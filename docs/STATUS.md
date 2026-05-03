@@ -1,4 +1,3 @@
-
 # KredBook — Roadmap & Status
 
 > **Source of truth for all phase tracking, task sequencing, and OpenCode execution.**
@@ -110,38 +109,74 @@
 | 3.8 | Collect shortcut on Dashboard hero — deep-link to top overdue Customer | ✅ Done | P2 | `/build` | `react-native-skills`, `project-planner`, `code-reviewer` |
 | 3.9 | Empty state illustrations — warm empty states with CTA | ✅ Done | P2 | `/build` | `react-native-skills`, `project-planner` |
 | 3.10 | Offline banner — top overlay with offline/online sync confirmation states | ✅ Done | P2 | `/build` | `react-native-skills`, `project-planner` |
-| 3.11 | Customer search improvements — speed + relevance | ⏳ Not Started | P2 | `/build` | `react-native-skills`, `project-planner` |
-| 3.12 | Entries + People filters | ⏳ Not Started | P2 | `/plan` | `project-planner`, `writing-plans` |
+| 3.11 | Customer search improvements — speed + relevance | ✅ Done | P2 | `/build` | `react-native-skills`, `project-planner`, `code-reviewer` |
+| 3.12 | Entries + People filters | ✅ Done | P2 | `/plan` | `project-planner`, `writing-plans` |
 | 3.13 | Export hardening — validate CSV totals, locale-safe formatting | ⏳ Not Started | P2 | `/audit` | `supabase`, `code-reviewer` |
 
+### Phase 3 — Task Notes
+
+#### 3.11 — Customer Search Improvements ✅ Done
+
+**Implemented the People search upgrade end-to-end with smoother input handling and better matching.**
+
+- Added 250ms debounced search input in `app/(main)/people/index.tsx` so typing doesn't trigger immediate heavy updates on every keypress.
+- Added fuzzy/prefix matching (includes, token-prefix, and ordered-char fallback) so queries like `raj` match `Rajesh Kumar` in `app/(main)/people/index.tsx`.
+- Added search result count label: `X of Y customers` in `app/(main)/people/index.tsx`.
+- Added matched substring highlight in customer name by passing a rich title node into `ListItem`:
+  - `src/components/layer2/ListItem.tsx` now supports `titleNode?: React.ReactNode`
+  - `app/(main)/people/index.tsx` renders highlighted text using theme primary color.
+- Consolidated duplicate data-fetch logic by switching `usePeople` to reuse API fetch logic:
+  - `src/hooks/usePeople.ts` now uses `fetchPeople` from `src/api/people.ts` instead of maintaining a second parallel fetch implementation.
+
+**Files changed:** `app/(main)/people/index.tsx`, `src/components/layer2/ListItem.tsx`, `src/hooks/usePeople.ts`
+
+**Verification:** `npm run lint` passes with 0 errors (existing warnings remain in unrelated files).
+
+---
+
+#### 3.12 — Entries + People Filters ✅ Done
+
+**Plan: List Filter Chips**
+
+**Overview:** Add client-side filter chips to both People and Entries screens, with URL-safe state so links can restore the active filter. Keep all filtering local to cached React Query data and avoid new DB calls.
+
+**Tasks:**
+
+| # | Task | Type | Estimate | Depends |
+|---|---|---|---|---|
+| 1 | Inspect current list state, routing, and existing filter helpers in People and Entries screens | Research | 15m | - |
+| 2 | Define a shared URL-safe filter schema for each screen (peopleFilter, entriesFilter, plus custom range params) | Design | 30m | 1 |
+| 3 | Add People filter chips: All, Overdue, Pending, Paid, Advance | UI | 30m | 2 |
+| 4 | Add Entries filter chips: All, Overdue, Pending, Paid, This Month, Custom Range | UI | 45m | 2 |
+| 5 | Wire both screens to read/write filter state from params so deep links restore correctly | Navigation/State | 1 hr | 2 |
+| 6 | Keep filtering client-side from existing React Query cache, with no extra fetches | Data flow | 30m | 1 |
+| 7 | Make Custom Range param-safe and restoreable from link state | State/Navigation | 45m | 2, 5 |
+| 8 | Verify empty states, result counts, and active filter labels still behave correctly | QA | 30m | 3, 4, 5 |
+| 9 | Run lint and sanity-check deep-link behavior | Verification | 15m | 3-8 |
+
+**Execution Order:**
+1. Confirm the current filter and route patterns.
+2. Define the shared param contract.
+3. Implement People chips.
+4. Implement Entries chips.
+5. Connect deep-linkable param state.
+6. Validate client-side filtering only.
+7. Test restore behavior from URLs.
+
+**Risks:**
+- Custom Range can become ambiguous unless the param shape is fixed up front.
+- People and Entries may use different route param conventions, so the shared contract needs to stay simple.
+- Deep-link support may require normalizing empty/default states carefully.
+
+**Success Criteria:**
+- Both screens expose the requested chip sets.
+- Filter state survives refresh/deep link navigation.
+- No new DB queries are added.
+- Lint passes.
+
+---
+
 ### Phase 3 — OpenCode Prompts
-
-#### 3.11 — Customer Search Improvements
-
-```
-/build load_skills=["react-native-skills","project-planner","code-reviewer"]
-
-Improve Customer search in (main)/people/index.tsx.
-- Debounce search input (250ms) to reduce re-renders on keypress
-- Add fuzzy/prefix matching — "raj" should match "Rajesh Kumar"
-- Show search result count: "3 of 24 customers"
-- Highlight matched substring in the name label
-- Consolidate any duplicate filter logic between people.ts and usePeople.ts
-Verification: search responds smoothly, match highlight renders, lint clean.
-```
-
-#### 3.12 — Entries + People Filters
-
-```
-/plan load_skills=["project-planner","writing-plans"]
-
-Plan filter chips for Entries list and People list screens.
-- People filters: All · Overdue · Pending · Paid · Advance
-- Entries filters: All · Overdue · Pending · Paid · This Month · Custom Range
-- Both filter states should be URL/param-safe so deep links work
-- No new DB queries — filter client-side from existing React Query cache
-Deliver a task plan only. No code changes.
-```
 
 #### 3.13 — Export Hardening
 
