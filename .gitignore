@@ -73,3 +73,8 @@ design-audit-results.txt
 
 #scripts
 scripts/*.obra-superpowers
+
+# graphify
+graphify-out/manifest.json    
+graphify-out/cost.json        
+graphify-out/cache/         
