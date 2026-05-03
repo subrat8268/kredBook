@@ -7,7 +7,7 @@ If any other instruction contradicts this file, **this file wins**.
 ## Current State (update after each task)
 
 - **Phase:** 3 — Polish & Features
-- **Last completed:** Task 3.13 — Export hardening audit (CSV correctness + locale safety)
+- **Last completed:** Task 3.13 — Export hardening fix (CSV amounts/date formatting)
 - **Next:** Task 4.1 — Plan AI architecture (Edge Function boundary, guardrails, rate limits)
 - **Roadmap:** `docs/STATUS.md` — read only the Phase 3 section for current context
 
@@ -96,5 +96,5 @@ Minimum quality gates for any non-trivial change:
 
 ## Current State
 
-- Last completed: 3.13 (export hardening audit)
+- Last completed: 3.13 (export hardening fix)
 - Next: 4.1 (plan AI architecture)

@@ -193,6 +193,7 @@ Deliver an audit report only. Fixes go in a follow-up /fix task.
 
 - Audit report: `docs/audits/csv-export-audit-2026-05-03.md`
 - Outcome: totals spot-check passed for 3/3 customers; locale/date inconsistencies found in CSV rows; CSV escaping is safe for commas/quotes/newlines.
+- Follow-up `/fix` complete: CSV row amounts now use `formatINR` and CSV row dates now use `DD MMM YYYY` via shared formatter.
 
 ---
 

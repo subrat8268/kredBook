@@ -1,5 +1,7 @@
 import { toApiError } from "../lib/supabaseQuery";
 import { supabase } from "../services/supabase";
+import { formatINR } from "../utils/formatCurrency";
+import { formatDateDDMMMYYYY } from "../utils/formatDate";
 
 export interface LedgerEntry {
   id: string;
@@ -151,11 +153,17 @@ export async function fetchLedgerCsvRows(
   const ledger = await fetchLedgerForExport(customerId, vendorId, from, to);
 
   return ledger.entries.map((entry) => ({
-    date: entry.date ? entry.date.substring(0, 10) : "",
+    date: entry.date ? formatDateDDMMMYYYY(entry.date) : "",
     description: entry.description,
-    amount: entry.type === "bill" ? entry.amount : -entry.amount,
+    amount: formatINR(entry.type === "bill" ? entry.amount : -entry.amount, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }),
     status: entry.status,
-    balance_after: entry.balance_after,
+    balance_after: formatINR(entry.balance_after, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }),
     type: entry.type,
   }));
 }

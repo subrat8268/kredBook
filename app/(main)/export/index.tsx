@@ -19,7 +19,7 @@ import ScreenLayout from "@/src/components/layer2/ScreenLayout";
 import CustomerPicker from "@/src/components/picker/CustomerPicker";
 import DateRangePicker from "@/src/components/ui/DateRangePicker";
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { fetchLedgerForExport } from "@/src/api/exportCustomer";
+import { fetchLedgerCsvRows, fetchLedgerForExport } from "@/src/api/exportCustomer";
 import { shareLedgerPdf } from "@/src/utils/exportLedgerPdf";
 import { toCsv, shareCsv } from "@/src/utils/exportCsv";
 import { useAuthStore } from "@/src/store/authStore";
@@ -187,23 +187,16 @@ export default function ExportScreen() {
     }
     setLoading("csv");
     try {
-      const ledger = await fetchLedgerForExport(
+      const rows = await fetchLedgerCsvRows(
         selectedCustomer.id,
         vendorId,
         dateRange.from,
         dateRange.to,
       );
-      if (ledger.entries.length === 0) {
+      if (rows.length === 0) {
         Alert.alert("No Data", "No entries found for this customer in the selected period.");
         return;
       }
-      const rows = ledger.entries.map((e) => ({
-        date: e.date ? e.date.substring(0, 10) : "",
-        description: e.description,
-        amount: e.type === "bill" ? e.amount : -e.amount,
-        status: e.status,
-        balance_after: e.balance_after,
-      }));
       const csv = toCsv(rows);
       const filename = `ledger_${selectedCustomer.name.replace(/\s+/g, "_")}_${new Date().toISOString().substring(0, 10)}.csv`;
       await shareCsv(csv, filename);
