@@ -11,7 +11,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { Alert } from "react-native";
-import { fetchPersonDetail, PAGE_SIZE } from "../api/people";
+import { fetchPeople, fetchPersonDetail, PAGE_SIZE } from "../api/people";
 import { ApiError } from "../lib/supabaseQuery";
 import { supabase } from "../services/supabase";
 import { Person, PersonDetail } from "../types/customer";
@@ -52,54 +52,6 @@ export const customerKeys = {
 // Preferred alias (new naming)
 export const peopleKeys = customerKeys;
 
-/**
- * Fetch people (customers) using new parties table
- */
-async function fetchCustomersFromParties(
-  pageParam: number,
-  vendorId: string,
-  search?: string,
-): Promise<Person[]> {
-  let query = supabase
-    .from("parties")
-    .select("*")
-    .eq("vendor_id", vendorId)
-    .eq("is_customer", true)
-    .order("created_at", { ascending: false })
-    .range(pageParam * PAGE_SIZE, pageParam * PAGE_SIZE + PAGE_SIZE - 1);
-
-  if (search) {
-    query = query.or(`name.ilike.%${search}%,phone.ilike.%${search}%`);
-  }
-
-  const { data, error } = await query;
-  if (error) throw error;
-
-  const parties = (data ?? []) as Party[];
-
-  // Convert parties to people
-  const people = parties.map(partyToPerson);
-
-  // Determine overdue status: balance_due > 0 AND due_date < today
-  const { data: overdueOrders } = await supabase
-    .from("orders")
-    .select("customer_id")
-    .eq("vendor_id", vendorId)
-    .gt("balance_due", 0)
-    .lt("due_date", new Date().toISOString());
-
-  const overdueIds = new Set(
-    (overdueOrders ?? []).map((o: any) => o.customer_id),
-  );
-
-  // Mark overdue people
-  people.forEach((p) => {
-    p.isOverdue = overdueIds.has(p.id);
-  });
-
-  return people;
-}
-
 export const useCustomers = (vendorId?: string, search?: string) => {
   const debouncedSearch = useDebounce(search ?? "", 300);
 
@@ -108,11 +60,7 @@ export const useCustomers = (vendorId?: string, search?: string) => {
       ? customerKeys.list(vendorId, debouncedSearch)
       : ["customers-disabled"],
     queryFn: ({ pageParam }) =>
-      fetchCustomersFromParties(
-        pageParam as number,
-        vendorId!,
-        debouncedSearch,
-      ),
+      fetchPeople(pageParam as number, vendorId!, debouncedSearch),
     getNextPageParam: (lastPage, allPages) =>
       lastPage.length === PAGE_SIZE ? allPages.length : undefined,
     initialPageParam: 0,

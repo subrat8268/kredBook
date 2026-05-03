@@ -11,6 +11,7 @@ import FloatingActionButton from "@/src/components/ui/FloatingActionButton";
 import SearchBar from "@/src/components/ui/SearchBar";
 import Avatar from "@/src/components/ui/Avatar";
 import { useCreateOrder } from "@/src/hooks/useEntries";
+import { useDebounce } from "@/src/hooks/useDebounce";
 import { useInfiniteScroll } from "@/src/hooks/useInfiniteScroll";
 import { useAddPerson, usePeople } from "@/src/hooks/usePeople";
 import { useAuthStore } from "@/src/store/authStore";
@@ -47,6 +48,7 @@ export default function CustomersScreen() {
   const params = useLocalSearchParams<{ action?: string }>();
 
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 250);
   const [filter, setFilter] = useState<FilterOption>("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -64,7 +66,7 @@ export default function CustomersScreen() {
     isLoading,
     error,
     people,
-  } = usePeople(profile?.id, search);
+  } = usePeople(profile?.id, debouncedSearch);
 
   const addCustomerMutation = useAddPerson(profile?.id ?? "");
   const createOrderMutation = useCreateOrder(profile?.id ?? "");
@@ -83,10 +85,38 @@ export default function CustomersScreen() {
     return list.sort((a, b) => a.name.localeCompare(b.name));
   }, [people]);
 
-  const filteredCustomers = useMemo(() => {
-    if (filter === "All") return sortedCustomers;
+  const normalizedSearch = debouncedSearch.trim().toLowerCase();
+
+  const isFuzzyMatch = useCallback((value: string, query: string) => {
+    if (!query) return true;
+    const normalizedValue = value.toLowerCase();
+    if (normalizedValue.includes(query)) return true;
+
+    const tokens = normalizedValue.split(/\s+/).filter(Boolean);
+    if (tokens.some((token) => token.startsWith(query))) return true;
+
+    let queryIndex = 0;
+    for (let i = 0; i < normalizedValue.length && queryIndex < query.length; i += 1) {
+      if (normalizedValue[i] === query[queryIndex]) {
+        queryIndex += 1;
+      }
+    }
+    return queryIndex === query.length;
+  }, []);
+
+  const searchedCustomers = useMemo(() => {
+    if (!normalizedSearch) return sortedCustomers;
 
     return sortedCustomers.filter((customer) => {
+      const candidate = `${customer.name} ${customer.phone ?? ""}`;
+      return isFuzzyMatch(candidate, normalizedSearch);
+    });
+  }, [isFuzzyMatch, normalizedSearch, sortedCustomers]);
+
+  const filteredCustomers = useMemo(() => {
+    if (filter === "All") return searchedCustomers;
+
+    return searchedCustomers.filter((customer) => {
       const status = getCustomerStatus(
         customer.outstandingBalance ?? 0,
         customer.isOverdue,
@@ -95,7 +125,43 @@ export default function CustomersScreen() {
       if (filter === "Paid") return status === "Paid" || status === "Advance";
       return status === filter;
     });
-  }, [filter, sortedCustomers]);
+  }, [filter, searchedCustomers]);
+
+  const getHighlightRange = useCallback((name: string, query: string) => {
+    if (!query) return null;
+    const loweredName = name.toLowerCase();
+    const directIndex = loweredName.indexOf(query);
+    if (directIndex >= 0) {
+      return { start: directIndex, end: directIndex + query.length };
+    }
+
+    const words = loweredName.split(/\s+/);
+    let cursor = 0;
+    for (const word of words) {
+      const wordStart = loweredName.indexOf(word, cursor);
+      if (word.startsWith(query) && wordStart >= 0) {
+        return { start: wordStart, end: wordStart + query.length };
+      }
+      cursor = wordStart + word.length;
+    }
+    return null;
+  }, []);
+
+  const renderHighlightedName = useCallback(
+    (name: string) => {
+      const range = getHighlightRange(name, normalizedSearch);
+      if (!range) return name;
+
+      return (
+        <>
+          {name.slice(0, range.start)}
+          <Text style={styles.highlightText}>{name.slice(range.start, range.end)}</Text>
+          {name.slice(range.end)}
+        </>
+      );
+    },
+    [getHighlightRange, normalizedSearch, styles.highlightText],
+  );
 
   const handleAddCustomer = async (values: {
     name: string;
@@ -244,6 +310,12 @@ export default function CustomersScreen() {
             <StatusBadge status={activeFilterStatus} align="left" />
           </View>
         ) : null}
+
+        {normalizedSearch ? (
+          <Text style={styles.searchCountLabel}>
+            {filteredCustomers.length} of {sortedCustomers.length} customers
+          </Text>
+        ) : null}
       </View>
 
       {isLoading && filteredCustomers.length === 0 ? (
@@ -269,10 +341,11 @@ export default function CustomersScreen() {
               status === "Paid" ? 0 : Math.abs(item.outstandingBalance ?? 0);
 
             return (
-              <ListItem
-                title={item.name}
-                subtitle={`Last activity: ${formatRelativeActivity(item.lastActiveAt)}`}
-                leftSlot={<Avatar name={item.name} size="md" />}
+                <ListItem
+                  title={item.name}
+                  titleNode={renderHighlightedName(item.name)}
+                  subtitle={`Last activity: ${formatRelativeActivity(item.lastActiveAt)}`}
+                  leftSlot={<Avatar name={item.name} size="md" />}
                 amount={displayBalance}
                 amountColor={amountColorMap[status]}
                 status={status}
@@ -295,7 +368,7 @@ export default function CustomersScreen() {
             isFetchingNextPage ? <Loader message="Loading more customers..." /> : null
           }
           ListEmptyComponent={
-            search.trim() ? (
+            normalizedSearch ? (
               <EmptyState
                 illustration="search"
                 headingEn="No results found"
@@ -388,6 +461,15 @@ const createStyles = (
     activeFilterLabel: {
       ...typography.caption,
       color: colors.textSecondary,
+    },
+    searchCountLabel: {
+      ...typography.small,
+      marginTop: spacing.xs,
+      color: colors.textSecondary,
+    },
+    highlightText: {
+      color: colors.primary,
+      fontWeight: "700",
     },
     listContent: {
       paddingHorizontal: spacing.screenPadding,

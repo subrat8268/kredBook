@@ -15,6 +15,7 @@ type Status = "Paid" | "Pending" | "Overdue" | "Partially Paid" | "Advance";
 
 type Props = {
   title: string;
+  titleNode?: React.ReactNode;
   subtitle?: string;
   leftSlot?: React.ReactNode;
   onPress?: () => void;
@@ -34,6 +35,7 @@ type Props = {
 
 export default memo(function ListItem({
   title,
+  titleNode,
   subtitle,
   leftSlot,
   onPress,
@@ -148,7 +150,7 @@ export default memo(function ListItem({
 
         <View style={styles.content}>
           <Text style={typography.cardTitle} numberOfLines={1}>
-            {title}
+            {titleNode ?? title}
           </Text>
           {subtitle ? (
             <Text style={[typography.caption, styles.subtitle]} numberOfLines={1}>
