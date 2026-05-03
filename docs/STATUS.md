@@ -111,7 +111,7 @@
 | 3.10 | Offline banner — top overlay with offline/online sync confirmation states | ✅ Done | P2 | `/build` | `react-native-skills`, `project-planner` |
 | 3.11 | Customer search improvements — speed + relevance | ✅ Done | P2 | `/build` | `react-native-skills`, `project-planner`, `code-reviewer` |
 | 3.12 | Entries + People filters | ✅ Done | P2 | `/plan` | `project-planner`, `writing-plans` |
-| 3.13 | Export hardening — validate CSV totals, locale-safe formatting | ⏳ Not Started | P2 | `/audit` | `supabase`, `code-reviewer` |
+| 3.13 | Export hardening — validate CSV totals, locale-safe formatting | ✅ Done | P2 | `/audit` | `supabase`, `code-reviewer` |
 
 ### Phase 3 — Task Notes
 
@@ -190,6 +190,9 @@ Audit CSV export for correctness and locale safety.
 - Flag any rows that may produce broken CSV if customer name has a comma
 Deliver an audit report only. Fixes go in a follow-up /fix task.
 ```
+
+- Audit report: `docs/audits/csv-export-audit-2026-05-03.md`
+- Outcome: totals spot-check passed for 3/3 customers; locale/date inconsistencies found in CSV rows; CSV escaping is safe for commas/quotes/newlines.
 
 ---
 
