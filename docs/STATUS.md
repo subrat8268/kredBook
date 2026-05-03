@@ -1,3 +1,4 @@
+
 # KredBook — Roadmap & Status
 
 > **Source of truth for all phase tracking, task sequencing, and OpenCode execution.**
@@ -22,9 +23,9 @@
 | 1 | Truth Reset | ✅ Done | Canonical nouns, core flows, offline-first baseline |
 | 2 | DB Hardening | ✅ Done | Schema cleanup, due_date, payment_date, parties fields |
 | 3 | Experience Upgrades | 🔄 In Progress | Dark mode, WhatsApp-first sharing, overdue polish |
-| 4 | AI Assistance | ⏳ Not Started | Opt-in AI layer via Edge Functions |
+| 4 | UI/UX Redesign | ⏳ Not Started | Full design system overhaul — Vercel × Khatabook × Linear |
 | 5 | Documents + Collection | ⏳ Not Started | PDF outputs, UPI collection |
-| 6 | UI/UX Redesign | ⏳ Not Started | Full design system overhaul — Vercel × Khatabook × Linear |
+| 6 | AI Assistance | ⏳ Not Started | Opt-in AI layer via Edge Functions |
 
 ---
 
@@ -113,140 +114,75 @@
 | 3.12 | Entries + People filters | ⏳ Not Started | P2 | `/plan` | `project-planner`, `writing-plans` |
 | 3.13 | Export hardening — validate CSV totals, locale-safe formatting | ⏳ Not Started | P2 | `/audit` | `supabase`, `code-reviewer` |
 
-### Phase 3 OpenCode Prompts
+### Phase 3 — OpenCode Prompts
 
-#### 3.1 — Dark mode ✅ Done
-
-```
-/build load_skills=["ui-ux-pro-max","building-native-ui","react-native-skills","code-reviewer"]
-
-Implement dark mode for KredBook.
-- Add semantic dark/light token pairs to src/utils/theme.ts
-- Wire a dark mode toggle in Profile settings
-- Apply tokens across all active screens: Dashboard, People, Entries, Profile
-- No hardcoded colors — all values must come from theme tokens
-- Use NativeWind + Tailwind config already wired in tailwind.config.js
-Verification: toggle works, all 4 screens render correctly in both modes, lint clean, diagnostics clean.
-```
-
-#### 3.2 — Overdue badge ✅ Done
-
-- Created `src/components/ui/OverdueChip.tsx` with `badge` (pill) and `inline` (text) variants
-- Replaced hardcoded `colors.danger` overdue refs with `colors.overdue.text`/`bg` across all surfaces:
-  - Dashboard: inline text colored with theme token
-  - People list: filter chip text color
-  - Entries list: filter chip text + bg color
-  - People detail: hero chip text (container preserved)
-  - CustomerCard: amount text + Call button bg (`primaryBlueBg`)
-- No behavior change; visual result identical to current state.
-
-#### 3.3 — WhatsApp share polish
+#### 3.11 — Customer Search Improvements
 
 ```
-/build load_skills=["project-planner","react-native-skills","code-reviewer"]
+/build load_skills=["react-native-skills","project-planner","code-reviewer"]
 
-Polish WhatsApp share message template across KredBook.
-- Standardize the share message: include Customer name, amount, due date, and a short CTA
-- Use canonical nouns: Customer, Entry, Payment (no order/party/transaction)
-- EN and HI variants using existing i18n setup
-- Must work from: Entry detail, Customer detail, record payment success
-Verification: share fires correctly from all 3 surfaces, correct amount/date format, lint clean.
+Improve Customer search in (main)/people/index.tsx.
+- Debounce search input (250ms) to reduce re-renders on keypress
+- Add fuzzy/prefix matching — "raj" should match "Rajesh Kumar"
+- Show search result count: "3 of 24 customers"
+- Highlight matched substring in the name label
+- Consolidate any duplicate filter logic between people.ts and usePeople.ts
+Verification: search responds smoothly, match highlight renders, lint clean.
 ```
 
-#### 3.4 — Overdue push notifications ✅ Done
-
-- Added local notification scheduling on app launch + foreground active transition.
-- Query is based on overdue unpaid `orders`, grouped by Customer (`customer_id`, legacy/transitional party reference), with one notification per Customer.
-- Added Profile toggle `Overdue reminders` backed by persisted `preferencesStore.remindersEnabled`.
-- First toggle-on requests permission once; denied state renders inline warning in Profile.
-- Notification tap deep-links to People (`/people`), and scheduler cancels + reschedules to avoid duplicate stacks.
-
-#### 3.5 — Indian number format
-
-- Added `formatINR` utility in `src/utils/format.ts` and replaced scattered `toLocaleString("en-IN")`/`Intl.NumberFormat("en-IN")` usage across app surfaces.
+#### 3.12 — Entries + People Filters
 
 ```
-/fix load_skills=["systematic-debugging","react-native-skills","code-reviewer"]
+/plan load_skills=["project-planner","writing-plans"]
 
-Enforce Indian number format (₹1,20,000) everywhere amounts are displayed.
-- Create a single formatINR(amount: number): string utility in src/utils/format.ts
-- Replace all ad-hoc amount formatting across screens with formatINR
-- Target: Dashboard, People list + detail, Entry list + detail, Payment records, CSV export
-Verification: ₹1,20,000 renders correctly in all surfaces, lint clean, no hardcoded Intl calls scattered around.
+Plan filter chips for Entries list and People list screens.
+- People filters: All · Overdue · Pending · Paid · Advance
+- Entries filters: All · Overdue · Pending · Paid · This Month · Custom Range
+- Both filter states should be URL/param-safe so deep links work
+- No new DB queries — filter client-side from existing React Query cache
+Deliver a task plan only. No code changes.
 ```
 
-#### 3.7 — Entry note field
-
-- Commit: f56c6f8
+#### 3.13 — Export Hardening
 
 ```
-/build load_skills=["project-planner","supabase","react-native-skills","code-reviewer"]
+/audit load_skills=["supabase","code-reviewer"]
 
-Add optional short note field to Entries.
-- Migration: add nullable `note TEXT` column to `orders` table in supabase/migrations/
-- Update database.types.ts
-- Create Entry screen: add optional "Add note" collapsed field
-- Entry Detail screen: show note if present
-- Edit Entry screen: editable note field
-Verification: note saves, displays, edits correctly; migration in supabase/migrations/; lint clean.
+Audit CSV export for correctness and locale safety.
+- Validate that exported totals match on-screen totals (spot-check 3 customers)
+- Confirm all amounts use formatINR — no raw toLocaleString calls remaining
+- Confirm date formatting is consistent (DD MMM YYYY) across export rows
+- Flag any rows that may produce broken CSV if customer name has a comma
+Deliver an audit report only. Fixes go in a follow-up /fix task.
 ```
 
 ---
 
-## Phase 4 — AI Assistance ⏳ Not Started
-
-**Goal:** Opt-in AI features only. All AI goes through Supabase Edge Functions with guardrails.
-
-> **Rule:** No AI feature is added without an opt-in UX. All AI calls are rate-limited and audit-logged. No AI feature modifies data directly.
-
-| # | Task | Status | Priority | Command | Skills |
-|---|---|---|---|---|---|
-| 4.1 | Plan AI architecture — Edge Function boundary, guardrails, rate limits | ⏳ Not Started | P0 | `/plan` | `project-planner`, `writing-plans`, `supabase` |
-| 4.2 | Follow-up prioritization — rank Customers by overdue + recency | ⏳ Not Started | P1 | `/build` | `project-planner`, `supabase` |
-| 4.3 | Smart Customer summary — last 30 days entries/payments + suggested action | ⏳ Not Started | P1 | `/build` | `supabase`, `project-planner` |
-| 4.4 | AI WhatsApp draft — generate EN/HI message variants with opt-in UX | ⏳ Not Started | P1 | `/plan` | `project-planner`, `writing-plans` |
-| 4.5 | Anomaly detection — flag customers with 45+ days no payment | ⏳ Not Started | P2 | `/plan` | `project-planner`, `supabase` |
-| 4.6 | Monthly insight card — collection trend summary | ⏳ Not Started | P2 | `/build` | `supabase`, `project-planner` |
-
----
-
-## Phase 5 — Documents + Collection ⏳ Not Started
-
-**Goal:** PDF outputs and UPI collection links for WhatsApp-first sharing.
-
-| # | Task | Status | Priority | Command | Skills |
-|---|---|---|---|---|---|
-| 5.1 | PDF Customer statement — Edge Function generates PDF, stores in Supabase Storage, share via WhatsApp | ⏳ Not Started | P1 | `/build` | `supabase`, `project-planner` |
-| 5.2 | Entry PDF — single Entry receipt shareable via WhatsApp | ⏳ Not Started | P2 | `/build` | `supabase`, `project-planner` |
-| 5.3 | UPI collect link + QR on Customer balance screen | ⏳ Not Started | P1 | `/build` | `project-planner`, `react-native-skills` |
-| 5.4 | Receipt-friendly sharing flow — polish and test end-to-end | ⏳ Not Started | P2 | `/plan` | `project-planner`, `writing-plans` |
-| 5.5 | Referral prompt after successful payment — lightweight share + deep link | ⏳ Not Started | P3 | `/build` | `ui-ux-pro-max`, `project-planner` |
-
----
-
-## Phase 6 — UI/UX Redesign ⏳ Not Started
+## Phase 4 — UI/UX Redesign ⏳ Not Started
 
 **Goal:** Full design system overhaul and screen-by-screen redesign. Vercel × Khatabook × Linear aesthetic. Bharat-market ready.
 
-> **Depends On:** Phase 3 task 3.1 (dark mode tokens) must be ✅ Done first — Phase 6.0 builds on top of those token foundations.
-> **Rule:** Never start a screen redesign without 6.0 (design system) being ✅ Done. All tokens must be locked before touching any screen.
+> **Depends On:** Phase 3 task 3.1 (dark mode tokens) must be ✅ Done first — Phase 4.0 builds on top of those token foundations.
+> **Rule:** Never start a screen redesign without 4.0 (design system) being ✅ Done. All tokens must be locked before touching any screen.
 
 ---
 
-### Phase 6.0 — Design System Foundation (Blocks All Other 6.x Tasks)
+### Phase 4.0 — Design System Foundation ⚠️ Blocks All Other 4.x Tasks
 
 | # | Task | Status | Priority | Command | Skills | Depends On |
 |---|---|---|---|---|---|---|
-| 6.0.1 | Update `theme.ts` — new color tokens (green primary, amber accent, semantic palette) | ⏳ Not Started | P0 | `/refactor` | `ui-ux-pro-max`, `building-native-ui`, `react-native-skills` | 3.1 ✅ |
-| 6.0.2 | Fix `tailwind.config.js` — replace CSS vars with literal token values | ⏳ Not Started | P0 | `/fix` | `refactor-engineer`, `expo-tailwind-setup`, `react-native-skills` | 6.0.1 ✅ |
-| 6.0.3 | Add motion tokens — `duration-fast: 150ms`, `duration-base: 250ms`, easing curves | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 6.0.1 ✅ |
-| 6.0.4 | Unify icon system — migrate all icons to `lucide-react-native`, remove SVG + system mix | ⏳ Not Started | P0 | `/refactor` | `refactor-engineer`, `code-reviewer` | 6.0.1 ✅ |
-| 6.0.5 | Rebuild `StatusBadge` — filled pill + semantic color per status (Paid/Partial/Overdue/Advance) | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps` | 6.0.1 ✅ |
-| 6.0.6 | Rebuild `Button` variants — primary / secondary / ghost / danger with new tokens | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 6.0.1 ✅ |
-| 6.0.7 | Create `Skeleton` component — shimmer loading for all list/card surfaces | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 6.0.1 ✅ |
-| 6.0.8 | Create `SpeedDialFAB` component — expandable FAB (New Entry · New Customer · Record Payment) | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 6.0.3 ✅ |
+| 4.0.1 | Update `theme.ts` — new color tokens (green primary, amber accent, semantic palette) | ⏳ Not Started | P0 | `/refactor` | `ui-ux-pro-max`, `building-native-ui`, `react-native-skills` | 3.1 ✅ |
+| 4.0.2 | Fix `tailwind.config.js` — replace CSS vars with literal token values | ⏳ Not Started | P0 | `/fix` | `refactor-engineer`, `expo-tailwind-setup`, `react-native-skills` | 4.0.1 ✅ |
+| 4.0.3 | Add motion tokens — `duration-fast: 150ms`, `duration-base: 250ms`, easing curves | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.1 ✅ |
+| 4.0.4 | Unify icon system — migrate all icons to `lucide-react-native`, remove SVG + system mix | ⏳ Not Started | P0 | `/refactor` | `refactor-engineer`, `code-reviewer` | 4.0.1 ✅ |
+| 4.0.5 | Rebuild `StatusBadge` — filled pill + semantic color per status (Paid/Partial/Overdue/Advance) | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps` | 4.0.1 ✅ |
+| 4.0.6 | Rebuild `Button` variants — primary / secondary / ghost / danger with new tokens | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.1 ✅ |
+| 4.0.7 | Create `Skeleton` component — shimmer loading for all list/card surfaces | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.1 ✅ |
+| 4.0.8 | Create `SpeedDialFAB` component — expandable FAB (New Entry · New Customer · Record Payment) | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.3 ✅ |
 
-**New Brand Tokens (implement in 6.0.1):**
+**New Brand Tokens (implement in 4.0.1):**
+
+Current `theme.ts` uses blue (`#2563EB`) as primary. Phase 4 migrates to:
 
 ```
 primary:    #16A34A  (green-600)   → trust, money, growth
@@ -260,11 +196,11 @@ warning:    #F59E0B                → overdue
 border:     #E5E7EB  (gray-200)    → dividers
 ```
 
-**Typography:**
-- Body / numbers: **Inter**
-- Headings: **Manrope**
+**Typography upgrade (implement in 4.0.1):**
+- Body / numbers: **Inter** (already in use — no change)
+- Headings: **Manrope** (new — replace screenTitle/sectionTitle Inter instances)
 
-**Dead code to kill in 6.0 (before redesign starts):**
+**Dead code to kill in 4.0 (before redesign starts):**
 - Center FAB tab from `(main)/_layout.tsx` — replace with SpeedDialFAB
 - Standalone Export tab — move to Profile screen
 - `src/components/navigation/` (empty directory)
@@ -272,26 +208,46 @@ border:     #E5E7EB  (gray-200)    → dividers
 - `role.tsx` unregistered route in onboarding `_layout.tsx`
 - Wired-but-unused i18n `t()` calls — either fully wire or remove
 
+#### 4.0.1 — Update theme.ts OpenCode Prompt
+
+```
+/refactor load_skills=["ui-ux-pro-max","building-native-ui","react-native-skills","code-reviewer"]
+
+Migrate KredBook brand tokens in src/utils/theme.ts from blue-primary to green-primary.
+
+Changes:
+1. Replace primary blue (#2563EB) with green-600 (#16A34A) as the main primary color
+2. Add accent token: #F59E0B (amber-500) for overdue/urgency surfaces
+3. Update heroGradients: dashboardHero + customerHero/peopleHero to use green-700→green-800
+4. Keep danger (#DC2626), warning (#F59E0B = accent), success (#16A34A = primary) — all correct
+5. Add motion tokens object: { fast: 150, base: 250, slow: 400, easing: 'cubic-bezier(0.16,1,0.3,1)' }
+6. Add Manrope font family entries alongside existing Inter entries
+7. Update lightColors + darkColors to reflect all above changes
+8. Keep all existing token names — only values change. No component edits in this task.
+
+Verification: theme.ts exports unchanged API shape, no TS errors, lint clean.
+```
+
 ---
 
-### Phase 6.1 — Core Loop Screens (Daily Driver)
+### Phase 4.1 — Core Loop Screens (Daily Driver)
 
-> Depends On: All of 6.0 ✅ Done
+> Depends On: All of 4.0 ✅ Done
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
-| 6.1.1 | Dashboard redesign — hero card, quick stats row, activity feed, SpeedDialFAB | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `(main)/dashboard/index.tsx` |
-| 6.1.2 | Tab navigation redesign — 4-tab layout, lucide icons, active pill indicator | ⏳ Not Started | P0 | `/refactor` | `ui-ux-pro-max`, `react-native-skills` | `(main)/_layout.tsx` |
-| 6.1.3 | Create Entry redesign — full-screen numpad, bottom sheet customer picker, quick due-date chips | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/create.tsx` |
-| 6.1.4 | Record Payment modal redesign — large numpad, partial toggle, payment method, WhatsApp receipt | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
-| 6.1.5 | Customer Detail redesign — hero card, sticky balance bar, timeline view, swipe actions | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
+| 4.1.1 | Dashboard redesign — hero card, quick stats row, activity feed, SpeedDialFAB | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `(main)/dashboard/index.tsx` |
+| 4.1.2 | Tab navigation redesign — 4-tab layout, lucide icons, active pill indicator | ⏳ Not Started | P0 | `/refactor` | `ui-ux-pro-max`, `react-native-skills` | `(main)/_layout.tsx` |
+| 4.1.3 | Create Entry redesign — full-screen numpad, bottom sheet customer picker, quick due-date chips | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/create.tsx` |
+| 4.1.4 | Record Payment modal redesign — large numpad, partial toggle, payment method, WhatsApp receipt | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
+| 4.1.5 | Customer Detail redesign — hero card, sticky balance bar, timeline view, swipe actions | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
 
-#### 6.1.1 — Dashboard Redesign OpenCode Prompt
+#### 4.1.1 — Dashboard Redesign OpenCode Prompt
 
 ```
 /build load_skills=["ui-ux-pro-max","sleek-design-mobile-apps","react-native-skills","code-reviewer"]
 
-Redesign the KredBook Dashboard screen. All tokens from src/utils/theme.ts (Phase 6.0 must be done first).
+Redesign the KredBook Dashboard screen. All tokens from src/utils/theme.ts (Phase 4.0 must be done first).
 
 Changes:
 1. Hero card: gradient green-600 → green-700, white text, "Collect Outstanding" total with animated
@@ -302,8 +258,8 @@ Changes:
 4. Top follow-up: horizontal scroll cards (not vertical list), avatar/initials,
    days-overdue amber badge, "Collect" action
 5. Recent activity feed: last 5 transactions (entry/payment) as a timeline
-6. Replace center FAB tab with SpeedDialFAB component (6.0.8)
-7. Skeleton loading on all cards (6.0.7 component)
+6. Replace center FAB tab with SpeedDialFAB component (4.0.8)
+7. Skeleton loading on all cards (4.0.7 component)
 8. Empty state for overdue section: "All clear! No overdue customers 🎉"
 9. Pull-to-refresh: keep existing
 
@@ -311,7 +267,7 @@ No new DB queries. Wire to existing hooks + get_dashboard_summary RPC.
 Verification: all sections render, skeleton shows on load, SpeedDialFAB expands/collapses, lint clean.
 ```
 
-#### 6.1.3 — Create Entry Redesign OpenCode Prompt
+#### 4.1.3 — Create Entry Redesign OpenCode Prompt
 
 ```
 /build load_skills=["ui-ux-pro-max","react-native-skills","code-reviewer"]
@@ -332,18 +288,18 @@ Verification: entry creates successfully, draft saves on exit, no dead code, lin
 
 ---
 
-### Phase 6.2 — List Screens
+### Phase 4.2 — List Screens
 
-> Depends On: 6.0 ✅ Done, 6.1 ✅ Done
+> Depends On: 4.0 ✅ Done, 4.1 ✅ Done
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
-| 6.2.1 | Customer List redesign — filter chips, swipe actions, sort options, alphabetical headers, empty state | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/index.tsx` |
-| 6.2.2 | Entry List redesign — filter chips, swipe actions, date section headers, summary banner | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/index.tsx` |
-| 6.2.3 | Entry Detail redesign — hero card, payment timeline, sticky "Record Payment" bar | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId].tsx` |
-| 6.2.4 | Edit Entry redesign — quick due-date chips, customer reassign, unsaved changes warning | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId]/edit.tsx` |
+| 4.2.1 | Customer List redesign — filter chips, swipe actions, sort options, alphabetical headers, empty state | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/index.tsx` |
+| 4.2.2 | Entry List redesign — filter chips, swipe actions, date section headers, summary banner | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/index.tsx` |
+| 4.2.3 | Entry Detail redesign — hero card, payment timeline, sticky "Record Payment" bar | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId].tsx` |
+| 4.2.4 | Edit Entry redesign — quick due-date chips, customer reassign, unsaved changes warning | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId]/edit.tsx` |
 
-#### 6.2.1 — Customer List OpenCode Prompt
+#### 4.2.1 — Customer List OpenCode Prompt
 
 ```
 /build load_skills=["ui-ux-pro-max","react-native-skills","code-reviewer"]
@@ -366,35 +322,35 @@ Verification: filters work, swipe actions fire correctly, empty state renders, l
 
 ---
 
-### Phase 6.3 — Auth + Onboarding
+### Phase 4.3 — Auth + Onboarding
 
-> Depends On: 6.0 ✅ Done
+> Depends On: 4.0 ✅ Done
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
-| 6.3.1 | Welcome screen redesign — illustrated full-bleed, tagline, social proof, language toggle, Lottie animation | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `app/index.tsx` |
-| 6.3.2 | Login redesign — show/hide password, Google OAuth, inline field errors, keyboard avoidance | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/login.tsx` |
-| 6.3.3 | Signup redesign — remove confirm password, add name field + terms checkbox + progress pill | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/signup.tsx` |
-| 6.3.4 | Reset Password redesign — full-screen success illustration state | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/resetPassword.tsx` |
-| 6.3.5 | Phone Setup redesign — flag + country code input, inline OTP, skip option, progress bar | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/phone-setup.tsx` |
-| 6.3.6 | Onboarding business.tsx — business type selector, logo upload, skip option | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/business.tsx` |
-| 6.3.7 | Onboarding bank.tsx — make optional, add UPI ID + QR preview, prominent skip | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/bank.tsx` |
-| 6.3.8 | Onboarding ready.tsx — confetti Lottie, feature highlights, "Take a Tour" trigger | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/ready.tsx` |
+| 4.3.1 | Welcome screen redesign — illustrated full-bleed, tagline, social proof, language toggle, Lottie animation | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `app/index.tsx` |
+| 4.3.2 | Login redesign — show/hide password, Google OAuth, inline field errors, keyboard avoidance | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/login.tsx` |
+| 4.3.3 | Signup redesign — remove confirm password, add name field + terms checkbox + progress pill | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/signup.tsx` |
+| 4.3.4 | Reset Password redesign — full-screen success illustration state | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/resetPassword.tsx` |
+| 4.3.5 | Phone Setup redesign — flag + country code input, inline OTP, skip option, progress bar | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/phone-setup.tsx` |
+| 4.3.6 | Onboarding business.tsx — business type selector, logo upload, skip option | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/business.tsx` |
+| 4.3.7 | Onboarding bank.tsx — make optional, add UPI ID + QR preview, prominent skip | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/bank.tsx` |
+| 4.3.8 | Onboarding ready.tsx — confetti Lottie, feature highlights, "Take a Tour" trigger | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/ready.tsx` |
 
 ---
 
-### Phase 6.4 — Profile, Export + Public Ledger
+### Phase 4.4 — Profile, Export + Public Ledger
 
-> Depends On: 6.0 ✅ Done, 6.2 ✅ Done
+> Depends On: 4.0 ✅ Done, 4.2 ✅ Done
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
-| 6.4.1 | Profile screen redesign — editable header, UPI QR, app settings section, danger zone | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/profile/index.tsx` |
-| 6.4.2 | Profile Edit redesign — logo upload, UPI ID, address, sticky save bar, inline validation | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/profile/edit.tsx` |
-| 6.4.3 | Export — move from standalone tab into Profile, add customer filter, email export, export history | ⏳ Not Started | P1 | `/refactor` | `refactor-engineer`, `react-native-skills` | `(main)/export/index.tsx` |
-| 6.4.4 | Public Ledger redesign — business logo, UPI Pay Now button, WhatsApp CTA, mobile-responsive, KredBook footer | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `project-planner` | `app/l/[token].tsx` |
+| 4.4.1 | Profile screen redesign — editable header, UPI QR, app settings section, danger zone | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/profile/index.tsx` |
+| 4.4.2 | Profile Edit redesign — logo upload, UPI ID, address, sticky save bar, inline validation | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/profile/edit.tsx` |
+| 4.4.3 | Export — move from standalone tab into Profile, add customer filter, email export, export history | ⏳ Not Started | P1 | `/refactor` | `refactor-engineer`, `react-native-skills` | `(main)/export/index.tsx` |
+| 4.4.4 | Public Ledger redesign — business logo, UPI Pay Now button, WhatsApp CTA, mobile-responsive, KredBook footer | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `project-planner` | `app/l/[token].tsx` |
 
-#### 6.4.4 — Public Ledger OpenCode Prompt
+#### 4.4.4 — Public Ledger OpenCode Prompt
 
 ```
 /build load_skills=["ui-ux-pro-max","project-planner","code-reviewer"]
@@ -413,6 +369,38 @@ Changes:
 
 Verification: renders on mobile viewport, UPI deep link fires, WhatsApp CTA works, lint clean.
 ```
+
+---
+
+## Phase 5 — Documents + Collection ⏳ Not Started
+
+**Goal:** PDF outputs and UPI collection links for WhatsApp-first sharing.
+
+| # | Task | Status | Priority | Command | Skills |
+|---|---|---|---|---|---|
+| 5.1 | PDF Customer statement — Edge Function generates PDF, stores in Supabase Storage, share via WhatsApp | ⏳ Not Started | P1 | `/build` | `supabase`, `project-planner` |
+| 5.2 | Entry PDF — single Entry receipt shareable via WhatsApp | ⏳ Not Started | P2 | `/build` | `supabase`, `project-planner` |
+| 5.3 | UPI collect link + QR on Customer balance screen | ⏳ Not Started | P1 | `/build` | `project-planner`, `react-native-skills` |
+| 5.4 | Receipt-friendly sharing flow — polish and test end-to-end | ⏳ Not Started | P2 | `/plan` | `project-planner`, `writing-plans` |
+| 5.5 | Referral prompt after successful payment — lightweight share + deep link | ⏳ Not Started | P3 | `/build` | `ui-ux-pro-max`, `project-planner` |
+
+---
+
+## Phase 6 — AI Assistance ⏳ Not Started
+
+**Goal:** Opt-in AI features only. All AI goes through Supabase Edge Functions with guardrails.
+
+> **Rule:** No AI feature is added without an opt-in UX. All AI calls are rate-limited and audit-logged. No AI feature modifies data directly.
+> **Depends On:** Phase 4 (UI/UX Redesign) ✅ Done preferred — AI surfaces must use the new design system tokens.
+
+| # | Task | Status | Priority | Command | Skills |
+|---|---|---|---|---|---|
+| 6.1 | Plan AI architecture — Edge Function boundary, guardrails, rate limits | ⏳ Not Started | P0 | `/plan` | `project-planner`, `writing-plans`, `supabase` |
+| 6.2 | Follow-up prioritization — rank Customers by overdue + recency | ⏳ Not Started | P1 | `/build` | `project-planner`, `supabase` |
+| 6.3 | Smart Customer summary — last 30 days entries/payments + suggested action | ⏳ Not Started | P1 | `/build` | `supabase`, `project-planner` |
+| 6.4 | AI WhatsApp draft — generate EN/HI message variants with opt-in UX | ⏳ Not Started | P1 | `/plan` | `project-planner`, `writing-plans` |
+| 6.5 | Anomaly detection — flag customers with 45+ days no payment | ⏳ Not Started | P2 | `/plan` | `project-planner`, `supabase` |
+| 6.6 | Monthly insight card — collection trend summary | ⏳ Not Started | P2 | `/build` | `supabase`, `project-planner` |
 
 ---
 
