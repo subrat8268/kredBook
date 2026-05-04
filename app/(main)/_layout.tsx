@@ -149,7 +149,10 @@ export default function TabLayout() {
             router.push({ pathname: "/(main)/people", params: { action: "add" } } as never);
             return;
           }
-          router.push("/(main)/dashboard" as never);
+          if (action === "record-payment") {
+            router.push({ pathname: "/(main)/dashboard", params: { action: "record-payment" } } as never);
+            return;
+          }
         }}
       />
     </View>

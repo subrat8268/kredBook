@@ -107,8 +107,9 @@ export default function SpeedDialFAB({ onAction, bottom = 24, right = 20 }: Spee
 
   const handleActionPress = useCallback(
     (action: Action) => {
-      onAction(action);
       close();
+      // Delay action slightly so close animation starts before navigation
+      setTimeout(() => onAction(action), 80);
     },
     [close, onAction],
   );
@@ -125,6 +126,13 @@ export default function SpeedDialFAB({ onAction, bottom = 24, right = 20 }: Spee
 
   return (
     <>
+      {/* Backdrop renders FIRST so the action button container sits above it */}
+      <Modal visible={isOpen} transparent animationType="none">
+        <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
+          <Pressable style={styles.backdropPressable} onPress={close} />
+        </Animated.View>
+      </Modal>
+
       <View style={[styles.container, { right, bottom }]} pointerEvents="box-none">
         {isOpen
           ? ACTIONS.map((item, index) => (
@@ -153,12 +161,6 @@ export default function SpeedDialFAB({ onAction, bottom = 24, right = 20 }: Spee
           </Animated.View>
         </Pressable>
       </View>
-
-      <Modal visible={isOpen} transparent animationType="none">
-        <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
-          <Pressable style={styles.backdropPressable} onPress={close} />
-        </Animated.View>
-      </Modal>
     </>
   );
 }
@@ -168,6 +170,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     alignItems: "flex-end",
     gap: 12,
+    zIndex: 999,
+    elevation: 999,
   },
   fabPressable: {
     borderRadius: 28,
@@ -214,11 +218,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.08)",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
