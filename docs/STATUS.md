@@ -5,6 +5,16 @@
 
 ---
 
+## How to use this file
+
+1. **Before starting any task** — read the task row, check `Depends On`, confirm that dependency is `✅ Done`.
+2. **Copy the OpenCode Prompt** exactly as written. Load listed skills before running.
+3. **After completing a task** — update `Status` to `✅ Done`, fill in the `Commit` link, and run doc-sync checklist (`.agents/doc-sync-checklist.md`).
+4. **Never skip a task or reorder**. Tasks within a phase are sequenced for safety.
+5. This file is the only tracker. Do not use Notion or Google Sheets.
+
+---
+
 ## Phase Overview
 
 | Phase | Name | Status | Theme |
@@ -18,6 +28,24 @@
 
 ---
 
+## ⚡ Next Up (Priority Queue)
+
+> PM-reordered on 2026-05-05. Complete the core user loop before Profile polish.
+> The loop is: **Add Customer → Create Entry → View What They Owe → Record Payment → See It Reflected.**
+
+| Priority | Task | Why Now |
+|---|---|---|
+| 🔴 P0 — NOW | **4.1.4** Record Payment modal redesign | Every "Collect" tap lands here. The money moment. Must feel like a cash register. |
+| 🔴 P0 | **4.1.5** Customer Detail redesign | Most-viewed screen after Dashboard. Balance hero + entry timeline unlocks trust. |
+| 🟠 P1 | **4.2.3** Entry Detail redesign | Audit trail screen — users need to verify amounts before collecting. |
+| 🟠 P1 | **4.2.2** Entry List redesign | Gateway to Entry Detail. |
+| 🟠 P1 | **4.2.1** Customer List redesign | Gateway to Customer Detail. |
+| 🟡 P2 | **4.3.x** Auth + Onboarding screens | First impression. Important but not blocking daily use. |
+| 🟡 P2 | **4.4.1** Profile redesign | ⚠️ Partial work already shipped (see 4.4.0 below). Align + complete. |
+| 🔵 Pull Forward | **5.3** UPI collect link + QR | UPI ID already in Profile. This is the highest-value Phase 5 item. Consider pulling into 4.4. |
+
+---
+
 ## Active Product Surface
 
 | Area | Status | Notes |
@@ -27,7 +55,7 @@
 | People (Customers) | ✅ Working | Add / list / search / detail |
 | Entries | ✅ Working | Create / list / detail |
 | Payments | ✅ Working | Record + context |
-| Profile | ✅ Working | Settings + CSV export |
+| Profile | ✅ Working | Business details, account management, app preferences, CSV export — [f6f73dd](https://github.com/subrat8268/kredBook/commit/f6f73dd26efd79c04d6cd1e594455988cb83430b) |
 | Offline-first sync | ✅ Working | Queue in `src/lib/syncQueue.ts`, replay on reconnect |
 | Localization | ✅ Working | EN / HI |
 | CSV export | ✅ Working | Profile-area export |
@@ -44,10 +72,13 @@
 - `parties` is customers-only now (`parties_is_customer_only`). Supplier fields have been removed.
 - `profiles.dashboard_mode` has been removed.
 - Supplier / product surfaces are out of scope and must not be described as active features.
+- **4.4.1 (Profile redesign) is partially done** — basic screen shipped in [f6f73dd](https://github.com/subrat8268/kredBook/commit/f6f73dd26efd79c04d6cd1e594455988cb83430b). Full design-system-aligned redesign still pending. Do not mark 4.4.1 Done until UPI QR + danger zone + settings section are complete.
 
 ---
 
 ## Phase 1 — Truth Reset ✅ Done
+
+**Goal:** Lock canonical product nouns, get core flows working, establish offline-first baseline.
 
 | # | Task | Status | Commit |
 |---|---|---|---|
@@ -64,6 +95,8 @@
 
 ## Phase 2 — DB Hardening ✅ Done
 
+**Goal:** Clean up schema, drop dead columns, add business-critical fields, lock schema truth.
+
 | # | Task | Status | Command | Skills | Commit |
 |---|---|---|---|---|---|
 | 2.1 | Audit full schema correctness | ✅ Done | `/audit` | `code-reviewer`, `supabase` | [bee19a9](https://github.com/subrat8268/kredBook/commit/bee19a931aa49080026cbab9efb51c5d2a06a62a) |
@@ -72,7 +105,7 @@
 | 2.4 | Expand `payment_mode` enum + add `payment_date` | ✅ Done | `/build` | `project-planner`, `supabase` | [bee19a9](https://github.com/subrat8268/kredBook/commit/bee19a931aa49080026cbab9efb51c5d2a06a62a) |
 | 2.5 | Add `notes`, `avatar_url`, `email` to `parties` | ✅ Done | `/build` | `project-planner`, `supabase` | [bee19a9](https://github.com/subrat8268/kredBook/commit/bee19a931aa49080026cbab9efb51c5d2a06a62a) |
 | 2.6 | Add CHECK constraint `parties.is_customer = TRUE` | ✅ Done | `/fix` | `systematic-debugging`, `supabase` | [bee19a9](https://github.com/subrat8268/kredBook/commit/bee19a931aa49080026cbab9efb51c5d2a06a62a) |
-| 2.7 | Regenerate `database.types.ts` from live Supabase | ✅ Done | `/fix` | `supabase`, `project-planner` | [22cbed5](https://github.com/subrat8268/kredBook/commit/22cbed521a992fe0d032fcbf74eace2f793956d2) |
+| 2.7 | Regenerate `database.types.ts` from live Supabase | ✅ Done | `/fix` | `supabase`, `project-planner` | [22cbed5](https://github.com/subrat8268/kredBook/commit/22cbed521a992fe0d032fcbf74eaca2f793956d2) |
 | 2.8 | Refresh `schema.sql` from live Supabase (no-data ref) | ✅ Done | `/audit` | `supabase` | [22cbed5](https://github.com/subrat8268/kredBook/commit/22cbed521a992fe0d032fcbf74eace2f793956d2) |
 | 2.9 | Rename storage bucket `product-images` → `avatars` | ✅ Done | `/refactor` | `refactor-engineer`, `supabase` | [dea2297](https://github.com/subrat8268/kredBook/commit/dea22974108ac94a7f677919d9c37234cb2d9b18) |
 | 2.10 | Add RPC `get_dashboard_summary` (single-query dashboard) | ✅ Done | `/build` | `project-planner`, `supabase` | [dea2297](https://github.com/subrat8268/kredBook/commit/dea22974108ac94a7f677919d9c37234cb2d9b18) |
@@ -80,6 +113,8 @@
 ---
 
 ## Phase 3 — Experience Upgrades ✅ Done
+
+**Goal:** Dark mode, WhatsApp-first sharing, overdue polish, offline resilience.
 
 | # | Task | Status | Priority | Command | Skills |
 |---|---|---|---|---|---|
@@ -93,16 +128,18 @@
 | 3.8 | Collect shortcut on Dashboard hero — deep-link to top overdue Customer | ✅ Done | P2 | `/build` | `react-native-skills`, `project-planner`, `code-reviewer` |
 | 3.9 | Empty state illustrations — warm empty states with CTA | ✅ Done | P2 | `/build` | `react-native-skills`, `project-planner` |
 | 3.10 | Offline banner — top overlay with offline/online sync confirmation states | ✅ Done | P2 | `/build` | `react-native-skills`, `project-planner` |
-| 3.11 | Customer search improvements — speed + relevance | ✅ Done | P2 | `/build` | `react-native-skills`, `project-planner`, `code-reviewer` |
-| 3.12 | Entries + People filters | ✅ Done | P2 | `/plan` | `project-planner`, `writing-plans` |
+| 3.11 | Customer search improvements — debounce + fuzzy match + highlight | ✅ Done | P2 | `/build` | `react-native-skills`, `project-planner`, `code-reviewer` |
+| 3.12 | Entries + People filter chips | ✅ Done | P2 | `/plan` | `project-planner`, `writing-plans` |
 | 3.13 | Export hardening — validate CSV totals, locale-safe formatting | ✅ Done | P2 | `/audit` | `supabase`, `code-reviewer` |
+| 3.14 | Pre-Phase 4 bug sweep — 7 screen flow bugs fixed | ✅ Done | P0 | `/fix` | `systematic-debugging`, `code-reviewer` | [4346bda](https://github.com/subrat8268/kredBook/commit/4346bda) |
 
 ---
 
 ## Phase 4 — UI/UX Redesign 🔄 In Progress
 
+### Phase 4.0 — Design System Foundation ✅ Done
 
-### Phase 4.0 — Design System Foundation ⚠️ Blocks All Other 4.x Tasks
+> ⚠️ This block gates all other 4.x tasks. All 4.0.x are done.
 
 | # | Task | Status | Priority | Command | Skills | Depends On | Commit |
 |---|---|---|---|---|---|---|---|
@@ -115,9 +152,10 @@
 | 4.0.7 | Create `Skeleton` component — shimmer loading for all list/card surfaces | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.1 ✅ | [3049f19](https://github.com/subrat8268/kredBook/commit/3049f19) |
 | 4.0.8 | Create `SpeedDialFAB` component — expandable FAB (New Entry · New Customer · Record Payment) | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.3 ✅ | [07ddd84](https://github.com/subrat8268/kredBook/commit/07ddd84) |
 
-### Phase 4.1 — Core Loop Screens (Daily Driver)
+### Phase 4.1 — Core Loop Screens (Daily Driver) 🔄 In Progress
 
 > Depends On: All of 4.0 ✅ Done
+> **This is the most important block. Complete 4.1.4 and 4.1.5 before any 4.2/4.3/4.4 work.**
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
@@ -125,14 +163,14 @@
 | 4.1.2 | Tab navigation redesign — theme-aware tab bar, lucide icons, SpeedDialFAB record-payment routing fix | ✅ Done | P0 | `/refactor` | `ui-ux-pro-max`, `react-native-skills` | `(main)/_layout.tsx` ([fa4f3b2](https://github.com/subrat8268/kredBook/commit/fa4f3b24e2ca07a2edb27f42a410a94ca02ffcad)) |
 | 4.1.3 | Create Entry redesign — full-screen numpad, bottom sheet customer picker, quick due-date chips | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/create.tsx` ([5d588b8](https://github.com/subrat8268/kredBook/commit/5d588b8)) |
 | 4.1.3a | Create Entry bug fixes — params override draft, due-date format normalization, numpad guard, Bill/Payment toggle, recent customers first | ✅ Done | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max` | `(main)/entries/create.tsx`, `CustomerPicker.tsx`, `BillFooter.tsx` |
-| 4.1.3b | Create Entry UX redesign — remove SpeedDialFAB, save/share split buttons, progressive disclosure, Bill Mode with line items, modern visual standards | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills`, `code-reviewer` | `(main)/entries/create.tsx`, `BillFooter.tsx` |
-| 4.1.3c | Create Entry hotfix pass — payment clarity, due-date single picker, draft cleanup, amount formatting, bill-item editability, and UX polish | ✅ Done | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max`, `code-reviewer` | `(main)/entries/create.tsx`, `CustomerPicker.tsx`, `BillFooter.tsx` |
-| 4.1.4 | Record Payment modal redesign — large numpad, partial toggle, payment method, WhatsApp receipt | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
-| 4.1.5 | Customer Detail redesign — hero card, sticky balance bar, timeline view, swipe actions | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
+| 4.1.3b | Create Entry UX redesign — remove SpeedDialFAB, save/share split buttons, progressive disclosure, Bill Mode with line items, modern visual standards | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills`, `code-reviewer` | `(main)/entries/create.tsx`, `BillFooter.tsx` ([3f6ab2b](https://github.com/subrat8268/kredBook/commit/3f6ab2b6793254a8d86c9ddacf6a56ce40c10c2d)) |
+| 4.1.3c | Create Entry hotfix pass — payment clarity, due-date single picker, draft cleanup, formatINR, bill-item tap-to-edit, fractional qty, haptics, +New Person shortcut, avatar fix | ✅ Done | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max`, `code-reviewer` | `(main)/entries/create.tsx`, `CustomerPicker.tsx`, `BillFooter.tsx` ([5b036be](https://github.com/subrat8268/kredBook/commit/5b036be62e8e12d95f916e3dfc4d61a61b4763b1)) |
+| **4.1.4** | **Record Payment modal redesign — large numpad, partial toggle, payment method chips, WhatsApp receipt** | **⏳ Not Started** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
+| **4.1.5** | **Customer Detail redesign — hero card, sticky balance bar, entry timeline, swipe actions, one-tap Collect** | **⏳ Not Started** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
 
-### Phase 4.2 — List Screens
+### Phase 4.2 — List + Detail Screens
 
-> Depends On: 4.0 ✅ Done, 4.1 ✅ Done
+> Depends On: 4.0 ✅ Done. Start after 4.1.4 + 4.1.5 are done.
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
@@ -143,7 +181,7 @@
 
 ### Phase 4.3 — Auth + Onboarding
 
-> Depends On: 4.0 ✅ Done
+> Depends On: 4.0 ✅ Done. Can run in parallel with 4.2 after 4.1 is complete.
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
@@ -159,15 +197,21 @@
 ### Phase 4.4 — Profile, Export + Public Ledger
 
 > Depends On: 4.0 ✅ Done, 4.2 ✅ Done
+> ⚠️ **4.4.0 — Profile screen has partial implementation shipped** ([f6f73dd](https://github.com/subrat8268/kredBook/commit/f6f73dd26efd79c04d6cd1e594455988cb83430b)). See Drift Watchlist.
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
-| 4.4.1 | Profile screen redesign — editable header, UPI QR, app settings section, danger zone | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/profile/index.tsx` |
+| 4.4.0 | Profile screen — basic screen shipped (business details, account management, app preferences) | ✅ Partial | P1 | — | — | `(main)/profile/index.tsx` ([f6f73dd](https://github.com/subrat8268/kredBook/commit/f6f73dd26efd79c04d6cd1e594455988cb83430b)) |
+| 4.4.1 | Profile screen redesign — complete with editable header, UPI QR, danger zone, align to design system | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/profile/index.tsx` |
 | 4.4.2 | Profile Edit redesign — logo upload, UPI ID, address, sticky save bar, inline validation | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/profile/edit.tsx` |
 | 4.4.3 | Export — move from standalone tab into Profile, add customer filter, email export, export history | ⏳ Not Started | P1 | `/refactor` | `refactor-engineer`, `react-native-skills` | `(main)/export/index.tsx` |
 | 4.4.4 | Public Ledger redesign — business logo, UPI Pay Now button, WhatsApp CTA, mobile-responsive, KredBook footer | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `project-planner` | `app/l/[token].tsx` |
 
+---
+
 ## Phase 5 — Documents + Collection ⏳ Not Started
+
+> 💡 **Pull-forward candidate:** 5.3 (UPI collect link) can move into Phase 4.4 since UPI ID is already in Profile. Discuss before starting Phase 4.4.
 
 | # | Task | Status | Priority | Command | Skills |
 |---|---|---|---|---|---|
@@ -176,6 +220,8 @@
 | 5.3 | UPI collect link + QR on Customer balance screen | ⏳ Not Started | P1 | `/build` | `project-planner`, `react-native-skills` |
 | 5.4 | Receipt-friendly sharing flow — polish and test end-to-end | ⏳ Not Started | P2 | `/plan` | `project-planner`, `writing-plans` |
 | 5.5 | Referral prompt after successful payment — lightweight share + deep link | ⏳ Not Started | P3 | `/build` | `ui-ux-pro-max`, `project-planner` |
+
+---
 
 ## Phase 6 — AI Assistance ⏳ Not Started
 
@@ -189,6 +235,8 @@
 | 6.4 | AI WhatsApp draft — generate EN/HI message variants with opt-in UX | ⏳ Not Started | P1 | `/plan` | `project-planner`, `writing-plans` |
 | 6.5 | Anomaly detection — flag customers with 45+ days no payment | ⏳ Not Started | P2 | `/plan` | `project-planner`, `supabase` |
 | 6.6 | Monthly insight card — collection trend summary | ⏳ Not Started | P2 | `/build` | `supabase`, `project-planner` |
+
+---
 
 ## OpenCode Quick Reference
 
