@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import {
   Alert,
   Animated,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -492,6 +493,7 @@ export default function CreateOrderScreen() {
     setItemName("");
     setItemQty(1);
     setItemRateInput("");
+    Keyboard.dismiss();
     setIsAddItemModalOpen(false);
   };
 
