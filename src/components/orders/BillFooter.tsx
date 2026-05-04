@@ -7,6 +7,11 @@ interface BillFooterProps {
   isLoading?: boolean;
   onSaveAndShare?: () => void;
   shareLabel?: string;
+  onPrimaryAction?: () => void;
+  onSecondaryAction?: () => void;
+  primaryLabel?: string;
+  secondaryLabel?: string;
+  secondaryDisabled?: boolean;
   totalAmount?: number;
   totalLabel?: string;
   showIcon?: boolean;
@@ -18,6 +23,11 @@ export default function BillFooter({
   isLoading = false,
   onSaveAndShare,
   shareLabel = "Save & Share",
+  onPrimaryAction,
+  onSecondaryAction,
+  primaryLabel = "Save Entry",
+  secondaryLabel,
+  secondaryDisabled = false,
   totalAmount,
   totalLabel,
   showIcon = true,
@@ -25,6 +35,7 @@ export default function BillFooter({
   disabled = false,
 }: BillFooterProps) {
   const { colors } = useTheme();
+  const useSplitActions = Boolean(secondaryLabel);
 
   return (
     <View
@@ -61,37 +72,97 @@ export default function BillFooter({
         </View>
       )}
 
-      <TouchableOpacity
-        onPress={onSaveAndShare}
-        disabled={disabled || isLoading}
-        style={{
-          backgroundColor: disabled ? colors.border : colors.primary,
-          paddingVertical: 14,
-          borderRadius: 8,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {isLoading ? (
-          <ActivityIndicator color={colors.surface} />
-        ) : (
-          <>
-            {showIcon ? (
-              <Share2 size={18} color={colors.surface} style={{ marginRight: 8 }} />
-            ) : null}
+      {useSplitActions ? (
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <TouchableOpacity
+            onPress={onPrimaryAction}
+            disabled={disabled || isLoading}
+            style={{
+              flex: 1,
+              backgroundColor: disabled ? colors.border : colors.primary,
+              paddingVertical: 14,
+              borderRadius: 10,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            activeOpacity={0.75}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={colors.surface} />
+            ) : (
+              <Text
+                style={{
+                  color: colors.surface,
+                  fontSize: 16,
+                  fontWeight: "700",
+                }}
+              >
+                {primaryLabel}
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={onSecondaryAction}
+            disabled={secondaryDisabled || isLoading}
+            style={{
+              flex: 1,
+              borderWidth: 1,
+              borderColor: secondaryDisabled ? colors.border : colors.primary,
+              backgroundColor: colors.surface,
+              paddingVertical: 14,
+              borderRadius: 10,
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: secondaryDisabled ? 0.5 : 1,
+            }}
+            activeOpacity={0.75}
+          >
             <Text
               style={{
-                color: colors.surface,
+                color: secondaryDisabled ? colors.textSecondary : colors.primary,
                 fontSize: 16,
-                fontWeight: "600",
+                fontWeight: "700",
               }}
             >
-              {shareLabel}
+              {secondaryLabel}
             </Text>
-          </>
-        )}
-      </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <TouchableOpacity
+          onPress={onSaveAndShare}
+          disabled={disabled || isLoading}
+          style={{
+            backgroundColor: disabled ? colors.border : colors.primary,
+            paddingVertical: 14,
+            borderRadius: 8,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          activeOpacity={0.75}
+        >
+          {isLoading ? (
+            <ActivityIndicator color={colors.surface} />
+          ) : (
+            <>
+              {showIcon ? (
+                <Share2 size={18} color={colors.surface} style={{ marginRight: 8 }} />
+              ) : null}
+              <Text
+                style={{
+                  color: colors.surface,
+                  fontSize: 16,
+                  fontWeight: "600",
+                }}
+              >
+                {shareLabel}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

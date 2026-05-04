@@ -1,7 +1,7 @@
 import { Icon } from "@/src/components/ui/Icon";
 import SpeedDialFAB from "@/src/components/ui/SpeedDialFAB";
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs, usePathname, useRouter } from "expo-router";
 import { House, Receipt, User, Users } from "lucide-react-native";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -59,8 +59,11 @@ function TabLabel({ label, color }: { label: string; color: string }) {
 
 export default function TabLayout() {
   const router = useRouter();
+  const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const { colors, spacing } = useTheme();
+  const hideFabOnScreen =
+    pathname === "/entries/create" || pathname === "/(main)/entries/create";
 
   return (
     <View style={{ flex: 1 }}>
@@ -137,21 +140,23 @@ export default function TabLayout() {
         <Tabs.Screen name="new-entry" options={{ href: null }} />
       </Tabs>
 
-      <SpeedDialFAB
-        bottom={72 + insets.bottom}
-        right={spacing.fabMargin}
-        onAction={(action) => {
-          if (action === "new-entry") {
-            router.push("/(main)/entries/create" as never);
-            return;
-          }
-          if (action === "new-customer") {
-            router.push({ pathname: "/(main)/people", params: { action: "add" } } as never);
-            return;
-          }
-          router.push({ pathname: "/(main)/dashboard", params: { action: "record-payment" } } as never);
-        }}
-      />
+      {!hideFabOnScreen ? (
+        <SpeedDialFAB
+          bottom={72 + insets.bottom}
+          right={spacing.fabMargin}
+          onAction={(action) => {
+            if (action === "new-entry") {
+              router.push("/(main)/entries/create" as never);
+              return;
+            }
+            if (action === "new-customer") {
+              router.push({ pathname: "/(main)/people", params: { action: "add" } } as never);
+              return;
+            }
+            router.push({ pathname: "/(main)/dashboard", params: { action: "record-payment" } } as never);
+          }}
+        />
+      ) : null}
     </View>
   );
 }

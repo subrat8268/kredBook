@@ -1,6 +1,6 @@
 import { useNetworkSync } from "@/src/hooks/useNetworkSync";
 import { usePeople } from "@/src/hooks/usePeople";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FlatList, Keyboard, Text, TouchableOpacity, View } from "react-native";
 import Loader from "../feedback/Loader";
 import SearchBar from "../ui/SearchBar";
@@ -34,6 +34,16 @@ export default function CustomerPicker({
     isFetchingNextPage,
   } = usePeople(vendorId, search);
 
+  // A5: Sort customers by recently added first (created_at DESC)
+  const sortedPeople = useMemo(() => {
+    if (!people) return [];
+    return [...people].sort((a, b) => {
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return dateB - dateA;
+    });
+  }, [people]);
+
   // ✅ Infinite scroll loader
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
@@ -65,8 +75,7 @@ export default function CustomerPicker({
   // ✅ Unique key
   const keyExtractor = (item: any) => item.id.toString();
 
-  if (variant === "inline") {
-    const inlinePeople = people ?? [];
+if (variant === "inline") {
     return (
       <View className="rounded-2xl bg-surface border border-border overflow-hidden dark:bg-surface-dark dark:border-border-dark">
         <View className="px-4 py-3 border-b border-border dark:border-border-dark">
@@ -82,12 +91,12 @@ export default function CustomerPicker({
           </View>
           {!isConnected && (
             <Text className="mt-2 text-[12px] text-textSecondary dark:text-textSecondary-dark">
-              You’re offline. People will load when back online.
+              You&apos;re offline. People will load when back online.
             </Text>
           )}
         </View>
         <FlatList
-          data={inlinePeople}
+          data={sortedPeople}
           keyExtractor={keyExtractor}
           renderItem={({ item, index }: { item: any; index: number }) => (
             <TouchableOpacity
@@ -148,12 +157,12 @@ export default function CustomerPicker({
       visible={visible}
       onClose={onClose ?? (() => {})}
       title="Person"
-      items={people}
+      items={sortedPeople}
       isLoading={isLoading}
       isFetchingNextPage={isFetchingNextPage}
       onEndReached={handleEndReached}
-      search={search} // optional if your hook handles search internally
-      setSearch={setSearch} // optional placeholder if not using search
+      search={search}
+      setSearch={setSearch}
       keyExtractor={keyExtractor}
       renderItem={renderItem}
     />

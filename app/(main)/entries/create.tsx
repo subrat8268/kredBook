@@ -13,17 +13,19 @@ import { useAuthStore } from "@/src/store/authStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
 import { buildEntryShareMessage } from "@/src/utils/shareTemplates";
-import { BillItem, generateBillPdf } from "@/src/utils/generateBillPdf";
 import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import * as Sharing from "expo-sharing";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createMMKV } from "react-native-mmkv";
 import { ArrowLeft, Pencil } from "lucide-react-native";
+import { format } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
+  Animated,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   Share,
@@ -54,13 +56,40 @@ function computeDueDateFromPreset(preset: "today" | "7" | "15" | "30" | "custom"
   if (preset === "15") date.setDate(date.getDate() + 15);
   if (preset === "30") date.setDate(date.getDate() + 30);
   if (preset === "custom") date.setDate(date.getDate() + 30);
-  return date.toISOString();
+  return format(date, "yyyy-MM-dd");
 }
 
 function formatChipDate(dateStr?: string) {
   if (!dateStr) return "Custom";
   const d = new Date(dateStr);
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
+}
+
+// A3: Numpad input guard
+function handleNumpadInput(current: string, key: string): string {
+  if (key === "0" && current === "") return "0";
+  if (key === ".") {
+    if (current === "") return "0.";
+    if (current.includes(".")) return current;
+    return `${current}.`;
+  }
+  
+  // Handle decimal digits - max 2 decimal places
+  if (current.includes(".")) {
+    const [, decimals] = current.split(".");
+    if (decimals.length >= 2) return current;
+  }
+  
+  // Strip leading zeros from whole number part
+  let newValue = `${current}${key}`;
+  if (!newValue.includes(".")) {
+    const num = parseInt(newValue, 10);
+    if (num === 0 && newValue.length > 1) {
+      newValue = newValue.replace(/^0+/, "");
+    }
+  }
+  
+  return newValue || "0";
 }
 
 export default function CreateOrderScreen() {
@@ -103,10 +132,22 @@ export default function CreateOrderScreen() {
   const [orderNote, setOrderNote] = useState<string>("");
   const [orderNoteExpanded, setOrderNoteExpanded] = useState(false);
   const [entryType, setEntryType] = useState<"bill" | "payment">("bill");
+  const [entryMode, setEntryMode] = useState<"quick" | "bill">("quick");
   const [isCustomerSheetOpen, setIsCustomerSheetOpen] = useState(false);
   const [duePreset, setDuePreset] = useState<"today" | "7" | "15" | "30" | "custom">("today");
   const [customDueDate, setCustomDueDate] = useState<string | undefined>(undefined);
   const [isCustomDuePickerOpen, setIsCustomDuePickerOpen] = useState(false);
+  const [savedEntry, setSavedEntry] = useState<any>(null);
+  const [isPostSaveModalOpen, setIsPostSaveModalOpen] = useState(false);
+  const [lineItems, setLineItems] = useState<{ id: string; name: string; quantity: number; rate: number }[]>([]);
+  const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
+  const [itemName, setItemName] = useState("");
+  const [itemQty, setItemQty] = useState(1);
+  const [itemRateInput, setItemRateInput] = useState("");
+  const [itemNameCache, setItemNameCache] = useState<string[]>([]);
+  const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
+  const [hadInitialSeedData, setHadInitialSeedData] = useState(false);
+  const [revealAnim] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     if (!customerParams) return;
@@ -135,9 +176,36 @@ export default function CreateOrderScreen() {
     [vendorId],
   );
 
-  // Initialize store if we were routed here with a preselected customer
+  // A1: Restore draft FIRST, then apply deep-link params (params win over draft)
   useEffect(() => {
+    const key = `draft:${vendorId ?? "anon"}`;
+    const cached = draftStorage.getString(key);
+    let hasSeedData = false;
+    
+    // Step 1: Restore draft values
+    if (cached) {
+      hasSeedData = true;
+      try {
+        const parsed = JSON.parse(cached);
+        setQuickAmount(parsed.quickAmount ?? "");
+        setNote(parsed.note ?? "");
+        setOrderNote(parsed.orderNote ?? "");
+        setOrderNoteExpanded(Boolean(parsed.orderNote));
+        setEntryType(parsed.entryType ?? "bill");
+        setDuePreset(parsed.duePreset ?? "today");
+        setCustomDueDate(parsed.customDueDate ?? undefined);
+        if (parsed.selectedCustomerMeta) {
+          setSelectedCustomerMeta(parsed.selectedCustomerMeta);
+          setSelectedCustomerId(parsed.selectedCustomerMeta.id ?? null);
+        }
+      } catch {
+        // ignore corrupted draft
+      }
+    }
+
+    // Step 2: Apply deep-link params (override draft if present)
     if (customerParams) {
+      hasSeedData = true;
       try {
         const parsed = JSON.parse(customerParams);
         setSelectedCustomerId(parsed.id);
@@ -153,10 +221,23 @@ export default function CreateOrderScreen() {
       }
     }
     if (amountParam && !Number.isNaN(Number(amountParam))) {
+      hasSeedData = true;
       setEntryType("payment");
       setQuickAmount(String(amountParam));
     }
-  }, [amountParam, customerParams, fetchPreviousBalance, router, showToast]);
+    setHadInitialSeedData(hasSeedData);
+    setHasHydratedDraft(true);
+  }, [amountParam, customerParams, draftStorage, vendorId, fetchPreviousBalance, router, showToast]);
+
+  useEffect(() => {
+    if (!hasHydratedDraft) return;
+    if (!selectedCustomerId) return;
+    Animated.timing(revealAnim, {
+      toValue: 1,
+      duration: 240,
+      useNativeDriver: true,
+    }).start();
+  }, [hasHydratedDraft, revealAnim, selectedCustomerId]);
 
   const handleSelectPerson = useCallback(
     async (person: any) => {
@@ -171,29 +252,38 @@ export default function CreateOrderScreen() {
 
   const createOrderMutation = useCreateOrder(vendorId!);
   const { queueLength } = useNetworkSync();
-  const hasItems = false;
+  const hasItems = lineItems.length > 0;
+
+  const lineItemsTotal = useMemo(
+    () => lineItems.reduce((sum, item) => sum + item.quantity * item.rate, 0),
+    [lineItems],
+  );
+  const quickAmountValue = parseFloat(quickAmount) || 0;
+  const computedEntryAmount = entryMode === "bill" ? lineItemsTotal : quickAmountValue;
 
   useEffect(() => {
-    const key = `draft:${vendorId ?? "anon"}`;
-    const cached = draftStorage.getString(key);
-    if (!cached) return;
-    try {
-      const parsed = JSON.parse(cached);
-      setQuickAmount(parsed.quickAmount ?? "");
-      setNote(parsed.note ?? "");
-      setOrderNote(parsed.orderNote ?? "");
-      setOrderNoteExpanded(Boolean(parsed.orderNote));
-      setEntryType(parsed.entryType ?? "bill");
-      setDuePreset(parsed.duePreset ?? "today");
-      setCustomDueDate(parsed.customDueDate ?? undefined);
-      if (parsed.selectedCustomerMeta) {
-        setSelectedCustomerMeta(parsed.selectedCustomerMeta);
-        setSelectedCustomerId(parsed.selectedCustomerMeta.id ?? null);
+    const loadItemNameCache = async () => {
+      try {
+        const raw = await AsyncStorage.getItem("item-name-cache");
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          setItemNameCache(parsed.filter((x) => typeof x === "string"));
+        }
+      } catch {
+        // ignore cache parse errors
       }
-    } catch {
-      // ignore corrupted draft
-    }
-  }, [draftStorage, vendorId]);
+    };
+    loadItemNameCache();
+  }, []);
+
+  const persistItemNameCache = useCallback(async (name: string) => {
+    const normalized = name.trim();
+    if (!normalized) return;
+    const next = [normalized, ...itemNameCache.filter((n) => n.toLowerCase() !== normalized.toLowerCase())].slice(0, 50);
+    setItemNameCache(next);
+    await AsyncStorage.setItem("item-name-cache", JSON.stringify(next));
+  }, [itemNameCache]);
 
   useEffect(() => {
     const key = `draft:${vendorId ?? "anon"}`;
@@ -203,11 +293,11 @@ export default function CreateOrderScreen() {
     );
   }, [customDueDate, draftStorage, duePreset, entryType, note, orderNote, quickAmount, selectedCustomerMeta, vendorId]);
 
-  // Calculate effective total (amount-first flow only)
-  const entryAmount = parseFloat(quickAmount) || 0;
-  const totalWithBalance = entryAmount + previousBalance;
+  // Calculate effective total
+  const entryAmount = computedEntryAmount;
+  const totalWithBalance = computedEntryAmount + previousBalance;
 
-  const handleSaveAndShare = async () => {
+  const handleSaveEntry = async () => {
     // Validation
     if (!selectedCustomerId) {
       return Alert.alert("Error", "Please select a person");
@@ -220,25 +310,39 @@ export default function CreateOrderScreen() {
       return handleRecordPayment();
     }
 
-    // Quick amount must be provided
-    if (!quickAmount.trim()) {
+    // Quick amount or bill items must be provided
+    if (entryMode === "quick" && !quickAmount.trim()) {
       return Alert.alert("Error", "Please enter an amount");
     }
+    if (entryMode === "bill" && !lineItems.length) {
+      return Alert.alert("Error", "Please add at least one item");
+    }
 
-    await performSave();
+    const savedOrder = await performSave();
+    if (savedOrder) {
+      setSavedEntry(savedOrder);
+      setIsPostSaveModalOpen(true);
+    }
   };
 
   const performSave = async () => {
     try {
-      // Create a generic entry item from quick amount
-      const orderItems = [
-        {
-          product_id: null,
-          product_name: note.trim() || "Entry Amount",
-          price: parseFloat(quickAmount) || 0,
-          quantity: 1,
-        },
-      ];
+      const orderItems =
+        entryMode === "bill"
+          ? lineItems.map((item) => ({
+              product_id: null,
+              product_name: item.name,
+              price: item.rate,
+              quantity: item.quantity,
+            }))
+          : [
+              {
+                product_id: null,
+                product_name: note.trim() || "Entry Amount",
+                price: parseFloat(quickAmount) || 0,
+                quantity: 1,
+              },
+            ];
 
         const savedOrder = await createOrderMutation.mutateAsync({
           customerId: selectedCustomerId!,
@@ -255,88 +359,53 @@ export default function CreateOrderScreen() {
               : computeDueDateFromPreset(duePreset),
         });
 
-      // Generate Native Shareable PDF
-      const pdfItems: BillItem[] = [
-        {
-          name: note.trim() || "Entry Amount",
-          quantity: 1,
-          rate: parseFloat(quickAmount) || 0,
-          amount: parseFloat(quickAmount) || 0,
-        },
-      ];
-
-      const businessDetails = {
-        name: profile?.business_name || "Your Store",
-        address: profile?.business_address || "",
-        phone: profile?.phone || "",
-        gstin: profile?.gstin || "",
-      };
-
-      const billMeta = {
-        invoiceNumber: savedOrder.bill_number,
-        date: new Date(savedOrder.created_at ?? Date.now()).toLocaleDateString(
-          "en-IN",
-        ),
-        subtotal: parseFloat(quickAmount) || 0,
-        taxAmount: 0,
-        loadingCharge: 0,
-        bankDetails:
-          profile?.bank_name && profile?.account_number && profile?.ifsc_code
-            ? {
-                bankName: profile.bank_name,
-                accountNo: profile.account_number,
-                ifsc: profile.ifsc_code,
-              }
-            : undefined,
-      };
-
-      const localPdfPath = await generateBillPdf(
-        pdfItems,
-        businessDetails,
-        entryAmount,
-        selectedCustomerMeta?.name || "Person",
-        billMeta,
-      );
-
-      const canShare = await Sharing.isAvailableAsync();
-      if (canShare) {
-        await Sharing.shareAsync(localPdfPath, { mimeType: "application/pdf" });
-      } else {
-        const locale = i18n.language?.toLowerCase().startsWith("hi") ? "hi" : "en";
-        await Share.share({
-          message: buildEntryShareMessage({
-            locale,
-            customerName: selectedCustomerMeta?.name || "Customer",
-            amount: entryAmount,
-            entryDate: savedOrder.created_at ?? new Date(),
-            dueDate: (savedOrder as any).due_date ?? null,
-            businessName: profile?.business_name || profile?.name || "KredBook",
-          }),
-        });
-      }
-
-      // Cleanup Draft on success and go to the created detail screen.
-      setQuickAmount("");
-      setNote("");
-      setOrderNote("");
-      setOrderNoteExpanded(false);
+      // Keep form values so user can choose post-save actions.
       showToast({
         message: `Entry created for ${selectedCustomerMeta?.name ?? "customer"}`,
         type: "success",
       });
-      router.replace({
-        pathname: "/(main)/entries/[orderId]",
-        params: { orderId: savedOrder.id },
-      } as never);
+      return savedOrder;
     } catch (err: any) {
-      console.error("Save & Share failed:", err.message);
-      const errorMessage = err.message || "Failed to save and share entry";
+      console.error("Save entry failed:", err.message);
+      const errorMessage = err.message || "Failed to save entry";
       showToast({ message: errorMessage, type: "error" });
       Alert.alert("Error", errorMessage);
+      return null;
     }
   };
 
+  const handleShareOnWhatsApp = useCallback(async () => {
+    if (!savedEntry) return;
+    const locale = i18n.language?.toLowerCase().startsWith("hi") ? "hi" : "en";
+    await Share.share({
+      message: buildEntryShareMessage({
+        locale,
+        customerName: selectedCustomerMeta?.name || "Customer",
+        amount: entryAmount,
+        entryDate: savedEntry.created_at ?? new Date(),
+        dueDate: (savedEntry as any).due_date ?? null,
+        businessName: profile?.business_name || profile?.name || "KredBook",
+      }),
+    });
+  }, [entryAmount, i18n.language, profile?.business_name, profile?.name, savedEntry, selectedCustomerMeta?.name]);
+
+  const handleViewSavedEntry = useCallback(() => {
+    if (!savedEntry?.id) return;
+    setIsPostSaveModalOpen(false);
+    router.replace({
+      pathname: "/(main)/entries/[orderId]",
+      params: { orderId: savedEntry.id },
+    } as never);
+  }, [router, savedEntry?.id]);
+
+  const handleDoneAfterSave = useCallback(() => {
+    setIsPostSaveModalOpen(false);
+    router.back();
+  }, [router]);
+
   const invoiceRef = `${profile?.bill_number_prefix || "INV"}-NEW`;
+  const showOnlyCustomerCard =
+    hasHydratedDraft && !hadInitialSeedData && !selectedCustomerId;
 
   const handleRecordPayment = async () => {
     if (!selectedCustomerId || !profile?.id) return;
@@ -390,13 +459,37 @@ export default function CreateOrderScreen() {
 
   if (isFetchingProfile || !profile) return <Loader />;
 
+  const addLineItem = async () => {
+    const name = itemName.trim();
+    const rate = parseFloat(itemRateInput) || 0;
+    if (!name) {
+      Alert.alert("Error", "Please enter item name");
+      return;
+    }
+    if (rate <= 0) {
+      Alert.alert("Error", "Please enter a valid rate");
+      return;
+    }
+    const newItem = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name,
+      quantity: itemQty,
+      rate,
+    };
+    setLineItems((prev) => [...prev, newItem]);
+    await persistItemNameCache(name);
+    setItemName("");
+    setItemQty(1);
+    setItemRateInput("");
+    setIsAddItemModalOpen(false);
+  };
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="flex-1"
         >
           {/* Header */}
           <View className="flex-row items-center border-b border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
@@ -410,23 +503,60 @@ export default function CreateOrderScreen() {
                 strokeWidth={2.2}
               />
             </TouchableOpacity>
-            <Text className="flex-1 text-[18px] font-bold text-textPrimary dark:text-textPrimary-dark">
-              Add Entry
-            </Text>
+            
+            {/* B4: Quick Entry / Bill Mode toggle */}
+            <View className="flex-row rounded-full border border-border overflow-hidden dark:border-border-dark">
+              <TouchableOpacity
+                onPress={() => setEntryMode("quick")}
+                className="px-3 py-1.5"
+                style={{
+                  backgroundColor: entryMode === "quick" ? colors.primary : "transparent",
+                }}
+                activeOpacity={0.75}
+              >
+                <Text
+                  className="text-[12px] font-bold"
+                  style={{ color: entryMode === "quick" ? colors.surface : colors.textSecondary }}
+                >
+                  Quick Entry
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setEntryMode("bill")}
+                className="px-3 py-1.5"
+                style={{
+                  backgroundColor: entryMode === "bill" ? colors.primary : "transparent",
+                }}
+                activeOpacity={0.75}
+              >
+                <Text
+                  className="text-[12px] font-bold"
+                  style={{ color: entryMode === "bill" ? colors.surface : colors.textSecondary }}
+                >
+                  Bill Mode
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View className="flex-1" />
             <View className="mr-2">
               <SyncStatus />
             </View>
-            <View className="rounded-full border border-primary bg-primary-light px-3 py-1 dark:bg-primary-soft-dark">
+            <TouchableOpacity
+              className="rounded-full border border-primary bg-primary-light px-3 py-1 dark:bg-primary-soft-dark"
+              onPress={() => setEntryType((prev) => (prev === "payment" ? "bill" : "payment"))}
+              activeOpacity={0.75}
+            >
               <Text className="text-[13px] font-bold text-primary">
                 {entryType === "payment" ? "PAYMENT" : invoiceRef}
               </Text>
-            </View>
+            </TouchableOpacity>
           </View>
 
           {/* Scrollable Content */}
           <ScrollView
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }}
+            contentContainerStyle={{ padding: 16, paddingBottom: 130, gap: 12 }}
             showsVerticalScrollIndicator={false}
           >
 
@@ -482,7 +612,68 @@ export default function CreateOrderScreen() {
                 )}
             </View>
 
+            {selectedCustomerMeta ? (
+              <TouchableOpacity
+                onPress={() => setIsCustomerSheetOpen(true)}
+                className="mt-2 self-start rounded-full border border-border px-3 py-1 dark:border-border-dark"
+                activeOpacity={0.75}
+              >
+                <Text className="text-[12px] font-semibold text-primary">Change</Text>
+              </TouchableOpacity>
+            ) : null}
+
+            {!showOnlyCustomerCard ? (
+              <Animated.View
+                style={{
+                  opacity: revealAnim,
+                  transform: [
+                    {
+                      translateY: revealAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [16, 0],
+                      }),
+                    },
+                  ],
+                }}
+              >
+            {entryMode === "bill" ? (
+              <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+                <TouchableOpacity
+                  onPress={() => setIsAddItemModalOpen(true)}
+                  className="rounded-xl border border-primary px-4 py-3"
+                  activeOpacity={0.75}
+                >
+                  <Text className="text-center font-bold text-primary">+ Add Item</Text>
+                </TouchableOpacity>
+                {lineItems.length ? (
+                  <View className="mt-3" style={{ gap: 8 }}>
+                    {lineItems.map((item) => (
+                      <View key={item.id} className="rounded-xl border border-border px-3 py-3 dark:border-border-dark">
+                        <View className="flex-row items-center justify-between">
+                          <View className="flex-1">
+                            <Text className="font-semibold text-textPrimary dark:text-textPrimary-dark">{item.name}</Text>
+                            <Text className="text-textSecondary dark:text-textSecondary-dark">{item.quantity} × {formatINR(item.rate)}</Text>
+                          </View>
+                          <View className="items-end">
+                            <Text className="font-bold text-textPrimary dark:text-textPrimary-dark">{formatINR(item.quantity * item.rate)}</Text>
+                            <TouchableOpacity
+                              onPress={() => setLineItems((prev) => prev.filter((x) => x.id !== item.id))}
+                              activeOpacity={0.75}
+                              className="mt-1"
+                            >
+                              <Text className="text-xs font-semibold text-danger">Delete</Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
+
             {/* AMOUNT HERO + NUMPAD */}
+            {entryMode === "quick" ? (
             <View className="mt-2">
               <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">
                 AMOUNT
@@ -503,8 +694,7 @@ export default function CreateOrderScreen() {
                               setQuickAmount((prev) => prev.slice(0, -1));
                               return;
                             }
-                            if (key === "." && quickAmount.includes(".")) return;
-                            setQuickAmount((prev) => `${prev}${key}`);
+                            setQuickAmount((prev) => handleNumpadInput(prev, key));
                           }}
                         >
                           <Text className="text-[22px] font-bold text-textPrimary dark:text-textPrimary-dark">{key}</Text>
@@ -515,6 +705,7 @@ export default function CreateOrderScreen() {
                 </View>
               </View>
             </View>
+            ) : null}
 
             <View>
               {!orderNoteExpanded && !orderNote.trim() ? (
@@ -618,16 +809,20 @@ export default function CreateOrderScreen() {
                 </View>
               </View>
             )}
+              </Animated.View>
+            ) : null}
           </ScrollView>
 
           {/* Absolute Footer */}
+          {!showOnlyCustomerCard ? (
           <View className="absolute bottom-0 w-full">
             <BillFooter
               isLoading={createOrderMutation.isPending}
-              onSaveAndShare={handleSaveAndShare}
-              shareLabel={
-                entryType === "payment" ? "Record Payment" : "Save & Share"
-              }
+              onPrimaryAction={entryType === "payment" ? handleRecordPayment : handleSaveEntry}
+              primaryLabel={entryType === "payment" ? "Record Payment" : "Save Entry"}
+              onSecondaryAction={handleShareOnWhatsApp}
+              secondaryLabel={entryType === "payment" ? undefined : "Share on WhatsApp"}
+              secondaryDisabled={!savedEntry?.id}
               totalAmount={
                 entryType === "payment"
                   ? parseFloat(quickAmount) || 0
@@ -647,8 +842,155 @@ export default function CreateOrderScreen() {
                     (!quickAmount.trim() && !hasItems) ||
                     createOrderMutation.isPending
               }
-            />
-          </View>
+             />
+           </View>
+          ) : null}
+
+          <Modal
+            visible={isAddItemModalOpen}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setIsAddItemModalOpen(false)}
+          >
+            <View className="flex-1 items-center justify-end bg-black/40 px-4 pb-6">
+              <View className="w-full rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+                <Text className="text-lg font-bold text-textPrimary dark:text-textPrimary-dark">Add Item</Text>
+                <View className="mt-3">
+                  <Input
+                    placeholder="Item Name"
+                    value={itemName}
+                    onChangeText={setItemName}
+                    variant="white"
+                  />
+                  {itemNameCache.length ? (
+                    <View className="mt-2 flex-row flex-wrap" style={{ gap: 6 }}>
+                      {itemNameCache
+                        .filter((x) => x.toLowerCase().includes(itemName.toLowerCase()))
+                        .slice(0, 6)
+                        .map((name) => (
+                          <TouchableOpacity
+                            key={name}
+                            onPress={() => setItemName(name)}
+                            className="rounded-full border border-border px-3 py-1 dark:border-border-dark"
+                            activeOpacity={0.75}
+                          >
+                            <Text className="text-xs text-textSecondary dark:text-textSecondary-dark">{name}</Text>
+                          </TouchableOpacity>
+                        ))}
+                    </View>
+                  ) : null}
+                </View>
+
+                <View className="mt-4 flex-row items-center justify-between">
+                  <Text className="font-semibold text-textPrimary dark:text-textPrimary-dark">Quantity</Text>
+                  <View className="flex-row items-center" style={{ gap: 10 }}>
+                    <TouchableOpacity
+                      onPress={() => setItemQty((q) => Math.max(1, q - 1))}
+                      className="h-8 w-8 items-center justify-center rounded-md border border-border dark:border-border-dark"
+                      activeOpacity={0.75}
+                    >
+                      <Text className="font-bold text-textPrimary dark:text-textPrimary-dark">-</Text>
+                    </TouchableOpacity>
+                    <Text className="w-8 text-center font-bold text-textPrimary dark:text-textPrimary-dark">{itemQty}</Text>
+                    <TouchableOpacity
+                      onPress={() => setItemQty((q) => q + 1)}
+                      className="h-8 w-8 items-center justify-center rounded-md border border-border dark:border-border-dark"
+                      activeOpacity={0.75}
+                    >
+                      <Text className="font-bold text-textPrimary dark:text-textPrimary-dark">+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View className="mt-4">
+                  <Text className="mb-2 font-semibold text-textPrimary dark:text-textPrimary-dark">Rate</Text>
+                  <Text className="mb-2 text-2xl font-extrabold text-primary">{formatINR(parseFloat(itemRateInput || "0"))}</Text>
+                  <View style={{ gap: 8 }}>
+                    {["1,2,3", "4,5,6", "7,8,9", ".,0,⌫"].map((row) => (
+                      <View key={row} className="flex-row" style={{ gap: 8 }}>
+                        {row.split(",").map((key) => (
+                          <TouchableOpacity
+                            key={key}
+                            className="flex-1 rounded-xl border border-border py-3 items-center"
+                            activeOpacity={0.75}
+                            onPress={() => {
+                              if (key === "⌫") {
+                                setItemRateInput((prev) => prev.slice(0, -1));
+                                return;
+                              }
+                              setItemRateInput((prev) => handleNumpadInput(prev, key));
+                            }}
+                          >
+                            <Text className="text-[20px] font-bold text-textPrimary dark:text-textPrimary-dark">{key}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                <Text className="mt-3 text-right font-semibold text-textPrimary dark:text-textPrimary-dark">
+                  Total: {formatINR((parseFloat(itemRateInput) || 0) * itemQty)}
+                </Text>
+
+                <TouchableOpacity
+                  onPress={addLineItem}
+                  className="mt-4 rounded-xl bg-primary py-3"
+                  activeOpacity={0.75}
+                >
+                  <Text className="text-center font-bold text-white">Add to Bill</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
+            visible={isPostSaveModalOpen}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setIsPostSaveModalOpen(false)}
+          >
+            <View className="flex-1 items-center justify-center bg-black/50 px-5">
+              <View className="w-full max-w-[360px] rounded-2xl border border-border bg-surface p-5 dark:border-border-dark dark:bg-surface-dark">
+                <Text className="text-[18px] font-bold text-textPrimary dark:text-textPrimary-dark">
+                  Entry saved
+                </Text>
+                <Text className="mt-2 text-[14px] text-textSecondary dark:text-textSecondary-dark">
+                  Choose what you want to do next.
+                </Text>
+
+                <TouchableOpacity
+                  onPress={handleShareOnWhatsApp}
+                  className="mt-4 rounded-xl bg-primary py-3"
+                  activeOpacity={0.75}
+                >
+                  <Text className="text-center text-[15px] font-bold text-white">
+                    Share on WhatsApp
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={handleViewSavedEntry}
+                  className="mt-3 rounded-xl border border-border py-3 dark:border-border-dark"
+                  activeOpacity={0.75}
+                >
+                  <Text className="text-center text-[15px] font-semibold text-textPrimary dark:text-textPrimary-dark">
+                    View Entry
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={handleDoneAfterSave}
+                  className="mt-3 py-2"
+                  activeOpacity={0.75}
+                >
+                  <Text className="text-center text-[14px] font-semibold text-textSecondary dark:text-textSecondary-dark">
+                    Done
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
 
           {isCustomerSheetOpen ? (
             <CustomerPicker
@@ -660,9 +1002,9 @@ export default function CreateOrderScreen() {
             />
           ) : null}
 
-          {isCustomDuePickerOpen ? (
+          {isCustomDuePickerOpen && (
             <DateRangePicker
-              visible
+              visible={isCustomDuePickerOpen}
               value={{ from: customDueDate, to: customDueDate }}
               onChange={(range) => {
                 const selected = range.to ?? range.from;
@@ -670,7 +1012,7 @@ export default function CreateOrderScreen() {
               }}
               onClose={() => setIsCustomDuePickerOpen(false)}
             />
-          ) : null}
+          )}
         </KeyboardAvoidingView>
       </SafeAreaView>
     </>
