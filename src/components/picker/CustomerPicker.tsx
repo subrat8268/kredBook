@@ -64,6 +64,7 @@ export default function CustomerPicker({
       key={item.id}
       className="p-4 mb-3 rounded-2xl border border-border bg-surface shadow-sm dark:border-border-dark dark:bg-surface-dark"
       onPress={() => handleSelect(item)}
+      activeOpacity={0.75}
     >
       <Text className="font-medium text-textPrimary dark:text-textPrimary-dark">{item.name}</Text>
       {item.phone && (
@@ -75,7 +76,7 @@ export default function CustomerPicker({
   // ✅ Unique key
   const keyExtractor = (item: any) => item.id.toString();
 
-if (variant === "inline") {
+  if (variant === "inline") {
     return (
       <View className="rounded-2xl bg-surface border border-border overflow-hidden dark:bg-surface-dark dark:border-border-dark">
         <View className="px-4 py-3 border-b border-border dark:border-border-dark">
@@ -106,7 +107,7 @@ if (variant === "inline") {
                   : "bg-surface dark:bg-surface-dark"
               }`}
               onPress={() => handleSelect(item)}
-              activeOpacity={0.8}
+              activeOpacity={0.75}
             >
               <Text className="text-[15px] font-semibold text-textPrimary dark:text-textPrimary-dark">
                 {item.name}

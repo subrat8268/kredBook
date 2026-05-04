@@ -19,6 +19,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createMMKV } from "react-native-mmkv";
 import { ArrowLeft, Pencil } from "lucide-react-native";
 import { format } from "date-fns";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -128,7 +129,6 @@ export default function CreateOrderScreen() {
   const [previousBalance, setPreviousBalance] = useState<number>(0);
   const [isFetchingBalance, setIsFetchingBalance] = useState(false);
   const [quickAmount, setQuickAmount] = useState<string>("");
-  const [note, setNote] = useState<string>("");
   const [orderNote, setOrderNote] = useState<string>("");
   const [orderNoteExpanded, setOrderNoteExpanded] = useState(false);
   const [entryType, setEntryType] = useState<"bill" | "payment">("bill");
@@ -188,7 +188,6 @@ export default function CreateOrderScreen() {
       try {
         const parsed = JSON.parse(cached);
         setQuickAmount(parsed.quickAmount ?? "");
-        setNote(parsed.note ?? "");
         setOrderNote(parsed.orderNote ?? "");
         setOrderNoteExpanded(Boolean(parsed.orderNote));
         setEntryType(parsed.entryType ?? "bill");
@@ -289,9 +288,9 @@ export default function CreateOrderScreen() {
     const key = `draft:${vendorId ?? "anon"}`;
     draftStorage.set(
       key,
-      JSON.stringify({ quickAmount, note, orderNote, entryType, duePreset, customDueDate, selectedCustomerMeta }),
+      JSON.stringify({ quickAmount, orderNote, entryType, duePreset, customDueDate, selectedCustomerMeta }),
     );
-  }, [customDueDate, draftStorage, duePreset, entryType, note, orderNote, quickAmount, selectedCustomerMeta, vendorId]);
+  }, [customDueDate, draftStorage, duePreset, entryType, orderNote, quickAmount, selectedCustomerMeta, vendorId]);
 
   // Calculate effective total
   const entryAmount = computedEntryAmount;
@@ -338,7 +337,7 @@ export default function CreateOrderScreen() {
           : [
               {
                 product_id: null,
-                product_name: note.trim() || "Entry Amount",
+                product_name: orderNote.trim() || "Entry Amount",
                 price: parseFloat(quickAmount) || 0,
                 quantity: 1,
               },
@@ -434,7 +433,7 @@ export default function CreateOrderScreen() {
         paymentAmount,
         "Cash",
         false,
-        note.trim() || undefined,
+        orderNote.trim() || undefined,
       );
       // Ensure lists refresh after recording a payment.
       queryClient.invalidateQueries({ queryKey: ["orders", profile.id] });
@@ -444,7 +443,7 @@ export default function CreateOrderScreen() {
       });
       queryClient.invalidateQueries({ queryKey: ["dashboard", profile.id] });
       setQuickAmount("");
-      setNote("");
+      setOrderNote("");
       showToast({
         message: `Payment recorded for ${detail.name}`,
         type: "success",
@@ -496,6 +495,7 @@ export default function CreateOrderScreen() {
             <TouchableOpacity
               onPress={() => router.back()}
               className="mr-3 p-1"
+              activeOpacity={0.75}
             >
               <ArrowLeft
                 size={22}
@@ -562,7 +562,7 @@ export default function CreateOrderScreen() {
 
             {/* Person picker */}
             <View className="overflow-hidden rounded-2xl border border-border bg-surface dark:border-border-dark dark:bg-surface-dark">
-              <TouchableOpacity onPress={() => setIsCustomerSheetOpen(true)} className="flex-row items-center border-b border-border px-4 py-4 dark:border-border-dark">
+              <TouchableOpacity onPress={() => setIsCustomerSheetOpen(true)} className="flex-row items-center border-b border-border px-4 py-4 dark:border-border-dark" activeOpacity={0.75}>
                 <View
                   className="rounded-full items-center justify-center mr-3 w-[52px] h-[52px]"
                     style={{
@@ -602,9 +602,9 @@ export default function CreateOrderScreen() {
                 !isFetchingBalance && (
                   <View
                     className="flex-row items-center gap-2 border-t border-border px-4 py-3 dark:border-border-dark"
-                    style={{ backgroundColor: colors.dangerBg }}
+                    style={{ backgroundColor: colors.warningBg }}
                   >
-                    <Text className="text-[13px] font-bold text-danger">
+                    <Text className="text-[13px] font-bold" style={{ color: colors.warning }}>
                       ⚠️ Previous Balance: ₹
                       {formatINR(previousBalance, { currencySymbol: "" })}
                     </Text>
@@ -648,7 +648,27 @@ export default function CreateOrderScreen() {
                 {lineItems.length ? (
                   <View className="mt-3" style={{ gap: 8 }}>
                     {lineItems.map((item) => (
-                      <View key={item.id} className="rounded-xl border border-border px-3 py-3 dark:border-border-dark">
+                      <Swipeable
+                        key={item.id}
+                        overshootRight={false}
+                        renderRightActions={() => (
+                          <TouchableOpacity
+                            onPress={() => setLineItems((prev) => prev.filter((x) => x.id !== item.id))}
+                            activeOpacity={0.75}
+                            style={{
+                              backgroundColor: colors.danger,
+                              justifyContent: "center",
+                              alignItems: "center",
+                              paddingHorizontal: 16,
+                              borderRadius: 12,
+                              marginLeft: 8,
+                            }}
+                          >
+                            <Text style={{ color: colors.surface, fontWeight: "700" }}>Delete</Text>
+                          </TouchableOpacity>
+                        )}
+                      >
+                      <View className="rounded-xl border border-border px-3 py-3 dark:border-border-dark">
                         <View className="flex-row items-center justify-between">
                           <View className="flex-1">
                             <Text className="font-semibold text-textPrimary dark:text-textPrimary-dark">{item.name}</Text>
@@ -656,16 +676,10 @@ export default function CreateOrderScreen() {
                           </View>
                           <View className="items-end">
                             <Text className="font-bold text-textPrimary dark:text-textPrimary-dark">{formatINR(item.quantity * item.rate)}</Text>
-                            <TouchableOpacity
-                              onPress={() => setLineItems((prev) => prev.filter((x) => x.id !== item.id))}
-                              activeOpacity={0.75}
-                              className="mt-1"
-                            >
-                              <Text className="text-xs font-semibold text-danger">Delete</Text>
-                            </TouchableOpacity>
                           </View>
                         </View>
                       </View>
+                      </Swipeable>
                     ))}
                   </View>
                 ) : null}
@@ -688,7 +702,9 @@ export default function CreateOrderScreen() {
                       {row.split(",").map((key) => (
                         <TouchableOpacity
                           key={key}
-                          className="flex-1 rounded-xl border border-border py-3 items-center"
+                          className="flex-1 items-center justify-center border border-border"
+                          style={{ borderRadius: 14, height: 72 }}
+                          activeOpacity={0.75}
                           onPress={() => {
                             if (key === "⌫") {
                               setQuickAmount((prev) => prev.slice(0, -1));
@@ -697,7 +713,7 @@ export default function CreateOrderScreen() {
                             setQuickAmount((prev) => handleNumpadInput(prev, key));
                           }}
                         >
-                          <Text className="text-[22px] font-bold text-textPrimary dark:text-textPrimary-dark">{key}</Text>
+                          <Text className="text-[24px] font-bold text-textPrimary dark:text-textPrimary-dark">{key}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -709,7 +725,7 @@ export default function CreateOrderScreen() {
 
             <View>
               {!orderNoteExpanded && !orderNote.trim() ? (
-                <TouchableOpacity onPress={() => setOrderNoteExpanded(true)}>
+                <TouchableOpacity onPress={() => setOrderNoteExpanded(true)} activeOpacity={0.75}>
                   <Text className="text-[13px] font-semibold text-primary">+ Add note</Text>
                 </TouchableOpacity>
               ) : null}
@@ -755,12 +771,13 @@ export default function CreateOrderScreen() {
                       if (chip.key === "custom") setIsCustomDuePickerOpen(true);
                     }}
                     className="rounded-full border px-3 py-2"
+                    activeOpacity={0.75}
                     style={{
                       borderColor: duePreset === chip.key ? colors.primary : colors.border,
-                      backgroundColor: duePreset === chip.key ? colors.primaryLight : colors.surface,
+                      backgroundColor: duePreset === chip.key ? colors.primary : colors.surface,
                     }}
                   >
-                    <Text style={{ color: duePreset === chip.key ? colors.primary : colors.textSecondary, fontWeight: "600" }}>
+                    <Text style={{ color: duePreset === chip.key ? colors.surface : colors.textSecondary, fontWeight: "600" }}>
                       {chip.key === "custom" && duePreset === "custom" ? formatChipDate(customDueDate) : chip.label}
                     </Text>
                   </TouchableOpacity>
@@ -785,7 +802,7 @@ export default function CreateOrderScreen() {
                     <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">
                       Previous Balance
                     </Text>
-                    <Text className="text-[16px] font-bold text-danger">
+                    <Text className="text-[16px] font-bold" style={{ color: colors.warning }}>
                       ₹{previousBalance.toFixed(2)}
                     </Text>
                   </View>
@@ -911,7 +928,8 @@ export default function CreateOrderScreen() {
                         {row.split(",").map((key) => (
                           <TouchableOpacity
                             key={key}
-                            className="flex-1 rounded-xl border border-border py-3 items-center"
+                            className="flex-1 items-center justify-center border border-border"
+                            style={{ borderRadius: 14, height: 72 }}
                             activeOpacity={0.75}
                             onPress={() => {
                               if (key === "⌫") {
@@ -921,7 +939,7 @@ export default function CreateOrderScreen() {
                               setItemRateInput((prev) => handleNumpadInput(prev, key));
                             }}
                           >
-                            <Text className="text-[20px] font-bold text-textPrimary dark:text-textPrimary-dark">{key}</Text>
+                            <Text className="text-[24px] font-bold text-textPrimary dark:text-textPrimary-dark">{key}</Text>
                           </TouchableOpacity>
                         ))}
                       </View>
