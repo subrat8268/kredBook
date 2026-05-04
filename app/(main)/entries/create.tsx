@@ -34,6 +34,7 @@ import {
   Share,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -144,9 +145,10 @@ export default function CreateOrderScreen() {
   const [lineItems, setLineItems] = useState<{ id: string; name: string; quantity: number; rate: number }[]>([]);
   const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
   const [itemName, setItemName] = useState("");
-  const [itemQty, setItemQty] = useState(1);
+  const [itemQtyInput, setItemQtyInput] = useState("1");
   const [itemRateInput, setItemRateInput] = useState("");
   const [itemNameCache, setItemNameCache] = useState<string[]>([]);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
   const [hadInitialSeedData, setHadInitialSeedData] = useState(false);
   const [revealAnim] = useState(() => new Animated.Value(0));
@@ -482,19 +484,29 @@ export default function CreateOrderScreen() {
       Alert.alert("Error", "Please enter a valid rate");
       return;
     }
-    const newItem = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      name,
-      quantity: itemQty,
-      rate,
-    };
-    setLineItems((prev) => [...prev, newItem]);
+const parsedQty = parseFloat(itemQtyInput) || 1;
+    if (editingItemId) {
+      setLineItems((prev) =>
+        prev.map((item) =>
+          item.id === editingItemId ? { ...item, name, quantity: parsedQty, rate } : item
+        )
+      );
+    } else {
+      const newItem = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name,
+        quantity: parsedQty,
+        rate,
+      };
+      setLineItems((prev) => [...prev, newItem]);
+    }
     await persistItemNameCache(name);
     setItemName("");
-    setItemQty(1);
+    setItemQtyInput("1");
     setItemRateInput("");
     Keyboard.dismiss();
     setIsAddItemModalOpen(false);
+    setEditingItemId(null);
   };
 
   return (
@@ -675,15 +687,8 @@ export default function CreateOrderScreen() {
               >
             {entryMode === "bill" ? (
               <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
-                <TouchableOpacity
-                  onPress={() => setIsAddItemModalOpen(true)}
-                  className="rounded-xl border border-primary px-4 py-3"
-                  activeOpacity={0.75}
-                >
-                  <Text className="text-center font-bold text-primary">+ Add Item</Text>
-                </TouchableOpacity>
                 {lineItems.length ? (
-                  <View className="mt-3" style={{ gap: 8 }}>
+                  <View className="mb-3" style={{ gap: 8 }}>
                     {lineItems.map((item) => (
                       <Swipeable
                         key={item.id}
@@ -705,7 +710,17 @@ export default function CreateOrderScreen() {
                           </TouchableOpacity>
                         )}
                       >
-                      <View className="rounded-xl border border-border px-3 py-3 dark:border-border-dark">
+                      <TouchableOpacity
+                        onPress={() => {
+                          setEditingItemId(item.id);
+                          setItemName(item.name);
+                          setItemQtyInput(String(item.quantity));
+                          setItemRateInput(String(item.rate));
+                          setIsAddItemModalOpen(true);
+                        }}
+                        activeOpacity={0.75}
+                        className="rounded-xl border border-border px-3 py-3 dark:border-border-dark"
+                      >
                         <View className="flex-row items-center justify-between">
                           <View className="flex-1">
                             <Text className="font-semibold text-textPrimary dark:text-textPrimary-dark">{item.name}</Text>
@@ -713,13 +728,27 @@ export default function CreateOrderScreen() {
                           </View>
                           <View className="items-end">
                             <Text className="font-bold text-textPrimary dark:text-textPrimary-dark">{formatINR(item.quantity * item.rate)}</Text>
+                            <Text className="text-[10px] text-textSecondary dark:text-textSecondary-dark">tap to edit</Text>
                           </View>
                         </View>
-                      </View>
+                      </TouchableOpacity>
                       </Swipeable>
                     ))}
                   </View>
                 ) : null}
+                <TouchableOpacity
+                  onPress={() => {
+                    setEditingItemId(null);
+                    setItemName("");
+                    setItemQtyInput("1");
+                    setItemRateInput("");
+                    setIsAddItemModalOpen(true);
+                  }}
+                  className="rounded-xl border border-primary px-4 py-3"
+                  activeOpacity={0.75}
+                >
+                  <Text className="text-center font-bold text-primary">+ Add Item</Text>
+                </TouchableOpacity>
               </View>
             ) : null}
 
@@ -934,7 +963,7 @@ export default function CreateOrderScreen() {
           >
             <View className="flex-1 items-center justify-end bg-black/40 px-4 pb-6">
               <View className="w-full rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
-                <Text className="text-lg font-bold text-textPrimary dark:text-textPrimary-dark">Add Item</Text>
+                <Text className="text-lg font-bold text-textPrimary dark:text-textPrimary-dark">{editingItemId ? "Edit Item" : "Add Item"}</Text>
                 <View className="mt-3">
                   <Input
                     placeholder="Item Name"
@@ -961,24 +990,22 @@ export default function CreateOrderScreen() {
                   ) : null}
                 </View>
 
-                <View className="mt-4 flex-row items-center justify-between">
-                  <Text className="font-semibold text-textPrimary dark:text-textPrimary-dark">Quantity</Text>
-                  <View className="flex-row items-center" style={{ gap: 10 }}>
-                    <TouchableOpacity
-                      onPress={() => setItemQty((q) => Math.max(1, q - 1))}
-                      className="h-8 w-8 items-center justify-center rounded-md border border-border dark:border-border-dark"
-                      activeOpacity={0.75}
-                    >
-                      <Text className="font-bold text-textPrimary dark:text-textPrimary-dark">-</Text>
-                    </TouchableOpacity>
-                    <Text className="w-8 text-center font-bold text-textPrimary dark:text-textPrimary-dark">{itemQty}</Text>
-                    <TouchableOpacity
-                      onPress={() => setItemQty((q) => q + 1)}
-                      className="h-8 w-8 items-center justify-center rounded-md border border-border dark:border-border-dark"
-                      activeOpacity={0.75}
-                    >
-                      <Text className="font-bold text-textPrimary dark:text-textPrimary-dark">+</Text>
-                    </TouchableOpacity>
+                <View className="mt-4">
+                  <Text className="font-semibold text-textPrimary dark:text-textPrimary-dark mb-2">Quantity</Text>
+                  <View className="rounded-xl border border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
+                    <TextInput
+                      className="text-[20px] font-bold text-textPrimary dark:text-textPrimary-dark text-center"
+                      value={itemQtyInput}
+                      onChangeText={(text) => {
+                        const cleaned = text.replace(/[^0-9.]/g, "");
+                        const parts = cleaned.split(".");
+                        if (parts.length > 2) return;
+                        setItemQtyInput(cleaned);
+                      }}
+                      keyboardType="decimal-pad"
+                      placeholder="1"
+                      placeholderTextColor={colors.textSecondary}
+                    />
                   </View>
                 </View>
 
@@ -1020,7 +1047,7 @@ export default function CreateOrderScreen() {
                 </View>
 
                 <Text className="mt-3 text-right font-semibold text-textPrimary dark:text-textPrimary-dark">
-                  Total: {formatINR((parseFloat(itemRateInput) || 0) * itemQty)}
+                  Total: {formatINR((parseFloat(itemRateInput) || 0) * (parseFloat(itemQtyInput) || 1))}
                 </Text>
 
                 <TouchableOpacity
@@ -1028,7 +1055,7 @@ export default function CreateOrderScreen() {
                   className="mt-4 rounded-xl bg-primary py-3"
                   activeOpacity={0.75}
                 >
-                  <Text className="text-center font-bold text-white">Add to Bill</Text>
+                  <Text className="text-center font-bold text-white">{editingItemId ? "Update Item" : "Add to Bill"}</Text>
                 </TouchableOpacity>
               </View>
             </View>
