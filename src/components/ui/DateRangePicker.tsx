@@ -258,4 +258,5 @@ const DateRangePicker = memo(function DateRangePicker({ visible, value, onChange
   );
 });
 
+export { DatePickerSheet };
 export default DateRangePicker;

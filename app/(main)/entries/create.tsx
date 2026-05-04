@@ -15,7 +15,7 @@ import { buildEntryShareMessage } from "@/src/utils/shareTemplates";
 import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { DatePickerSheet } from "@/src/components/ui/DateRangePicker";
 import * as Haptics from "expo-haptics";
 import { createMMKV } from "react-native-mmkv";
 import { ArrowLeft, Pencil, User } from "lucide-react-native";
@@ -1125,44 +1125,18 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             />
           ) : null}
 
-          {isCustomDuePickerOpen ? (
-            <Modal
+          {isCustomDuePickerOpen && (
+            <DatePickerSheet
+              title="Select Due Date"
+              value={customDueDate ? new Date(`${customDueDate}T00:00:00`) : new Date()}
               visible={isCustomDuePickerOpen}
-              transparent
-              animationType="fade"
-              onRequestClose={() => setIsCustomDuePickerOpen(false)}
-            >
-              <View className="flex-1 items-center justify-center bg-black/40 px-5">
-                <View className="w-full max-w-[340px] rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
-                  <Text className="mb-3 text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
-                    Select Due Date
-                  </Text>
-                  <DateTimePicker
-                    value={customDueDate ? new Date(`${customDueDate}T00:00:00`) : new Date()}
-                    mode="date"
-                    display={Platform.OS === "ios" ? "inline" : "default"}
-                    onChange={(_, selectedDate) => {
-                      if (Platform.OS !== "ios") {
-                        setIsCustomDuePickerOpen(false);
-                      }
-                      if (selectedDate) {
-                        setCustomDueDate(format(selectedDate, "yyyy-MM-dd"));
-                      }
-                    }}
-                  />
-                  {Platform.OS === "ios" ? (
-                    <TouchableOpacity
-                      onPress={() => setIsCustomDuePickerOpen(false)}
-                      className="mt-3 rounded-xl bg-primary py-3"
-                      activeOpacity={0.75}
-                    >
-                      <Text className="text-center font-bold text-white">Done</Text>
-                    </TouchableOpacity>
-                  ) : null}
-                </View>
-              </View>
-            </Modal>
-          ) : null}
+              onConfirm={(date) => {
+                setCustomDueDate(format(date, "yyyy-MM-dd"));
+                setIsCustomDuePickerOpen(false);
+              }}
+onClose={() => setIsCustomDuePickerOpen(false)}
+            />
+          )}
         </KeyboardAvoidingView>
       </SafeAreaView>
     </>
