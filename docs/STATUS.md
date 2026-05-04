@@ -22,7 +22,7 @@
 | 1 | Truth Reset | ✅ Done | Canonical nouns, core flows, offline-first baseline |
 | 2 | DB Hardening | ✅ Done | Schema cleanup, due_date, payment_date, parties fields |
 | 3 | Experience Upgrades | 🔄 In Progress | Dark mode, WhatsApp-first sharing, overdue polish |
-| 4 | UI/UX Redesign | ⏳ Not Started | Full design system overhaul — Vercel × Khatabook × Linear |
+| 4 | UI/UX Redesign | 🔄 In Progress | Full design system overhaul — Vercel × Khatabook × Linear |
 | 5 | Documents + Collection | ⏳ Not Started | PDF outputs, UPI collection |
 | 6 | AI Assistance | ⏳ Not Started | Opt-in AI layer via Edge Functions |
 
@@ -208,16 +208,16 @@ Deliver an audit report only. Fixes go in a follow-up /fix task.
 
 ### Phase 4.0 — Design System Foundation ⚠️ Blocks All Other 4.x Tasks
 
-| # | Task | Status | Priority | Command | Skills | Depends On |
-|---|---|---|---|---|---|---|
-| 4.0.1 | Update `theme.ts` — new color tokens (green primary, amber accent, semantic palette) | ⏳ Not Started | P0 | `/refactor` | `ui-ux-pro-max`, `building-native-ui`, `react-native-skills` | 3.1 ✅ |
-| 4.0.2 | Fix `tailwind.config.js` — replace CSS vars with literal token values | ⏳ Not Started | P0 | `/fix` | `refactor-engineer`, `expo-tailwind-setup`, `react-native-skills` | 4.0.1 ✅ |
-| 4.0.3 | Add motion tokens — `duration-fast: 150ms`, `duration-base: 250ms`, easing curves | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.1 ✅ |
-| 4.0.4 | Unify icon system — migrate all icons to `lucide-react-native`, remove SVG + system mix | ⏳ Not Started | P0 | `/refactor` | `refactor-engineer`, `code-reviewer` | 4.0.1 ✅ |
-| 4.0.5 | Rebuild `StatusBadge` — filled pill + semantic color per status (Paid/Partial/Overdue/Advance) | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps` | 4.0.1 ✅ |
-| 4.0.6 | Rebuild `Button` variants — primary / secondary / ghost / danger with new tokens | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.1 ✅ |
-| 4.0.7 | Create `Skeleton` component — shimmer loading for all list/card surfaces | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.1 ✅ |
-| 4.0.8 | Create `SpeedDialFAB` component — expandable FAB (New Entry · New Customer · Record Payment) | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.3 ✅ |
+| # | Task | Status | Priority | Command | Skills | Depends On | Commit |
+|---|---|---|---|---|---|---|---|
+| 4.0.1 | Update `theme.ts` — new color tokens (green primary, amber accent, semantic palette) | ✅ Done | P0 | `/refactor` | `ui-ux-pro-max`, `building-native-ui`, `react-native-skills` | 3.1 ✅ | [58302ca](https://github.com/subrat8268/kredBook/commit/58302ca) |
+| 4.0.2 | Fix `tailwind.config.js` — replace CSS vars with literal token values | ✅ Done | P0 | `/fix` | `refactor-engineer`, `expo-tailwind-setup`, `react-native-skills` | 4.0.1 ✅ | [58302ca](https://github.com/subrat8268/kredBook/commit/58302ca) |
+| 4.0.3 | Add motion tokens — `duration-fast: 150ms`, `duration-base: 250ms`, easing curves | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.1 ✅ | [0f5e639](https://github.com/subrat8268/kredBook/commit/0f5e639) |
+| 4.0.4 | Unify icon system — migrate all icons to `lucide-react-native`, remove SVG + system mix | ✅ Done | P0 | `/refactor` | `refactor-engineer`, `code-reviewer` | 4.0.1 ✅ | [28a4307](https://github.com/subrat8268/kredBook/commit/28a4307) |
+| 4.0.5 | Rebuild `StatusBadge` — filled pill + semantic color per status (Paid/Partial/Overdue/Advance) | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps` | 4.0.1 ✅ | [bf13490](https://github.com/subrat8268/kredBook/commit/bf13490) |
+| 4.0.6 | Rebuild `Button` variants — primary / secondary / ghost / danger with new tokens | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.1 ✅ | [7f271ea](https://github.com/subrat8268/kredBook/commit/7f271ea) |
+| 4.0.7 | Create `Skeleton` component — shimmer loading for all list/card surfaces | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.1 ✅ | [3049f19](https://github.com/subrat8268/kredBook/commit/3049f19) |
+| 4.0.8 | Create `SpeedDialFAB` component — expandable FAB (New Entry · New Customer · Record Payment) | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | 4.0.3 ✅ | [07ddd84](https://github.com/subrat8268/kredBook/commit/07ddd84) |
 
 **New Brand Tokens (implement in 4.0.1):**
 
