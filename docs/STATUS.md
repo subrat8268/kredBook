@@ -126,24 +126,9 @@
 | 4.1.3 | Create Entry redesign — full-screen numpad, bottom sheet customer picker, quick due-date chips | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/create.tsx` ([5d588b8](https://github.com/subrat8268/kredBook/commit/5d588b8)) |
 | 4.1.3a | Create Entry bug fixes — params override draft, due-date format normalization, numpad guard, Bill/Payment toggle, recent customers first | ✅ Done | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max` | `(main)/entries/create.tsx`, `CustomerPicker.tsx`, `BillFooter.tsx` |
 | 4.1.3b | Create Entry UX redesign — remove SpeedDialFAB, save/share split buttons, progressive disclosure, Bill Mode with line items, modern visual standards | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills`, `code-reviewer` | `(main)/entries/create.tsx`, `BillFooter.tsx` |
-| 4.1.3c | Create Entry hotfix pass — payment clarity, due-date single picker, draft cleanup, amount formatting, bill-item editability, and UX polish | ⏳ Not Started | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max`, `code-reviewer` | `(main)/entries/create.tsx`, `CustomerPicker.tsx`, `BillFooter.tsx` |
+| 4.1.3c | Create Entry hotfix pass — payment clarity, due-date single picker, draft cleanup, amount formatting, bill-item editability, and UX polish | ✅ Done | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max`, `code-reviewer` | `(main)/entries/create.tsx`, `CustomerPicker.tsx`, `BillFooter.tsx` |
 | 4.1.4 | Record Payment modal redesign — large numpad, partial toggle, payment method, WhatsApp receipt | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
 | 4.1.5 | Customer Detail redesign — hero card, sticky balance bar, timeline view, swipe actions | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
-
-#### 4.1.3c — Create Entry Hotfix Plan
-
-```
-/fix load_skills=["systematic-debugging","react-native-skills","ui-ux-pro-max","code-reviewer"]
-
-Stabilize and polish Create Entry after 4.1.3a + 4.1.3b.
-Files: app/(main)/entries/create.tsx, src/components/picker/CustomerPicker.tsx, src/components/orders/BillFooter.tsx
-
-D1-D4 Critical: single due-date picker, payment round-trip reduction, formatINR consistency, draft cleanup.
-E1-E8 UX: clear payment intent toggle, payment summary visibility, share helper text, haptics, keyboard dismiss, fractional qty, item flow clarity, item edit path.
-F1-F5 Polish: long-press clear, intentional empty avatar, +New Person in picker, contextual summary labels, pressed-state consistency.
-
-Verification: due-date YYYY-MM-DD; summary formatINR; draft clears post-success; fractional qty + item edit path work; lint passes.
-```
 
 ### Phase 4.2 — List Screens
 
