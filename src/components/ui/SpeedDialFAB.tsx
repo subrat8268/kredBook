@@ -1,22 +1,16 @@
-import { Icon } from "./Icon";
 import { colors, motion, radius } from "@/src/utils/theme";
-import React, { useCallback, useState } from "react";
-import { Animated, Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import { FilePlus, Plus, UserPlus, Wallet, X } from "lucide-react-native";
+import { FilePlus, Plus, UserPlus, Wallet } from "lucide-react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Animated, BackHandler, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Icon } from "./Icon";
 
 type Action = "new-entry" | "new-customer" | "record-payment";
 
-interface SpeedDialFABProps {
+type SpeedDialFABProps = {
   onAction: (action: Action) => void;
-}
+};
 
-interface ActionItem {
-  action: Action;
-  label: string;
-  icon: typeof FilePlus;
-}
-
-const ACTIONS: ActionItem[] = [
+const ACTIONS: { action: Action; label: string; icon: typeof FilePlus }[] = [
   { action: "new-entry", label: "New Entry", icon: FilePlus },
   { action: "new-customer", label: "New Customer", icon: UserPlus },
   { action: "record-payment", label: "Record Payment", icon: Wallet },
@@ -24,37 +18,10 @@ const ACTIONS: ActionItem[] = [
 
 export default function SpeedDialFAB({ onAction }: SpeedDialFABProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const rotateAnim = useState(new Animated.Value(0))[0];
-  const backdropAnim = useState(new Animated.Value(0))[0];
-  const childAnims = useState(() =>
-    ACTIONS.map(() => new Animated.Value({ x: 0, y: 20, opacity: 0 }))
-  )[0];
-
-  const open = useCallback(() => {
-    setIsOpen(true);
-    Animated.spring(rotateAnim, {
-      toValue: 1,
-      ...motion.springConfig.snappy,
-      useNativeDriver: true,
-    }).start();
-    Animated.timing(backdropAnim, {
-      toValue: 1,
-      duration: motion.duration.base,
-      useNativeDriver: true,
-    }).start();
-
-    childAnims.forEach((anim, index) => {
-      setTimeout(() => {
-        Animated.parallel([
-          Animated.spring(anim, {
-            toValue: { x: 0, y: 0, opacity: 1 },
-            ...motion.springConfig.default,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }, index * 50);
-    });
-  }, [rotateAnim, backdropAnim, childAnims]);
+  const rotateAnim = useMemo(() => new Animated.Value(0), []);
+  const backdropAnim = useMemo(() => new Animated.Value(0), []);
+  const translateYAnims = useMemo(() => ACTIONS.map(() => new Animated.Value(20)), []);
+  const opacityAnims = useMemo(() => ACTIONS.map(() => new Animated.Value(0)), []);
 
   const close = useCallback(() => {
     Animated.parallel([
@@ -70,35 +37,78 @@ export default function SpeedDialFAB({ onAction }: SpeedDialFABProps) {
       }),
     ]).start();
 
-    childAnims.forEach((anim, index) => {
+    translateYAnims.forEach((translateY, index) => {
       setTimeout(() => {
         Animated.parallel([
-          Animated.spring(anim, {
-            toValue: { x: 0, y: 20, opacity: 0 },
+          Animated.spring(translateY, {
+            toValue: 20,
+            ...motion.springConfig.default,
+            useNativeDriver: true,
+          }),
+          Animated.spring(opacityAnims[index], {
+            toValue: 0,
             ...motion.springConfig.default,
             useNativeDriver: true,
           }),
         ]).start();
-      }, (childAnims.length - 1 - index) * 40);
+      }, (translateYAnims.length - 1 - index) * 40);
     });
 
     setTimeout(() => setIsOpen(false), motion.duration.base + 100);
-  }, [rotateAnim, backdropAnim, childAnims]);
+  }, [backdropAnim, opacityAnims, rotateAnim, translateYAnims]);
 
-  const handlePress = useCallback(() => {
-    if (isOpen) {
+  const open = useCallback(() => {
+    setIsOpen(true);
+    Animated.spring(rotateAnim, {
+      toValue: 1,
+      ...motion.springConfig.snappy,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(backdropAnim, {
+      toValue: 1,
+      duration: motion.duration.base,
+      useNativeDriver: true,
+    }).start();
+
+    translateYAnims.forEach((translateY, index) => {
+      setTimeout(() => {
+        Animated.parallel([
+          Animated.spring(translateY, {
+            toValue: 0,
+            ...motion.springConfig.default,
+            useNativeDriver: true,
+          }),
+          Animated.spring(opacityAnims[index], {
+            toValue: 1,
+            ...motion.springConfig.default,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, index * 50);
+    });
+  }, [backdropAnim, opacityAnims, rotateAnim, translateYAnims]);
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (!isOpen) return false;
       close();
-    } else {
-      open();
-    }
-  }, [isOpen, open, close]);
+      return true;
+    });
+    return () => subscription.remove();
+  }, [close, isOpen]);
 
-  const handleAction = useCallback(
+  const handleFabPress = useCallback(() => {
+    if (isOpen) close();
+    else open();
+  }, [close, isOpen, open]);
+
+  const handleActionPress = useCallback(
     (action: Action) => {
       onAction(action);
       close();
     },
-    [onAction, close]
+    [close, onAction],
   );
 
   const rotation = rotateAnim.interpolate({
@@ -113,60 +123,37 @@ export default function SpeedDialFAB({ onAction }: SpeedDialFABProps) {
 
   return (
     <>
-      <View style={styles.container}>
-        <Animated.View
-          style={[
-            styles.fab,
-            {
-              transform: [{ rotate: rotation }],
-            },
-          ]}
-        >
-          <Pressable onPress={handlePress} style={styles.fabPressable}>
-            <Icon name={isOpen ? X : Plus} size={28} color="#FFFFFF" />
-          </Pressable>
-        </Animated.View>
-
-        {isOpen &&
-          ACTIONS.map((item, index) => {
-            const anim = childAnims[index];
-            const translateY = anim.y;
-            const opacity = anim.opacity;
-
-            return (
+      <View style={styles.container} pointerEvents="box-none">
+        {isOpen
+          ? ACTIONS.map((item, index) => (
               <Animated.View
                 key={item.action}
-                style={[
-                  styles.childContainer,
-                  {
-                    transform: [{ translateY }],
-                    opacity,
-                  },
-                ]}
+                style={{
+                  transform: [{ translateY: translateYAnims[index] }],
+                  opacity: opacityAnims[index],
+                }}
               >
-                <Pressable
-                  style={styles.childButton}
-                  onPress={() => handleAction(item.action)}
-                >
+                <Pressable style={styles.childButton} onPress={() => handleActionPress(item.action)}>
                   <View style={styles.childLabel}>
                     <Text style={styles.childLabelText}>{item.label}</Text>
                   </View>
-                  <View style={styles.childIcon}>
-                    <Icon name={item.icon} size={22} color={colors.primary} />
+                  <View style={styles.childIconWrap}>
+                    <Icon name={item.icon} size={20} color={colors.primary} />
                   </View>
                 </Pressable>
               </Animated.View>
-            );
-          })}
+            ))
+          : null}
+
+        <Pressable onPress={handleFabPress} style={styles.fabPressable}>
+          <Animated.View style={[styles.fab, { transform: [{ rotate: rotation }] }]}>
+            <Icon name={Plus} size={28} color={colors.surface} />
+          </Animated.View>
+        </Pressable>
       </View>
 
       <Modal visible={isOpen} transparent animationType="none">
-        <Animated.View
-          style={[
-            styles.backdrop,
-            { opacity: backdropOpacity },
-          ]}
-        >
+        <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
           <Pressable style={styles.backdropPressable} onPress={close} />
         </Animated.View>
       </Modal>
@@ -177,45 +164,38 @@ export default function SpeedDialFAB({ onAction }: SpeedDialFABProps) {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    bottom: 24,
     right: 20,
-    alignItems: "center",
+    bottom: 24,
+    alignItems: "flex-end",
+    gap: 12,
+  },
+  fabPressable: {
+    borderRadius: 28,
   },
   fab: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.primary,
     shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
   },
-  fabPressable: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  childContainer: {
-    position: "relative",
-    marginBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-  },
   childButton: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 2,
   },
   childLabel: {
-    backgroundColor: colors.surface,
+    marginRight: 10,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: radius.sm,
-    marginRight: 10,
+    backgroundColor: colors.surface,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -223,17 +203,17 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   childLabelText: {
-    fontSize: 14,
-    fontWeight: "600",
     color: colors.textPrimary,
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 14,
   },
-  childIcon: {
+  childIconWrap: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.surface,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surface,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

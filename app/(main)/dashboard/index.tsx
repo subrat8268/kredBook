@@ -1,24 +1,23 @@
-import DashboardHeader from "@/src/components/dashboard/DashboardHeader";
-import Loader from "@/src/components/feedback/Loader";
+import StatusBadge from "@/src/components/layer2/StatusBadge";
 import { useToast } from "@/src/components/feedback/Toast";
+import NewCustomerModal from "@/src/components/people/NewCustomerModal";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
 import BottomSheetPicker from "@/src/components/picker/BottomSheetPicker";
 import Avatar from "@/src/components/ui/Avatar";
-import EmptyState from "@/src/components/ui/EmptyState";
-import FloatingActionButton from "@/src/components/ui/FloatingActionButton";
-import MoneyAmount from "@/src/components/ui/MoneyAmount";
+import SpeedDialFAB from "@/src/components/ui/SpeedDialFAB";
+import { Skeleton, SkeletonCard, SkeletonHeroCard, SkeletonText } from "@/src/components/ui/Skeleton";
 import { fetchPersonDetail } from "@/src/api/people";
 import { useDashboard } from "@/src/hooks/useDashboard";
-import { usePeople } from "@/src/hooks/usePeople";
+import { useAddPerson, usePeople } from "@/src/hooks/usePeople";
 import { useAuthStore } from "@/src/store/authStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { ArrowDownCircle, ChevronRight, TrendingUp, Users } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
-import { Animated, Easing, Pressable, ScrollView, StatusBar, Text, View } from "react-native";
+import { ArrowDownRight, ArrowUpRight, Clock3, Receipt, Users, Wallet } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Animated, Pressable, RefreshControl, ScrollView, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type PaymentContext = {
@@ -29,110 +28,46 @@ type PaymentContext = {
   initialAmount?: number;
 };
 
+type SpeedDialAction = "new-entry" | "new-customer" | "record-payment";
+
+function getGreetingLabel(name: string | undefined) {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const safeName = (name ?? "there").trim() || "there";
+  return `${greeting}, ${safeName} 👋`;
+}
+
 export default function DashboardScreen() {
-  const { colors, gradients, spacing, typography, statusBarStyle, isDark } = useTheme();
+  const { colors, gradients, spacing, statusBarStyle, motion } = useTheme();
   const router = useRouter();
   const { profile } = useAuthStore();
   const { show: showToast } = useToast();
+
   const {
     toReceive,
-    overdueCustomers: overduePeople,
-    overdueCustomersAll: overduePeopleAll,
+    overdueCustomers,
     data: dashboardData,
     overdueTotalCount,
     weekDelta,
+    recentActivity,
     isLoading,
     isFetching,
     refreshDashboard,
   } = useDashboard(profile?.id);
 
-  const totalCustomersCount =
-    (dashboardData as any)?.totalCustomersCount ??
-    (dashboardData as any)?.total_customers_count ??
-    0;
+  const addCustomerMutation = useAddPerson(profile?.id ?? "");
 
-  const totalOutstanding = useMemo(() => toReceive ?? 0, [toReceive]);
-  const collectedThisWeek = weekDelta > 0 ? weekDelta : 0;
-  const followUpPeople = useMemo(() => {
-    const seen = new Set<string>();
-    const unique = overduePeople.filter((p) => {
-      if (seen.has(p.id)) return false;
-      seen.add(p.id);
-      return true;
-    });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCustomerPickerOpen, setIsCustomerPickerOpen] = useState(false);
+  const [isCollecting, setIsCollecting] = useState(false);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [paymentContext, setPaymentContext] = useState<PaymentContext | null>(null);
 
-    // Prefer oldest overdue first, then highest balance.
-    unique.sort((a, b) => {
-      if (b.daysSince !== a.daysSince) return b.daysSince - a.daysSince;
-      return b.balance - a.balance;
-    });
-
-    return unique.slice(0, 3);
-  }, [overduePeople]);
-
-  const topOverdueCustomer = useMemo(() => {
-    const list = overduePeopleAll ?? [];
-    if (list.length === 0) return null;
-
-    const sorted = list.slice().sort((a: any, b: any) => {
-      const aBal = Number(a.balance ?? 0);
-      const bBal = Number(b.balance ?? 0);
-      if (bBal !== aBal) return bBal - aBal;
-
-      const aDue = a.due_date ?? a.dueDate;
-      const bDue = b.due_date ?? b.dueDate;
-      const aTime = aDue ? new Date(aDue).getTime() : Number.POSITIVE_INFINITY;
-      const bTime = bDue ? new Date(bDue).getTime() : Number.POSITIVE_INFINITY;
-      return aTime - bTime;
-    });
-
-    return sorted[0] ?? null;
-  }, [overduePeopleAll]);
-
-  const collectScale = useRef(new Animated.Value(1)).current;
-  const onCollectPressIn = useCallback(() => {
-    Animated.timing(collectScale, {
-      toValue: 0.97,
-      duration: 150,
-      easing: Easing.inOut(Easing.ease),
-      useNativeDriver: true,
-    }).start();
-  }, [collectScale]);
-
-  const onCollectPressOut = useCallback(() => {
-    Animated.timing(collectScale, {
-      toValue: 1,
-      duration: 150,
-      easing: Easing.inOut(Easing.ease),
-      useNativeDriver: true,
-    }).start();
-  }, [collectScale]);
-
-  const heroSupportText = useMemo(() => {
-    if (collectedThisWeek > 0) {
-      return `${formatINR(collectedThisWeek)} collected this week`;
-    }
-
-    if (overdueTotalCount > 0) {
-      return `Start with the most overdue customer today`;
-    }
-
-    return "You are all caught up. Add new entries as they happen.";
-  }, [collectedThisWeek, overdueTotalCount]);
-
-  const openCustomer = (customerId: string) => {
-    router.push({
-      pathname: "/(main)/people/[customerId]",
-      params: { customerId },
-    } as never);
-  };
+  const animatedOutstanding = useRef(new Animated.Value(0)).current;
+  const [displayOutstanding, setDisplayOutstanding] = useState(0);
 
   const paymentSheetRef = useRef<BottomSheetModal>(null);
-  const [paymentContext, setPaymentContext] = useState<PaymentContext | null>(null);
-  const [isCollecting, setIsCollecting] = useState(false);
 
-  const [isCustomerPickerOpen, setIsCustomerPickerOpen] = useState(false);
-  const [customerSearch, setCustomerSearch] = useState("");
   const {
     people: pickerPeople,
     isLoading: isPickerLoading,
@@ -141,16 +76,44 @@ export default function DashboardScreen() {
     isFetchingNextPage: pickerIsFetchingNextPage,
   } = usePeople(profile?.id, customerSearch);
 
+  const totalOutstanding = useMemo(() => Number(toReceive ?? 0), [toReceive]);
+  const totalCustomersCount = Number((dashboardData as any)?.totalCustomersCount ?? (dashboardData as any)?.total_customers_count ?? 0);
+  const collectedThisMonth = useMemo(
+    () => recentActivity.filter((item) => item.type === "payment").reduce((sum, item) => sum + Number(item.amount ?? 0), 0),
+    [recentActivity],
+  );
+
+  const followUpPeople = useMemo(() => {
+    const uniqueById = new Map<string, (typeof overdueCustomers)[number]>();
+    overdueCustomers.forEach((item) => {
+      if (!uniqueById.has(item.id)) uniqueById.set(item.id, item);
+    });
+    return Array.from(uniqueById.values()).sort((a, b) => b.daysSince - a.daysSince).slice(0, 5);
+  }, [overdueCustomers]);
+
+  useEffect(() => {
+    const listener = animatedOutstanding.addListener(({ value }) => {
+      setDisplayOutstanding(Math.max(0, Math.round(value)));
+    });
+
+    Animated.timing(animatedOutstanding, {
+      toValue: totalOutstanding,
+      duration: motion.duration.slow,
+      useNativeDriver: false,
+    }).start();
+
+    return () => {
+      animatedOutstanding.removeListener(listener);
+    };
+  }, [animatedOutstanding, totalOutstanding, motion.duration.slow]);
+
   const openRecordPaymentForCustomer = useCallback(
     async (customerId: string, customerName: string) => {
       setIsCollecting(true);
       try {
         const detail = await fetchPersonDetail(customerId);
         if (!detail?.pendingOrderId || !detail.pendingOrderBalance) {
-          showToast({
-            message: "No outstanding balance to collect for this customer.",
-            type: "error",
-          });
+          showToast({ message: "No outstanding balance to collect for this customer.", type: "error" });
           return;
         }
 
@@ -173,47 +136,74 @@ export default function DashboardScreen() {
   );
 
   const handleCollectNow = useCallback(async () => {
-    const top = followUpPeople[0];
-    if (top) {
-      await openRecordPaymentForCustomer(top.id, top.name);
+    const first = followUpPeople[0];
+    if (first) {
+      await openRecordPaymentForCustomer(first.id, first.name);
       return;
     }
-
     setIsCustomerPickerOpen(true);
   }, [followUpPeople, openRecordPaymentForCustomer]);
 
-  if (isLoading || !profile) {
-    return (
-      <View className="items-center justify-center bg-background dark:bg-background-dark" style={{ flex: 1 }}>
-        <Loader message="Loading dashboard..." />
-      </View>
-    );
-  }
+  const handleSpeedDialAction = useCallback(
+    async (action: SpeedDialAction) => {
+      if (action === "new-entry") {
+        router.push("/(main)/entries/create" as never);
+        return;
+      }
+      if (action === "new-customer") {
+        setIsModalOpen(true);
+        return;
+      }
+      await handleCollectNow();
+    },
+    [handleCollectNow, router],
+  );
 
-  if (totalCustomersCount === 0) {
+  const quickStats = [
+    {
+      title: "Total Customers",
+      value: `${totalCustomersCount}`,
+      icon: Users,
+      onPress: () => router.push("/(main)/people" as never),
+    },
+    {
+      title: "Overdue Count",
+      value: `${overdueTotalCount}`,
+      icon: Clock3,
+      onPress: () => router.push("/(main)/people" as never),
+    },
+    {
+      title: "Collected This Month",
+      value: formatINR(collectedThisMonth),
+      icon: Wallet,
+      onPress: () => router.push("/(main)/entries" as never),
+    },
+  ] as const;
+
+  if (!profile) return null;
+
+  if (isLoading && totalCustomersCount === 0) {
     return (
       <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={["top"]}>
-        <StatusBar
-          barStyle={statusBarStyle}
-          backgroundColor={colors.background}
-          translucent={false}
-        />
-        <View style={{ flex: 1 }}>
-          <DashboardHeader
-            overdueCount={0}
-            showNotification
-            onPressNotifications={() => router.push("/(main)/people" as never)}
-          />
-          <EmptyState
-            illustration="ledger"
-            headingEn="Your ledger is empty"
-            headingHi="आपका खाता खाली है"
-            bodyEn="Add your first customer to start tracking"
-            bodyHi="पहला ग्राहक जोड़ें और शुरुआत करें"
-            ctaLabel="Add Customer"
-            onCta={() => router.push("/(main)/people/create" as never)}
-          />
-        </View>
+        <StatusBar barStyle={statusBarStyle} backgroundColor={colors.background} translucent={false} />
+        <ScrollView className="px-4" contentContainerStyle={{ paddingBottom: 120 }}>
+          <View className="mt-4">
+            <Skeleton width="55%" height={18} />
+          </View>
+          <View className="mt-4">
+            <SkeletonHeroCard />
+          </View>
+          <View className="mt-4 flex-row" style={{ gap: 10 }}>
+            <Skeleton height={84} style={{ flex: 1 }} />
+            <Skeleton height={84} style={{ flex: 1 }} />
+            <Skeleton height={84} style={{ flex: 1 }} />
+          </View>
+          <View className="mt-6" style={{ gap: 12 }}>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -223,215 +213,148 @@ export default function DashboardScreen() {
       <StatusBar barStyle={statusBarStyle} backgroundColor={colors.background} translucent={false} />
 
       <ScrollView
-        contentContainerStyle={{
-          paddingBottom: spacing.fabBottom + spacing.fabSize + spacing.tabBarHeight,
-        }}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refreshDashboard} tintColor={colors.primary} />}
+        contentContainerStyle={{ paddingHorizontal: spacing.screenPadding, paddingBottom: spacing.tabBarHeight + 90 }}
       >
-        <DashboardHeader
-          overdueCount={overdueTotalCount}
-          showNotification
-          onPressNotifications={() => router.push("/(main)/people" as never)}
-        />
+        <Text className="mt-4 text-card-title text-textSecondary dark:text-textSecondary-dark">Dashboard</Text>
+        <Text className="mt-1 text-screen-title text-textPrimary dark:text-textPrimary-dark">{getGreetingLabel(profile.name)}</Text>
 
-        <View className="px-4">
-          <LinearGradient
-            colors={[gradients.dashboardHero.start, gradients.dashboardHero.end]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="relative mb-4 overflow-hidden rounded-2xl px-6 pb-5 pt-6 shadow-lg"
-          >
-            <View className={`absolute -right-10 -top-12 h-36 w-36 rounded-full ${isDark ? "bg-dashboard-hero-orb-dark" : "bg-dashboard-hero-orb"}`} />
-            <View className={`absolute -bottom-12 right-10 h-28 w-28 rounded-full ${isDark ? "bg-dashboard-hero-orb-dark" : "bg-dashboard-hero-orb"}`} />
+        <LinearGradient
+          colors={[gradients.dashboardHero.end, gradients.dashboardHero.start]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="mt-4 overflow-hidden rounded-2xl px-5 py-5"
+        >
+          <Text className="text-caption uppercase tracking-widest text-dashboard-hero-text-muted">Collect Outstanding</Text>
+          <Text className="mt-2 text-[34px] font-inter-bold text-dashboard-hero-text">{formatINR(displayOutstanding)}</Text>
 
-            <Text className="text-dashboard-hero-text-muted opacity-75" style={typography.overline}>
-              COLLECT OUTSTANDING
+          <View className="mt-2 flex-row items-center">
+            {weekDelta >= 0 ? (
+              <ArrowUpRight size={16} color={colors.successLight} strokeWidth={2.4} />
+            ) : (
+              <ArrowDownRight size={16} color={colors.warningBg} strokeWidth={2.4} />
+            )}
+            <Text className="ml-1 text-caption text-dashboard-hero-text-muted">
+              {weekDelta >= 0 ? "Up" : "Down"} {formatINR(Math.abs(weekDelta))} vs last week
             </Text>
+          </View>
 
-            <MoneyAmount value={totalOutstanding} variant="hero" color={colors.dashboard.heroText} className="mt-1" />
+          <Pressable
+            onPress={handleCollectNow}
+            disabled={isCollecting}
+            className="mt-4 rounded-xl bg-surface px-4 py-3"
+            style={{ opacity: isCollecting ? 0.65 : 1 }}
+          >
+            <Text className="text-center font-inter-semibold text-primary">Record Payment</Text>
+          </Pressable>
+        </LinearGradient>
 
-            <View className="mt-2 flex-row items-center">
-              <TrendingUp size={14} color={colors.dashboard.heroText} strokeWidth={2.2} />
-              <Text className="ml-1.5 text-caption font-inter-medium text-dashboard-hero-text-muted">
-                {heroSupportText}
-              </Text>
-            </View>
-          </LinearGradient>
+        <View className="mt-4 flex-row" style={{ gap: 10 }}>
+          {quickStats.map((stat) => (
+            <Pressable key={stat.title} onPress={stat.onPress} className="flex-1 rounded-xl border border-border bg-surface p-3 dark:border-border-dark dark:bg-surface-dark">
+              <stat.icon size={16} color={colors.primary} strokeWidth={2.2} />
+              <Text className="mt-2 text-[11px] text-textSecondary dark:text-textSecondary-dark">{stat.title}</Text>
+              <Text className="mt-1 text-card-title text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>{stat.value}</Text>
+            </Pressable>
+          ))}
+        </View>
 
-          {isFetching ? (
-            <View
-              className="mb-4 overflow-hidden rounded-2xl border border-soft bg-surface dark:border-border-soft-dark dark:bg-surface-dark"
-              style={{ height: 72, opacity: 0.6 }}
-            />
-          ) : topOverdueCustomer ? (
-            <Animated.View style={{ transform: [{ scale: collectScale }] }}>
-              <Pressable
-                className="mb-4 overflow-hidden rounded-2xl border border-soft bg-surface dark:border-border-soft-dark dark:bg-surface-dark"
-                onPressIn={onCollectPressIn}
-                onPressOut={onCollectPressOut}
-                onPress={() => openCustomer(topOverdueCustomer.id)}
-              >
-                <View className="px-5 py-3">
-                  <Text
-                    className="text-dashboard-hero-text-muted opacity-75"
-                    style={[typography.overline, { color: colors.textSecondary }]}
-                  >
-                    COLLECT NOW
-                  </Text>
+        <View className="mt-6 flex-row items-center justify-between">
+          <Text className="text-section-title text-textPrimary dark:text-textPrimary-dark">Top follow-up</Text>
+          <Pressable onPress={() => router.push("/(main)/people" as never)}>
+            <Text className="text-caption font-inter-semibold text-primary">See all</Text>
+          </Pressable>
+        </View>
 
-                  <View className="mt-1 flex-row items-center justify-between">
-                    <View className="flex-1 pr-3">
-                      <Text
-                        className="text-section-title text-textPrimary dark:text-textPrimary-dark"
-                        numberOfLines={1}
-                      >
-                        {topOverdueCustomer.name}
-                      </Text>
-                      <Text
-                        className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark"
-                        numberOfLines={1}
-                      >
-                        {topOverdueCustomer.daysSince} days overdue
-                      </Text>
-                    </View>
-
-                    <View className="items-end">
-                      <Text
-                        className="text-body font-inter-bold"
-                        style={{ color: colors.overdue.text }}
-                      >
-                        {formatINR(topOverdueCustomer.balance)}
-                      </Text>
-                      <ChevronRight size={18} color={colors.textSecondary} strokeWidth={2.2} />
-                    </View>
+        {isFetching ? (
+          <View className="mt-3" style={{ gap: 10 }}>
+            <SkeletonCard />
+            <SkeletonCard />
+          </View>
+        ) : followUpPeople.length === 0 ? (
+          <View className="mt-3 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+            <Text className="text-card-title text-textPrimary dark:text-textPrimary-dark">All clear! No overdue customers 🎉</Text>
+          </View>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-3">
+            {followUpPeople.map((person) => (
+              <View key={person.id} className="mr-3 w-64 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+                <View className="flex-row items-center justify-between">
+                  <Avatar name={person.name} size="sm" />
+                  <View className="rounded-full bg-warning-bg px-2 py-1">
+                    <Text className="text-[11px] font-inter-semibold text-warning-dark">{person.daysSince}d overdue</Text>
                   </View>
                 </View>
-              </Pressable>
-            </Animated.View>
-          ) : null}
+                <Text className="mt-3 text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>{person.name}</Text>
+                <Text className="mt-1 text-card-title text-overdue-text">{formatINR(person.balance)}</Text>
+                <Pressable className="mt-3 rounded-full bg-primary px-4 py-2" onPress={() => openRecordPaymentForCustomer(person.id, person.name)}>
+                  <Text className="text-center text-caption font-inter-semibold text-surface">Collect</Text>
+                </Pressable>
+              </View>
+            ))}
+          </ScrollView>
+        )}
 
-          <View className="mb-5 flex-row gap-3">
-            <Pressable
-              className={`flex-1 flex-row items-center justify-center rounded-full bg-primary py-3 shadow-sm ${isCollecting ? "opacity-70" : ""}`}
-              onPress={handleCollectNow}
-              disabled={isCollecting}
-            >
-              <ArrowDownCircle size={18} color={colors.surface} strokeWidth={2.1} />
-              <Text className="ml-2 text-body font-inter-semibold text-surface">Collect Now</Text>
-            </Pressable>
+        <View className="mt-6 flex-row items-center justify-between">
+          <Text className="text-section-title text-textPrimary dark:text-textPrimary-dark">Recent activity</Text>
+          <Pressable onPress={() => router.push("/(main)/entries" as never)}>
+            <Text className="text-caption font-inter-semibold text-primary">View entries</Text>
+          </Pressable>
+        </View>
 
-            <Pressable
-              className="flex-1 flex-row items-center justify-center rounded-full border border-soft bg-surface py-3 dark:border-border-soft-dark dark:bg-surface-dark"
-              onPress={() => router.push("/(main)/people" as never)}
-            >
-              <Users size={18} color={colors.primary} strokeWidth={2.1} />
-              <Text className="ml-2 text-body font-inter-semibold text-primary">View Customers</Text>
-            </Pressable>
-          </View>
-
-          <View className="mb-4 mt-1 flex-row items-center justify-between">
-            <Text className="text-section-title text-textPrimary dark:text-textPrimary-dark">Start collecting</Text>
-            <Pressable onPress={() => router.push("/(main)/people" as never)}>
-              <Text className="text-caption font-inter-bold text-primary">See all</Text>
-            </Pressable>
-          </View>
-
-          <View className="overflow-hidden rounded-2xl border border-soft bg-surface shadow-sm dark:border-border-soft-dark dark:bg-surface-dark">
-            {followUpPeople.length > 0 ? (
-              followUpPeople.map((person, index) => {
-                const isLast = index === followUpPeople.length - 1;
-
-                return (
-                  <View key={person.id}>
-                    <View className="flex-row items-center px-5 py-2.5">
-                      <Pressable
-                        onPress={() => openCustomer(person.id)}
-                        className="flex-1 flex-row items-center"
-                      >
-                        <Avatar name={person.name} size="xs" />
-
-                        <View className="ml-3 flex-1">
-                          <Text className="text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>
-                            {person.name}
-                          </Text>
-                          <Text className="mt-0.5 text-caption text-textMuted dark:text-textMuted-dark">
-                            <Text className="mt-0.5 text-caption" style={{ color: colors.overdue.text }}>
-                            {person.daysSince}d overdue
-                          </Text>
-                          </Text>
-                        </View>
-                      </Pressable>
-
-                      <View className="w-36 items-end">
-                        <MoneyAmount
-                          value={person.balance}
-                          variant="title"
-                          color={colors.textPrimary}
-                          className="font-inter-semibold"
-                          style={{ fontVariant: ["tabular-nums"] }}
-                        />
-
-                        <Pressable
-                          className="mt-1 rounded-full bg-search px-3 py-1 dark:bg-search-dark"
-                          onPress={() => openRecordPaymentForCustomer(person.id, person.name)}
-                        >
-                          <Text className="text-primary" style={typography.overline}>
-                            COLLECT
-                          </Text>
-                        </Pressable>
+        <View className="mt-3 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+          {isFetching ? (
+            <SkeletonText lines={4} />
+          ) : recentActivity.slice(0, 5).length === 0 ? (
+            <Text className="text-caption text-textSecondary dark:text-textSecondary-dark">No recent transactions yet.</Text>
+          ) : (
+            recentActivity.slice(0, 5).map((item, index) => {
+              const isLast = index === Math.min(recentActivity.length, 5) - 1;
+              const mappedStatus = item.status === "Partially Paid" ? "Partially Paid" : item.status;
+              return (
+                <View key={item.id}>
+                  <Pressable className="flex-row items-start" onPress={() => router.push("/(main)/entries" as never)}>
+                    <View className="mr-3 mt-1 h-8 w-8 items-center justify-center rounded-full bg-surface-alt dark:bg-surface-dark">
+                      <Receipt size={16} color={colors.textSecondary} strokeWidth={2} />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>{item.title}</Text>
+                      <Text className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark">{new Date(item.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</Text>
+                    </View>
+                    <View className="items-end">
+                      <Text className="text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark">{formatINR(item.amount)}</Text>
+                      <View className="mt-1">
+                        <StatusBadge status={mappedStatus} size="sm" />
                       </View>
                     </View>
-
-                    {!isLast ? <View className="ml-16 mr-5 h-px bg-border-soft dark:bg-border-soft-dark" /> : null}
-                  </View>
-                );
-              })
-            ) : (
-              <View className="px-4 py-5">
-                  <Text className="text-card-title text-textPrimary dark:text-textPrimary-dark">Nothing needs action now</Text>
-                  <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark">
-                    Overdue follow-ups will appear here when customers miss payment timelines.
-                  </Text>
+                  </Pressable>
+                  {!isLast ? <View className="my-3 h-px bg-border" /> : null}
                 </View>
-              )}
-          </View>
-
-          <View className="mt-4 flex-row gap-3">
-            <View className="flex-1 rounded-xl border border-soft bg-surface p-4 dark:border-border-soft-dark dark:bg-surface-dark">
-              <Text className="text-textSecondary dark:text-textSecondary-dark" style={typography.overline}>
-                NEEDS ACTION NOW
-              </Text>
-              <Text className="mt-2 text-h2 text-textPrimary dark:text-textPrimary-dark">{overdueTotalCount}</Text>
-              <Text className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark">
-                {overdueTotalCount === 1 ? "customer overdue" : "customers overdue"}
-              </Text>
-            </View>
-
-            <View className="flex-1 rounded-xl border border-soft bg-surface p-4 dark:border-border-soft-dark dark:bg-surface-dark">
-              <Text className="text-textSecondary dark:text-textSecondary-dark" style={typography.overline}>
-                COLLECTED THIS WEEK
-              </Text>
-              <MoneyAmount
-                value={collectedThisWeek}
-                showPlusForPositive
-                variant="title"
-                color={colors.textPrimary}
-                style={typography.h2}
-                className="mt-2"
-              />
-              <Text className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark">
-                {collectedThisWeek > 0 ? "cashflow improved" : "no collections yet"}
-              </Text>
-            </View>
-          </View>
+              );
+            })
+          )}
         </View>
       </ScrollView>
 
-      <FloatingActionButton
-        onPress={() => router.push("/(main)/entries/create" as never)}
-        bottom={spacing.fabBottom}
-        right={spacing.fabMargin}
-        size={spacing.fabSizeCompact}
+      <SpeedDialFAB onAction={handleSpeedDialAction} />
+
+      <NewCustomerModal
+        visible={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={async (values) => {
+          await addCustomerMutation.mutateAsync({
+            name: values.name,
+            phone: values.phone || "",
+            address: values.address,
+            openingBalance: values.openingBalance,
+          });
+          setIsModalOpen(false);
+          showToast({ message: "Customer added", type: "success" });
+          refreshDashboard();
+        }}
+        loading={addCustomerMutation.isPending}
+        errorMessage={addCustomerMutation.error?.message}
       />
 
       <BottomSheetPicker
@@ -457,12 +380,8 @@ export default function DashboardScreen() {
           >
             <Avatar name={item.name} size="sm" />
             <View className="ml-3 flex-1">
-              <Text className="text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>
-                {item.name}
-              </Text>
-              <Text className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={1}>
-                Open to record a payment
-              </Text>
+              <Text className="text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>{item.name}</Text>
+              <Text className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={1}>Open to record a payment</Text>
             </View>
           </Pressable>
         )}
