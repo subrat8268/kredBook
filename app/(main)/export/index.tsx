@@ -1,4 +1,3 @@
-import { Stack, useRouter } from "expo-router";
 import { FileText, Download, AlertCircle } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import {
@@ -11,9 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-import EmptyState from "@/src/components/feedback/EmptyState";
+ 
 import Header from "@/src/components/layer2/Header";
 import ScreenLayout from "@/src/components/layer2/ScreenLayout";
 import CustomerPicker from "@/src/components/picker/CustomerPicker";
@@ -27,11 +24,11 @@ import { useAuthStore } from "@/src/store/authStore";
 export default function ExportScreen() {
   const { colors, spacing, typography } = useTheme();
   const { profile } = useAuthStore();
-  const router = useRouter();
 
   const [customerPickerVisible, setCustomerPickerVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [dateRange, setDateRange] = useState<{ from?: string; to?: string }>({});
+  const [dateRangePickerVisible, setDateRangePickerVisible] = useState(false);
   const [loading, setLoading] = useState<"pdf" | "csv" | null>(null);
 
   const vendorId = profile?.id ?? "";
@@ -246,11 +243,19 @@ export default function ExportScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>DATE RANGE (OPTIONAL)</Text>
           <DateRangePicker
-            visible={false}
+            visible={dateRangePickerVisible}
             value={dateRange}
             onChange={setDateRange}
-            onClose={() => {}}
+            onClose={() => setDateRangePickerVisible(false)}
           />
+          <Pressable
+            style={{ marginTop: spacing.sm }}
+            onPress={() => setDateRangePickerVisible(true)}
+          >
+            <Text style={{ ...typography.caption, color: colors.primary, fontWeight: "700" }}>
+              Select date range
+            </Text>
+          </Pressable>
         </View>
 
         {/* Export options */}

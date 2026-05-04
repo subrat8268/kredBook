@@ -3,7 +3,6 @@ import Loader from "@/src/components/feedback/Loader";
 import SyncStatus from "@/src/components/feedback/SyncStatus";
 import { useToast } from "@/src/components/feedback/Toast";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
-import OverdueChip from "@/src/components/ui/OverdueChip";
 import { usePersonDetail } from "@/src/hooks/usePeople";
 import { supabase } from "@/src/services/supabase";
 import { useAuthStore } from "@/src/store/authStore";

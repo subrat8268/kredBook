@@ -68,6 +68,7 @@ export default function CreateOrderScreen() {
   const vendorId = profile?.id;
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { show: showToast } = useToast();
 
   // Zustand Draft Entry Store
   const setCustomer = useOrderStore((state) => state.setCustomer);
@@ -76,9 +77,14 @@ export default function CreateOrderScreen() {
   const clearOrder = useOrderStore((state) => state.clearOrder);
 
   // Local ephemeral layout/picker states
-  const [selectedCustomerMeta, setSelectedCustomerMeta] = useState<any>(
-    customerParams ? JSON.parse(customerParams) : null,
-  );
+  const [selectedCustomerMeta, setSelectedCustomerMeta] = useState<any>(() => {
+    if (!customerParams) return null;
+    try {
+      return JSON.parse(customerParams);
+    } catch {
+      return null;
+    }
+  });
   const [previousBalance, setPreviousBalance] = useState<number>(0);
   const [isFetchingBalance, setIsFetchingBalance] = useState(false);
 
@@ -88,6 +94,17 @@ export default function CreateOrderScreen() {
   const [orderNote, setOrderNote] = useState<string>("");
   const [orderNoteExpanded, setOrderNoteExpanded] = useState(false);
   const [entryType, setEntryType] = useState<"bill" | "payment">("bill");
+
+  useEffect(() => {
+    if (!customerParams) return;
+    if (selectedCustomerMeta) return;
+
+    showToast({
+      message: "Invalid customer link. Please try again.",
+      type: "error",
+    });
+    router.back();
+  }, [customerParams, router, selectedCustomerMeta, showToast]);
 
   const fetchPreviousBalance = useCallback(
     async (customerId: string) => {
@@ -108,16 +125,25 @@ export default function CreateOrderScreen() {
   // Initialize store if we were routed here with a preselected customer
   useEffect(() => {
     if (customerParams) {
-      const parsed = JSON.parse(customerParams);
-      setCustomer(parsed.id);
-      setSelectedCustomerMeta(parsed);
-      fetchPreviousBalance(parsed.id);
+      try {
+        const parsed = JSON.parse(customerParams);
+        setCustomer(parsed.id);
+        setSelectedCustomerMeta(parsed);
+        fetchPreviousBalance(parsed.id);
+      } catch {
+        showToast({
+          message: "Invalid customer link. Please try again.",
+          type: "error",
+        });
+        router.back();
+        return;
+      }
     }
     if (amountParam && !Number.isNaN(Number(amountParam))) {
       setEntryType("payment");
       setQuickAmount(String(amountParam));
     }
-  }, [customerParams, amountParam, setCustomer, fetchPreviousBalance]);
+  }, [amountParam, customerParams, fetchPreviousBalance, router, setCustomer, showToast]);
 
   const handleSelectPerson = useCallback(
     async (person: any) => {
@@ -130,7 +156,6 @@ export default function CreateOrderScreen() {
     [setCustomer, fetchPreviousBalance],
   );
 
-  const { show: showToast } = useToast();
   const createOrderMutation = useCreateOrder(vendorId!);
   const { queueLength } = useNetworkSync();
   const hasItems = draftItems.length > 0;

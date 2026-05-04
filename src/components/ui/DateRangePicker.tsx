@@ -1,7 +1,7 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { BottomSheetView } from "@gorhom/bottom-sheet";
 import { memo, useCallback, useMemo, useState } from "react";
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import BaseBottomSheet from "../layer2/BaseBottomSheet";
 
 interface DateRange {
@@ -41,8 +41,6 @@ function formatDisplay(str?: string): string {
   });
 }
 
-const DAY_COUNT = 31;
-
 interface PickerColumnProps {
   items: number[] | string[];
   selected: number;
@@ -56,7 +54,7 @@ const PickerColumn = memo(function PickerColumn({
   onChange,
   itemH,
 }: PickerColumnProps) {
-  const { colors, typography } = useTheme();
+  const { colors } = useTheme();
   return (
     <View style={{ height: itemH * 3, overflow: "hidden" }}>
       <ScrollView
@@ -97,18 +95,17 @@ const PickerColumn = memo(function PickerColumn({
 interface DatePickerSheetProps {
   title: string;
   value: Date;
+  visible: boolean;
   onConfirm: (d: Date) => void;
   onClose: () => void;
 }
 
-function DatePickerSheet({ title, value, onConfirm, onClose }: DatePickerSheetProps) {
+function DatePickerSheet({ title, value, visible, onConfirm, onClose }: DatePickerSheetProps) {
   const { colors, spacing, typography } = useTheme();
 
   const [day, setDay] = useState(value.getDate() - 1);
   const [month, setMonth] = useState(value.getMonth());
   const [year, setYear] = useState(YEARS.indexOf(value.getFullYear()));
-  const [showPicker, setShowPicker] = useState(true);
-
   const itemH = 40;
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
@@ -121,7 +118,7 @@ function DatePickerSheet({ title, value, onConfirm, onClose }: DatePickerSheetPr
 
   return (
     <BaseBottomSheet
-      visible={showPicker}
+      visible={visible}
       onClose={onClose}
       title={title}
       snapPoints={["55%"]}
@@ -213,7 +210,7 @@ const DateRangePicker = memo(function DateRangePicker({ visible, value, onChange
   );
 
   return (
-    <View>
+    <BaseBottomSheet visible={visible} onClose={onClose} title="Select Date Range" snapPoints={["40%"]} withScroll={false}>
       <View style={styles.row}>
         <View style={styles.field}>
           <Text style={styles.label}>From</Text>
@@ -245,6 +242,7 @@ const DateRangePicker = memo(function DateRangePicker({ visible, value, onChange
       <DatePickerSheet
         title="Select From Date"
         value={fromDate}
+        visible={showFromPicker}
         onConfirm={(d) => onChange({ ...value, from: toDateStr(d) })}
         onClose={() => setShowFromPicker(false)}
       />
@@ -252,10 +250,11 @@ const DateRangePicker = memo(function DateRangePicker({ visible, value, onChange
       <DatePickerSheet
         title="Select To Date"
         value={toDate}
+        visible={showToPicker}
         onConfirm={(d) => onChange({ ...value, to: toDateStr(d) })}
         onClose={() => setShowToPicker(false)}
       />
-    </View>
+    </BaseBottomSheet>
   );
 });
 

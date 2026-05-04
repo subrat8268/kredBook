@@ -21,14 +21,6 @@ export async function fetchOverdueReminders(
 
   if (!data || data.length === 0) return [];
 
-  const { data: customers } = await supabase
-    .from("parties")
-    .select("id, name")
-    .eq("vendor_id", vendorId)
-    .eq("is_customer", true);
-
-  const customerMap = new Map((customers ?? []).map((c: any) => [c.id, c]));
-
   type OrderRow = {
     id: string;
     balance_due: number;

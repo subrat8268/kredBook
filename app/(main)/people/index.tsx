@@ -210,15 +210,14 @@ export default function CustomersScreen() {
       if (!values.entryAmount || values.entryAmount <= 0) {
         const shouldRedirect = values.redirectToEntry ?? redirectAfterAdd;
         if (shouldRedirect) {
-          router.push({
-            pathname: "/(main)/entries/create",
-            params: {
-              customer: JSON.stringify(createdCustomer),
-              next: shouldRedirect ? "share" : undefined,
-            },
-          });
-        }
-      }
+           router.push({
+             pathname: "/(main)/entries/create",
+             params: {
+               customer: JSON.stringify(createdCustomer),
+             },
+           });
+         }
+       }
 
       setRedirectAfterAdd(false);
     } catch (error) {

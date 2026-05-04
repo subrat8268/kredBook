@@ -36,7 +36,7 @@ export default function OnboardingBank() {
     setLoading(true);
     try {
       // Only include fields that have a value — columns have NOT NULL constraints
-      const updates: Record<string, string> = { onboarding_complete: "true" }; // Mark as done on final step
+      const updates: Record<string, any> = { onboarding_complete: true }; // Mark as done on final step
       if (upiId.trim()) updates.upi_id = upiId.trim();
       if (bankName.trim()) updates.bank_name = bankName.trim();
       if (accountNumber.trim()) updates.account_number = accountNumber.trim();

@@ -38,7 +38,7 @@ export default function WelcomePage() {
 
   return (
     <View
-      className="items-center flex-1 px-6 bg-white"
+      className="items-center flex-1 px-6 bg-background"
       style={{ paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }}
     >
       {/* Logo */}

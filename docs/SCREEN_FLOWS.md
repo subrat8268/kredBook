@@ -100,7 +100,7 @@ Route convention summary:
 ### Exit Points
 - Customer row tap -> `router.push({ pathname: "/(main)/people/[customerId]", params: { customerId } })`
 - Add-entry action -> `router.push({ pathname: "/(main)/entries/create", params: { customer: JSON.stringify(customer) } })`
-- Post-create redirect -> `router.push({ pathname: "/(main)/entries/create", params: { customer: JSON.stringify(createdCustomer), next: "share" } })`
+- Post-create redirect -> `router.push({ pathname: "/(main)/entries/create", params: { customer: JSON.stringify(createdCustomer) } })`
 - Empty-state CTA -> `router.push("/(main)/people/create")`
 - `NewCustomerModal` is opened locally, not routed
 
@@ -151,7 +151,7 @@ Route convention summary:
 
 ### Known Issues / Drift
 - Route param inconsistency: `action=add` is a lightweight route contract while Create Entry still receives a full serialized `customer` object.
-- Route param drift: `next: "share"` is pushed here but `entries/create.tsx` does not consume it.
+- Route param drift: Create Entry consumes only `customer` and `amount` params; avoid pushing unused params.
 - Data duplication: server-side search via `fetchPeople(search)` is layered with client-side fuzzy filtering, so matches outside the currently loaded pages can be missed.
 - Component duplication risk: this screen uses `@/src/components/layer2/StatusBadge`, while Entry Detail uses a different `StatusBadge` implementation.
 - No import/contact CTA in the empty state yet, although Phase 4 calls for it.
@@ -194,7 +194,6 @@ Route convention summary:
 - `SyncStatus` — `@/src/components/feedback/SyncStatus`
 - `useToast` — `@/src/components/feedback/Toast`
 - `RecordCustomerPaymentModal` — `@/src/components/people/RecordCustomerPaymentModal`
-- `OverdueChip` — `@/src/components/ui/OverdueChip`
 
 ### Color Tokens
 - Direct token usage: `colors.success`, `colors.danger`, `colors.primary`, `colors.border`, `colors.textPrimary`, `colors.textSecondary`, `colors.textMuted`, `colors.overdue.text`
@@ -224,7 +223,7 @@ Route convention summary:
 ### Known Issues / Drift
 - Route param inconsistency: empty-state Add Entry passes both serialized `customer` and `customerId`, but `entries/create.tsx` only consumes `customer`.
 - Hardcoded English strings dominate despite `useTranslation()` being present.
-- `OverdueChip` is imported but unused.
+- (Fixed) Removed unused `OverdueChip` import.
 - Navigation edge-case handling is partial: call/share flows assume valid phone numbers and external apps.
 - Data hook fetches more than the screen always needs: `fetchPersonDetail()` loads full statement history even when only the hero/actions are used.
 
@@ -344,7 +343,7 @@ Route convention summary:
 
 ### Known Issues / Drift
 - Route param inconsistency: `customerId` and `next` are passed in some flows but not consumed here.
-- Unhandled edge case: `JSON.parse(customerParams)` is not guarded.
+- (Fixed) Guarded parsing of `customer` route param; invalid payload now shows toast and navigates back.
 - Hardcoded color: `"transparent"` is used in local style creation instead of a token.
 - Duplicate component usage: file renders `CustomerPicker` inline and also maintains picker-related state that Phase 4 already marks as dead/stub behavior.
 
@@ -412,7 +411,7 @@ Route convention summary:
 - MMKV keys: none visible in this file
 
 ### Known Issues / Drift
-- Hard defect: `fmt(...)` is referenced but not defined/imported in this file.
+- (Fixed) Added local `fmt()` helper for item/summary rendering.
 - Component duplication: this screen imports `@/src/components/dashboard/StatusBadge`, while other list/detail screens use `@/src/components/layer2/StatusBadge`.
 - Route param inconsistency: serialized `customer` object is passed into Create Entry instead of just an ID.
 - Navigation edge handling is inconsistent: WhatsApp uses multiple URL styles and phone sanitization differs from Customer Detail.
@@ -550,7 +549,7 @@ Route convention summary:
 
 ### Color Tokens
 - Direct token usage from static theme import: `colors.primaryDark`, `colors.primary`, `colors.textPrimary`, `colors.textSecondary`
-- Hardcoded utility/class color usage: `bg-white`
+- (Fixed) Removed `bg-white` usage; uses themed `bg-background`.
 
 ### Buttons & Actions
 - `Get Started` — `handleStart` — marks welcome seen and opens Signup
@@ -563,7 +562,7 @@ Route convention summary:
 - MMKV keys: none
 
 ### Known Issues / Drift
-- Hardcoded color drift: container uses `bg-white` instead of theme tokens.
+- (Fixed) Container uses themed `bg-background`.
 - Static `colors` import means the screen does not respect runtime theme mode.
 - No language toggle or richer onboarding surface yet.
 
@@ -878,7 +877,7 @@ Route convention summary:
 
 ### Known Issues / Drift
 - Static `colors` import means onboarding screen does not follow runtime theme mode.
-- Schema drift risk: `onboarding_complete` is written as string `"true"` in `handleContinue` but as boolean `true` in `handleSkip`.
+- (Fixed) Normalized `onboarding_complete` writes to boolean `true` in both continue and skip flows.
 - Product drift: no QR preview, no stronger optional-state treatment.
 
 ### Phase 4 Target
@@ -912,7 +911,7 @@ Route convention summary:
 ### Color Tokens
 - Direct token usage from static theme import: `colors.textSecondary`, `colors.success`, `colors.border`, `colors.primary`
 - Static spacing/typography imports: `spacing`, `typography`
-- Hardcoded utility/class color usage: `bg-white`
+- (Fixed) Replaced `bg-white` with themed `bg-surface` in chip surfaces.
 
 ### Buttons & Actions
 - `Add Your First Customer` — `handleAddPerson` — completes onboarding and opens People with `action=add`
@@ -926,7 +925,7 @@ Route convention summary:
 
 ### Known Issues / Drift
 - Static `colors` import means onboarding screen does not follow runtime theme mode.
-- Hardcoded color drift: `bg-white` token bypass.
+- (Fixed) Replaced `bg-white` with themed `bg-surface`.
 - Route param contract `action=add` is reused here; keep it documented because it drives modal behavior on the People screen.
 - `onboarding_complete` may already be set in the bank step, so this screen can duplicate the completion write.
 
@@ -1091,7 +1090,7 @@ Route convention summary:
 ### Known Issues / Drift
 - Component/API drift: `EmptyState`, `Stack`, `useRouter`, and `SafeAreaView` imports are unused.
 - Naming drift: screen is Customer-facing, but picker prop/state naming still uses `selectedPerson` in related code.
-- `DateRangePicker` is passed `visible={false}` and `onClose={() => {}}`, which suggests an ambiguous or stale API surface.
+- (Fixed) Export screen now opens/closes `DateRangePicker` via `visible` + `onClose` bindings.
 - Product drift: Phase 4 plans to move export into Profile and add email/export history.
 
 ### Phase 4 Target

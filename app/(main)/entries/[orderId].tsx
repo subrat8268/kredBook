@@ -75,6 +75,17 @@ export default function OrderDetailScreen() {
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
   const { show: showToast } = useToast();
 
+  // Local formatter for places where the UI already includes the ₹ prefix.
+  const fmt = useCallback(
+    (value: number) =>
+      formatINR(value, {
+        currencySymbol: "",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+    [],
+  );
+
   // ── Derived values ───────────────────────────────────────────────
   const customerName = order?.customer?.name ?? "Unknown Person";
   const customerPhone = order?.customer?.phone ?? "";

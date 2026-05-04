@@ -85,7 +85,7 @@ export default function OnboardingReady() {
 
         <View className="flex-row flex-wrap gap-2.5 justify-center">
           <View
-            className="flex-row items-center gap-1.5 border rounded-full px-3.5 py-[7px] bg-white"
+            className="flex-row items-center gap-1.5 border rounded-full px-3.5 py-[7px] bg-surface"
             style={{ borderColor: hasBusinessSetup ? colors.success : colors.border }}
           >
             <CalendarDays
@@ -102,7 +102,7 @@ export default function OnboardingReady() {
             </Text>
           </View>
 
-          <View className="flex-row items-center gap-1.5 border rounded-full px-3.5 py-[7px] bg-white" style={{ borderColor: colors.primary }}>
+          <View className="flex-row items-center gap-1.5 border rounded-full px-3.5 py-[7px] bg-surface" style={{ borderColor: colors.primary }}>
             <CheckCircle2 size={14} color={colors.success} strokeWidth={2.5} />
             <Text className="text-[13px] font-semibold text-primary">
               Ledger ready
