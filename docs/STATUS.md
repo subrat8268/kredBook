@@ -277,7 +277,8 @@ Verification: theme.ts exports unchanged API shape, no TS errors, lint clean.
 |---|---|---|---|---|---|---|
 | 4.1.1 | Dashboard redesign — hero card, quick stats row, activity feed, SpeedDialFAB | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `(main)/dashboard/index.tsx` ([f690c3c](https://github.com/subrat8268/kredBook/commit/f690c3c)) |
 | 4.1.2 | Tab navigation redesign — theme-aware tab bar, lucide icons, SpeedDialFAB record-payment routing fix | ✅ Done | P0 | `/refactor` | `ui-ux-pro-max`, `react-native-skills` | `(main)/_layout.tsx` ([fa4f3b2](https://github.com/subrat8268/kredBook/commit/fa4f3b24e2ca07a2edb27f42a410a94ca02ffcad)) |
-| 4.1.3 | Create Entry redesign — full-screen numpad, bottom sheet customer picker, quick due-date chips | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/create.tsx` ([5d588b8](https://github.com/subrat8268/kredBook/commit/5d588b8)) |
+| 4.1.3 | Create Entry redesign — full-screen numpad, bottom sheet customer picker, quick due-date chips | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/create.tsx` ([5d588b8](https://github.com/subrat8268/kredBook/commit/5d588b8c3dc0cb320be115fbcd5808e72424b82d)) |
+| 4.1.3-hotfix | Create Entry bug fixes — params override draft, single-date picker, recently-added-first, post-create WhatsApp modal | ⏳ Not Started | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `code-reviewer` | `(main)/entries/create.tsx`, `src/components/picker/CustomerPicker.tsx` |
 | 4.1.4 | Record Payment modal redesign — large numpad, partial toggle, payment method, WhatsApp receipt | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
 | 4.1.5 | Customer Detail redesign — hero card, sticky balance bar, timeline view, swipe actions | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
 
@@ -294,7 +295,85 @@ Verification: theme.ts exports unchanged API shape, no TS errors, lint clean.
 
 **Verification:** Tab bar uses surface token in both light and dark mode; record-payment FAB action tested from People and Entries tabs; `npm run lint` passes.
 
-#### 4.1.3 — Create Entry Redesign OpenCode Prompt
+---
+
+#### 4.1.3 — Create Entry Redesign ✅ Done
+
+**Commit:** [5d588b8](https://github.com/subrat8268/kredBook/commit/5d588b8c3dc0cb320be115fbcd5808e72424b82d)
+
+**Implemented full Create Entry redesign:**
+- Full-screen large numpad (PhonePe/GPay style) — amount is the hero element
+- Searchable bottom sheet customer picker (no full-page navigation)
+- Quick due-date chips: Today · +7d · +15d · +30d · Custom
+- MMKV-backed draft auto-save on exit
+- Removed stub product picker state (lines 91–103) and all `// Stub state` comments
+
+**Files changed:** `app/(main)/entries/create.tsx`, `src/components/picker/CustomerPicker.tsx`
+
+**Known bugs logged → 4.1.3-hotfix (next task):**
+
+| Severity | Issue | Location |
+|---|---|---|
+| High | `entryType` stuck on `"bill"` — payment path unreachable from UI | `create.tsx:105`, `:216` |
+| High | Customer picker not sorted by recently added | `CustomerPicker.tsx:29`, `:153` |
+| High | Due date custom uses `DateRangePicker` (from/to) for a single date — wrong UX + inconsistent value shape | `create.tsx:663` |
+| High | Due date format inconsistent: presets use ISO datetime, custom gives `YYYY-MM-DD` only — timezone/display bugs | `create.tsx:51`, `:666` |
+| Medium | Draft restore can override deep-link params (customer/amount) if stale draft exists — params should win | `create.tsx:139`, `:176` |
+| Medium | Numpad accepts malformed inputs: leading `.`, multiple leading zeros | `create.tsx:501` |
+| Medium | `note` vs `orderNote` semantics are confusingly split — note = line-item name, orderNote = order note | `create.tsx:237`, `:251`, `:368` |
+| Gap | WhatsApp as primary action in post-create modal not implemented — currently opens generic share directly | `create.tsx:301` |
+| Gap | "Recently added customers first" not implemented in CustomerPicker | `CustomerPicker.tsx:29` |
+
+---
+
+#### 4.1.3-hotfix — Create Entry Bug Fixes OpenCode Prompt
+
+```
+/fix load_skills=["systematic-debugging","react-native-skills","code-reviewer"]
+
+Fix all high/medium bugs found in Create Entry screen post-redesign audit.
+
+Fixes (in order):
+1. params override stale draft:
+   - If deep-link provides customer or amount params, they must win over any restored MMKV draft.
+   - Apply params after draft restore, not before (create.tsx:139, :176).
+
+2. Normalize due-date format:
+   - All due-date values (preset chips + custom picker) must store as YYYY-MM-DD date string only.
+   - Remove .toISOString() from preset chips — use toLocaleDateString('en-CA') or date-fns format(date, 'yyyy-MM-dd') instead.
+   - Replace DateRangePicker with a single-date DateTimePicker (mode="date") for the Custom chip.
+   - (create.tsx:51, :663, :666)
+
+3. entryType toggle:
+   - Expose Bill / Payment toggle in the UI so entryType can be switched by the user.
+   - Default to "bill". Payment type must be reachable without deep-link params.
+   - (create.tsx:105, :216)
+
+4. Numpad input guard:
+   - Reject leading decimal (".") as first character — replace with "0."
+   - Strip leading zeros beyond one before the decimal point.
+   - (create.tsx:501)
+
+5. Recently added customers first in CustomerPicker:
+   - Sort the customer list by created_at DESC before rendering.
+   - Search results should still use fuzzy match but within that sorted base.
+   - (CustomerPicker.tsx:29, :153)
+
+6. Post-create WhatsApp modal:
+   - After successful entry creation, show an action modal (not auto-share).
+   - Primary CTA: "Share on WhatsApp" (pre-filled message with customer name, amount, due date).
+   - Secondary CTA: "Done" (dismiss).
+   - (create.tsx:301)
+
+Out of scope for this hotfix:
+- note vs orderNote semantic rename — leave for a dedicated /refactor task.
+
+Verification: all 6 fixes tested manually, lint clean, no TS errors.
+```
+
+---
+
+#### 4.1.3 — Create Entry Redesign OpenCode Prompt (archived — task complete)
 
 ```
 /build load_skills=["ui-ux-pro-max","react-native-skills","code-reviewer"]
