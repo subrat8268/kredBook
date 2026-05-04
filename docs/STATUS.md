@@ -277,8 +277,9 @@ Verification: theme.ts exports unchanged API shape, no TS errors, lint clean.
 |---|---|---|---|---|---|---|
 | 4.1.1 | Dashboard redesign — hero card, quick stats row, activity feed, SpeedDialFAB | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `(main)/dashboard/index.tsx` ([f690c3c](https://github.com/subrat8268/kredBook/commit/f690c3c)) |
 | 4.1.2 | Tab navigation redesign — theme-aware tab bar, lucide icons, SpeedDialFAB record-payment routing fix | ✅ Done | P0 | `/refactor` | `ui-ux-pro-max`, `react-native-skills` | `(main)/_layout.tsx` ([fa4f3b2](https://github.com/subrat8268/kredBook/commit/fa4f3b24e2ca07a2edb27f42a410a94ca02ffcad)) |
-| 4.1.3 | Create Entry redesign — full-screen numpad, bottom sheet customer picker, quick due-date chips | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/create.tsx` ([5d588b8](https://github.com/subrat8268/kredBook/commit/5d588b8c3dc0cb320be115fbcd5808e72424b82d)) |
-| 4.1.3-hotfix | Create Entry bug fixes — params override draft, single-date picker, recently-added-first, post-create WhatsApp modal | ⏳ Not Started | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `code-reviewer` | `(main)/entries/create.tsx`, `src/components/picker/CustomerPicker.tsx` |
+| 4.1.3 | Create Entry redesign — full-screen numpad, bottom sheet customer picker, quick due-date chips | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/create.tsx` ([5d588b8](https://github.com/subrat8268/kredBook/commit/5d588b8)) |
+| 4.1.3a | Create Entry bug fixes — params override draft, due-date format normalization, numpad guard, Bill/Payment toggle, recent customers first | ⏳ Not Started | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max` | `(main)/entries/create.tsx`, `CustomerPicker.tsx`, `BillFooter.tsx` |
+| 4.1.3b | Create Entry UX redesign — remove SpeedDialFAB, save/share split buttons, progressive disclosure, Bill Mode with line items, modern visual standards | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills`, `code-reviewer` | `(main)/entries/create.tsx`, `BillFooter.tsx` |
 | 4.1.4 | Record Payment modal redesign — large numpad, partial toggle, payment method, WhatsApp receipt | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
 | 4.1.5 | Customer Detail redesign — hero card, sticky balance bar, timeline view, swipe actions | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
 
@@ -295,101 +296,183 @@ Verification: theme.ts exports unchanged API shape, no TS errors, lint clean.
 
 **Verification:** Tab bar uses surface token in both light and dark mode; record-payment FAB action tested from People and Entries tabs; `npm run lint` passes.
 
----
+#### 4.1.3 — Create Entry Redesign ✅ Done (with known issues - see 4.1.3a & 4.1.3b below)
 
-#### 4.1.3 — Create Entry Redesign ✅ Done
+**Initial implementation completed in commit 5d588b8.**
 
-**Commit:** [5d588b8](https://github.com/subrat8268/kredBook/commit/5d588b8c3dc0cb320be115fbcd5808e72424b82d)
+This redesign added: full-screen numpad, bottom sheet customer picker, quick due-date chips, MMKV-backed draft persistence.
 
-**Implemented full Create Entry redesign:**
-- Full-screen large numpad (PhonePe/GPay style) — amount is the hero element
-- Searchable bottom sheet customer picker (no full-page navigation)
-- Quick due-date chips: Today · +7d · +15d · +30d · Custom
-- MMKV-backed draft auto-save on exit
-- Removed stub product picker state (lines 91–103) and all `// Stub state` comments
-
-**Files changed:** `app/(main)/entries/create.tsx`, `src/components/picker/CustomerPicker.tsx`
-
-**Known bugs logged → 4.1.3-hotfix (next task):**
-
-| Severity | Issue | Location |
-|---|---|---|
-| High | `entryType` stuck on `"bill"` — payment path unreachable from UI | `create.tsx:105`, `:216` |
-| High | Customer picker not sorted by recently added | `CustomerPicker.tsx:29`, `:153` |
-| High | Due date custom uses `DateRangePicker` (from/to) for a single date — wrong UX + inconsistent value shape | `create.tsx:663` |
-| High | Due date format inconsistent: presets use ISO datetime, custom gives `YYYY-MM-DD` only — timezone/display bugs | `create.tsx:51`, `:666` |
-| Medium | Draft restore can override deep-link params (customer/amount) if stale draft exists — params should win | `create.tsx:139`, `:176` |
-| Medium | Numpad accepts malformed inputs: leading `.`, multiple leading zeros | `create.tsx:501` |
-| Medium | `note` vs `orderNote` semantics are confusingly split — note = line-item name, orderNote = order note | `create.tsx:237`, `:251`, `:368` |
-| Gap | WhatsApp as primary action in post-create modal not implemented — currently opens generic share directly | `create.tsx:301` |
-| Gap | "Recently added customers first" not implemented in CustomerPicker | `CustomerPicker.tsx:29` |
+**Known issues requiring follow-up:** 
+- Deep-link params can be overridden by stale draft (A1)
+- Due-date format inconsistencies (A2)
+- Numpad accepts invalid inputs like "." as first char (A3)
+- No Bill/Payment toggle in header (A4)
+- Customer list not sorted by recently added first (A5)
+- Need UX refinements per 4.1.3b
 
 ---
 
-#### 4.1.3-hotfix — Create Entry Bug Fixes OpenCode Prompt
+#### 4.1.3a — Create Entry Bug Fixes
 
 ```
-/fix load_skills=["systematic-debugging","react-native-skills","code-reviewer"]
+/fix load_skills=["systematic-debugging","react-native-skills","ui-ux-pro-max","code-reviewer"]
 
-Fix all high/medium bugs found in Create Entry screen post-redesign audit.
+Fix and redesign the Create Entry screen end-to-end.
+Files: app/(main)/entries/create.tsx, src/components/picker/CustomerPicker.tsx, src/components/orders/BillFooter.tsx
 
-Fixes (in order):
-1. params override stale draft:
-   - If deep-link provides customer or amount params, they must win over any restored MMKV draft.
-   - Apply params after draft restore, not before (create.tsx:139, :176).
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION A — BUG FIXES (must fix first)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-2. Normalize due-date format:
-   - All due-date values (preset chips + custom picker) must store as YYYY-MM-DD date string only.
-   - Remove .toISOString() from preset chips — use toLocaleDateString('en-CA') or date-fns format(date, 'yyyy-MM-dd') instead.
-   - Replace DateRangePicker with a single-date DateTimePicker (mode="date") for the Custom chip.
-   - (create.tsx:51, :663, :666)
+A1. Params override stale draft (create.tsx:139–176)
+    - Apply deep-link params AFTER draft restore, not before.
+    - If customerParams exists → override selectedCustomerMeta and selectedCustomerId from params.
+    - If amountParam exists → override quickAmount from params.
+    - Draft must never silently win over a deep-link intent.
 
-3. entryType toggle:
-   - Expose Bill / Payment toggle in the UI so entryType can be switched by the user.
-   - Default to "bill". Payment type must be reachable without deep-link params.
-   - (create.tsx:105, :216)
+A2. Normalize due-date format (create.tsx:51, :663, :666)
+    - ALL due dates must store as YYYY-MM-DD string only.
+    - Replace computeDueDateFromPreset() .toISOString() with:
+      format(date, 'yyyy-MM-dd')  ← use date-fns (already in project)
+    - Replace DateRangePicker (from/to UX) with a single DateTimePicker (mode="date").
+    - Custom chip shows chosen date as "12 May" after selection.
 
-4. Numpad input guard:
-   - Reject leading decimal (".") as first character — replace with "0."
-   - Strip leading zeros beyond one before the decimal point.
-   - (create.tsx:501)
+A3. Numpad input guard (create.tsx:501)
+    - Reject "." as the first character → auto-insert "0." instead.
+    - Strip extra leading zeros (e.g. "007" → "7").
+    - Max 2 decimal places — reject further decimal digits after 2.
 
-5. Recently added customers first in CustomerPicker:
-   - Sort the customer list by created_at DESC before rendering.
-   - Search results should still use fuzzy match but within that sorted base.
-   - (CustomerPicker.tsx:29, :153)
+A4. entryType toggle in header (create.tsx:105, :216)
+    - Add Bill / Payment toggle in the header row (two pill buttons, not a dropdown).
+    - Bill = default. Payment = switches intent, updates footer CTA to "Record Payment".
+    - Toggle must be reachable without any deep-link param.
 
-6. Post-create WhatsApp modal:
-   - After successful entry creation, show an action modal (not auto-share).
-   - Primary CTA: "Share on WhatsApp" (pre-filled message with customer name, amount, due date).
-   - Secondary CTA: "Done" (dismiss).
-   - (create.tsx:301)
+A5. Recently added customers first (CustomerPicker.tsx:29, :153)
+    - Sort customer list by created_at DESC before rendering.
+    - Search results still use fuzzy match but within this sorted base.
 
-Out of scope for this hotfix:
-- note vs orderNote semantic rename — leave for a dedicated /refactor task.
-
-Verification: all 6 fixes tested manually, lint clean, no TS errors.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Deep-link with customer+amount params: params win over stale draft.
+- Custom due date: single date picker, stores YYYY-MM-DD, chip shows "12 May".
+- Numpad: "." as first press → becomes "0." | "007" → "7" | max 2 decimal places enforced.
+- Payment toggle: switch to Payment → enter amount → "Record Payment" fires handleRecordPayment().
+- npm run lint passes, no TS errors.
 ```
 
 ---
 
-#### 4.1.3 — Create Entry Redesign OpenCode Prompt (archived — task complete)
+#### 4.1.3b — Create Entry UX Redesign
 
 ```
 /build load_skills=["ui-ux-pro-max","react-native-skills","code-reviewer"]
 
-Redesign Create Entry screen in (main)/entries/create.tsx.
+Fix and redesign the Create Entry screen end-to-end.
+Files: app/(main)/entries/create.tsx, src/components/picker/CustomerPicker.tsx, src/components/orders/BillFooter.tsx
 
-Changes:
-1. Amount input: full-screen large numpad (PhonePe/GPay style) — amount is the hero
-2. Customer selector: searchable bottom sheet (not full navigation), recently added customers first
-3. Description: optional, collapsed by default. Tap "+ Add note" to expand
-4. Due date: quick chips — Today · +7 days · +15 days · +30 days · Custom (no calendar scroll by default)
-5. Auto-save draft on exit (MMKV backed)
-6. Remove stub product picker state (lines 91–103) and all "// Stub state" comments
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION B — UX REDESIGN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Keep: PDF auto-generate + share, WhatsApp share as primary action in post-create modal.
-Verification: entry creates successfully, draft saves on exit, no dead code, lint clean.
+B1. Remove SpeedDialFAB from this screen entirely.
+    The Create Entry screen is already a focused task — no FAB needed here.
+
+B2. Split "Save & Share" into two separate bottom actions:
+    - Replace BillFooter's single "Save & Share" CTA with two buttons in a row:
+        LEFT:  [💾 Save Entry]         → full green, primary CTA, creates record
+        RIGHT: [📤 Share on WhatsApp]  → ghost/outline, secondary
+    - "Share on WhatsApp" is DISABLED until Save is complete.
+    - After save: show post-save action modal:
+        Primary:   "Share on WhatsApp" (pre-filled: customer name, amount, due date, business name)
+        Secondary: "View Entry" → navigate to /(main)/entries/[orderId]
+        Dismiss:   "Done" → router.back()
+    - Remove the combined BillFooter "Save & Share" pattern from this screen.
+
+B3. Progressive disclosure — customer first:
+    - On first open (no draft, no params): show customer picker card as the ONLY visible element.
+      Numpad, due date chips, note toggle all remain hidden until a customer is selected.
+    - Once customer is selected: animate-in the amount section, due date chips, note toggle.
+    - "Change" tappable link on the locked customer row to re-open picker.
+
+B4. Bill / Quick mode toggle in header:
+    - Two pills: [Quick Entry●] [Bill Mode]
+    - Quick Entry = current flow (single amount, no line items).
+    - Bill Mode = shows "+ Add Item" section above the numpad for line items.
+    - Default: Quick Entry.
+
+B5. Bill Mode — line items (only visible when Bill Mode is active):
+    - "+ Add Item" button opens a bottom sheet with:
+        Item Name field (text input, autocomplete from AsyncStorage cached past items)
+        Qty stepper (+/- buttons, default 1)
+        Rate field (uses existing numpad component)
+        Total preview = qty × rate
+        "Add to Bill" CTA
+    - Saved items render as swipeable cards above the numpad (swipe left to delete).
+    - Grand Total = sum of all line items (replaces manual amount in Bill Mode).
+    - In Bill Mode, the manual numpad is hidden — total is derived from items only.
+    - Item name autocomplete: cache used names in AsyncStorage key "item-name-cache",
+      max 50 entries, most-recent-first.
+
+B6. Grand Total row always visible in footer:
+    - Show "Grand Total  ₹X,XXX" as a label row above the two action buttons.
+    - In Quick Entry: total = entered amount + previousBalance (if any).
+    - In Bill Mode: total = sum of line items + previousBalance (if any).
+
+B7. Modern, premium visual standards (apply throughout):
+    - No SpeedDial on this screen.
+    - No colored side-borders on cards.
+    - All cards use surface elevation (border: 1px solid colors.border, shadow-sm).
+    - Numpad keys: 72px height, border radius 14, font size 24, bold.
+    - Active chip: filled primary bg + white text (not just border change).
+    - Previous balance warning: amber background strip, not red — red is for errors only.
+    - Every TouchableOpacity must have an activeOpacity={0.75} and a visible pressed state.
+    - All text sizes follow theme tokens — no hardcoded font sizes outside the theme scale.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION C — BACKEND ALIGNMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+C1. Bill Mode line items must map to existing order_items schema:
+    - product_id: null (nullable — existing column, no schema change needed)
+    - product_name: item name string
+    - price: rate (unit price)
+    - quantity: qty from stepper
+    - amount: price × quantity (computed, not stored separately)
+
+C2. due_date field:
+    - After A2 fix, all paths store YYYY-MM-DD.
+    - Pass directly to createOrderMutation — no .toISOString() wrapping.
+
+C3. note field cleanup:
+    - The single "note" field (orderNote in state) maps to orders.note in DB.
+    - Remove the confusing split between note (line-item name) and orderNote (order note).
+    - In Quick Entry: note = optional order note (e.g. "Delivery Monday").
+    - In Bill Mode: note = order-level note. Each line item has its own name field.
+    - product_name for the Quick Entry single item = note.trim() || "Entry Amount" (keep as-is).
+
+C4. Payment type (entryType === "payment"):
+    - handleRecordPayment() flow unchanged — it correctly calls recordPayment() API.
+    - Just ensure the Bill/Payment header toggle (A4) properly sets entryType state.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OUT OF SCOPE FOR THIS TASK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- GST calculation (planned for 4.2.1)
+- PDF generation changes
+- Any new Supabase migrations
+- note vs orderNote semantic rename in DB
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Quick Entry: select customer → enter amount → Save Entry → post-save modal appears → Share on WhatsApp fires pre-filled message.
+- Bill Mode: select customer → add 2 items → Grand Total auto-calculates → Save Entry works.
+- Payment toggle: switch to Payment → enter amount → "Record Payment" fires handleRecordPayment().
+- Deep-link with customer+amount params: params win over stale draft.
+- Custom due date: single date picker, stores YYYY-MM-DD, chip shows "12 May".
+- Numpad: "." as first press → becomes "0." | "007" → "7" | max 2 decimal places enforced.
+- npm run lint passes, no TS errors.
 ```
 
 ---
