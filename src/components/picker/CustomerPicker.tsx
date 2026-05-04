@@ -5,6 +5,7 @@ import { FlatList, Keyboard, Text, TouchableOpacity, View } from "react-native";
 import Loader from "../feedback/Loader";
 import SearchBar from "../ui/SearchBar";
 import BottomSheetPicker from "./BottomSheetPicker";
+import { Plus } from "lucide-react-native";
 
 interface CustomerPickerProps {
   visible: boolean;
@@ -13,6 +14,7 @@ interface CustomerPickerProps {
   vendorId: string;
   onClose?: () => void;
   variant?: "sheet" | "inline";
+  onCreateNew?: () => void;
 }
 
 export default function CustomerPicker({
@@ -22,6 +24,7 @@ export default function CustomerPicker({
   vendorId,
   onClose,
   variant = "sheet",
+  onCreateNew,
 }: CustomerPickerProps) {
   const [search, setSearch] = useState("");
   const { isConnected } = useNetworkSync();
@@ -94,6 +97,16 @@ export default function CustomerPicker({
             <Text className="mt-2 text-[12px] text-textSecondary dark:text-textSecondary-dark">
               You&apos;re offline. People will load when back online.
             </Text>
+          )}
+          {onCreateNew && (
+            <TouchableOpacity
+              onPress={onCreateNew}
+              className="mt-3 flex-row items-center justify-center rounded-xl border border-primary bg-primary-light py-3 dark:bg-primary-soft-dark"
+              activeOpacity={0.75}
+            >
+              <Plus size={16} className="mr-2 text-primary" />
+              <Text className="font-bold text-primary">New Person</Text>
+            </TouchableOpacity>
           )}
         </View>
         <FlatList

@@ -1118,6 +1118,10 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               setSelectedPerson={handleSelectPerson}
               vendorId={vendorId!}
               onClose={() => setIsCustomerSheetOpen(false)}
+              onCreateNew={() => {
+                setIsCustomerSheetOpen(false);
+                router.push("/(main)/people" as never);
+              }}
             />
           ) : null}
 
