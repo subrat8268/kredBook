@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DatePickerSheet } from "@/src/components/ui/DateRangePicker";
 import * as Haptics from "expo-haptics";
 import { createMMKV } from "react-native-mmkv";
-import { ArrowLeft, Pencil, User } from "lucide-react-native";
+import { ArrowLeft, ArrowRightLeft, User } from "lucide-react-native";
 import { format } from "date-fns";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import {
   Alert,
   Animated,
+  FlatList,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
@@ -138,7 +139,7 @@ export default function CreateOrderScreen() {
   const [entryMode, setEntryMode] = useState<"quick" | "bill">("quick");
   const [isCustomerSheetOpen, setIsCustomerSheetOpen] = useState(false);
   const [duePreset, setDuePreset] = useState<"today" | "7" | "15" | "30" | "custom">("today");
-  const [customDueDate, setCustomDueDate] = useState<string | undefined>(undefined);
+  const [customDueDate, setCustomDueDate] = useState<string | undefined>(() => computeDueDateFromPreset("today"));
   const [isCustomDateActive, setIsCustomDateActive] = useState(false);
   const [isCustomDuePickerOpen, setIsCustomDuePickerOpen] = useState(false);
   const [savedEntry, setSavedEntry] = useState<any>(null);
@@ -197,7 +198,7 @@ export default function CreateOrderScreen() {
         setOrderNoteExpanded(Boolean(parsed.orderNote));
         setEntryType(parsed.entryType ?? "bill");
         setDuePreset(parsed.duePreset ?? "today");
-        setCustomDueDate(parsed.customDueDate ?? undefined);
+        setCustomDueDate(parsed.customDueDate ?? computeDueDateFromPreset("today"));
         setIsCustomDateActive(parsed.duePreset === "custom" && Boolean(parsed.customDueDate));
         if (parsed.selectedCustomerMeta) {
           setSelectedCustomerMeta(parsed.selectedCustomerMeta);
@@ -206,6 +207,12 @@ export default function CreateOrderScreen() {
       } catch {
         // ignore corrupted draft
       }
+    }
+
+    if (!cached) {
+      setDuePreset("today");
+      setCustomDueDate(computeDueDateFromPreset("today"));
+      setIsCustomDateActive(false);
     }
 
     // Step 2: Apply deep-link params (override draft if present)
@@ -379,7 +386,7 @@ export default function CreateOrderScreen() {
 
       // Clear draft after successful save
       const draftKey = `draft:${vendorId ?? "anon"}`;
-      draftStorage.delete(draftKey);
+      draftStorage.remove(draftKey);
 
       showToast({
         message: `Entry created for ${selectedCustomerMeta?.name ?? "customer"}`,
@@ -458,7 +465,7 @@ export default function CreateOrderScreen() {
       queryClient.invalidateQueries({ queryKey: ["dashboard", profile.id] });
       // Clear draft after successful payment
       const draftKey = `draft:${vendorId ?? "anon"}`;
-      draftStorage.delete(draftKey);
+      draftStorage.remove(draftKey);
       setQuickAmount("");
       setOrderNote("");
       showToast({
@@ -519,11 +526,13 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           {/* Header */}
-          <View className="flex-row items-center border-b border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
+          <View className="border-b border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
+            <View className="flex-row items-center">
             <TouchableOpacity
               onPress={() => router.back()}
               className="mr-3 p-1"
               activeOpacity={0.75}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
               <ArrowLeft
                 size={22}
@@ -607,7 +616,9 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             </View>
 
             <View className="flex-1" />
-            <View className="mr-2">
+            </View>
+
+            <View className="mt-2 flex-row justify-end">
               <SyncStatus />
             </View>
           </View>
@@ -655,7 +666,12 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                   )}
                 </View>
 
-                <Pencil size={18} color={colors.primary} strokeWidth={2} />
+                <ArrowRightLeft
+                  size={18}
+                  color={colors.primary}
+                  strokeWidth={2}
+                  accessibilityLabel="Change customer"
+                />
               </TouchableOpacity>
 
               {selectedCustomerMeta &&
@@ -673,16 +689,6 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                 )}
             </View>
 
-            {selectedCustomerMeta ? (
-              <TouchableOpacity
-                onPress={() => setIsCustomerSheetOpen(true)}
-                className="mt-2 self-start rounded-full border border-border px-3 py-1 dark:border-border-dark"
-                activeOpacity={0.75}
-              >
-                <Text className="text-[12px] font-semibold text-primary">Change</Text>
-              </TouchableOpacity>
-            ) : null}
-
             {!showOnlyCustomerCard ? (
               <Animated.View
                 style={{
@@ -699,11 +705,17 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               >
             {entryType === "bill" && entryMode === "bill" ? (
               <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+                <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">
+                  ITEMS
+                </Text>
                 {lineItems.length ? (
-                  <View className="mb-3" style={{ gap: 8 }}>
-                    {lineItems.map((item) => (
+                  <FlatList
+                    data={lineItems}
+                    keyExtractor={(item) => item.id}
+                    scrollEnabled={false}
+                    contentContainerStyle={{ gap: 8, marginBottom: 12 }}
+                    renderItem={({ item }) => (
                       <Swipeable
-                        key={item.id}
                         overshootRight={false}
                         renderRightActions={() => (
                           <TouchableOpacity
@@ -722,31 +734,31 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                           </TouchableOpacity>
                         )}
                       >
-                      <TouchableOpacity
-                        onPress={() => {
-                          setEditingItemId(item.id);
-                          setItemName(item.name);
-                          setItemQtyInput(String(item.quantity));
-                          setItemRateInput(String(item.rate));
-                          setIsAddItemModalOpen(true);
-                        }}
-                        activeOpacity={0.75}
-                        className="rounded-xl border border-border px-3 py-3 dark:border-border-dark"
-                      >
-                        <View className="flex-row items-center justify-between">
-                          <View className="flex-1">
-                            <Text className="font-semibold text-textPrimary dark:text-textPrimary-dark">{item.name}</Text>
-                            <Text className="text-textSecondary dark:text-textSecondary-dark">{item.quantity} × {formatINR(item.rate)}</Text>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setEditingItemId(item.id);
+                            setItemName(item.name);
+                            setItemQtyInput(String(item.quantity));
+                            setItemRateInput(String(item.rate));
+                            setIsAddItemModalOpen(true);
+                          }}
+                          activeOpacity={0.75}
+                          className="rounded-xl border border-border px-3 py-3 dark:border-border-dark"
+                        >
+                          <View className="flex-row items-center justify-between">
+                            <View className="flex-1">
+                              <Text className="font-semibold text-textPrimary dark:text-textPrimary-dark">{item.name}</Text>
+                              <Text className="text-textSecondary dark:text-textSecondary-dark">{item.quantity} × {formatINR(item.rate)}</Text>
+                            </View>
+                            <View className="items-end">
+                              <Text className="font-bold text-textPrimary dark:text-textPrimary-dark">{formatINR(item.quantity * item.rate)}</Text>
+                              <Text className="text-[10px] text-textSecondary dark:text-textSecondary-dark">tap to edit</Text>
+                            </View>
                           </View>
-                          <View className="items-end">
-                            <Text className="font-bold text-textPrimary dark:text-textPrimary-dark">{formatINR(item.quantity * item.rate)}</Text>
-                            <Text className="text-[10px] text-textSecondary dark:text-textSecondary-dark">tap to edit</Text>
-                          </View>
-                        </View>
-                      </TouchableOpacity>
+                        </TouchableOpacity>
                       </Swipeable>
-                    ))}
-                  </View>
+                    )}
+                  />
                 ) : null}
                 <TouchableOpacity
                   onPress={() => {
@@ -757,6 +769,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                     setIsAddItemModalOpen(true);
                   }}
                   className="rounded-xl border border-primary px-4 py-3"
+                  style={{ borderStyle: "dashed" }}
                   activeOpacity={0.75}
                 >
                   <Text className="text-center font-bold text-primary">+ Add Item</Text>
@@ -770,7 +783,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">
                 AMOUNT
               </Text>
-              <View className="rounded-2xl border-2 border-primary bg-surface px-5 py-6 dark:bg-surface-dark">
+              <View className="rounded-2xl border border-border bg-surface px-5 py-6 dark:border-border-dark dark:bg-surface-dark">
                 <Text className="text-center text-[52px] font-extrabold" style={{ color: colors.primary }}>
                   {formatINR(parseFloat(quickAmount || "0"), { maximumFractionDigits: 2 })}
                 </Text>
@@ -810,7 +823,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             </View>
             ) : null}
 
-            <View>
+            <View className="mt-2">
               {!orderNoteExpanded && !orderNote.trim() ? (
                 <TouchableOpacity onPress={() => setOrderNoteExpanded(true)} activeOpacity={0.75}>
                   <Text className="text-[13px] font-semibold text-primary">+ Add note</Text>
@@ -841,9 +854,13 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               ) : null}
             </View>
 
-            <View className="mt-4">
+            <View className="mt-5">
               <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">DUE DATE</Text>
-              <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 8, paddingRight: 8 }}
+              >
                 {[
                   { key: "today", label: "Today" },
                   { key: "7", label: "+7 days" },
@@ -899,7 +916,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                     </Text>
                   </TouchableOpacity>
                 ))}
-              </View>
+              </ScrollView>
             </View>
 
             {/* SUMMARY (Bill mode) */}
@@ -907,7 +924,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
                 <View className="flex-row justify-between items-center mb-2">
                   <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">
-                    Entry Amount
+                    {entryMode === "bill" ? "Items Total" : "Entry Amount"}
                   </Text>
                   <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
                     {formatINR(entryAmount, { maximumFractionDigits: 2 })}
