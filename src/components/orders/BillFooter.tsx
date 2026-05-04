@@ -128,6 +128,11 @@ export default function BillFooter({
               {secondaryLabel}
             </Text>
           </TouchableOpacity>
+          {secondaryDisabled && (
+            <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 8, textAlign: "center" }}>
+              Save first to share
+            </Text>
+          )}
         </View>
       ) : (
         <TouchableOpacity
