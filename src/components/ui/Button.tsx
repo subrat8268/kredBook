@@ -7,6 +7,7 @@ type Props = {
   size?: "sm" | "md" | "lg";
   loading?: boolean;
   disabled?: boolean;
+  icon?: React.ReactNode;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   fullWidth?: boolean;
@@ -55,6 +56,7 @@ export default memo(function Button({
   size = "md",
   loading = false,
   disabled = false,
+  icon,
   leftIcon,
   rightIcon,
   fullWidth = false,
@@ -97,8 +99,8 @@ export default memo(function Button({
             paddingHorizontal: sizeToken.paddingHorizontal,
             borderRadius: radius.lg,
             backgroundColor: disabled ? colors.border : style.bg,
-            borderWidth: style.border ? 1 : 0,
-            borderColor: style.border,
+            borderWidth: style.bg ? 1 : 0,
+            borderColor: style.pressedBg,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
@@ -118,7 +120,9 @@ export default memo(function Button({
           <ActivityIndicator color={style.text} size="small" />
         ) : (
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            {leftIcon && <View style={{ marginRight: 8 }}>{leftIcon}</View>}
+            {(leftIcon || icon) && (
+              <View style={{ marginRight: 8 }}>{leftIcon || icon}</View>
+            )}
             {typeof content === "string" ? (
               <Text
                 style={{

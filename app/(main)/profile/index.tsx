@@ -176,7 +176,7 @@ export default function ProfileScreen() {
           <View style={{ marginTop: spacing.lg, width: 180 }}>
             <Button
               title="Edit Profile"
-              variant="outline"
+              variant="primary"
               onPress={() => router.push("/(main)/profile/edit" as never)}
             />
           </View>
