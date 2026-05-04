@@ -1,35 +1,77 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
-import { clsx } from "clsx";
+import { colors, motion, radius } from "@/src/utils/theme";
 import React, { memo, useRef } from "react";
-import { ActivityIndicator, Animated, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Animated, Pressable, Text, View } from "react-native";
 
 type Props = {
-  title: string;
-  className?: string;
-  onPress: () => void;
-  variant?: "primary" | "secondary" | "danger" | "outline";
+  variant?: "primary" | "secondary" | "ghost" | "danger";
+  size?: "sm" | "md" | "lg";
   loading?: boolean;
   disabled?: boolean;
-  icon?: React.ReactNode;
-  iconPosition?: "left" | "right";
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  fullWidth?: boolean;
+  onPress: () => void;
+  title?: string;
+  children?: React.ReactNode;
+};
+
+const sizeTokens = {
+  sm: { height: 32, fontSize: 13, paddingHorizontal: 12 },
+  md: { height: 44, fontSize: 15, paddingHorizontal: 16 },
+  lg: { height: 52, fontSize: 16, paddingHorizontal: 20 },
+};
+
+const variantStyles = {
+  primary: {
+    bg: colors.primary,
+    text: "#FFFFFF",
+    pressedBg: colors.primaryDark,
+    shadow: true,
+  },
+  secondary: {
+    bg: colors.surface,
+    text: colors.textPrimary,
+    pressedBg: colors.surfaceAlt,
+    border: colors.border,
+    shadow: false,
+  },
+  ghost: {
+    bg: "transparent",
+    text: colors.primary,
+    pressedBg: "rgba(22, 163, 74, 0.1)",
+    border: "transparent",
+    shadow: false,
+  },
+  danger: {
+    bg: colors.danger,
+    text: "#FFFFFF",
+    pressedBg: "#B91C1C",
+    shadow: true,
+  },
 };
 
 export default memo(function Button({
-  title,
-  className,
-  onPress,
   variant = "primary",
-  loading,
-  disabled,
-  icon,
-  iconPosition = "left",
+  size = "md",
+  loading = false,
+  disabled = false,
+  leftIcon,
+  rightIcon,
+  fullWidth = false,
+  onPress,
+  title,
+  children,
 }: Props) {
-  const { colors, radius, spacing, typography } = useTheme();
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const content = title ?? children ?? "";
+  const style = variantStyles[variant];
+  const sizeToken = sizeTokens[size];
 
   const handlePressIn = () => {
+    if (disabled || loading) return;
     Animated.spring(scaleAnim, {
-      toValue: 0.96,
+      toValue: 0.97,
+      ...motion.springConfig.snappy,
       useNativeDriver: true,
     }).start();
   };
@@ -42,89 +84,58 @@ export default memo(function Button({
     }).start();
   };
 
-  const baseStyle = "w-full items-center justify-center flex-row";
-
-  const variantStyle = clsx({
-    "bg-primary": variant === "primary" && !disabled,
-    "bg-surface border border-border": variant === "secondary" && !disabled,
-    "bg-danger": variant === "danger" && !disabled,
-    "bg-surface border border-primary": variant === "outline" && !disabled,
-  });
-
-  const textStyle = clsx("text-base font-bold", {
-    "text-surface": variant !== "outline" && variant !== "secondary" && !disabled,
-    "text-primary": variant === "outline" && !disabled,
-    "text-textPrimary": variant === "secondary" && !disabled,
-  });
-
-  const resolvedTextColor = disabled
-    ? colors.textMuted
-    : variant === "outline"
-      ? colors.primary
-      : variant === "secondary"
-        ? colors.textPrimary
-        : colors.surface;
-
   return (
-    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-      <TouchableOpacity
-        className={`${baseStyle} ${variantStyle} ${className}`}
+    <Animated.View style={{ transform: [{ scale: scaleAnim }], width: fullWidth ? "100%" : undefined }}>
+      <Pressable
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled || loading}
-        activeOpacity={1}
         style={[
           {
-            height: spacing.buttonHeight,
+            height: sizeToken.height,
+            paddingHorizontal: sizeToken.paddingHorizontal,
             borderRadius: radius.lg,
-            paddingHorizontal: spacing.lg,
+            backgroundColor: disabled ? colors.border : style.bg,
+            borderWidth: style.border ? 1 : 0,
+            borderColor: style.border,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
           },
-          variant === "primary" && !disabled
-            ? {
-                shadowColor: colors.primary,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.16,
-                shadowRadius: 10,
-                elevation: 4,
-              }
-            : undefined,
-          disabled && { backgroundColor: colors.border },
+          style.shadow &&
+            !disabled && {
+              shadowColor: style.bg,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.16,
+              shadowRadius: 10,
+              elevation: 4,
+            },
+          disabled && { opacity: 0.45 },
         ]}
       >
-      {loading ? (
-        <ActivityIndicator
-          color={
-            variant === "outline"
-              ? colors.primary
-              : variant === "secondary"
-                ? colors.textPrimary
-                : colors.surface
-          }
-        />
-      ) : (
-        <View className="flex-row items-center justify-center">
-          {icon && iconPosition === "left" && (
-            <View className="mr-2">{icon}</View>
-          )}
-
-          <Text
-            className={textStyle}
-            style={[
-              typography.body,
-              { fontWeight: "700" },
-              { color: resolvedTextColor },
-            ]}
-          >
-            {title}
-          </Text>
-
-          {icon && iconPosition === "right" && (
-            <View className="ml-2">{icon}</View>
-          )}
-        </View>
-      )}
-    </TouchableOpacity>
+        {loading ? (
+          <ActivityIndicator color={style.text} size="small" />
+        ) : (
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            {leftIcon && <View style={{ marginRight: 8 }}>{leftIcon}</View>}
+            {typeof content === "string" ? (
+              <Text
+                style={{
+                  fontSize: sizeToken.fontSize,
+                  fontWeight: "600",
+                  color: disabled ? colors.textMuted : style.text,
+                }}
+              >
+                {content}
+              </Text>
+            ) : (
+              content
+            )}
+            {rightIcon && <View style={{ marginLeft: 8 }}>{rightIcon}</View>}
+          </View>
+        )}
+      </Pressable>
     </Animated.View>
   );
 });
