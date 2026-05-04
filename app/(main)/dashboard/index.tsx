@@ -15,9 +15,9 @@ import { motion } from "@/src/utils/theme";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { ArrowDownRight, ArrowUpRight, Clock3, Receipt, Users, Wallet } from "lucide-react-native";
+import { ArrowDownRight, ArrowUpRight, Bell, Clock3, Receipt, Users, Wallet } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Pressable, RefreshControl, ScrollView, StatusBar, Text, View } from "react-native";
+import { Animated, Pressable, RefreshControl, ScrollView, Share, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type PaymentContext = {
@@ -28,11 +28,17 @@ type PaymentContext = {
   initialAmount?: number;
 };
 
-function getGreetingLabel(name: string | undefined) {
+function getGreetingOnly() {
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const safeName = (name ?? "there").trim() || "there";
-  return `${greeting}, ${safeName} 👋`;
+  return hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+}
+
+function getBusinessInitials(name: string | undefined) {
+  const source = (name ?? "").trim();
+  if (!source) return "KB";
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
 }
 
 export default function DashboardScreen() {
@@ -145,19 +151,19 @@ export default function DashboardScreen() {
 
   const quickStats = [
     {
-      title: "Total Customers",
+      title: "Customers",
       value: `${totalCustomersCount}`,
       icon: Users,
       onPress: () => router.push("/(main)/people" as never),
     },
     {
-      title: "Overdue Count",
+      title: "Overdue",
       value: `${overdueTotalCount}`,
       icon: Clock3,
       onPress: () => router.push("/(main)/people" as never),
     },
     {
-      title: "Collected This Month",
+      title: "This Month",
       value: formatINR(collectedThisMonth),
       icon: Wallet,
       onPress: () => router.push("/(main)/entries" as never),
@@ -199,10 +205,26 @@ export default function DashboardScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refreshDashboard} tintColor={colors.primary} />}
-        contentContainerStyle={{ paddingHorizontal: spacing.screenPadding, paddingBottom: spacing.tabBarHeight + 90 }}
+        contentContainerStyle={{ paddingHorizontal: spacing.screenPadding, paddingBottom: 120 }}
       >
-        <Text className="mt-4 text-card-title text-textSecondary dark:text-textSecondary-dark">Dashboard</Text>
-        <Text className="mt-1 text-screen-title text-textPrimary dark:text-textPrimary-dark">{getGreetingLabel(profile.name)}</Text>
+        <View style={{ paddingHorizontal: 4, paddingTop: 12, paddingBottom: 8, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", flex: 1, paddingRight: 12 }}>
+            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" }}>
+              <Text style={{ color: colors.surface, fontSize: 14, fontWeight: "700" }}>{getBusinessInitials((profile as any).business_name || profile.name)}</Text>
+            </View>
+            <View style={{ marginLeft: 10, flex: 1 }}>
+              <Text numberOfLines={1} style={{ fontSize: 15, fontWeight: "700", color: colors.textPrimary }}>{((profile as any).business_name || profile.name || "KredBook") as string}</Text>
+              <Text numberOfLines={1} style={{ fontSize: 12, color: colors.textMuted }}>{getGreetingOnly()} 👋</Text>
+            </View>
+          </View>
+          <Pressable
+            onPress={() => router.push({ pathname: "/(main)/entries", params: { filter: "Overdue" } } as never)}
+            style={{ width: 36, height: 36, alignItems: "center", justifyContent: "center" }}
+          >
+            <Bell size={22} color={colors.textMuted} strokeWidth={2} />
+            {overdueTotalCount > 0 ? <View style={{ position: "absolute", right: 6, top: 6, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.danger }} /> : null}
+          </Pressable>
+        </View>
 
         <LinearGradient
           colors={[gradients.dashboardHero.end, gradients.dashboardHero.start]}
@@ -224,28 +246,50 @@ export default function DashboardScreen() {
             </Text>
           </View>
 
-          <Pressable
-            onPress={handleCollectNow}
-            disabled={isCollecting}
-            className="mt-4 rounded-xl bg-surface px-4 py-3"
-            style={{ opacity: isCollecting ? 0.65 : 1 }}
-          >
-            <Text className="text-center font-inter-semibold text-primary">Record Payment</Text>
-          </Pressable>
+          <View style={{ marginTop: 16, flexDirection: "row", gap: 10 }}>
+            <Pressable
+              onPress={handleCollectNow}
+              disabled={isCollecting}
+              className="flex-1 rounded-full bg-surface px-4 py-3"
+              style={{ opacity: isCollecting ? 0.65 : 1 }}
+            >
+              <Text className="text-center font-inter-semibold text-primary">Record Payment</Text>
+            </Pressable>
+            <Pressable
+              onPress={async () => {
+                const businessName = ((profile as any).business_name || profile.name || "KredBook") as string;
+                await Share.share({
+                  message: `Hi, you have an outstanding amount of ${formatINR(totalOutstanding)} with ${businessName}. Please make the payment at your earliest. Thank you!`,
+                });
+              }}
+              className="flex-1 rounded-full px-4 py-3"
+              style={{ borderWidth: 1.5, borderColor: colors.surface }}
+            >
+              <Text className="text-center font-inter-semibold" style={{ color: colors.surface }}>Send Reminder</Text>
+            </Pressable>
+          </View>
         </LinearGradient>
 
         <View className="mt-4 flex-row" style={{ gap: 10 }}>
-          {quickStats.map((stat) => (
+          {quickStats.map((stat) => {
+            const isOverdue = stat.title === "Overdue";
+            return (
             <Pressable key={stat.title} onPress={stat.onPress} className="flex-1 rounded-xl border border-border bg-surface p-3 dark:border-border-dark dark:bg-surface-dark">
-              <stat.icon size={16} color={colors.primary} strokeWidth={2.2} />
-              <Text className="mt-2 text-[11px] text-textSecondary dark:text-textSecondary-dark">{stat.title}</Text>
-              <Text className="mt-1 text-card-title text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>{stat.value}</Text>
+              <stat.icon size={16} color={isOverdue ? colors.warning : colors.primary} strokeWidth={2.2} />
+              <Text style={{ marginTop: 8, fontSize: 12, fontWeight: "400", color: colors.textMuted }} numberOfLines={1}>{stat.title}</Text>
+              <Text style={{ marginTop: 4, fontSize: 22, fontWeight: "700", color: isOverdue ? colors.warning : colors.textPrimary }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{stat.value}</Text>
             </Pressable>
-          ))}
+            );
+          })}
         </View>
 
         <View className="mt-6 flex-row items-center justify-between">
-          <Text className="text-section-title text-textPrimary dark:text-textPrimary-dark">Top follow-up</Text>
+          <View className="flex-row items-center">
+            <Text className="text-section-title text-textPrimary dark:text-textPrimary-dark">Top follow-up</Text>
+            <View className="ml-2 rounded-full px-2 py-0.5" style={{ backgroundColor: colors.surfaceAlt }}>
+              <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: "600" }}>{overdueTotalCount}</Text>
+            </View>
+          </View>
           <Pressable onPress={() => router.push("/(main)/people" as never)}>
             <Text className="text-caption font-inter-semibold text-primary">See all</Text>
           </Pressable>
@@ -287,7 +331,7 @@ export default function DashboardScreen() {
           </Pressable>
         </View>
 
-        <View className="mt-3 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+        <View className="mt-3 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark" style={{ position: "relative", overflow: "hidden" }}>
           {isFetching ? (
             <SkeletonText lines={4} />
           ) : recentActivity.slice(0, 5).length === 0 ? (
@@ -303,11 +347,11 @@ export default function DashboardScreen() {
                       <Receipt size={16} color={colors.textSecondary} strokeWidth={2} />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>{item.title}</Text>
-                      <Text className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark">{new Date(item.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</Text>
+                      <Text className="text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>{item.name || item.title}</Text>
+                      <Text className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark">{item.title} · {new Date(item.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</Text>
                     </View>
                     <View className="items-end">
-                      <Text className="text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark">{formatINR(item.amount)}</Text>
+                      <Text className="text-body font-inter-semibold" style={{ color: item.type === "payment" ? colors.success : colors.danger }}>{item.type === "payment" ? `+${formatINR(item.amount)}` : `-${formatINR(item.amount)}`}</Text>
                       <View className="mt-1">
                         <StatusBadge status={mappedStatus} size="sm" />
                       </View>
@@ -318,6 +362,15 @@ export default function DashboardScreen() {
               );
             })
           )}
+          {!isFetching && recentActivity.slice(0, 5).length > 0 ? (
+            <LinearGradient
+              colors={["rgba(255,255,255,0)", "rgba(255,255,255,1)"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              pointerEvents="none"
+              style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 28 }}
+            />
+          ) : null}
         </View>
       </ScrollView>
 

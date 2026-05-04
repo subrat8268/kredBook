@@ -20,14 +20,31 @@ function TabIcon({
       <View
         className="rounded-full"
         style={{
-          width: 24,
+          width: 28,
           height: 3,
-          borderRadius: 2,
-          marginBottom: 2,
+          borderRadius: 99,
+          marginBottom: 4,
+          alignSelf: "center",
           backgroundColor: focused ? color : "transparent",
         }}
       />
-      <Icon name={icon} size={20} color={color} strokeWidth={focused ? 2.3 : 1.9} />
+      <View
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: 14,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: focused ? color : "transparent",
+        }}
+      >
+        <Icon
+          name={icon}
+          size={18}
+          color={focused ? "#FFFFFF" : color}
+          strokeWidth={2}
+        />
+      </View>
     </View>
   );
 }
@@ -51,20 +68,20 @@ export default function TabLayout() {
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: true,
+          tabBarHideOnKeyboard: true,
           tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.textSecondary,
-          tabBarIndicatorStyle: { height: 0 },
+          tabBarInactiveTintColor: colors.textMuted,
           tabBarStyle: {
-            backgroundColor: colors.surface,
-            borderTopWidth: spacing.dividerHeight,
-            borderTopColor: colors.border,
-            height: spacing.tabBarHeight + insets.bottom,
-            paddingBottom: insets.bottom,
+            backgroundColor: "#FFFFFF",
+            borderTopWidth: 0.5,
+            borderTopColor: "#E5E7EB",
+            height: 64 + insets.bottom,
+            paddingBottom: Math.max(8, insets.bottom),
             paddingTop: 6,
-            elevation: 8,
-            shadowColor: colors.textPrimary,
+            elevation: 4,
+            shadowColor: "#000000",
             shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.08,
+            shadowOpacity: 0.06,
             shadowRadius: 6,
           },
           tabBarItemStyle: {
@@ -75,6 +92,7 @@ export default function TabLayout() {
           },
           tabBarLabelStyle: {
             fontSize: 11,
+            fontWeight: "600",
           },
           tabBarAllowFontScaling: false,
         }}
@@ -114,10 +132,13 @@ export default function TabLayout() {
             tabBarLabel: ({ color }) => <TabLabel label="Profile" color={color} />,
           }}
         />
+
+        <Tabs.Screen name="export" options={{ href: null }} />
+        <Tabs.Screen name="new-entry" options={{ href: null }} />
       </Tabs>
 
       <SpeedDialFAB
-        bottom={spacing.tabBarHeight + insets.bottom + 12}
+        bottom={80}
         right={spacing.fabMargin}
         onAction={(action) => {
           if (action === "new-entry") {
