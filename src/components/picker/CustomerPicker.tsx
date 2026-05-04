@@ -1,6 +1,6 @@
 import { useNetworkSync } from "@/src/hooks/useNetworkSync";
 import { usePeople } from "@/src/hooks/usePeople";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { FlatList, Keyboard, Text, TouchableOpacity, View } from "react-native";
 import Loader from "../feedback/Loader";
 import SearchBar from "../ui/SearchBar";
@@ -27,18 +27,12 @@ export default function CustomerPicker({
   const { isConnected } = useNetworkSync();
 
   const {
-    data: peopleData,
+    people,
     isLoading,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = usePeople(vendorId, search);
-
-  // ✅ Flatten paginated data (use deduped people from hook)
-  const people = useMemo(
-    () => peopleData?.people ?? [],
-    [peopleData],
-  );
 
   // ✅ Infinite scroll loader
   const handleEndReached = useCallback(() => {

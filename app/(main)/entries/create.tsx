@@ -5,11 +5,11 @@ import SyncStatus from "@/src/components/feedback/SyncStatus";
 import { useToast } from "@/src/components/feedback/Toast";
 import BillFooter from "@/src/components/orders/BillFooter";
 import CustomerPicker from "@/src/components/picker/CustomerPicker";
+import DateRangePicker from "@/src/components/ui/DateRangePicker";
 import Input from "@/src/components/ui/Input";
 import { useCreateOrder } from "@/src/hooks/useEntries";
 import { useNetworkSync } from "@/src/hooks/useNetworkSync";
 import { useAuthStore } from "@/src/store/authStore";
-import { useOrderStore } from "@/src/store/orderStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
 import { buildEntryShareMessage } from "@/src/utils/shareTemplates";
@@ -17,6 +17,7 @@ import { BillItem, generateBillPdf } from "@/src/utils/generateBillPdf";
 import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
+import { createMMKV } from "react-native-mmkv";
 import { ArrowLeft, Pencil } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -47,6 +48,21 @@ function getAvatarColor(name: string, palette: readonly string[]): string {
   return palette[Math.abs(hash) % palette.length] as string;
 }
 
+function computeDueDateFromPreset(preset: "today" | "7" | "15" | "30" | "custom") {
+  const date = new Date();
+  if (preset === "7") date.setDate(date.getDate() + 7);
+  if (preset === "15") date.setDate(date.getDate() + 15);
+  if (preset === "30") date.setDate(date.getDate() + 30);
+  if (preset === "custom") date.setDate(date.getDate() + 30);
+  return date.toISOString();
+}
+
+function formatChipDate(dateStr?: string) {
+  if (!dateStr) return "Custom";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
+}
+
 export default function CreateOrderScreen() {
   const { colors } = useTheme();
   const { i18n } = useTranslation();
@@ -69,14 +85,9 @@ export default function CreateOrderScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { show: showToast } = useToast();
+  const draftStorage = useMemo(() => createMMKV({ id: "create-entry-draft" }), []);
 
-  // Zustand Draft Entry Store
-  const setCustomer = useOrderStore((state) => state.setCustomer);
-  const selectedCustomerId = useOrderStore((state) => state.selectedCustomerId);
-  const draftItems = useOrderStore((state) => state.items);
-  const clearOrder = useOrderStore((state) => state.clearOrder);
-
-  // Local ephemeral layout/picker states
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [selectedCustomerMeta, setSelectedCustomerMeta] = useState<any>(() => {
     if (!customerParams) return null;
     try {
@@ -87,13 +98,15 @@ export default function CreateOrderScreen() {
   });
   const [previousBalance, setPreviousBalance] = useState<number>(0);
   const [isFetchingBalance, setIsFetchingBalance] = useState(false);
-
-  // Phase 1: quick entry states (amount-first)
   const [quickAmount, setQuickAmount] = useState<string>("");
   const [note, setNote] = useState<string>("");
   const [orderNote, setOrderNote] = useState<string>("");
   const [orderNoteExpanded, setOrderNoteExpanded] = useState(false);
   const [entryType, setEntryType] = useState<"bill" | "payment">("bill");
+  const [isCustomerSheetOpen, setIsCustomerSheetOpen] = useState(false);
+  const [duePreset, setDuePreset] = useState<"today" | "7" | "15" | "30" | "custom">("today");
+  const [customDueDate, setCustomDueDate] = useState<string | undefined>(undefined);
+  const [isCustomDuePickerOpen, setIsCustomDuePickerOpen] = useState(false);
 
   useEffect(() => {
     if (!customerParams) return;
@@ -127,7 +140,7 @@ export default function CreateOrderScreen() {
     if (customerParams) {
       try {
         const parsed = JSON.parse(customerParams);
-        setCustomer(parsed.id);
+        setSelectedCustomerId(parsed.id);
         setSelectedCustomerMeta(parsed);
         fetchPreviousBalance(parsed.id);
       } catch {
@@ -143,22 +156,52 @@ export default function CreateOrderScreen() {
       setEntryType("payment");
       setQuickAmount(String(amountParam));
     }
-  }, [amountParam, customerParams, fetchPreviousBalance, router, setCustomer, showToast]);
+  }, [amountParam, customerParams, fetchPreviousBalance, router, showToast]);
 
   const handleSelectPerson = useCallback(
     async (person: any) => {
-      setCustomer(person?.id || null);
+      setSelectedCustomerId(person?.id || null);
       setSelectedCustomerMeta(person);
       if (person) {
         fetchPreviousBalance(person.id);
       }
     },
-    [setCustomer, fetchPreviousBalance],
+    [fetchPreviousBalance],
   );
 
   const createOrderMutation = useCreateOrder(vendorId!);
   const { queueLength } = useNetworkSync();
-  const hasItems = draftItems.length > 0;
+  const hasItems = false;
+
+  useEffect(() => {
+    const key = `draft:${vendorId ?? "anon"}`;
+    const cached = draftStorage.getString(key);
+    if (!cached) return;
+    try {
+      const parsed = JSON.parse(cached);
+      setQuickAmount(parsed.quickAmount ?? "");
+      setNote(parsed.note ?? "");
+      setOrderNote(parsed.orderNote ?? "");
+      setOrderNoteExpanded(Boolean(parsed.orderNote));
+      setEntryType(parsed.entryType ?? "bill");
+      setDuePreset(parsed.duePreset ?? "today");
+      setCustomDueDate(parsed.customDueDate ?? undefined);
+      if (parsed.selectedCustomerMeta) {
+        setSelectedCustomerMeta(parsed.selectedCustomerMeta);
+        setSelectedCustomerId(parsed.selectedCustomerMeta.id ?? null);
+      }
+    } catch {
+      // ignore corrupted draft
+    }
+  }, [draftStorage, vendorId]);
+
+  useEffect(() => {
+    const key = `draft:${vendorId ?? "anon"}`;
+    draftStorage.set(
+      key,
+      JSON.stringify({ quickAmount, note, orderNote, entryType, duePreset, customDueDate, selectedCustomerMeta }),
+    );
+  }, [customDueDate, draftStorage, duePreset, entryType, note, orderNote, quickAmount, selectedCustomerMeta, vendorId]);
 
   // Calculate effective total (amount-first flow only)
   const entryAmount = parseFloat(quickAmount) || 0;
@@ -206,6 +249,10 @@ export default function CreateOrderScreen() {
           taxPercent: 0,
           billNumberPrefix: profile?.bill_number_prefix || "INV",
           note: orderNote.trim() ? orderNote.trim() : null,
+          dueDate:
+            duePreset === "custom"
+              ? customDueDate ?? computeDueDateFromPreset("30")
+              : computeDueDateFromPreset(duePreset),
         });
 
       // Generate Native Shareable PDF
@@ -269,7 +316,6 @@ export default function CreateOrderScreen() {
       }
 
       // Cleanup Draft on success and go to the created detail screen.
-      clearOrder();
       setQuickAmount("");
       setNote("");
       setOrderNote("");
@@ -328,7 +374,6 @@ export default function CreateOrderScreen() {
         queryKey: ["customerDetail", selectedCustomerId],
       });
       queryClient.invalidateQueries({ queryKey: ["dashboard", profile.id] });
-      clearOrder();
       setQuickAmount("");
       setNote("");
       showToast({
@@ -385,9 +430,9 @@ export default function CreateOrderScreen() {
             showsVerticalScrollIndicator={false}
           >
 
-            {/* Person picker (inline, amount-first flow) */}
+            {/* Person picker */}
             <View className="overflow-hidden rounded-2xl border border-border bg-surface dark:border-border-dark dark:bg-surface-dark">
-              <View className="flex-row items-center border-b border-border px-4 py-4 dark:border-border-dark">
+              <TouchableOpacity onPress={() => setIsCustomerSheetOpen(true)} className="flex-row items-center border-b border-border px-4 py-4 dark:border-border-dark">
                 <View
                   className="rounded-full items-center justify-center mr-3 w-[52px] h-[52px]"
                     style={{
@@ -420,7 +465,7 @@ export default function CreateOrderScreen() {
                 </View>
 
                 <Pencil size={18} color={colors.primary} strokeWidth={2} />
-              </View>
+              </TouchableOpacity>
 
               {selectedCustomerMeta &&
                 previousBalance > 0 &&
@@ -437,80 +482,50 @@ export default function CreateOrderScreen() {
                 )}
             </View>
 
-            {/* Inline picker list (always visible) */}
-            <CustomerPicker
-              visible
-              variant="inline"
-              selectedPerson={selectedCustomerMeta}
-              setSelectedPerson={handleSelectPerson}
-              vendorId={vendorId!}
-            />
-
-            {/* QUICK AMOUNT INPUT (amount-first) */}
+            {/* AMOUNT HERO + NUMPAD */}
             <View className="mt-2">
               <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">
                 AMOUNT
               </Text>
               <View className="rounded-2xl border-2 border-primary bg-surface px-5 py-6 dark:bg-surface-dark">
-                <View className="flex-row items-center">
-                  <Text
-                    className="text-[40px] font-extrabold mr-1"
-                    style={{ color: colors.primary }}
-                  >
-                    ₹
-                  </Text>
-                  <Input
-                    placeholder="0"
-                    value={quickAmount}
-                    onChangeText={setQuickAmount}
-                    placeholderTextColor={colors.border}
-                    keyboardType="numeric"
-                    autoFocus={!selectedCustomerMeta}
-                    returnKeyType="done"
-                    onSubmitEditing={handleSaveAndShare}
-                    variant="white"
-                    containerStyle={styles.quickAmountInputContainer}
-                    inputStyle={styles.quickAmountInput}
-                  />
+                <Text className="text-center text-[52px] font-extrabold" style={{ color: colors.primary }}>
+                  {formatINR(parseFloat(quickAmount || "0"), { maximumFractionDigits: 2 })}
+                </Text>
+                <View className="mt-4" style={{ gap: 8 }}>
+                  {["1,2,3", "4,5,6", "7,8,9", ".,0,⌫"].map((row) => (
+                    <View key={row} className="flex-row" style={{ gap: 8 }}>
+                      {row.split(",").map((key) => (
+                        <TouchableOpacity
+                          key={key}
+                          className="flex-1 rounded-xl border border-border py-3 items-center"
+                          onPress={() => {
+                            if (key === "⌫") {
+                              setQuickAmount((prev) => prev.slice(0, -1));
+                              return;
+                            }
+                            if (key === "." && quickAmount.includes(".")) return;
+                            setQuickAmount((prev) => `${prev}${key}`);
+                          }}
+                        >
+                          <Text className="text-[22px] font-bold text-textPrimary dark:text-textPrimary-dark">{key}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  ))}
                 </View>
-                {hasItems && entryType === "bill" && (
-                  <Text className="mt-2 text-[11px] text-textSecondary dark:text-textSecondary-dark">
-                    Amount calculated from items below
-                  </Text>
-                )}
               </View>
             </View>
 
-            {/* OPTIONAL NOTE */}
-            <View>
-              <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">
-                NOTE (OPTIONAL)
-              </Text>
-              <View className="rounded-2xl border border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
-                <Input
-                  placeholder={
-                    entryType === "payment"
-                      ? "e.g., UPI payment"
-                      : "e.g., Rice purchase, Monthly bill..."
-                  }
-                  value={note}
-                  onChangeText={setNote}
-                  variant="white"
-                  multiline
-                  numberOfLines={3}
-                  containerStyle={styles.noteInputContainer}
-                  inputStyle={styles.noteInput}
-                />
-              </View>
-            </View>
-
-            {/* ENTRY NOTE (collapsible) */}
             <View>
               {!orderNoteExpanded && !orderNote.trim() ? (
                 <TouchableOpacity onPress={() => setOrderNoteExpanded(true)}>
                   <Text className="text-[13px] font-semibold text-primary">+ Add note</Text>
                 </TouchableOpacity>
-              ) : (
+              ) : null}
+            </View>
+
+            <View>
+              {orderNoteExpanded || orderNote.trim() ? (
                 <View>
                   <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">
                     ADD NOTE (OPTIONAL)
@@ -529,7 +544,37 @@ export default function CreateOrderScreen() {
                     />
                   </View>
                 </View>
-              )}
+              ) : null}
+            </View>
+
+            <View>
+              <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">DUE DATE</Text>
+              <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+                {[
+                  { key: "today", label: "Today" },
+                  { key: "7", label: "+7 days" },
+                  { key: "15", label: "+15 days" },
+                  { key: "30", label: "+30 days" },
+                  { key: "custom", label: "Custom" },
+                ].map((chip) => (
+                  <TouchableOpacity
+                    key={chip.key}
+                    onPress={() => {
+                      setDuePreset(chip.key as any);
+                      if (chip.key === "custom") setIsCustomDuePickerOpen(true);
+                    }}
+                    className="rounded-full border px-3 py-2"
+                    style={{
+                      borderColor: duePreset === chip.key ? colors.primary : colors.border,
+                      backgroundColor: duePreset === chip.key ? colors.primaryLight : colors.surface,
+                    }}
+                  >
+                    <Text style={{ color: duePreset === chip.key ? colors.primary : colors.textSecondary, fontWeight: "600" }}>
+                      {chip.key === "custom" && duePreset === "custom" ? formatChipDate(customDueDate) : chip.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
             {/* SUMMARY (Always visible) */}
@@ -605,13 +650,27 @@ export default function CreateOrderScreen() {
             />
           </View>
 
-          {/* Pickers */}
-          <CustomerPicker
-            visible={false}
-            selectedPerson={selectedCustomerMeta}
-            setSelectedPerson={handleSelectPerson}
-            vendorId={vendorId!}
-          />
+          {isCustomerSheetOpen ? (
+            <CustomerPicker
+              visible
+              selectedPerson={selectedCustomerMeta}
+              setSelectedPerson={handleSelectPerson}
+              vendorId={vendorId!}
+              onClose={() => setIsCustomerSheetOpen(false)}
+            />
+          ) : null}
+
+          {isCustomDuePickerOpen ? (
+            <DateRangePicker
+              visible
+              value={{ from: customDueDate, to: customDueDate }}
+              onChange={(range) => {
+                const selected = range.to ?? range.from;
+                if (selected) setCustomDueDate(selected);
+              }}
+              onClose={() => setIsCustomDuePickerOpen(false)}
+            />
+          ) : null}
         </KeyboardAvoidingView>
       </SafeAreaView>
     </>
@@ -620,17 +679,6 @@ export default function CreateOrderScreen() {
 
 const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
   StyleSheet.create({
-    quickAmountInputContainer: {
-      borderWidth: 0,
-      backgroundColor: "transparent",
-      paddingHorizontal: 0,
-      minHeight: 44,
-    },
-    quickAmountInput: {
-      fontSize: 36,
-      fontWeight: "800",
-      color: colors.textPrimary,
-    },
     noteInputContainer: {
       borderWidth: 0,
       backgroundColor: "transparent",

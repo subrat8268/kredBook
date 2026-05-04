@@ -219,6 +219,7 @@ export function useCreateOrder(vendorId: string) {
       taxPercent?: number;
       billNumberPrefix?: string;
       note?: string | null;
+      dueDate?: string | null;
     }
   >({
     mutationFn: ({
@@ -230,6 +231,7 @@ export function useCreateOrder(vendorId: string) {
       loadingCharge,
       taxPercent,
       billNumberPrefix,
+      dueDate,
     }) =>
       createOrder(
         vendorId,
@@ -241,6 +243,7 @@ export function useCreateOrder(vendorId: string) {
         loadingCharge,
         taxPercent,
         billNumberPrefix,
+        dueDate,
       ),
 
     onMutate: async (variables) => {

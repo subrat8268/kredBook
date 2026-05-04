@@ -322,6 +322,7 @@ export async function createOrder(
   loadingCharge: number = 0,
   taxPercent: number = 0,
   billNumberPrefix: string = "INV",
+  dueDate?: string | null,
 ): Promise<OrderDetail> {
   // Wrap mutation with offline queue fallback
   return executeWithOfflineQueue(
@@ -350,6 +351,15 @@ export async function createOrder(
         if (noteErr) throw toApiError(noteErr);
       }
 
+      if (dueDate) {
+        const { error: dueDateErr } = await supabase
+          .from("orders")
+          .update({ due_date: dueDate })
+          .eq("id", data.order_id)
+          .eq("vendor_id", vendorId);
+        if (dueDateErr) throw toApiError(dueDateErr);
+      }
+
       // Fetch and return the fully detailed order
       const orderDetail = await fetchOrderDetail(data.order_id);
       if (!orderDetail) throw new Error("Failed to fetch created order details");
@@ -368,6 +378,7 @@ export async function createOrder(
         loadingCharge,
         taxPercent,
         billNumberPrefix,
+        dueDate,
       },
     }
   );
