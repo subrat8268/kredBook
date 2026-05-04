@@ -1,189 +1,136 @@
-import { CustomerIcon, HomeIcon } from "@/assets/icons/main";
+import { Icon } from "@/src/components/ui/Icon";
+import SpeedDialFAB from "@/src/components/ui/SpeedDialFAB";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { Tabs, useRouter } from "expo-router";
-import { Plus, Receipt, UserRound } from "lucide-react-native";
-import { useMemo } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { House, Receipt, User, Users } from "lucide-react-native";
+import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-function NewBillButton() {
-  const router = useRouter();
-  const { colors, spacing, typography } = useTheme();
-  const styles = useMemo(() => createStyles(colors, spacing, typography), [colors, spacing, typography]);
-
+function TabIcon({
+  focused,
+  color,
+  icon,
+}: {
+  focused: boolean;
+  color: string;
+  icon: typeof House;
+}) {
   return (
-    <TouchableOpacity
-      onPress={() => router.push("/(main)/new-entry")}
-      activeOpacity={0.85}
-      style={styles.fabWrapper}
-    >
-      <View style={styles.fabContainer}>
-        {/* Orange circle with white border */}
-        <View style={styles.fab}>
-          <Plus size={28} color={colors.surface} strokeWidth={2.5} />
-        </View>
+    <View className="items-center justify-center">
+      <View
+        className="rounded-full"
+        style={{
+          width: 24,
+          height: 3,
+          borderRadius: 2,
+          marginBottom: 2,
+          backgroundColor: focused ? color : "transparent",
+        }}
+      />
+      <Icon name={icon} size={20} color={color} strokeWidth={focused ? 2.3 : 1.9} />
+    </View>
+  );
+}
 
-        {/* Floating label above the FAB */}
-        <View style={styles.labelBadge}>
-          <Text style={styles.fabLabelText}>Add Entry</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+function TabLabel({ label, color }: { label: string; color: string }) {
+  return (
+    <Text numberOfLines={1} style={{ fontSize: 11, color, fontWeight: "600" }}>
+      {label}
+    </Text>
   );
 }
 
 export default function TabLayout() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { colors, spacing, typography } = useTheme();
+  const { colors, spacing } = useTheme();
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopWidth: spacing.dividerHeight,
-          borderTopColor: colors.border,
-          elevation: 8,
-          shadowColor: colors.textPrimary,
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.08,
-          shadowRadius: 6,
-          height: spacing.tabBarHeight + insets.bottom,
-          paddingBottom: insets.bottom,
-          paddingTop: 2,
-        },
-        tabBarLabelStyle: {
-          fontSize: typography.label.fontSize,
-          fontWeight: typography.label.fontWeight,
-          marginTop: 2,
-        },
-      }}
-    >
-      {/* Tab 1 — Home */}
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, size, focused }) => (
-            <HomeIcon
-              width={focused ? size + 2 : size}
-              height={focused ? size + 2 : size}
-              color={color}
-            />
-          ),
+    <View style={{ flex: 1 }}>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarShowLabel: true,
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.textSecondary,
+          tabBarIndicatorStyle: { height: 0 },
+          tabBarStyle: {
+            backgroundColor: colors.surface,
+            borderTopWidth: spacing.dividerHeight,
+            borderTopColor: colors.border,
+            height: spacing.tabBarHeight + insets.bottom,
+            paddingBottom: insets.bottom,
+            paddingTop: 6,
+            elevation: 8,
+            shadowColor: colors.textPrimary,
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 6,
+          },
+          tabBarItemStyle: {
+            flex: 1,
+            minWidth: 0,
+            justifyContent: "center",
+            alignItems: "center",
+          },
+          tabBarLabelStyle: {
+            fontSize: 11,
+          },
+          tabBarAllowFontScaling: false,
+        }}
+      >
+        <Tabs.Screen
+          name="dashboard"
+          options={{
+            title: "Home",
+            tabBarIcon: ({ color, focused }) => <TabIcon focused={focused} color={color} icon={House} />,
+            tabBarLabel: ({ color }) => <TabLabel label="Home" color={color} />,
+          }}
+        />
+
+        <Tabs.Screen
+          name="people"
+          options={{
+            title: "People",
+            tabBarIcon: ({ color, focused }) => <TabIcon focused={focused} color={color} icon={Users} />,
+            tabBarLabel: ({ color }) => <TabLabel label="People" color={color} />,
+          }}
+        />
+
+        <Tabs.Screen
+          name="entries"
+          options={{
+            title: "Entries",
+            tabBarIcon: ({ color, focused }) => <TabIcon focused={focused} color={color} icon={Receipt} />,
+            tabBarLabel: ({ color }) => <TabLabel label="Entries" color={color} />,
+          }}
+        />
+
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            tabBarIcon: ({ color, focused }) => <TabIcon focused={focused} color={color} icon={User} />,
+            tabBarLabel: ({ color }) => <TabLabel label="Profile" color={color} />,
+          }}
+        />
+      </Tabs>
+
+      <SpeedDialFAB
+        bottom={spacing.tabBarHeight + insets.bottom + 12}
+        right={spacing.fabMargin}
+        onAction={(action) => {
+          if (action === "new-entry") {
+            router.push("/(main)/entries/create" as never);
+            return;
+          }
+          if (action === "new-customer") {
+            router.push({ pathname: "/(main)/people", params: { action: "add" } } as never);
+            return;
+          }
+          router.push("/(main)/dashboard" as never);
         }}
       />
-
-      {/* Tab 2 — People */}
-      <Tabs.Screen
-        name="people"
-        options={{
-          title: "People",
-          tabBarIcon: ({ color, size, focused }) => (
-            <CustomerIcon
-              width={focused ? size + 2 : size}
-              height={focused ? size + 2 : size}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      {/* Tab 3 — Add Entry (center FAB, phantom tab) */}
-      <Tabs.Screen
-        name="new-entry"
-        options={{
-          title: "Add",
-          tabBarIcon: () => null,
-          tabBarLabel: () => null,
-          tabBarButton: () => <NewBillButton />,
-        }}
-      />
-
-      {/* Tab 4 — Entries list */}
-      <Tabs.Screen
-        name="entries"
-        options={{
-          title: "Entries",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Receipt
-              size={focused ? size + 2 : size}
-              color={color}
-              strokeWidth={focused ? 2.3 : 1.8}
-            />
-          ),
-        }}
-      />
-
-      {/* Tab 5 — Profile (includes Export + Settings) */}
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size, focused }) => (
-            <UserRound
-              size={focused ? size + 2 : size}
-              color={color}
-              strokeWidth={focused ? 2.3 : 1.8}
-            />
-          ),
-        }}
-      />
-
-      {/* Hidden routes — accessible via router.push but not shown in the tab bar */}
-      <Tabs.Screen name="export" options={{ href: null }} />
-    </Tabs>
+    </View>
   );
 }
-
-const createStyles = (
-  colors: ReturnType<typeof useTheme>["colors"],
-  spacing: ReturnType<typeof useTheme>["spacing"],
-  typography: ReturnType<typeof useTheme>["typography"],
-) =>
-  StyleSheet.create({
-    fabWrapper: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    fabContainer: {
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    fab: {
-      width: spacing.fabSize,
-      height: spacing.fabSize,
-      borderRadius: spacing.fabSize / 2,
-      backgroundColor: colors.fabBg,
-      alignItems: "center",
-      justifyContent: "center",
-      borderWidth: 4,
-      borderColor: colors.surface,
-      marginTop: -(spacing.fabSize / 2),
-      shadowColor: colors.textPrimary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 10,
-      elevation: 5,
-    },
-    labelBadge: {
-      position: "absolute",
-      top: -(spacing.fabSize / 2) - 16,
-      backgroundColor: colors.surface,
-      paddingHorizontal: spacing.lg,
-      paddingVertical: spacing.xs,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: colors.borderLight,
-    },
-    fabLabelText: {
-      fontSize: typography.caption.fontSize,
-      fontWeight: "800" as const,
-      textAlign: "center",
-      color: colors.textPrimary,
-    },
-  });

@@ -4,7 +4,6 @@ import NewCustomerModal from "@/src/components/people/NewCustomerModal";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
 import BottomSheetPicker from "@/src/components/picker/BottomSheetPicker";
 import Avatar from "@/src/components/ui/Avatar";
-import SpeedDialFAB from "@/src/components/ui/SpeedDialFAB";
 import { Skeleton, SkeletonCard, SkeletonHeroCard, SkeletonText } from "@/src/components/ui/Skeleton";
 import { fetchPersonDetail } from "@/src/api/people";
 import { useDashboard } from "@/src/hooks/useDashboard";
@@ -28,8 +27,6 @@ type PaymentContext = {
   customerName: string;
   initialAmount?: number;
 };
-
-type SpeedDialAction = "new-entry" | "new-customer" | "record-payment";
 
 function getGreetingLabel(name: string | undefined) {
   const hour = new Date().getHours();
@@ -145,21 +142,6 @@ export default function DashboardScreen() {
     }
     setIsCustomerPickerOpen(true);
   }, [followUpPeople, openRecordPaymentForCustomer]);
-
-  const handleSpeedDialAction = useCallback(
-    async (action: SpeedDialAction) => {
-      if (action === "new-entry") {
-        router.push("/(main)/entries/create" as never);
-        return;
-      }
-      if (action === "new-customer") {
-        setIsModalOpen(true);
-        return;
-      }
-      await handleCollectNow();
-    },
-    [handleCollectNow, router],
-  );
 
   const quickStats = [
     {
@@ -338,8 +320,6 @@ export default function DashboardScreen() {
           )}
         </View>
       </ScrollView>
-
-      <SpeedDialFAB onAction={handleSpeedDialAction} />
 
       <NewCustomerModal
         visible={isModalOpen}

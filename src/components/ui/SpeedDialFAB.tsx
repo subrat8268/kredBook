@@ -8,6 +8,8 @@ type Action = "new-entry" | "new-customer" | "record-payment";
 
 type SpeedDialFABProps = {
   onAction: (action: Action) => void;
+  bottom?: number;
+  right?: number;
 };
 
 const ACTIONS: { action: Action; label: string; icon: typeof FilePlus }[] = [
@@ -16,7 +18,7 @@ const ACTIONS: { action: Action; label: string; icon: typeof FilePlus }[] = [
   { action: "record-payment", label: "Record Payment", icon: Wallet },
 ];
 
-export default function SpeedDialFAB({ onAction }: SpeedDialFABProps) {
+export default function SpeedDialFAB({ onAction, bottom = 24, right = 20 }: SpeedDialFABProps) {
   const [isOpen, setIsOpen] = useState(false);
   const rotateAnim = useMemo(() => new Animated.Value(0), []);
   const backdropAnim = useMemo(() => new Animated.Value(0), []);
@@ -123,7 +125,7 @@ export default function SpeedDialFAB({ onAction }: SpeedDialFABProps) {
 
   return (
     <>
-      <View style={styles.container} pointerEvents="box-none">
+      <View style={[styles.container, { right, bottom }]} pointerEvents="box-none">
         {isOpen
           ? ACTIONS.map((item, index) => (
               <Animated.View
@@ -164,8 +166,6 @@ export default function SpeedDialFAB({ onAction }: SpeedDialFABProps) {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    right: 20,
-    bottom: 24,
     alignItems: "flex-end",
     gap: 12,
   },
