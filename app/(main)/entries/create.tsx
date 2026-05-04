@@ -303,8 +303,21 @@ export default function CreateOrderScreen() {
     }
 
     if (entryType === "payment") {
-      if (!quickAmount.trim() || parseFloat(quickAmount) <= 0) {
+      const paymentAmount = parseFloat(quickAmount) || 0;
+      if (!quickAmount.trim() || paymentAmount <= 0) {
         return Alert.alert("Error", "Please enter a payment amount");
+      }
+      if (previousBalance <= 0) {
+        return Alert.alert(
+          "Up to date",
+          `${selectedCustomerMeta?.name ?? "This person"} has no pending entries to pay.`,
+        );
+      }
+      if (paymentAmount > previousBalance) {
+        return Alert.alert(
+          "Amount too high",
+          `Payment exceeds the pending balance of ${formatINR(previousBalance)}.`,
+        );
       }
       return handleRecordPayment();
     }
@@ -417,13 +430,6 @@ export default function CreateOrderScreen() {
         Alert.alert(
           "Up to date",
           `${detail?.name ?? selectedCustomerMeta?.name ?? "This person"} has no pending entries to pay.`,
-        );
-        return;
-      }
-      if (paymentAmount > (detail.pendingOrderBalance ?? 0)) {
-        Alert.alert(
-          "Amount too high",
-          `Payment exceeds the pending balance of ${formatINR(detail.pendingOrderBalance ?? 0)}.`,
         );
         return;
       }
