@@ -13,7 +13,7 @@ import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
 import { motion } from "@/src/utils/theme";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { ArrowDownRight, ArrowUpRight, Bell, Clock3, Receipt, Users, Wallet } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -44,6 +44,7 @@ function getBusinessInitials(name: string | undefined) {
 export default function DashboardScreen() {
   const { colors, gradients, spacing, statusBarStyle } = useTheme();
   const router = useRouter();
+  const params = useLocalSearchParams<{ action?: string }>();
   const { profile } = useAuthStore();
   const { show: showToast } = useToast();
 
@@ -112,6 +113,15 @@ export default function DashboardScreen() {
     };
   }, [animatedOutstanding, totalOutstanding, slowDuration]);
 
+  // Handle record-payment action param from SpeedDialFAB
+  useEffect(() => {
+    if (params.action === "record-payment") {
+      setIsCustomerPickerOpen(true);
+      // Clear param to prevent re-triggering on re-render
+      router.setParams({ action: undefined });
+    }
+  }, [params.action, router]);
+
   const openRecordPaymentForCustomer = useCallback(
     async (customerId: string, customerName: string) => {
       setIsCollecting(true);
@@ -172,7 +182,8 @@ export default function DashboardScreen() {
 
   if (!profile) return null;
 
-  if (isLoading && totalCustomersCount === 0) {
+  // Show skeleton only on true first load (no cached data yet)
+  if (isLoading) {
     return (
       <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={["top"]}>
         <StatusBar barStyle={statusBarStyle} backgroundColor={colors.background} translucent={false} />
@@ -364,7 +375,7 @@ export default function DashboardScreen() {
           )}
           {!isFetching && recentActivity.slice(0, 5).length > 0 ? (
             <LinearGradient
-              colors={["rgba(255,255,255,0)", "rgba(255,255,255,1)"]}
+              colors={["transparent", colors.surface]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
               pointerEvents="none"
