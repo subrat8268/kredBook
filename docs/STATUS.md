@@ -21,7 +21,7 @@
 |---|---|---|---|
 | 1 | Truth Reset | ✅ Done | Canonical nouns, core flows, offline-first baseline |
 | 2 | DB Hardening | ✅ Done | Schema cleanup, due_date, payment_date, parties fields |
-| 3 | Experience Upgrades | 🔄 In Progress | Dark mode, WhatsApp-first sharing, overdue polish |
+| 3 | Experience Upgrades | ✅ Done | Dark mode, WhatsApp-first sharing, overdue polish |
 | 4 | UI/UX Redesign | 🔄 In Progress | Full design system overhaul — Vercel × Khatabook × Linear |
 | 5 | Documents + Collection | ⏳ Not Started | PDF outputs, UPI collection |
 | 6 | AI Assistance | ⏳ Not Started | Opt-in AI layer via Edge Functions |
@@ -93,7 +93,7 @@
 
 ---
 
-## Phase 3 — Experience Upgrades 🔄 In Progress
+## Phase 3 — Experience Upgrades ✅ Done
 
 **Goal:** Dark mode, WhatsApp-first sharing polish, overdue badge consistency, quality-of-life wins.
 
@@ -197,7 +197,7 @@ Deliver an audit report only. Fixes go in a follow-up /fix task.
 
 ---
 
-## Phase 4 — UI/UX Redesign ⏳ Not Started
+## Phase 4 — UI/UX Redesign 🔄 In Progress
 
 **Goal:** Full design system overhaul and screen-by-screen redesign. Vercel × Khatabook × Linear aesthetic. Bharat-market ready.
 
@@ -276,12 +276,46 @@ Verification: theme.ts exports unchanged API shape, no TS errors, lint clean.
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
 | 4.1.1 | Dashboard redesign — hero card, quick stats row, activity feed, SpeedDialFAB | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `(main)/dashboard/index.tsx` ([f690c3c](https://github.com/subrat8268/kredBook/commit/f690c3c)) |
-| 4.1.2 | Tab navigation redesign — 4-tab layout, lucide icons, active pill indicator | ⏳ Not Started | P0 | `/refactor` | `ui-ux-pro-max`, `react-native-skills` | `(main)/_layout.tsx` |
+| 4.1.2 | Tab navigation redesign — theme-aware tab bar, lucide icons, SpeedDialFAB record-payment routing fix | ✅ Done | P0 | `/refactor` | `ui-ux-pro-max`, `react-native-skills` | `(main)/_layout.tsx` ([fa4f3b2](https://github.com/subrat8268/kredBook/commit/fa4f3b24e2ca07a2edb27f42a410a94ca02ffcad)) |
 | 4.1.3 | Create Entry redesign — full-screen numpad, bottom sheet customer picker, quick due-date chips | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/create.tsx` |
 | 4.1.4 | Record Payment modal redesign — large numpad, partial toggle, payment method, WhatsApp receipt | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
 | 4.1.5 | Customer Detail redesign — hero card, sticky balance bar, timeline view, swipe actions | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
 
-#### 4.1.1 — Dashboard Redesign OpenCode Prompt
+#### 4.1.2 — Tab Navigation Redesign ✅ Done
+
+**Fixed tab navigation in `app/(main)/_layout.tsx` — theme-aware colors and reliable FAB routing.**
+
+- Replaced hardcoded `backgroundColor: "#FFFFFF"` in `tabBarStyle` with `colors.surface` from `useTheme()` — tab bar now respects dark mode correctly.
+- Replaced hardcoded `borderTopColor` with `colors.border` token.
+- Fixed `SpeedDialFAB` record-payment action: instead of `router.setParams()` (which only worked on the Dashboard tab), it now calls `router.push({ pathname: "/(main)/dashboard", params: { action: "record-payment" } })` — customer picker opens correctly from any tab.
+- Kept all 4 tabs (Home, People, Entries, Profile), existing icons, and SpeedDialFAB new-entry / new-customer actions unchanged.
+
+**Files changed:** `app/(main)/_layout.tsx`
+
+**Verification:** Tab bar uses surface token in both light and dark mode; record-payment FAB action tested from People and Entries tabs; `npm run lint` passes.
+
+#### 4.1.3 — Create Entry Redesign OpenCode Prompt
+
+```
+/build load_skills=["ui-ux-pro-max","react-native-skills","code-reviewer"]
+
+Redesign Create Entry screen in (main)/entries/create.tsx.
+
+Changes:
+1. Amount input: full-screen large numpad (PhonePe/GPay style) — amount is the hero
+2. Customer selector: searchable bottom sheet (not full navigation), recently added customers first
+3. Description: optional, collapsed by default. Tap "+ Add note" to expand
+4. Due date: quick chips — Today · +7 days · +15 days · +30 days · Custom (no calendar scroll by default)
+5. Auto-save draft on exit (MMKV backed)
+6. Remove stub product picker state (lines 91–103) and all "// Stub state" comments
+
+Keep: PDF auto-generate + share, WhatsApp share as primary action in post-create modal.
+Verification: entry creates successfully, draft saves on exit, no dead code, lint clean.
+```
+
+---
+
+### Phase 4.1 — Dashboard Redesign OpenCode Prompt
 
 ```
 /build load_skills=["ui-ux-pro-max","sleek-design-mobile-apps","react-native-skills","code-reviewer"]
@@ -304,25 +338,6 @@ Changes:
 
 No new DB queries. Wire to existing hooks + get_dashboard_summary RPC.
 Verification: all sections render, skeleton shows on load, SpeedDialFAB expands/collapses, lint clean.
-```
-
-#### 4.1.3 — Create Entry Redesign OpenCode Prompt
-
-```
-/build load_skills=["ui-ux-pro-max","react-native-skills","code-reviewer"]
-
-Redesign Create Entry screen in (main)/entries/create.tsx.
-
-Changes:
-1. Amount input: full-screen large numpad (PhonePe/GPay style) — amount is the hero
-2. Customer selector: searchable bottom sheet (not full navigation), recently added customers first
-3. Description: optional, collapsed by default. Tap "+ Add note" to expand
-4. Due date: quick chips — Today · +7 days · +15 days · +30 days · Custom (no calendar scroll by default)
-5. Auto-save draft on exit (MMKV backed)
-6. Remove stub product picker state (lines 91–103) and all "// Stub state" comments
-
-Keep: PDF auto-generate + share, WhatsApp share as primary action in post-create modal.
-Verification: entry creates successfully, draft saves on exit, no dead code, lint clean.
 ```
 
 ---
