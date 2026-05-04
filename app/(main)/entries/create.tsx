@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Haptics from "expo-haptics";
 import { createMMKV } from "react-native-mmkv";
-import { ArrowLeft, Pencil } from "lucide-react-native";
+import { ArrowLeft, Pencil, User } from "lucide-react-native";
 import { format } from "date-fns";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -617,14 +617,16 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                     style={{
                       backgroundColor: selectedCustomerMeta
                         ? getAvatarColor(selectedCustomerMeta.name, avatarColors)
-                        : colors.border,
+                        : colors.background,
                     }}
                 >
-                  <Text className="font-bold text-surface text-[17px]">
-                    {selectedCustomerMeta
-                      ? getInitials(selectedCustomerMeta.name)
-                      : "?"}
-                  </Text>
+                  {selectedCustomerMeta ? (
+                    <Text className="font-bold text-surface text-[17px]">
+                      {getInitials(selectedCustomerMeta.name)}
+                    </Text>
+                  ) : (
+                    <User size={24} color={colors.textSecondary} />
+                  )}
                 </View>
 
                 <View className="flex-1">
