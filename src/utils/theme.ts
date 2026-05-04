@@ -12,39 +12,42 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const colors = {
-  // ─ Brand Blue (Primary UI actions only)
-  primary: "#2563EB",
-  primaryDark: "#1D4ED8",
-  primaryLight: "#EFF6FF",
+  // ─ Brand Green (Primary UI actions)
+  primary: "#16A34A", // green-600
+  primaryDark: "#15803D", // green-700
+  primaryLight: "#DCFCE7", // green-100
+
+  // ─ Accent (Overdue/urgency)
+  accent: "#F59E0B", // amber-500
 
   // ─ Brand aliases
-  fab: "#2563EB",
-  fabBg: "#2563EB",
+  fab: "#16A34A",
+  fabBg: "#16A34A",
 
   // ─ Semantic Reds / Pinks
-  danger: "#EF4444", // Owed, Overdue states
-  dangerStrong: "#DC2626", // Dashboard-level alert red (gradient start)
+  danger: "#DC2626", // errors, destructive
+  dangerStrong: "#B91C1C", // deeper red for emphasis
   supplierPrimary: "#DB2777", // Supplier card / I Owe Suppliers
 
   // ─ Semantic Amber
-  warning: "#F59E0B", // Pending, Reminder, Caution
+  warning: "#F59E0B", // = accent
 
   // ─ Semantic Green (positive money only)
-  success: "#16A34A",
+  success: "#16A34A", // = primary
   successDark: "#15803D",
   successLight: "#DCFCE7",
 
   // ─ Neutrals
-  background: "#F6F7F9", // App canvas (very light gray)
-  surface: "#FFFFFF", // Cards, modals, panels
-  textPrimary: "#1C1C1E", // Primary text (near-black)
-  textSecondary: "#6B7280", // Secondary text, captions
-  border: "#E2E8F0",    // Dividers, input borders, subtle separators
+  background: "#F9FAFB", // gray-50
+  surface: "#FFFFFF", // cards, modals, panels
+  textPrimary: "#111827", // gray-900
+  textSecondary: "#6B7280", // gray-500
+  border: "#E5E7EB", // gray-200
   borderLight: "#F1F5F9", // Slate-100 — innercard borders, sub-box dividers
 
-  // ─ Semantic Blues (FAB + action bar "New Entry")
-  primaryBlue: "#2563EB",    // Blue-600 — Brand/info alias
-  primaryBlueBg: "#EFF6FF",  // Blue-50  — New Entry icon circle bg
+  // ─ Semantic Blues (legacy info alias)
+  primaryBlue: "#2563EB", // legacy brand/info alias
+  primaryBlueBg: "#EFF6FF", // legacy light info surface
 
   // ─ Semantic backgrounds (tinted panels)
   successBg: "#F0FDF4",  // Green-50: YOU RECEIVE panel
@@ -128,7 +131,7 @@ export const colors = {
   supplierBadgeBg: "#FCE7F3", // pink-100 — header "I Owe" badge bg
 
   // ─ Icon backgrounds
-  iconBg: "#EFF6FF", // Light brand blue surface
+  iconBg: "#F0FDF4", // green-50
 
   // ─ Sync status tokens (for SyncStatusBanner component)
   sync: {
@@ -161,6 +164,17 @@ export const colors = {
 
 export type ThemeMode = "light" | "dark";
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// MOTION TOKENS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const motion = {
+  fast: 150,
+  base: 250,
+  slow: 400,
+  easing: "cubic-bezier(0.16,1,0.3,1)",
+} as const;
+
 type WidenLiterals<T> = T extends string
   ? string
   : T extends readonly (infer U)[]
@@ -175,14 +189,15 @@ export const lightColors: ColorTokens = colors;
 
 export const darkColors: ColorTokens = {
   ...colors,
-  primary: "#3B82F6",
-  primaryDark: "#2563EB",
-  primaryLight: "#1E3A8A",
-  fab: "#3B82F6",
-  fabBg: "#3B82F6",
-  danger: "#F87171",
+  primary: "#22C55E", // green-500
+  primaryDark: "#16A34A", // green-600
+  primaryLight: "#14532D", // green-900 surface
+  fab: "#22C55E",
+  fabBg: "#22C55E",
+  danger: "#FCA5A5",
   dangerStrong: "#EF4444",
   supplierPrimary: "#EC4899",
+  accent: "#F59E0B",
   warning: "#F59E0B",
   success: "#22C55E",
   successDark: "#16A34A",
@@ -262,21 +277,21 @@ export const darkColors: ColorTokens = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const gradients = {
-  // Dashboard hero card — red gradient
+  // Dashboard hero card — green gradient
   dashboardHero: {
-    start: "#B91C1C", // Red-700
-    end: "#7F1D1D", // Red-900
+    start: "#15803D", // green-700
+    end: "#166534", // green-800
   },
 
-  // Person balance card — red gradient
+  // Person balance card — green gradient
   customerHero: {
-    start: "#DC2626", // Red-600
-    end: "#B91C1C", // Red-800
+    start: "#15803D", // green-700
+    end: "#166534", // green-800
   },
   // Preferred alias (person naming)
   peopleHero: {
-    start: "#DC2626", // Red-600
-    end: "#B91C1C", // Red-800
+    start: "#15803D", // green-700
+    end: "#166534", // green-800
   },
 
   // Supplier payable card — pink gradient
@@ -326,16 +341,16 @@ export const lightGradients: GradientTokens = gradients;
 export const darkGradients: GradientTokens = {
   ...gradients,
   dashboardHero: {
-    start: "#7F1D1D",
-    end: "#450A0A",
+    start: "#14532D", // green-900
+    end: "#052E16", // green-950
   },
   customerHero: {
-    start: "#991B1B",
-    end: "#450A0A",
+    start: "#14532D",
+    end: "#052E16",
   },
   peopleHero: {
-    start: "#991B1B",
-    end: "#450A0A",
+    start: "#14532D",
+    end: "#052E16",
   },
   supplierHero: {
     start: "#9D174D",
@@ -451,6 +466,16 @@ export const typography = {
     extraBold: "Inter_800ExtraBold",
   },
 
+  // ─ Heading font (Phase 4)
+  headingFontFamily: "Manrope",
+  headingFontFamilies: {
+    regular: "Manrope_400Regular",
+    medium: "Manrope_500Medium",
+    semiBold: "Manrope_600SemiBold",
+    bold: "Manrope_700Bold",
+    extraBold: "Manrope_800ExtraBold",
+  },
+
   // ─ Text styles (size, weight, line-height)
   heroAmount: {
     fontSize: 36,
@@ -462,6 +487,7 @@ export const typography = {
     fontSize: 24,
     fontWeight: "700" as const,
     lineHeight: 30,
+    fontFamily: "Manrope_700Bold",
     color: colors.textPrimary,
   },
 
@@ -469,6 +495,7 @@ export const typography = {
     fontSize: 18,
     fontWeight: "700" as const,
     lineHeight: 24,
+    fontFamily: "Manrope_700Bold",
     color: colors.textPrimary,
   },
 
