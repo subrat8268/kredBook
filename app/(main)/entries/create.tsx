@@ -799,7 +799,7 @@ export default function CreateOrderScreen() {
                     Entry Amount
                   </Text>
                   <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
-                    ₹{entryAmount.toFixed(2)}
+                    {formatINR(entryAmount, { maximumFractionDigits: 2 })}
                   </Text>
                 </View>
 
@@ -809,7 +809,7 @@ export default function CreateOrderScreen() {
                       Previous Balance
                     </Text>
                     <Text className="text-[16px] font-bold" style={{ color: colors.warning }}>
-                      ₹{previousBalance.toFixed(2)}
+                      {formatINR(previousBalance, { maximumFractionDigits: 2 })}
                     </Text>
                   </View>
                 )}
@@ -827,7 +827,7 @@ export default function CreateOrderScreen() {
                     className="text-[24px] font-extrabold"
                     style={{ color: colors.primary }}
                   >
-                    ₹{totalWithBalance.toFixed(2)}
+                    {formatINR(totalWithBalance, { maximumFractionDigits: 2 })}
                   </Text>
                 </View>
               </View>
