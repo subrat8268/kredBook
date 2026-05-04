@@ -72,9 +72,9 @@ export default function TabLayout() {
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.textMuted,
           tabBarStyle: {
-            backgroundColor: "#FFFFFF",
+            backgroundColor: colors.surface,
             borderTopWidth: 0.5,
-            borderTopColor: "#E5E7EB",
+            borderTopColor: colors.border,
             height: 64 + insets.bottom,
             paddingBottom: Math.max(8, insets.bottom),
             paddingTop: 6,
@@ -149,7 +149,7 @@ export default function TabLayout() {
             router.push({ pathname: "/(main)/people", params: { action: "add" } } as never);
             return;
           }
-          router.setParams({ action: "record-payment" });
+          router.push({ pathname: "/(main)/dashboard", params: { action: "record-payment" } } as never);
         }}
       />
     </View>
