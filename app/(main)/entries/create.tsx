@@ -418,7 +418,6 @@ export default function CreateOrderScreen() {
     router.back();
   }, [router]);
 
-  const invoiceRef = `${profile?.bill_number_prefix || "INV"}-NEW`;
   const showOnlyCustomerCard =
     hasHydratedDraft && !hadInitialSeedData && !selectedCustomerId;
 
@@ -554,15 +553,38 @@ export default function CreateOrderScreen() {
             <View className="mr-2">
               <SyncStatus />
             </View>
-            <TouchableOpacity
-              className="rounded-full border border-primary bg-primary-light px-3 py-1 dark:bg-primary-soft-dark"
-              onPress={() => setEntryType((prev) => (prev === "payment" ? "bill" : "payment"))}
-              activeOpacity={0.75}
-            >
-              <Text className="text-[13px] font-bold text-primary">
-                {entryType === "payment" ? "PAYMENT" : invoiceRef}
-              </Text>
-            </TouchableOpacity>
+            <View className="flex-row rounded-full border border-border overflow-hidden dark:border-border-dark">
+              <TouchableOpacity
+                onPress={() => setEntryType("bill")}
+                className="px-3 py-1.5"
+                style={{
+                  backgroundColor: entryType === "bill" ? colors.primary : "transparent",
+                }}
+                activeOpacity={0.75}
+              >
+                <Text
+                  className="text-[12px] font-bold"
+                  style={{ color: entryType === "bill" ? colors.surface : colors.textSecondary }}
+                >
+                  Bill
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setEntryType("payment")}
+                className="px-3 py-1.5"
+                style={{
+                  backgroundColor: entryType === "payment" ? colors.primary : "transparent",
+                }}
+                activeOpacity={0.75}
+              >
+                <Text
+                  className="text-[12px] font-bold"
+                  style={{ color: entryType === "payment" ? colors.surface : colors.textSecondary }}
+                >
+                  Payment
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Scrollable Content */}
