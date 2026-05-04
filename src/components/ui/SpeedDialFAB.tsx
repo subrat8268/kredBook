@@ -1,7 +1,7 @@
 import { colors, motion, radius } from "@/src/utils/theme";
 import { FilePlus, Plus, UserPlus, Wallet } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Animated, BackHandler, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, BackHandler, Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon } from "./Icon";
 
 type Action = "new-entry" | "new-customer" | "record-payment";
@@ -124,7 +124,13 @@ export default function SpeedDialFAB({ onAction, bottom = 24, right = 20 }: Spee
   });
 
   return (
-    <>
+    <View style={styles.root} pointerEvents="box-none">
+      {isOpen ? (
+        <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]} pointerEvents="box-none">
+          <Pressable style={styles.backdropPressable} onPress={close} />
+        </Animated.View>
+      ) : null}
+
       <View style={[styles.container, { right, bottom }]} pointerEvents="box-none">
         {isOpen
           ? ACTIONS.map((item, index) => (
@@ -148,42 +154,41 @@ export default function SpeedDialFAB({ onAction, bottom = 24, right = 20 }: Spee
           : null}
 
         <Pressable onPress={handleFabPress} style={styles.fabPressable}>
-          <Animated.View style={[styles.fab, { transform: [{ rotate: rotation }] }]}>
+          <Animated.View style={[styles.fab, { transform: [{ rotate: rotation }] }]}> 
             <Icon name={Plus} size={28} color={colors.surface} />
           </Animated.View>
         </Pressable>
       </View>
-
-      <Modal visible={isOpen} transparent animationType="none">
-        <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
-          <Pressable style={styles.backdropPressable} onPress={close} />
-        </Animated.View>
-      </Modal>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    ...StyleSheet.absoluteFillObject,
+  },
   container: {
     position: "absolute",
     alignItems: "flex-end",
     gap: 12,
   },
   fabPressable: {
-    borderRadius: 28,
+    borderRadius: 50,
+    borderWidth: 4,
+    borderColor: colors.borderLight,
   },
   fab: {
-    width: 56,
-    height: 56,
+    width: 52,
+    height: 52,
     borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.primary,
     shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 1,
+    shadowRadius: 15,
+    elevation: 16,
   },
   childButton: {
     flexDirection: "row",

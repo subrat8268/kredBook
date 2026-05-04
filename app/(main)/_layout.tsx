@@ -138,7 +138,7 @@ export default function TabLayout() {
       </Tabs>
 
       <SpeedDialFAB
-        bottom={80}
+        bottom={72 + insets.bottom}
         right={spacing.fabMargin}
         onAction={(action) => {
           if (action === "new-entry") {
@@ -149,7 +149,7 @@ export default function TabLayout() {
             router.push({ pathname: "/(main)/people", params: { action: "add" } } as never);
             return;
           }
-          router.push("/(main)/dashboard" as never);
+          router.setParams({ action: "record-payment" });
         }}
       />
     </View>
