@@ -1,12 +1,12 @@
-# Graph Report - kredBook  (2026-05-03)
+# Graph Report - kredBook  (2026-05-04)
 
 ## Corpus Check
-- 171 files · ~326,285 words
+- 108 files · ~56,352 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 374 nodes · 454 edges · 17 communities detected
-- Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 50 edges (avg confidence: 0.8)
+- 385 nodes · 467 edges · 17 communities detected
+- Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 55 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -41,70 +41,70 @@
 10. `buildEntryShareMessage()` - 6 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `sendWhatsAppReminder()` --calls--> `formatINR()`  [INFERRED]
-  app\(main)\people\[customerId].tsx → src\utils\format.ts
-- `fetchPeople()` --calls--> `toApiError()`  [INFERRED]
-  src\api\people.ts → src\lib\supabaseQuery.ts
 - `scheduleOverdueReminder()` --calls--> `formatINR()`  [INFERRED]
   src\lib\notifications.ts → src\utils\format.ts
-- `init()` --calls--> `getOrCreateSyncQueueKey()`  [INFERRED]
-  app\_layout.tsx → src\lib\syncQueueStorage.ts
-- `handleRecordPayment()` --calls--> `recordPayment()`  [INFERRED]
-  app\(main)\entries\create.tsx → src\api\entries.ts
+- `sendWhatsAppReminder()` --calls--> `formatINR()`  [INFERRED]
+  app\(main)\people\[customerId].tsx → src\utils\format.ts
+- `exportNetPositionReport()` --calls--> `toApiError()`  [INFERRED]
+  src\api\dashboard.ts → src\lib\supabaseQuery.ts
+- `fetchOrders()` --calls--> `toApiError()`  [INFERRED]
+  src\api\entries.ts → src\lib\supabaseQuery.ts
+- `fetchOrderDetail()` --calls--> `toApiError()`  [INFERRED]
+  src\api\entries.ts → src\lib\supabaseQuery.ts
 
 ## Communities (83 total, 3 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.1
-Nodes (15): fetchPersonDetail(), handleRecordPayment(), handleSaveAndShare(), performSave(), handleWhatsApp(), handleSubmit(), fmtAmount(), formatINR() (+7 more)
+Cohesion: 0.09
+Nodes (21): fetchPersonDetail(), handleRecordPayment(), handleSaveAndShare(), performSave(), handleWhatsApp(), handleSubmit(), fmtAmount(), entryRow() (+13 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.09
-Nodes (15): init(), setupNotifications(), useAuth(), useFontsLoader(), fetchOverdueGroups(), getTodayDateString(), useOverdueNotifications(), createMMKVPersister() (+7 more)
+Cohesion: 0.1
+Nodes (18): createOrder(), fetchOrderDetail(), fetchOrders(), fetchPayments(), getCustomerPreviousBalance(), recordPayment(), updateOrder(), addPerson() (+10 more)
 
 ### Community 2 - "Community 2"
+Cohesion: 0.11
+Nodes (15): exportNetPositionReport(), getDashboardData(), getDashboardSummary(), getNetPositionReport(), fetchOrdersForExport(), isoRange(), fetchLedgerCsvRows(), fetchLedgerForExport() (+7 more)
+
+### Community 3 - "Community 3"
 Cohesion: 0.08
 Nodes (7): useCreateOrder(), useOrders(), useInfiniteScroll(), useNetworkSync(), useSyncStatus(), formatDate(), formatRelativeActivity()
 
-### Community 3 - "Community 3"
-Cohesion: 0.14
-Nodes (14): createOrder(), fetchOrderDetail(), fetchOrders(), getCustomerPreviousBalance(), recordPayment(), updateOrder(), addPerson(), fetchPeople() (+6 more)
-
 ### Community 4 - "Community 4"
-Cohesion: 0.16
-Nodes (12): exportNetPositionReport(), getDashboardData(), getDashboardSummary(), getNetPositionReport(), fetchOrdersForExport(), isoRange(), fetchLedgerCsvRows(), fetchLedgerForExport() (+4 more)
+Cohesion: 0.09
+Nodes (15): init(), setupNotifications(), useAuth(), useFontsLoader(), fetchOverdueGroups(), getTodayDateString(), useOverdueNotifications(), createMMKVPersister() (+7 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.16
 Nodes (8): loginApi(), logoutApi(), resetPasswordApi(), signInWithGoogleApi(), signUpApi(), useGoogleSignIn(), useLogin(), useSignUp()
 
 ### Community 6 - "Community 6"
-Cohesion: 0.15
-Nodes (7): fetchPayments(), useDebounce(), usePayments(), useRecordPayment(), dedupeById(), useCustomers(), ApiError
-
-### Community 7 - "Community 7"
 Cohesion: 0.19
 Nodes (9): DashboardScreen(), OfflineToastListener(), useToast(), useDashboard(), useWhatsAppShare(), onOfflineQueued(), completeOnboarding(), handleAddPerson() (+1 more)
 
-### Community 8 - "Community 8"
+### Community 7 - "Community 7"
 Cohesion: 0.32
 Nodes (12): clear(), dequeue(), enqueue(), getStats(), getStorage(), incrementRetry(), isEmpty(), list() (+4 more)
+
+### Community 8 - "Community 8"
+Cohesion: 0.17
+Nodes (7): ErrorState(), Loader(), OrderSummary(), ThemeProvider(), useResolvedTheme(), useTheme(), FloatingActionButton()
 
 ### Community 9 - "Community 9"
 Cohesion: 0.29
 Nodes (7): getFileExtension(), getImageContentType(), uploadBusinessLogo(), uploadImage(), uploadToBucket(), handleLogoUpload(), pickImageFromLibrary()
 
-### Community 10 - "Community 10"
-Cohesion: 0.26
-Nodes (8): shareCsv(), toCsv(), entryRow(), formatDate(), generateLedgerPdf(), shareLedgerPdf(), signAmount(), statusColor()
-
 ### Community 11 - "Community 11"
 Cohesion: 0.2
 Nodes (3): buildStatementHtml(), downloadStatement(), sendWhatsAppReminder()
 
-### Community 13 - "Community 13"
+### Community 12 - "Community 12"
 Cohesion: 0.33
 Nodes (6): useOverdueReminderOnForeground(), useOverdueReminders(), cancelAllOverdueReminders(), ensureNotificationPermission(), scheduleOverdueReminder(), syncOverdueReminders()
+
+### Community 13 - "Community 13"
+Cohesion: 0.28
+Nodes (3): useDebounce(), dedupeById(), useCustomers()
 
 ### Community 16 - "Community 16"
 Cohesion: 0.5
@@ -116,17 +116,17 @@ Nodes (3): handleContinue(), proceedToNext(), usePhoneSetup()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `formatINR()` connect `Community 0` to `Community 1`, `Community 3`, `Community 7`, `Community 10`, `Community 11`, `Community 13`?**
-  _High betweenness centrality (0.165) - this node is a cross-community bridge._
-- **Why does `useToast()` connect `Community 7` to `Community 0`, `Community 2`, `Community 3`, `Community 9`, `Community 11`?**
-  _High betweenness centrality (0.093) - this node is a cross-community bridge._
-- **Why does `getOrCreateSyncQueueKey()` connect `Community 1` to `Community 3`?**
-  _High betweenness centrality (0.056) - this node is a cross-community bridge._
-- **Are the 14 inferred relationships involving `formatINR()` (e.g. with `handleRecordPayment()` and `handleWhatsApp()`) actually correct?**
+- **Why does `formatINR()` connect `Community 0` to `Community 1`, `Community 4`, `Community 6`, `Community 8`, `Community 11`, `Community 12`?**
+  _High betweenness centrality (0.192) - this node is a cross-community bridge._
+- **Why does `useToast()` connect `Community 6` to `Community 0`, `Community 1`, `Community 3`, `Community 9`, `Community 11`?**
+  _High betweenness centrality (0.092) - this node is a cross-community bridge._
+- **Why does `toApiError()` connect `Community 2` to `Community 1`?**
+  _High betweenness centrality (0.058) - this node is a cross-community bridge._
+- **Are the 14 inferred relationships involving `formatINR()` (e.g. with `fmtAmount()` and `scheduleOverdueReminder()`) actually correct?**
   _`formatINR()` has 14 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 11 inferred relationships involving `toApiError()` (e.g. with `getDashboardSummary()` and `getDashboardData()`) actually correct?**
   _`toApiError()` has 11 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 3 inferred relationships involving `useToast()` (e.g. with `DashboardScreen()` and `OfflineToastListener()`) actually correct?**
+- **Are the 3 inferred relationships involving `useToast()` (e.g. with `OfflineToastListener()` and `useWhatsAppShare()`) actually correct?**
   _`useToast()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.1 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09 - nodes in this community are weakly interconnected._
