@@ -819,7 +819,7 @@ export default function CreateOrderScreen() {
               </View>
             </View>
 
-            {/* SUMMARY (Always visible) */}
+            {/* SUMMARY (Bill mode) */}
             {entryType === "bill" && (quickAmount || hasItems) && (
               <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
                 <View className="flex-row justify-between items-center mb-2">
@@ -856,6 +856,23 @@ export default function CreateOrderScreen() {
                     style={{ color: colors.primary }}
                   >
                     {formatINR(totalWithBalance, { maximumFractionDigits: 2 })}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* SUMMARY (Payment mode) */}
+            {entryType === "payment" && quickAmount && (
+              <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
+                    Payment Amount
+                  </Text>
+                  <Text
+                    className="text-[24px] font-extrabold"
+                    style={{ color: colors.primary }}
+                  >
+                    {formatINR(parseFloat(quickAmount) || 0, { maximumFractionDigits: 2 })}
                   </Text>
                 </View>
               </View>
