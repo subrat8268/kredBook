@@ -139,6 +139,7 @@ export default function CreateOrderScreen() {
   const [isCustomerSheetOpen, setIsCustomerSheetOpen] = useState(false);
   const [duePreset, setDuePreset] = useState<"today" | "7" | "15" | "30" | "custom">("today");
   const [customDueDate, setCustomDueDate] = useState<string | undefined>(undefined);
+  const [isCustomDateActive, setIsCustomDateActive] = useState(false);
   const [isCustomDuePickerOpen, setIsCustomDuePickerOpen] = useState(false);
   const [savedEntry, setSavedEntry] = useState<any>(null);
   const [isPostSaveModalOpen, setIsPostSaveModalOpen] = useState(false);
@@ -197,6 +198,7 @@ export default function CreateOrderScreen() {
         setEntryType(parsed.entryType ?? "bill");
         setDuePreset(parsed.duePreset ?? "today");
         setCustomDueDate(parsed.customDueDate ?? undefined);
+        setIsCustomDateActive(parsed.duePreset === "custom" && Boolean(parsed.customDueDate));
         if (parsed.selectedCustomerMeta) {
           setSelectedCustomerMeta(parsed.selectedCustomerMeta);
           setSelectedCustomerId(parsed.selectedCustomerMeta.id ?? null);
@@ -530,62 +532,65 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               />
             </TouchableOpacity>
             
-            {/* B4: Quick Entry / Bill Mode toggle */}
+            {/* Header mode toggle */}
             <View className="flex-row rounded-full border border-border overflow-hidden dark:border-border-dark">
               <TouchableOpacity
-                onPress={() => setEntryMode("quick")}
+                onPress={() => {
+                  setEntryType("bill");
+                  setEntryMode("quick");
+                }}
                 className="px-3 py-1.5"
                 style={{
-                  backgroundColor: entryMode === "quick" ? colors.primary : "transparent",
+                  backgroundColor:
+                    entryType === "bill" && entryMode === "quick"
+                      ? colors.primary
+                      : "transparent",
                 }}
                 activeOpacity={0.75}
               >
                 <Text
                   className="text-[12px] font-bold"
-                  style={{ color: entryMode === "quick" ? colors.surface : colors.textSecondary }}
+                  style={{
+                    color:
+                      entryType === "bill" && entryMode === "quick"
+                        ? colors.surface
+                        : colors.textSecondary,
+                  }}
                 >
                   Quick Entry
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => setEntryMode("bill")}
+                onPress={() => {
+                  setEntryType("bill");
+                  setEntryMode("bill");
+                }}
                 className="px-3 py-1.5"
                 style={{
-                  backgroundColor: entryMode === "bill" ? colors.primary : "transparent",
+                  backgroundColor:
+                    entryType === "bill" && entryMode === "bill"
+                      ? colors.primary
+                      : "transparent",
                 }}
                 activeOpacity={0.75}
               >
                 <Text
                   className="text-[12px] font-bold"
-                  style={{ color: entryMode === "bill" ? colors.surface : colors.textSecondary }}
+                  style={{
+                    color:
+                      entryType === "bill" && entryMode === "bill"
+                        ? colors.surface
+                        : colors.textSecondary,
+                  }}
                 >
                   Bill Mode
                 </Text>
               </TouchableOpacity>
-            </View>
-
-            <View className="flex-1" />
-            <View className="mr-2">
-              <SyncStatus />
-            </View>
-            <View className="flex-row rounded-full border border-border overflow-hidden dark:border-border-dark">
               <TouchableOpacity
-                onPress={() => setEntryType("bill")}
-                className="px-3 py-1.5"
-                style={{
-                  backgroundColor: entryType === "bill" ? colors.primary : "transparent",
+                onPress={() => {
+                  setEntryType("payment");
+                  setEntryMode("quick");
                 }}
-                activeOpacity={0.75}
-              >
-                <Text
-                  className="text-[12px] font-bold"
-                  style={{ color: entryType === "bill" ? colors.surface : colors.textSecondary }}
-                >
-                  Bill
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setEntryType("payment")}
                 className="px-3 py-1.5"
                 style={{
                   backgroundColor: entryType === "payment" ? colors.primary : "transparent",
@@ -599,6 +604,11 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                   Payment
                 </Text>
               </TouchableOpacity>
+            </View>
+
+            <View className="flex-1" />
+            <View className="mr-2">
+              <SyncStatus />
             </View>
           </View>
 
@@ -687,7 +697,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                   ],
                 }}
               >
-            {entryMode === "bill" ? (
+            {entryType === "bill" && entryMode === "bill" ? (
               <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
                 {lineItems.length ? (
                   <View className="mb-3" style={{ gap: 8 }}>
@@ -831,7 +841,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               ) : null}
             </View>
 
-            <View>
+            <View className="mt-4">
               <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">DUE DATE</Text>
               <View className="flex-row flex-wrap" style={{ gap: 8 }}>
                 {[
@@ -844,18 +854,48 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                   <TouchableOpacity
                     key={chip.key}
                     onPress={() => {
+                      if (chip.key === "custom") {
+                        setIsCustomDuePickerOpen(true);
+                        return;
+                      }
                       setDuePreset(chip.key as any);
-                      if (chip.key === "custom") setIsCustomDuePickerOpen(true);
+                      setIsCustomDateActive(false);
                     }}
                     className="rounded-full border px-3 py-2"
                     activeOpacity={0.75}
                     style={{
-                      borderColor: duePreset === chip.key ? colors.primary : colors.border,
-                      backgroundColor: duePreset === chip.key ? colors.primary : colors.surface,
+                      borderColor:
+                        chip.key === "custom"
+                          ? isCustomDateActive
+                            ? colors.primary
+                            : colors.border
+                          : duePreset === chip.key
+                            ? colors.primary
+                            : colors.border,
+                      backgroundColor:
+                        chip.key === "custom"
+                          ? isCustomDateActive
+                            ? colors.primary
+                            : colors.surface
+                          : duePreset === chip.key
+                            ? colors.primary
+                            : colors.surface,
                     }}
                   >
-                    <Text style={{ color: duePreset === chip.key ? colors.surface : colors.textSecondary, fontWeight: "600" }}>
-                      {chip.key === "custom" && duePreset === "custom" ? formatChipDate(customDueDate) : chip.label}
+                    <Text
+                      style={{
+                        color:
+                          chip.key === "custom"
+                            ? isCustomDateActive
+                              ? colors.surface
+                              : colors.textSecondary
+                            : duePreset === chip.key
+                              ? colors.surface
+                              : colors.textSecondary,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {chip.key === "custom" && isCustomDateActive ? formatChipDate(customDueDate) : chip.label}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -874,33 +914,6 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                   </Text>
                 </View>
 
-                {previousBalance > 0 && (
-                  <View className="flex-row justify-between items-center mb-2">
-                    <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">
-                      Previous Balance
-                    </Text>
-                    <Text className="text-[16px] font-bold" style={{ color: colors.warning }}>
-                      {formatINR(previousBalance, { maximumFractionDigits: 2 })}
-                    </Text>
-                  </View>
-                )}
-
-                <View
-                  className="h-px my-2"
-                  style={{ backgroundColor: colors.border }}
-                />
-
-                <View className="flex-row justify-between items-center">
-                  <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
-                    Grand Total
-                  </Text>
-                  <Text
-                    className="text-[24px] font-extrabold"
-                    style={{ color: colors.primary }}
-                  >
-                    {formatINR(totalWithBalance, { maximumFractionDigits: 2 })}
-                  </Text>
-                </View>
               </View>
             )}
 
@@ -932,7 +945,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               onPrimaryAction={entryType === "payment" ? handleRecordPayment : handleSaveEntry}
               primaryLabel={entryType === "payment" ? "Record Payment" : "Save Entry"}
               onSecondaryAction={handleShareOnWhatsApp}
-              secondaryLabel={entryType === "payment" ? undefined : "Share on WhatsApp"}
+              secondaryLabel={entryType === "payment" ? undefined : "Share Receipt"}
               secondaryDisabled={!savedEntry?.id}
               totalAmount={
                 entryType === "payment"
@@ -1132,6 +1145,8 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               visible={isCustomDuePickerOpen}
               onConfirm={(date) => {
                 setCustomDueDate(format(date, "yyyy-MM-dd"));
+                setDuePreset("custom");
+                setIsCustomDateActive(true);
                 setIsCustomDuePickerOpen(false);
               }}
 onClose={() => setIsCustomDuePickerOpen(false)}

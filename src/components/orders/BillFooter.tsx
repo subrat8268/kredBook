@@ -80,7 +80,8 @@ export default function BillFooter({
             style={{
               flex: 1,
               backgroundColor: disabled ? colors.border : colors.primary,
-              paddingVertical: 14,
+              minHeight: 56,
+              paddingVertical: 10,
               borderRadius: 10,
               alignItems: "center",
               justifyContent: "center",
@@ -110,7 +111,8 @@ export default function BillFooter({
               borderWidth: 1,
               borderColor: secondaryDisabled ? colors.border : colors.primary,
               backgroundColor: colors.surface,
-              paddingVertical: 14,
+              minHeight: 56,
+              paddingVertical: 8,
               borderRadius: 10,
               alignItems: "center",
               justifyContent: "center",
@@ -119,6 +121,7 @@ export default function BillFooter({
             activeOpacity={0.75}
           >
             <Text
+              numberOfLines={1}
               style={{
                 color: secondaryDisabled ? colors.textSecondary : colors.primary,
                 fontSize: 16,
@@ -127,12 +130,19 @@ export default function BillFooter({
             >
               {secondaryLabel}
             </Text>
+            {secondaryDisabled ? (
+              <Text
+                style={{
+                  marginTop: 2,
+                  fontSize: 11,
+                  color: colors.textSecondary,
+                  textAlign: "center",
+                }}
+              >
+                Save first to share
+              </Text>
+            ) : null}
           </TouchableOpacity>
-          {secondaryDisabled && (
-            <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 8, textAlign: "center" }}>
-              Save first to share
-            </Text>
-          )}
         </View>
       ) : (
         <TouchableOpacity
