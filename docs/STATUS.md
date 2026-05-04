@@ -279,7 +279,7 @@ Verification: theme.ts exports unchanged API shape, no TS errors, lint clean.
 | 4.1.2 | Tab navigation redesign — theme-aware tab bar, lucide icons, SpeedDialFAB record-payment routing fix | ✅ Done | P0 | `/refactor` | `ui-ux-pro-max`, `react-native-skills` | `(main)/_layout.tsx` ([fa4f3b2](https://github.com/subrat8268/kredBook/commit/fa4f3b24e2ca07a2edb27f42a410a94ca02ffcad)) |
 | 4.1.3 | Create Entry redesign — full-screen numpad, bottom sheet customer picker, quick due-date chips | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/create.tsx` ([5d588b8](https://github.com/subrat8268/kredBook/commit/5d588b8)) |
 | 4.1.3a | Create Entry bug fixes — params override draft, due-date format normalization, numpad guard, Bill/Payment toggle, recent customers first | ✅ Done | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max` | `(main)/entries/create.tsx`, `CustomerPicker.tsx`, `BillFooter.tsx` |
-| 4.1.3b | Create Entry UX redesign — remove SpeedDialFAB, save/share split buttons, progressive disclosure, Bill Mode with line items, modern visual standards | 🔄 In Progress | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills`, `code-reviewer` | `(main)/entries/create.tsx`, `BillFooter.tsx` |
+| 4.1.3b | Create Entry UX redesign — remove SpeedDialFAB, save/share split buttons, progressive disclosure, Bill Mode with line items, modern visual standards | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills`, `code-reviewer` | `(main)/entries/create.tsx`, `BillFooter.tsx` |
 | 4.1.4 | Record Payment modal redesign — large numpad, partial toggle, payment method, WhatsApp receipt | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
 | 4.1.5 | Customer Detail redesign — hero card, sticky balance bar, timeline view, swipe actions | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
 
@@ -363,7 +363,16 @@ VERIFICATION
 
 ---
 
-#### 4.1.3b — Create Entry UX Redesign
+#### 4.1.3b — Create Entry UX Redesign ✅ Done
+
+Completed across commits `309f126` and `5ff5ded`.
+
+- Removed SpeedDialFAB while on Create Entry route.
+- Split footer actions into Save Entry + Share on WhatsApp with post-save action modal.
+- Added customer-first progressive disclosure with reveal animation and Change action.
+- Added Quick Entry / Bill Mode toggle with Bill Mode line items, item-name cache, and swipe-to-delete.
+- Updated visual polish: active chip fill state, amber previous-balance warning, 72px numpad keys, standardized `activeOpacity`.
+- Verified with `npm run lint`.
 
 ```
 /build load_skills=["ui-ux-pro-max","react-native-skills","code-reviewer"]
