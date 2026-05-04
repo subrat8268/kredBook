@@ -12,6 +12,7 @@ import { useAddPerson, usePeople } from "@/src/hooks/usePeople";
 import { useAuthStore } from "@/src/store/authStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
+import { motion } from "@/src/utils/theme";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -38,7 +39,7 @@ function getGreetingLabel(name: string | undefined) {
 }
 
 export default function DashboardScreen() {
-  const { colors, gradients, spacing, statusBarStyle, motion } = useTheme();
+  const { colors, gradients, spacing, statusBarStyle } = useTheme();
   const router = useRouter();
   const { profile } = useAuthStore();
   const { show: showToast } = useToast();
@@ -77,6 +78,7 @@ export default function DashboardScreen() {
   } = usePeople(profile?.id, customerSearch);
 
   const totalOutstanding = useMemo(() => Number(toReceive ?? 0), [toReceive]);
+  const slowDuration = motion.duration.slow;
   const totalCustomersCount = Number((dashboardData as any)?.totalCustomersCount ?? (dashboardData as any)?.total_customers_count ?? 0);
   const collectedThisMonth = useMemo(
     () => recentActivity.filter((item) => item.type === "payment").reduce((sum, item) => sum + Number(item.amount ?? 0), 0),
@@ -98,14 +100,14 @@ export default function DashboardScreen() {
 
     Animated.timing(animatedOutstanding, {
       toValue: totalOutstanding,
-      duration: motion.duration.slow,
+      duration: slowDuration,
       useNativeDriver: false,
     }).start();
 
     return () => {
       animatedOutstanding.removeListener(listener);
     };
-  }, [animatedOutstanding, totalOutstanding, motion.duration.slow]);
+  }, [animatedOutstanding, totalOutstanding, slowDuration]);
 
   const openRecordPaymentForCustomer = useCallback(
     async (customerId: string, customerName: string) => {
