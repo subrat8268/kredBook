@@ -169,11 +169,25 @@ export type ThemeMode = "light" | "dark";
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const motion = {
-  fast: 150,
-  base: 250,
-  slow: 400,
-  easing: "cubic-bezier(0.16,1,0.3,1)",
+  duration: {
+    fast: 150,   // ms — icon swaps, badge updates
+    base: 250,  // ms — screen transitions, modal open/close
+    slow: 400,  // ms — hero number counter, skeleton fade-in
+  },
+  easing: {
+    spring: "cubic-bezier(0.16, 1, 0.3, 1)",   // Expo spring feel
+    smooth: "cubic-bezier(0.4, 0, 0.2, 1)",   // Material-style smooth
+    entrance: "cubic-bezier(0.0, 0.0, 0.2, 1)", // Decelerate in
+    exit: "cubic-bezier(0.4, 0.0, 1, 1)",     // Accelerate out
+  },
+  springConfig: {
+    default: { damping: 20, stiffness: 200, mass: 1 },
+    bouncy: { damping: 14, stiffness: 180, mass: 1 },
+    snappy: { damping: 26, stiffness: 300, mass: 1 },
+  },
 } as const;
+
+export type Motion = typeof motion;
 
 type WidenLiterals<T> = T extends string
   ? string
@@ -571,6 +585,7 @@ export const theme = {
   gradients,
   spacing,
   typography,
+  motion,
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
