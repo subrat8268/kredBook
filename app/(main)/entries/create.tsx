@@ -371,7 +371,10 @@ export default function CreateOrderScreen() {
               : computeDueDateFromPreset(duePreset),
         });
 
-      // Keep form values so user can choose post-save actions.
+      // Clear draft after successful save
+      const draftKey = `draft:${vendorId ?? "anon"}`;
+      draftStorage.delete(draftKey);
+
       showToast({
         message: `Entry created for ${selectedCustomerMeta?.name ?? "customer"}`,
         type: "success",
@@ -448,6 +451,9 @@ export default function CreateOrderScreen() {
         queryKey: ["customerDetail", selectedCustomerId],
       });
       queryClient.invalidateQueries({ queryKey: ["dashboard", profile.id] });
+      // Clear draft after successful payment
+      const draftKey = `draft:${vendorId ?? "anon"}`;
+      draftStorage.delete(draftKey);
       setQuickAmount("");
       setOrderNote("");
       showToast({
