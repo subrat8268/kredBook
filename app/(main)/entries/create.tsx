@@ -16,6 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import * as Haptics from "expo-haptics";
 import { createMMKV } from "react-native-mmkv";
 import { ArrowLeft, Pencil } from "lucide-react-native";
 import { format } from "date-fns";
@@ -742,10 +743,19 @@ export default function CreateOrderScreen() {
                           onPress={() => {
                             if (key === "⌫") {
                               setQuickAmount((prev) => prev.slice(0, -1));
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                               return;
                             }
                             setQuickAmount((prev) => handleNumpadInput(prev, key));
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           }}
+                          onLongPress={() => {
+                            if (key === "⌫") {
+                              setQuickAmount("");
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                            }
+                          }}
+                          delayLongPress={500}
                         >
                           <Text className="text-[24px] font-bold text-textPrimary dark:text-textPrimary-dark">{key}</Text>
                         </TouchableOpacity>
@@ -985,10 +995,19 @@ export default function CreateOrderScreen() {
                             onPress={() => {
                               if (key === "⌫") {
                                 setItemRateInput((prev) => prev.slice(0, -1));
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                                 return;
                               }
                               setItemRateInput((prev) => handleNumpadInput(prev, key));
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             }}
+                            onLongPress={() => {
+                              if (key === "⌫") {
+                                setItemRateInput("");
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                              }
+                            }}
+                            delayLongPress={500}
                           >
                             <Text className="text-[24px] font-bold text-textPrimary dark:text-textPrimary-dark">{key}</Text>
                           </TouchableOpacity>
