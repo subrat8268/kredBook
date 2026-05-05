@@ -35,7 +35,7 @@ export default function ExportScreen() {
   const [loading, setLoading] = useState<"pdf" | "csv" | null>(null);
 
   const vendorId = profile?.id ?? "";
-  const { people } = usePeople(vendorId, "");
+  const { people, isLoading: isPeopleLoading } = usePeople(vendorId, "");
 
   useEffect(() => {
     setRecentIds(getRecentCustomerIds());
@@ -342,6 +342,7 @@ export default function ExportScreen() {
         }))}
         selectedCustomerId={selectedCustomer?.id}
         recentIds={recentIds}
+        isLoading={isPeopleLoading}
         onSelectCustomer={setSelectedCustomer}
         onClose={() => setCustomerPickerVisible(false)}
       />

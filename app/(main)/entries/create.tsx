@@ -266,7 +266,7 @@ export default function CreateOrderScreen() {
   );
 
   const createOrderMutation = useCreateOrder(vendorId!);
-  const { people } = usePeople(vendorId, "");
+  const { people, isLoading: isPeopleLoading } = usePeople(vendorId, "");
   const { queueLength } = useNetworkSync();
   const hasItems = lineItems.length > 0;
 
@@ -1164,6 +1164,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               }))}
               selectedCustomerId={selectedCustomerId}
               recentIds={recentIds}
+              isLoading={isPeopleLoading}
               onSelectCustomer={handleSelectPerson}
               onClose={() => setIsCustomerSheetOpen(false)}
             />

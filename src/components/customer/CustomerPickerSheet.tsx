@@ -1,19 +1,24 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
-import { formatINR } from "@/src/utils/format";
+import CustomerAvatar from "@/src/components/common/CustomerAvatar";
+import { getSheetTokens } from "../../styles/sheetTokens";
+import { useTheme } from "../../utils/ThemeProvider";
+import { formatINR } from "../../utils/format";
 import { BottomSheetBackdrop, BottomSheetFlatList, BottomSheetModal } from "@gorhom/bottom-sheet";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import { Check, Plus, User } from "lucide-react-native";
+import { Search, UserPlus, UserSearch, Users, X } from "lucide-react-native";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Animated,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Customer = {
   id: string;
@@ -29,24 +34,13 @@ interface Props {
   selectedCustomerId?: string | null;
   recentIds: string[];
   onSelectCustomer: (customer: Customer) => void;
+  isLoading?: boolean;
 }
 
-function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
-}
-
-function getAvatarColor(name: string, palette: readonly string[]): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length] as string;
-}
-
-function getBalanceMeta(balance: number) {
-  if (balance > 0) return { text: `${formatINR(balance)} due`, kind: "due" as const };
-  if (balance < 0) return { text: `${formatINR(Math.abs(balance))} advance`, kind: "advance" as const };
-  return { text: `${formatINR(0)}`, kind: "clear" as const };
+function getBalanceText(balance: number) {
+  if (balance > 0) return `${formatINR(balance)} due`;
+  if (balance < 0) return `${formatINR(Math.abs(balance))} advance`;
+  return "";
 }
 
 const CustomerPickerSheet = memo(function CustomerPickerSheet({
@@ -56,32 +50,60 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
   selectedCustomerId,
   recentIds,
   onSelectCustomer,
+  isLoading = false,
 }: Props) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const sheetRef = useRef<BottomSheetModal>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
+  const clearAnim = useRef(new Animated.Value(0)).current;
+  const shimmerAnim = useRef(new Animated.Value(0.4)).current;
 
+  const tokens = useMemo(() => getSheetTokens(colors), [colors]);
   const snapPoints = useMemo(() => ["50%", "90%"], []);
-  const avatarPalette = useMemo(() => [colors.primary, colors.warning, colors.danger, ...colors.avatarPalette], [colors]);
 
   useEffect(() => {
     if (visible) sheetRef.current?.present();
     else sheetRef.current?.dismiss();
   }, [visible]);
 
+  useEffect(() => {
+    Animated.timing(clearAnim, {
+      toValue: searchQuery.length > 0 ? 1 : 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+  }, [clearAnim, searchQuery.length]);
+
+  useEffect(() => {
+    if (!isLoading) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnim, { toValue: 0.8, duration: 450, useNativeDriver: true }),
+        Animated.timing(shimmerAnim, { toValue: 0.4, duration: 450, useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [isLoading, shimmerAnim]);
+
   const sortedList = useMemo(() => {
-    return [...customerList].sort((a, b) => {
+    const base = [...customerList];
+    return base.sort((a, b) => {
       const aDue = a.balance > 0;
       const bDue = b.balance > 0;
-      const aAdvance = a.balance < 0;
-      const bAdvance = b.balance < 0;
-
       if (aDue && bDue) return b.balance - a.balance;
       if (aDue !== bDue) return aDue ? -1 : 1;
-      if (a.balance === 0 && b.balance === 0) return a.name.localeCompare(b.name);
-      if (a.balance === 0 && bAdvance) return -1;
-      if (aAdvance && b.balance === 0) return 1;
+
+      const aClear = a.balance === 0;
+      const bClear = b.balance === 0;
+      if (aClear && bClear) return a.name.localeCompare(b.name);
+      if (aClear !== bClear) return aClear ? -1 : 1;
+
+      const aAdvance = a.balance < 0;
+      const bAdvance = b.balance < 0;
       if (aAdvance && bAdvance) return Math.abs(a.balance) - Math.abs(b.balance);
       return 0;
     });
@@ -95,16 +117,25 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
     );
   }, [searchQuery, sortedList]);
 
-  const recentCustomers = useMemo(() => {
+  const recents = useMemo(() => {
     if (searchQuery.trim() || !recentIds.length) return [] as Customer[];
     const byId = new Map(customerList.map((c) => [c.id, c]));
-    const list = recentIds.map((id) => byId.get(id)).filter(Boolean) as Customer[];
-    return list.slice(0, 5);
+    return recentIds.map((id) => byId.get(id)).filter(Boolean).slice(0, 5) as Customer[];
   }, [customerList, recentIds, searchQuery]);
+
+  const onAddNew = (prefillName?: string) => {
+    sheetRef.current?.close();
+    setTimeout(() => {
+      router.push("/(main)/people/create" as never);
+    }, 200);
+  };
 
   const renderRow = ({ item }: { item: Customer }) => {
     const selected = selectedCustomerId === item.id;
-    const meta = getBalanceMeta(item.balance);
+    const balanceLabel = getBalanceText(item.balance);
+    const due = item.balance > 0;
+    const advance = item.balance < 0;
+
     return (
       <TouchableOpacity
         onPress={async () => {
@@ -112,56 +143,82 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
           onSelectCustomer(item);
           onClose();
         }}
-        activeOpacity={0.75}
+        activeOpacity={0.7}
         style={{
-          height: 56,
+          height: tokens.rowHeight,
           flexDirection: "row",
           alignItems: "center",
-          paddingHorizontal: 16,
+          paddingHorizontal: 20,
           backgroundColor: selected ? `${colors.primary}14` : "transparent",
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border,
         }}
       >
+        <CustomerAvatar name={item.name} size={tokens.avatarSize} selected={selected} />
+
+        <View style={{ flex: 1, marginLeft: 14, justifyContent: "center" }}>
+          <Text numberOfLines={1} style={{ fontSize: 15, fontWeight: "600", color: colors.textPrimary }}>
+            {item.name}
+          </Text>
+          {balanceLabel ? (
+            <View
+              style={{
+                marginTop: 3,
+                alignSelf: "flex-start",
+                paddingHorizontal: 6,
+                paddingVertical: 2,
+                borderRadius: 4,
+                backgroundColor: due ? `${colors.warning}1A` : `${colors.success}1A`,
+              }}
+            >
+              <Text style={{ fontSize: 11, color: due ? colors.warning : colors.success }}>
+                {balanceLabel}
+              </Text>
+            </View>
+          ) : (
+            <View style={{ height: 18 }} />
+          )}
+        </View>
+
+        {selected ? (
+          <View style={{ alignItems: "flex-end", marginLeft: 8 }}>
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: "800",
+                letterSpacing: 1,
+                color: colors.primary,
+                backgroundColor: `${colors.primary}15`,
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+                borderRadius: 4,
+              }}
+            >
+              SELECTED
+            </Text>
+          </View>
+        ) : (
+          <View style={{ width: 80, alignItems: "flex-end", marginLeft: 8 }}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: item.balance === 0 ? "500" : "700",
+                color: due ? colors.warning : advance ? colors.success : colors.textMuted,
+              }}
+            >
+              {formatINR(Math.abs(item.balance), { maximumFractionDigits: 0 })}
+            </Text>
+          </View>
+        )}
+
         <View
           style={{
-            width: 38,
-            height: 38,
-            borderRadius: 999,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: getAvatarColor(item.name, avatarPalette),
-            marginRight: 10,
+            position: "absolute",
+            left: tokens.separatorInset,
+            right: 0,
+            bottom: 0,
+            height: StyleSheet.hairlineWidth,
+            backgroundColor: colors.border,
           }}
-        >
-          <Text style={{ color: colors.surface, fontWeight: "700", fontSize: 12 }}>{getInitials(item.name)}</Text>
-          {selected ? (
-            <View style={{ position: "absolute", right: -2, bottom: -2, backgroundColor: colors.primary, borderRadius: 999 }}>
-              <Check size={12} color={colors.surface} />
-            </View>
-          ) : null}
-        </View>
-
-        <View style={{ flex: 1 }}>
-          <Text numberOfLines={1} style={{ fontSize: 14, fontWeight: "600", color: colors.textPrimary }}>{item.name}</Text>
-          <Text
-            style={{
-              fontSize: 11,
-              color: meta.kind === "due" ? colors.warning : meta.kind === "advance" ? colors.primary : colors.textSecondary,
-            }}
-          >
-            {meta.text}
-          </Text>
-        </View>
-
-        <Text
-          style={{
-            fontWeight: "700",
-            color: item.balance > 0 ? colors.warning : colors.primary,
-          }}
-        >
-          {formatINR(Math.abs(item.balance))}
-        </Text>
+        />
       </TouchableOpacity>
     );
   };
@@ -172,125 +229,274 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
       index={0}
       snapPoints={snapPoints}
       onDismiss={onClose}
-      handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
-      backgroundStyle={{ backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24 }}
       backdropComponent={(props) => (
-        <BottomSheetBackdrop {...props} opacity={0.4} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior="close" />
+        <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} opacity={0.4} pressBehavior="close" />
       )}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
+      handleStyle={{ paddingTop: 8 }}
+      handleIndicatorStyle={{
+        backgroundColor: tokens.handleColor,
+        width: tokens.handleWidth,
+        height: tokens.handleHeight,
+        borderRadius: 2,
+      }}
+      backgroundStyle={{
+        backgroundColor: tokens.background,
+        borderTopLeftRadius: tokens.borderTopRadius,
+        borderTopRightRadius: tokens.borderTopRadius,
+        shadowColor: colors.textPrimary,
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+      }}
     >
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <Text style={{ fontSize: 16, fontWeight: "600", color: colors.textPrimary }}>Select Customer</Text>
-            <TouchableOpacity
-              activeOpacity={0.75}
-              onPress={() => router.push({ pathname: "/main/people/add", params: { prefillName: searchQuery } } as never)}
+        <View style={{ paddingTop: tokens.headerPaddingTop, paddingHorizontal: tokens.headerPaddingHorizontal }}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <Text
+              style={{
+                fontSize: tokens.headerTitleSize,
+                fontWeight: tokens.headerTitleWeight,
+                color: colors.textPrimary,
+              }}
             >
-              <Text style={{ color: colors.primary, fontWeight: "700" }}>Add New</Text>
+              Select Customer
+            </Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={onClose}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: colors.surfaceAlt,
+                borderWidth: 1,
+                borderColor: colors.border,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <X size={16} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
-          <View style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, flexDirection: "row", alignItems: "center" }}>
+          <View
+            style={{
+              marginTop: 12,
+              height: 48,
+              borderRadius: tokens.searchBorderRadius,
+              backgroundColor: tokens.searchBackground,
+              paddingHorizontal: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              borderWidth: searchFocused ? 1.5 : 0,
+              borderColor: searchFocused ? `${colors.primary}66` : "transparent",
+            }}
+          >
+            <Search size={18} color={colors.textMuted} />
             <TextInput
+              style={{ flex: 1, marginLeft: 10, fontSize: 15, color: colors.textPrimary }}
+              placeholder="Search by name or phone"
+              placeholderTextColor={colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholder="Search by name or phone"
-              placeholderTextColor={colors.textSecondary}
-              style={{ flex: 1, color: colors.textPrimary }}
-              onFocus={() => sheetRef.current?.snapToIndex(1)}
+              onFocus={() => {
+                setSearchFocused(true);
+                sheetRef.current?.snapToIndex(1);
+              }}
+              onBlur={() => setSearchFocused(false)}
             />
-            {searchQuery ? (
-              <TouchableOpacity activeOpacity={0.75} onPress={() => setSearchQuery("")}> 
-                <Text style={{ color: colors.textSecondary, fontWeight: "700" }}>✕</Text>
-              </TouchableOpacity>
-            ) : null}
+
+            <Animated.View
+              style={{
+                opacity: clearAnim,
+                transform: [{ scale: clearAnim }],
+              }}
+            >
+              {searchQuery.length > 0 ? (
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setSearchQuery("")}
+                  style={{
+                    borderRadius: 999,
+                    backgroundColor: colors.border,
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                  }}
+                >
+                  <Text style={{ color: colors.textMuted, fontWeight: "700" }}>✕</Text>
+                </TouchableOpacity>
+              ) : null}
+            </Animated.View>
           </View>
         </View>
 
-        {!searchQuery.trim() && recentCustomers.length ? (
-          <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
-            <Text style={{ fontSize: 11, letterSpacing: 1.2, color: colors.textSecondary, fontWeight: "700", marginBottom: 8 }}>RECENT</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
-              {recentCustomers.map((customer) => (
+        {!searchQuery.trim() && recents.length > 0 ? (
+          <View style={{ marginTop: 10 }}>
+            <Text
+              style={{
+                marginLeft: 20,
+                marginBottom: 8,
+                fontSize: 11,
+                letterSpacing: 1.2,
+                color: colors.textMuted,
+                fontWeight: "700",
+              }}
+            >
+              FREQUENT
+            </Text>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 12, gap: 8 }}
+            >
+              {recents.map((customer) => (
                 <TouchableOpacity
                   key={customer.id}
-                  activeOpacity={0.75}
+                  activeOpacity={0.7}
                   onPress={async () => {
                     await Haptics.selectionAsync();
                     onSelectCustomer(customer);
                     onClose();
                   }}
-                  style={{ width: 62, alignItems: "center" }}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8,
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 999,
+                    backgroundColor: selectedCustomerId === customer.id ? `${colors.primary}15` : colors.surface,
+                    borderWidth: 1,
+                    borderColor: selectedCustomerId === customer.id ? colors.primary : colors.border,
+                  }}
                 >
-                  <View
+                  <CustomerAvatar name={customer.name} size={28} selected={selectedCustomerId === customer.id} />
+                  <Text
+                    numberOfLines={1}
                     style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 999,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: getAvatarColor(customer.name, avatarPalette),
+                      fontSize: 14,
+                      color: selectedCustomerId === customer.id ? colors.primary : colors.textPrimary,
+                      fontWeight: "600",
+                      maxWidth: 140,
                     }}
                   >
-                    <Text style={{ color: colors.surface, fontWeight: "700", fontSize: 11 }}>{getInitials(customer.name)}</Text>
-                  </View>
-                  <Text numberOfLines={1} style={{ marginTop: 4, fontSize: 11, color: colors.textPrimary }}>
-                    {customer.name.split(" ")[0]}
+                    {customer.name}
                   </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <View style={{ marginTop: 10, height: 1, backgroundColor: colors.border }} />
+
+            <View style={{ height: 1, backgroundColor: colors.border, marginHorizontal: 20 }} />
           </View>
         ) : null}
 
-        <BottomSheetFlatList
-          data={filtered}
-          keyExtractor={(item) => item.id}
-          renderItem={renderRow}
-          keyboardShouldPersistTaps="handled"
-          ListHeaderComponent={
-            filtered.length === 0 && searchQuery.trim() ? (
-              <View style={{ paddingHorizontal: 16, paddingVertical: 20 }}>
-                <Text style={{ color: colors.textSecondary }}>No customer named &apos;{searchQuery}&apos;</Text>
-                <TouchableOpacity
-                  activeOpacity={0.75}
-                  onPress={() => router.push({ pathname: "/main/people/add", params: { prefillName: searchQuery } } as never)}
-                >
-                  <Text style={{ marginTop: 8, color: colors.primary, fontWeight: "700" }}>Add &apos;{searchQuery}&apos; as new customer?</Text>
-                </TouchableOpacity>
-              </View>
-            ) : customerList.length === 0 ? (
-              <View style={{ alignItems: "center", paddingVertical: 28, paddingHorizontal: 16 }}>
-                <View style={{ width: 56, height: 56, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: colors.background }}>
-                  <User size={26} color={colors.textSecondary} />
+        <Text
+          style={{
+            marginTop: recents.length ? 16 : 14,
+            marginBottom: 4,
+            marginLeft: 20,
+            fontSize: 11,
+            letterSpacing: 1.5,
+            color: colors.textMuted,
+            fontWeight: "700",
+          }}
+        >
+          ALL CUSTOMERS
+        </Text>
+
+        {isLoading ? (
+          <View style={{ paddingTop: 10 }}>
+            {[0, 1, 2].map((idx) => (
+              <Animated.View
+                key={String(idx)}
+                style={{
+                  opacity: shimmerAnim,
+                  height: tokens.rowHeight,
+                  paddingHorizontal: 20,
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.border }} />
+                <View style={{ width: 16 }} />
+                <View style={{ flex: 1 }}>
+                  <View style={{ height: 12, width: "50%", backgroundColor: colors.border, borderRadius: 4 }} />
+                  <View style={{ height: 10, width: "30%", backgroundColor: colors.border, borderRadius: 4, marginTop: 8 }} />
                 </View>
-                <Text style={{ marginTop: 10, color: colors.textSecondary, textAlign: "center" }}>Add your first customer to get started</Text>
-                <TouchableOpacity
-                  activeOpacity={0.75}
-                  onPress={() => router.push({ pathname: "/main/people/add" } as never)}
-                  style={{ marginTop: 12, backgroundColor: colors.primary, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 18 }}
-                >
-                  <Text style={{ color: colors.surface, fontWeight: "700" }}>Add Customer</Text>
-                </TouchableOpacity>
-              </View>
-            ) : null
-          }
-          ListFooterComponent={
-            <TouchableOpacity
-              activeOpacity={0.75}
-              onPress={() => router.push({ pathname: "/main/people/add", params: { prefillName: searchQuery } } as never)}
-              style={{ height: 56, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", borderTopWidth: 1, borderTopColor: colors.border }}
-            >
-              <View style={{ width: 28, height: 28, borderRadius: 999, borderWidth: 1, borderColor: colors.textSecondary, alignItems: "center", justifyContent: "center", marginRight: 10 }}>
-                <Plus size={14} color={colors.textSecondary} />
-              </View>
-              <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>+ Add New Person</Text>
-            </TouchableOpacity>
-          }
-        />
+              </Animated.View>
+            ))}
+          </View>
+        ) : (
+          <BottomSheetFlatList
+            data={filtered}
+            keyExtractor={(item) => item.id}
+            renderItem={renderRow}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingBottom: 84 + insets.bottom }}
+            ListEmptyComponent={
+              searchQuery.trim() ? (
+                <View style={{ alignItems: "center", paddingHorizontal: 20, paddingVertical: 24 }}>
+                  <UserSearch size={40} color={colors.textMuted} />
+                  <Text style={{ marginTop: 10, color: colors.textPrimary, fontWeight: "600" }}>
+                    No one named &apos;{searchQuery}&apos;
+                  </Text>
+                  <Text style={{ marginTop: 4, color: colors.textMuted }}>Add them as a new customer?</Text>
+                  <TouchableOpacity activeOpacity={0.7} onPress={() => onAddNew(searchQuery)}>
+                    <Text style={{ marginTop: 8, color: colors.primary, fontWeight: "700" }}>Add {searchQuery}</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={{ alignItems: "center", paddingHorizontal: 20, paddingVertical: 28 }}>
+                  <Users size={48} color={colors.textMuted} />
+                  <Text style={{ marginTop: 10, color: colors.textPrimary, fontWeight: "600" }}>No customers yet</Text>
+                  <Text style={{ marginTop: 4, color: colors.textMuted, textAlign: "center" }}>
+                    Add your first customer to start recording entries
+                  </Text>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => onAddNew()}
+                    style={{ marginTop: 14, width: "100%", backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 12, alignItems: "center" }}
+                  >
+                    <Text style={{ color: colors.surface, fontWeight: "700" }}>Add Customer</Text>
+                  </TouchableOpacity>
+                </View>
+              )
+            }
+            ListFooterComponent={<View style={{ height: 8 }} />}
+          />
+        )}
+
+        <View
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingHorizontal: 20,
+            paddingBottom: 16 + insets.bottom,
+            paddingTop: 10,
+            backgroundColor: colors.surface,
+          }}
+        >
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => onAddNew()}
+            style={{
+              height: 52,
+              borderRadius: 14,
+              backgroundColor: colors.primaryDark,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <UserPlus size={18} color={colors.surface} style={{ marginRight: 8 }} />
+            <Text style={{ color: colors.surface, fontWeight: "600", fontSize: 15 }}>Add New Person</Text>
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
     </BottomSheetModal>
   );
