@@ -4,13 +4,15 @@ import Loader from "@/src/components/feedback/Loader";
 import SyncStatus from "@/src/components/feedback/SyncStatus";
 import { useToast } from "@/src/components/feedback/Toast";
 import BillFooter from "@/src/components/orders/BillFooter";
-import CustomerPicker from "@/src/components/picker/CustomerPicker";
+import CustomerPickerSheet from "@/src/components/customer/CustomerPickerSheet";
 import Input from "@/src/components/ui/Input";
 import { useCreateOrder } from "@/src/hooks/useEntries";
 import { useNetworkSync } from "@/src/hooks/useNetworkSync";
+import { usePeople } from "@/src/hooks/usePeople";
 import { useAuthStore } from "@/src/store/authStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
+import { getRecentCustomerIds, prependRecentCustomer } from "@/src/utils/recentCustomers";
 import { buildEntryShareMessage } from "@/src/utils/shareTemplates";
 import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -138,6 +140,7 @@ export default function CreateOrderScreen() {
   const [entryType, setEntryType] = useState<"bill" | "payment">("bill");
   const [entryMode, setEntryMode] = useState<"quick" | "bill">("quick");
   const [isCustomerSheetOpen, setIsCustomerSheetOpen] = useState(false);
+  const [recentIds, setRecentIds] = useState<string[]>([]);
   const [duePreset, setDuePreset] = useState<"today" | "7" | "15" | "30" | "custom">("today");
   const [customDueDate, setCustomDueDate] = useState<string | undefined>(() => computeDueDateFromPreset("today"));
   const [isCustomDateActive, setIsCustomDateActive] = useState(false);
@@ -263,6 +266,7 @@ export default function CreateOrderScreen() {
   );
 
   const createOrderMutation = useCreateOrder(vendorId!);
+  const { people } = usePeople(vendorId, "");
   const { queueLength } = useNetworkSync();
   const hasItems = lineItems.length > 0;
 
@@ -287,6 +291,10 @@ export default function CreateOrderScreen() {
       }
     };
     loadItemNameCache();
+  }, []);
+
+  useEffect(() => {
+    setRecentIds(getRecentCustomerIds());
   }, []);
 
   const persistItemNameCache = useCallback(async (name: string) => {
@@ -387,6 +395,9 @@ export default function CreateOrderScreen() {
       // Clear draft after successful save
       const draftKey = `draft:${vendorId ?? "anon"}`;
       draftStorage.remove(draftKey);
+      if (selectedCustomerId) {
+        setRecentIds(prependRecentCustomer(selectedCustomerId));
+      }
 
       showToast({
         message: `Entry created for ${selectedCustomerMeta?.name ?? "customer"}`,
@@ -466,6 +477,7 @@ export default function CreateOrderScreen() {
       // Clear draft after successful payment
       const draftKey = `draft:${vendorId ?? "anon"}`;
       draftStorage.remove(draftKey);
+      setRecentIds(prependRecentCustomer(selectedCustomerId));
       setQuickAmount("");
       setOrderNote("");
       showToast({
@@ -1142,16 +1154,18 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
           </Modal>
 
           {isCustomerSheetOpen ? (
-            <CustomerPicker
+            <CustomerPickerSheet
               visible
-              selectedPerson={selectedCustomerMeta}
-              setSelectedPerson={handleSelectPerson}
-              vendorId={vendorId!}
+              customerList={(people ?? []).map((p: any) => ({
+                id: p.id,
+                name: p.name,
+                phone: p.phone,
+                balance: p.outstandingBalance ?? 0,
+              }))}
+              selectedCustomerId={selectedCustomerId}
+              recentIds={recentIds}
+              onSelectCustomer={handleSelectPerson}
               onClose={() => setIsCustomerSheetOpen(false)}
-              onCreateNew={() => {
-                setIsCustomerSheetOpen(false);
-                router.push("/(main)/people" as never);
-              }}
             />
           ) : null}
 

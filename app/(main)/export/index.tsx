@@ -1,5 +1,5 @@
 import { FileText, Download, AlertCircle } from "lucide-react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,10 +13,12 @@ import {
  
 import Header from "@/src/components/layer2/Header";
 import ScreenLayout from "@/src/components/layer2/ScreenLayout";
-import CustomerPicker from "@/src/components/picker/CustomerPicker";
+import CustomerPickerSheet from "@/src/components/customer/CustomerPickerSheet";
 import DateRangePicker from "@/src/components/ui/DateRangePicker";
+import { usePeople } from "@/src/hooks/usePeople";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { fetchLedgerCsvRows, fetchLedgerForExport } from "@/src/api/exportCustomer";
+import { getRecentCustomerIds } from "@/src/utils/recentCustomers";
 import { shareLedgerPdf } from "@/src/utils/exportLedgerPdf";
 import { toCsv, shareCsv } from "@/src/utils/exportCsv";
 import { useAuthStore } from "@/src/store/authStore";
@@ -27,11 +29,17 @@ export default function ExportScreen() {
 
   const [customerPickerVisible, setCustomerPickerVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [recentIds, setRecentIds] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<{ from?: string; to?: string }>({});
   const [dateRangePickerVisible, setDateRangePickerVisible] = useState(false);
   const [loading, setLoading] = useState<"pdf" | "csv" | null>(null);
 
   const vendorId = profile?.id ?? "";
+  const { people } = usePeople(vendorId, "");
+
+  useEffect(() => {
+    setRecentIds(getRecentCustomerIds());
+  }, []);
 
   const styles = StyleSheet.create({
     scroll: { flex: 1 },
@@ -324,13 +332,18 @@ export default function ExportScreen() {
         </View>
       </ScrollView>
 
-      <CustomerPicker
+      <CustomerPickerSheet
         visible={customerPickerVisible}
-        selectedPerson={selectedCustomer}
-        setSelectedPerson={setSelectedCustomer}
-        vendorId={vendorId}
+        customerList={(people ?? []).map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          phone: p.phone,
+          balance: p.outstandingBalance ?? 0,
+        }))}
+        selectedCustomerId={selectedCustomer?.id}
+        recentIds={recentIds}
+        onSelectCustomer={setSelectedCustomer}
         onClose={() => setCustomerPickerVisible(false)}
-        variant="sheet"
       />
     </ScreenLayout>
   );
