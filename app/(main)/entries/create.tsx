@@ -322,7 +322,6 @@ export default function CreateOrderScreen() {
   // Calculate effective total
   const entryAmount = computedEntryAmount;
   const totalWithBalance = computedEntryAmount + previousBalance;
-  const remainingBalance = Math.max(0, previousBalance - entryAmount);
   const isPaymentOverBalance = entryType === "payment" && previousBalance > 0 && entryAmount > previousBalance;
   const isPaymentZeroBalance = entryType === "payment" && previousBalance <= 0;
   const disableSave =
