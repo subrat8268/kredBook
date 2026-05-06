@@ -121,10 +121,23 @@ function DatePickerSheet({ title, value, visible, onConfirm, onClose }: DatePick
       visible={visible}
       onClose={onClose}
       title={title}
-      snapPoints={["55%"]}
+      snapPoints={["72%"]}
     >
-      <BottomSheetView style={{ paddingHorizontal: spacing.screenPadding }}>
-        <View style={{ flexDirection: "row", gap: 8, marginBottom: spacing.lg }}>
+      <BottomSheetView
+        style={{
+          flex: 1,
+          paddingHorizontal: spacing.screenPadding,
+          paddingBottom: spacing.md,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 8,
+            marginBottom: spacing.lg,
+            minHeight: itemH * 3 + 40,
+          }}
+        >
           <View style={{ flex: 1 }}>
             <Text style={{ ...typography.caption, color: colors.textSecondary, marginBottom: 6, textAlign: "center" }}>Day</Text>
             <PickerColumn items={days} selected={day} onChange={setDay} itemH={itemH} />
@@ -140,6 +153,7 @@ function DatePickerSheet({ title, value, visible, onConfirm, onClose }: DatePick
         </View>
         <Pressable
           style={{
+            marginTop: "auto",
             backgroundColor: colors.primary,
             borderRadius: 12,
             paddingVertical: 14,
