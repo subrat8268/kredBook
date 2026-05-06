@@ -1024,28 +1024,6 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               </View>
 
               <View className="h-px my-2" style={{ backgroundColor: colors.border }} />
-
-              <View className="flex-row justify-between items-center">
-                <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
-                  {entryType === "payment" ? "Remaining Balance" : "Grand Total"}
-                </Text>
-                <Text
-                  className="text-[18px]"
-                  style={{
-                    fontWeight: "700",
-                    color:
-                      entryType === "payment"
-                        ? remainingBalance > 0
-                          ? colors.warning
-                          : colors.success
-                        : colors.textPrimary,
-                  }}
-                >
-                  {formatINR(entryType === "payment" ? remainingBalance : totalWithBalance, {
-                    maximumFractionDigits: 2,
-                  })}
-                </Text>
-              </View>
             </View>
               </Animated.View>
             ) : null}
