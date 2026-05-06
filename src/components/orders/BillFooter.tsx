@@ -73,16 +73,16 @@ export default function BillFooter({
       )}
 
       {useSplitActions ? (
-        <View style={{ flexDirection: "row", gap: 10 }}>
+        <View style={{ flexDirection: "row", gap: 8 }}>
           <TouchableOpacity
             onPress={onPrimaryAction}
             disabled={disabled || isLoading}
             style={{
-              flex: 1,
+              flex: 0.65,
               backgroundColor: disabled ? colors.border : colors.primary,
-              minHeight: 56,
+              minHeight: 52,
               paddingVertical: 10,
-              borderRadius: 10,
+              borderRadius: 16,
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -107,29 +107,35 @@ export default function BillFooter({
             onPress={onSecondaryAction}
             disabled={secondaryDisabled || isLoading}
             style={{
-              flex: 1,
+              flex: 0.33,
               borderWidth: 1,
               borderColor: secondaryDisabled ? colors.border : colors.primary,
               backgroundColor: colors.surface,
-              minHeight: 56,
+              minHeight: 52,
               paddingVertical: 8,
-              borderRadius: 10,
+              borderRadius: 16,
               alignItems: "center",
               justifyContent: "center",
               opacity: secondaryDisabled ? 0.5 : 1,
             }}
             activeOpacity={0.75}
           >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Share2
+                size={16}
+                color={secondaryDisabled ? colors.textSecondary : colors.primary}
+              />
             <Text
               numberOfLines={1}
               style={{
                 color: secondaryDisabled ? colors.textSecondary : colors.primary,
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: "700",
               }}
             >
               {secondaryLabel}
             </Text>
+            </View>
             {secondaryDisabled ? (
               <Text
                 style={{

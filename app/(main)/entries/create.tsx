@@ -6,6 +6,7 @@ import { useToast } from "@/src/components/feedback/Toast";
 import BillFooter from "@/src/components/orders/BillFooter";
 import CustomerPickerSheet from "@/src/components/customer/CustomerPickerSheet";
 import Input from "@/src/components/ui/Input";
+import { Skeleton } from "@/src/components/ui/Skeleton";
 import { useCreateOrder } from "@/src/hooks/useEntries";
 import { useNetworkSync } from "@/src/hooks/useNetworkSync";
 import { usePeople } from "@/src/hooks/usePeople";
@@ -23,7 +24,7 @@ import { createMMKV } from "react-native-mmkv";
 import { ArrowLeft, ArrowRightLeft, User } from "lucide-react-native";
 import { format } from "date-fns";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
@@ -157,6 +158,9 @@ export default function CreateOrderScreen() {
   const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
   const [hadInitialSeedData, setHadInitialSeedData] = useState(false);
   const [revealAnim] = useState(() => new Animated.Value(0));
+  const [showCustomerRequired, setShowCustomerRequired] = useState(false);
+  const [shakeAnim] = useState(() => new Animated.Value(0));
+  const isSaving = useRef(false);
 
   useEffect(() => {
     if (!customerParams) return;
@@ -268,7 +272,6 @@ export default function CreateOrderScreen() {
   const createOrderMutation = useCreateOrder(vendorId!);
   const { people, isLoading: isPeopleLoading } = usePeople(vendorId, "");
   const { queueLength } = useNetworkSync();
-  const hasItems = lineItems.length > 0;
 
   const lineItemsTotal = useMemo(
     () => lineItems.reduce((sum, item) => sum + item.quantity * item.rate, 0),
@@ -316,45 +319,68 @@ export default function CreateOrderScreen() {
   // Calculate effective total
   const entryAmount = computedEntryAmount;
   const totalWithBalance = computedEntryAmount + previousBalance;
+  const remainingBalance = Math.max(0, previousBalance - entryAmount);
+  const isPaymentOverBalance = entryType === "payment" && previousBalance > 0 && entryAmount > previousBalance;
+  const isPaymentZeroBalance = entryType === "payment" && previousBalance <= 0;
+  const disableSave =
+    entryAmount === 0 ||
+    !selectedCustomerId ||
+    (entryMode === "bill" && lineItems.length === 0 && entryType === "bill") ||
+    isSaving.current ||
+    createOrderMutation.isPending ||
+    isPaymentZeroBalance;
 
   const handleSaveEntry = async () => {
+    if (isSaving.current) return;
+    isSaving.current = true;
+
     // Validation
     if (!selectedCustomerId) {
-      return Alert.alert("Error", "Please select a person");
+      Animated.sequence([
+        Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
+      ]).start();
+      setShowCustomerRequired(true);
+      setTimeout(() => setShowCustomerRequired(false), 2000);
+      isSaving.current = false;
+      return;
     }
 
     if (entryType === "payment") {
       const paymentAmount = parseFloat(quickAmount) || 0;
       if (!quickAmount.trim() || paymentAmount <= 0) {
-        return Alert.alert("Error", "Please enter a payment amount");
+        isSaving.current = false;
+        return;
       }
-      if (previousBalance <= 0) {
-        return Alert.alert(
-          "Up to date",
-          `${selectedCustomerMeta?.name ?? "This person"} has no pending entries to pay.`,
-        );
+      try {
+        await handleRecordPayment();
+      } finally {
+        isSaving.current = false;
       }
-      if (paymentAmount > previousBalance) {
-        return Alert.alert(
-          "Amount too high",
-          `Payment exceeds the pending balance of ${formatINR(previousBalance)}.`,
-        );
-      }
-      return handleRecordPayment();
+      return;
     }
 
     // Quick amount or bill items must be provided
     if (entryMode === "quick" && !quickAmount.trim()) {
-      return Alert.alert("Error", "Please enter an amount");
+      isSaving.current = false;
+      return;
     }
     if (entryMode === "bill" && !lineItems.length) {
-      return Alert.alert("Error", "Please add at least one item");
+      isSaving.current = false;
+      return;
     }
 
-    const savedOrder = await performSave();
-    if (savedOrder) {
-      setSavedEntry(savedOrder);
-      setIsPostSaveModalOpen(true);
+    try {
+      const savedOrder = await performSave();
+      if (savedOrder) {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setSavedEntry(savedOrder);
+        setIsPostSaveModalOpen(true);
+      }
+    } finally {
+      isSaving.current = false;
     }
   };
 
@@ -377,6 +403,7 @@ export default function CreateOrderScreen() {
               },
             ];
 
+        // Offline queue adapter behavior is handled in data layer and out of scope here.
         const savedOrder = await createOrderMutation.mutateAsync({
           customerId: selectedCustomerId!,
           vendorId: vendorId!,
@@ -406,7 +433,8 @@ export default function CreateOrderScreen() {
       return savedOrder;
     } catch (err: any) {
       console.error("Save entry failed:", err.message);
-      const errorMessage = err.message || "Failed to save entry";
+      // Keep draft intact on failure so user can retry.
+      const errorMessage = "Couldn't save. Your entry is preserved.";
       showToast({ message: errorMessage, type: "error" });
       Alert.alert("Error", errorMessage);
       return null;
@@ -455,7 +483,7 @@ export default function CreateOrderScreen() {
       if (!detail?.pendingOrderId || (detail.pendingOrderBalance ?? 0) <= 0) {
         Alert.alert(
           "Up to date",
-          `${detail?.name ?? selectedCustomerMeta?.name ?? "This person"} has no pending entries to pay.`,
+          `${detail?.name ?? selectedCustomerMeta?.name ?? "This customer"} has no pending entries to pay.`,
         );
         return;
       }
@@ -480,6 +508,7 @@ export default function CreateOrderScreen() {
       setRecentIds(prependRecentCustomer(selectedCustomerId));
       setQuickAmount("");
       setOrderNote("");
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       showToast({
         message: `Payment recorded for ${detail.name}`,
         type: "success",
@@ -630,8 +659,13 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             <View className="flex-1" />
             </View>
 
-            <View className="mt-2 flex-row justify-end">
+            <View className="mt-2 flex-row items-center justify-end gap-2">
               <SyncStatus />
+              {queueLength > 0 ? (
+                <Text className="text-[12px] text-textSecondary dark:text-textSecondary-dark">
+                  ({queueLength} pending)
+                </Text>
+              ) : null}
             </View>
           </View>
 
@@ -642,8 +676,13 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             showsVerticalScrollIndicator={false}
           >
 
-            {/* Person picker */}
-            <View className="overflow-hidden rounded-2xl border border-border bg-surface dark:border-border-dark dark:bg-surface-dark">
+            {/* Customer picker */}
+            <Animated.View
+              style={{
+                transform: [{ translateX: shakeAnim }],
+              }}
+              className="overflow-hidden rounded-2xl border border-border bg-surface dark:border-border-dark dark:bg-surface-dark"
+            >
               <TouchableOpacity onPress={() => setIsCustomerSheetOpen(true)} className="flex-row items-center border-b border-border px-4 py-4 dark:border-border-dark" activeOpacity={0.75}>
                 <View
                   className="rounded-full items-center justify-center mr-3 w-[52px] h-[52px]"
@@ -669,11 +708,11 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                   >
                     {selectedCustomerMeta
                       ? selectedCustomerMeta.name
-                      : "Select Person"}
+                      : "Select Customer"}
                   </Text>
                   {!selectedCustomerMeta && (
                     <Text className="mt-0.5 text-[14px] text-textSecondary dark:text-textSecondary-dark">
-                      Choose from your people list below
+                      Choose from your customers list below
                     </Text>
                   )}
                 </View>
@@ -685,6 +724,12 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                   accessibilityLabel="Change customer"
                 />
               </TouchableOpacity>
+
+              {selectedCustomerMeta && isFetchingBalance ? (
+                <View className="flex-row items-center border-t border-border px-4 py-3 dark:border-border-dark">
+                  <Skeleton width={80} height={20} radius={10} />
+                </View>
+              ) : null}
 
               {selectedCustomerMeta &&
                 previousBalance > 0 &&
@@ -699,7 +744,19 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                     </Text>
                   </View>
                 )}
-            </View>
+            </Animated.View>
+
+            {showCustomerRequired ? (
+              <Text className="mt-1 text-[12px]" style={{ color: colors.danger }}>
+                Select a customer to continue
+              </Text>
+            ) : null}
+
+            {selectedCustomerMeta && isPaymentZeroBalance ? (
+              <Text className="mt-1 text-[12px] text-textSecondary dark:text-textSecondary-dark">
+                This customer has no pending balance
+              </Text>
+            ) : null}
 
             {!showOnlyCustomerCard ? (
               <Animated.View
@@ -793,12 +850,22 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             {entryMode === "quick" ? (
             <View className="mt-2">
               <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">
-                AMOUNT
+                {entryType === "payment" ? "PAYMENT AMOUNT" : "AMOUNT"}
               </Text>
-              <View className="rounded-2xl border border-border bg-surface px-5 py-6 dark:border-border-dark dark:bg-surface-dark">
-                <Text className="text-center text-[52px] font-extrabold" style={{ color: colors.primary }}>
+              <View className="rounded-2xl px-5 py-6" style={{ backgroundColor: colors.surfaceAlt, borderRadius: 16, padding: 8 }}>
+                <Text
+                  className="text-center text-[52px] font-extrabold"
+                  style={{ color: entryAmount === 0 ? colors.textMuted : colors.primary }}
+                >
                   {formatINR(parseFloat(quickAmount || "0"), { maximumFractionDigits: 2 })}
                 </Text>
+                {isPaymentOverBalance ? (
+                  <View className="mt-3 rounded-lg px-3 py-2" style={{ backgroundColor: `${colors.warning}1A` }}>
+                    <Text style={{ color: colors.warning, fontSize: 12, fontWeight: "600" }}>
+                      {formatINR(entryAmount)} exceeds outstanding balance ({formatINR(previousBalance)})
+                    </Text>
+                  </View>
+                ) : null}
                 <View className="mt-4" style={{ gap: 8 }}>
                   {["1,2,3", "4,5,6", "7,8,9", ".,0,⌫"].map((row) => (
                     <View key={row} className="flex-row" style={{ gap: 8 }}>
@@ -866,7 +933,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               ) : null}
             </View>
 
-            <View className="mt-5">
+            <View className="mt-5" style={{ display: entryType === "payment" ? "none" : "flex" }}>
               <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">DUE DATE</Text>
               <ScrollView
                 horizontal
@@ -931,37 +998,48 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               </ScrollView>
             </View>
 
-            {/* SUMMARY (Bill mode) */}
-            {entryType === "bill" && (quickAmount || hasItems) && (
-              <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
-                <View className="flex-row justify-between items-center mb-2">
-                  <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">
-                    {entryMode === "bill" ? "Items Total" : "Entry Amount"}
-                  </Text>
-                  <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
-                    {formatINR(entryAmount, { maximumFractionDigits: 2 })}
-                  </Text>
-                </View>
-
+            {/* SUMMARY */}
+            <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+              <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">
+                  {entryType === "payment" ? "Payment Amount" : entryMode === "bill" ? "Items Total" : "Entry Amount"}
+                </Text>
+                <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
+                  {formatINR(entryAmount, { maximumFractionDigits: 2 })}
+                </Text>
               </View>
-            )}
 
-            {/* SUMMARY (Payment mode) */}
-            {entryType === "payment" && quickAmount && (
-              <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
-                <View className="flex-row justify-between items-center">
-                  <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
-                    Payment Amount
-                  </Text>
-                  <Text
-                    className="text-[24px] font-extrabold"
-                    style={{ color: colors.primary }}
-                  >
-                    {formatINR(parseFloat(quickAmount) || 0, { maximumFractionDigits: 2 })}
-                  </Text>
-                </View>
+              <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">Previous Balance</Text>
+                <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
+                  {formatINR(previousBalance, { maximumFractionDigits: 2 })}
+                </Text>
               </View>
-            )}
+
+              <View className="h-px my-2" style={{ backgroundColor: colors.border }} />
+
+              <View className="flex-row justify-between items-center">
+                <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
+                  {entryType === "payment" ? "Remaining Balance" : "Grand Total"}
+                </Text>
+                <Text
+                  className="text-[18px]"
+                  style={{
+                    fontWeight: "700",
+                    color:
+                      entryType === "payment"
+                        ? remainingBalance > 0
+                          ? colors.warning
+                          : colors.success
+                        : colors.textPrimary,
+                  }}
+                >
+                  {formatINR(entryType === "payment" ? remainingBalance : totalWithBalance, {
+                    maximumFractionDigits: 2,
+                  })}
+                </Text>
+              </View>
+            </View>
               </Animated.View>
             ) : null}
           </ScrollView>
@@ -971,7 +1049,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
           <View className="absolute bottom-0 w-full">
             <BillFooter
               isLoading={createOrderMutation.isPending}
-              onPrimaryAction={entryType === "payment" ? handleRecordPayment : handleSaveEntry}
+              onPrimaryAction={handleSaveEntry}
               primaryLabel={entryType === "payment" ? "Record Payment" : "Save Entry"}
               onSecondaryAction={handleShareOnWhatsApp}
               secondaryLabel={entryType === "payment" ? undefined : "Share Receipt"}
@@ -986,15 +1064,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               }
               showIcon={entryType !== "payment"}
               offlineQueueCount={queueLength}
-              disabled={
-                entryType === "payment"
-                  ? !selectedCustomerId ||
-                    !quickAmount.trim() ||
-                    createOrderMutation.isPending
-                  : !selectedCustomerId ||
-                    (!quickAmount.trim() && !hasItems) ||
-                    createOrderMutation.isPending
-              }
+              disabled={disableSave}
              />
            </View>
           ) : null}

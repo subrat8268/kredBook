@@ -494,7 +494,7 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
             }}
           >
             <UserPlus size={18} color={colors.surface} style={{ marginRight: 8 }} />
-            <Text style={{ color: colors.surface, fontWeight: "600", fontSize: 15 }}>Add New Person</Text>
+            <Text style={{ color: colors.surface, fontWeight: "600", fontSize: 15 }}>Add New Customer</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
