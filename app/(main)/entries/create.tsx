@@ -42,7 +42,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 function getInitials(name: string) {
   const parts = name.trim().split(/\s+/);
@@ -102,6 +102,7 @@ function handleNumpadInput(current: string, key: string): string {
 
 export default function CreateOrderScreen() {
   const { colors } = useTheme();
+  const { bottom } = useSafeAreaInsets();
   const { i18n } = useTranslation();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const avatarColors = useMemo(
@@ -161,6 +162,8 @@ export default function CreateOrderScreen() {
   const [showCustomerRequired, setShowCustomerRequired] = useState(false);
   const [shakeAnim] = useState(() => new Animated.Value(0));
   const isSaving = useRef(false);
+  const footerHeight = 150;
+  const footerBottomOffset = Math.max(bottom + 16, 16);
 
   useEffect(() => {
     if (!customerParams) return;
@@ -672,7 +675,11 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
           {/* Scrollable Content */}
           <ScrollView
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ padding: 16, paddingBottom: 130, gap: 12 }}
+            contentContainerStyle={{
+              padding: 16,
+              paddingBottom: footerHeight + footerBottomOffset,
+              gap: 12,
+            }}
             showsVerticalScrollIndicator={false}
           >
 
@@ -1046,7 +1053,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
 
           {/* Absolute Footer */}
           {!showOnlyCustomerCard ? (
-          <View className="absolute bottom-0 w-full">
+          <View className="absolute w-full" style={{ bottom: footerBottomOffset }}>
             <BillFooter
               isLoading={createOrderMutation.isPending}
               onPrimaryAction={handleSaveEntry}
