@@ -62,7 +62,7 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
   const shimmerAnim = useRef(new Animated.Value(0.4)).current;
 
   const tokens = useMemo(() => getSheetTokens(colors), [colors]);
-  const snapPoints = useMemo(() => ["50%", "90%"], []);
+  const snapPoints = useMemo(() => ["85%"], []);
 
   useEffect(() => {
     if (visible) sheetRef.current?.present();
@@ -228,6 +228,7 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
       ref={sheetRef}
       index={0}
       snapPoints={snapPoints}
+      enablePanDownToClose
       onDismiss={onClose}
       backdropComponent={(props) => (
         <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} opacity={0.4} pressBehavior="close" />
