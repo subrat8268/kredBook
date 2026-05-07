@@ -436,7 +436,7 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
             keyExtractor={(item) => item.id}
             renderItem={renderRow}
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ paddingBottom: 84 + insets.bottom }}
+            contentContainerStyle={{ paddingBottom: 20 }}
             ListEmptyComponent={
               searchQuery.trim() ? (
                 <View style={{ alignItems: "center", paddingHorizontal: 20, paddingVertical: 24 }}>
@@ -476,10 +476,12 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
             left: 0,
             right: 0,
             bottom: 0,
-            paddingHorizontal: 20,
-            paddingBottom: 16 + insets.bottom,
-            paddingTop: 10,
-            backgroundColor: colors.surface,
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            paddingBottom: insets.bottom + 12,
+            backgroundColor: colors.background,
+            borderTopWidth: 1,
+            borderTopColor: colors.border,
           }}
         >
           <TouchableOpacity
