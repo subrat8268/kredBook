@@ -73,6 +73,7 @@
 - `profiles.dashboard_mode` has been removed.
 - Supplier / product surfaces are out of scope and must not be described as active features.
 - **4.4.1 (Profile redesign) is partially done** — basic screen shipped in [f6f73dd](https://github.com/subrat8268/kredBook/commit/f6f73dd26efd79c04d6cd1e594455988cb83430b). Full design-system-aligned redesign still pending. Do not mark 4.4.1 Done until UPI QR + danger zone + settings section are complete.
+- Customer picker bottom-sheet now reserves explicit footer space + Android bottom inset to avoid list clipping behind gesture navigation.
 
 ---
 

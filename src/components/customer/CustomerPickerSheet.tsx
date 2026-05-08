@@ -2,22 +2,19 @@ import CustomerAvatar from "@/src/components/common/CustomerAvatar";
 import { getSheetTokens } from "../../styles/sheetTokens";
 import { useTheme } from "../../utils/ThemeProvider";
 import { formatINR } from "../../utils/format";
-import { BottomSheetBackdrop, BottomSheetFlatList, BottomSheetModal } from "@gorhom/bottom-sheet";
+import {
+  BottomSheetBackdrop,
+  BottomSheetFlatList,
+  BottomSheetFooter,
+  BottomSheetFooterProps,
+  BottomSheetModal,
+  BottomSheetTextInput,
+} from "@gorhom/bottom-sheet";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { Search, UserPlus, UserSearch, Users, X } from "lucide-react-native";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Animated,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Animated, NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Customer = {
@@ -56,6 +53,7 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const sheetRef = useRef<BottomSheetModal>(null);
+  const listRef = useRef<BottomSheetFlatList<Customer>>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const clearAnim = useRef(new Animated.Value(0)).current;
@@ -63,10 +61,21 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
 
   const tokens = useMemo(() => getSheetTokens(colors), [colors]);
   const snapPoints = useMemo(() => ["85%"], []);
+  const footerInset = Math.max(insets.bottom, 8);
+  const footerHeight = 52 + 12 + 12 + footerInset;
 
   useEffect(() => {
-    if (visible) sheetRef.current?.present();
-    else sheetRef.current?.dismiss();
+    if (visible) {
+      sheetRef.current?.present();
+      requestAnimationFrame(() => {
+        listRef.current?.scrollToOffset({ offset: 0, animated: false });
+      });
+      return;
+    }
+
+    setSearchQuery("");
+    setSearchFocused(false);
+    sheetRef.current?.dismiss();
   }, [visible]);
 
   useEffect(() => {
@@ -75,7 +84,7 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
       duration: 150,
       useNativeDriver: true,
     }).start();
-  }, [clearAnim, searchQuery.length]);
+  }, [clearAnim, searchQuery]);
 
   useEffect(() => {
     if (!isLoading) return;
@@ -123,256 +132,196 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
     return recentIds.map((id) => byId.get(id)).filter(Boolean).slice(0, 5) as Customer[];
   }, [customerList, recentIds, searchQuery]);
 
-  const onAddNew = (prefillName?: string) => {
+  const handleClosePress = useCallback(() => {
     sheetRef.current?.close();
-    setTimeout(() => {
-      router.push("/(main)/people/create" as never);
-    }, 200);
-  };
+  }, []);
 
-  const renderRow = ({ item }: { item: Customer }) => {
-    const selected = selectedCustomerId === item.id;
-    const balanceLabel = getBalanceText(item.balance);
-    const due = item.balance > 0;
-    const advance = item.balance < 0;
+  const handleAddNew = useCallback(
+    (prefillName?: string) => {
+      sheetRef.current?.close();
+      setTimeout(() => {
+        const name = prefillName?.trim();
+        if (name) {
+          router.push(`/(main)/people/create?name=${encodeURIComponent(name)}` as never);
+          return;
+        }
+        router.push("/(main)/people/create" as never);
+      }, 200);
+    },
+    [router],
+  );
 
-    return (
-      <TouchableOpacity
-        onPress={async () => {
-          await Haptics.selectionAsync();
-          onSelectCustomer(item);
-          onClose();
-        }}
-        activeOpacity={0.7}
-        style={{
-          height: tokens.rowHeight,
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: 20,
-          backgroundColor: selected ? `${colors.primary}14` : "transparent",
-        }}
-      >
-        <CustomerAvatar name={item.name} size={tokens.avatarSize} selected={selected} />
+  const handleSelectCustomer = useCallback(
+    async (customer: Customer) => {
+      await Haptics.selectionAsync();
+      onSelectCustomer(customer);
+      sheetRef.current?.close();
+    },
+    [onSelectCustomer],
+  );
 
-        <View style={{ flex: 1, marginLeft: 14, justifyContent: "center" }}>
-          <Text numberOfLines={1} style={{ fontSize: 15, fontWeight: "600", color: colors.textPrimary }}>
-            {item.name}
-          </Text>
-          {balanceLabel ? (
-            <View
-              style={{
-                marginTop: 3,
-                alignSelf: "flex-start",
-                paddingHorizontal: 6,
-                paddingVertical: 2,
-                borderRadius: 4,
-                backgroundColor: due ? `${colors.warning}1A` : `${colors.success}1A`,
-              }}
-            >
-              <Text style={{ fontSize: 11, color: due ? colors.warning : colors.success }}>
-                {balanceLabel}
+  const renderFooter = useCallback(
+    (props: BottomSheetFooterProps) => (
+      <BottomSheetFooter {...props} bottomInset={0}>
+        <View
+          style={[
+            styles.footerWrap,
+            {
+              paddingBottom: footerInset + 12,
+              backgroundColor: colors.background,
+              borderTopColor: colors.border,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => handleAddNew()}
+            style={[styles.footerButton, { backgroundColor: colors.primaryDark }]}
+          >
+            <UserPlus size={18} color={colors.surface} style={styles.footerIcon} />
+            <Text style={[styles.footerText, { color: colors.surface }]}>Add New Customer</Text>
+          </TouchableOpacity>
+        </View>
+      </BottomSheetFooter>
+    ),
+    [colors.background, colors.border, colors.primaryDark, colors.surface, footerInset, handleAddNew],
+  );
+
+  const debugScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (!__DEV__) return;
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const maxOffsetY = Math.max(contentSize.height - layoutMeasurement.height, 0);
+    const distanceToBottom = Math.max(maxOffsetY - contentOffset.y, 0);
+    if (distanceToBottom < 24) {
+      console.log("[CustomerPickerSheet] reached bottom", {
+        y: Math.round(contentOffset.y),
+        maxY: Math.round(maxOffsetY),
+        contentH: Math.round(contentSize.height),
+        viewportH: Math.round(layoutMeasurement.height),
+      });
+    }
+  }, []);
+
+  const debugContentSize = useCallback((width: number, height: number) => {
+    if (!__DEV__) return;
+    console.log("[CustomerPickerSheet] content size", {
+      w: Math.round(width),
+      h: Math.round(height),
+      rows: filtered.length,
+    });
+  }, [filtered.length]);
+
+  const renderRow = useCallback(
+    ({ item }: { item: Customer }) => {
+      const selected = selectedCustomerId === item.id;
+      const balanceLabel = getBalanceText(item.balance);
+      const due = item.balance > 0;
+      const advance = item.balance < 0;
+
+      return (
+        <TouchableOpacity
+          onPress={() => void handleSelectCustomer(item)}
+          activeOpacity={0.7}
+          style={[
+            styles.row,
+            {
+              height: tokens.rowHeight,
+              backgroundColor: selected ? `${colors.primary}14` : "transparent",
+            },
+          ]}
+        >
+          <CustomerAvatar name={item.name} size={tokens.avatarSize} selected={selected} />
+
+          <View style={styles.rowMainContent}>
+            <Text numberOfLines={1} style={[styles.rowTitle, { color: colors.textPrimary }]}>
+              {item.name}
+            </Text>
+            {balanceLabel ? (
+              <View
+                style={[
+                  styles.badge,
+                  { backgroundColor: due ? `${colors.warning}1A` : `${colors.success}1A` },
+                ]}
+              >
+                <Text style={{ fontSize: 11, color: due ? colors.warning : colors.success }}>{balanceLabel}</Text>
+              </View>
+            ) : (
+              <View style={styles.badgeSpacer} />
+            )}
+          </View>
+
+          {selected ? (
+            <View style={styles.selectedWrap}>
+              <Text style={[styles.selectedText, { color: colors.primary, backgroundColor: `${colors.primary}15` }]}>
+                SELECTED
               </Text>
             </View>
           ) : (
-            <View style={{ height: 18 }} />
+            <View style={styles.amountWrap}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: item.balance === 0 ? "500" : "700",
+                  color: due ? colors.warning : advance ? colors.success : colors.textMuted,
+                }}
+              >
+                {formatINR(Math.abs(item.balance), { maximumFractionDigits: 0 })}
+              </Text>
+            </View>
           )}
-        </View>
-
-        {selected ? (
-          <View style={{ alignItems: "flex-end", marginLeft: 8 }}>
-            <Text
-              style={{
-                fontSize: 11,
-                fontWeight: "800",
-                letterSpacing: 1,
-                color: colors.primary,
-                backgroundColor: `${colors.primary}15`,
-                paddingHorizontal: 8,
-                paddingVertical: 3,
-                borderRadius: 4,
-              }}
-            >
-              SELECTED
-            </Text>
-          </View>
-        ) : (
-          <View style={{ width: 80, alignItems: "flex-end", marginLeft: 8 }}>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: item.balance === 0 ? "500" : "700",
-                color: due ? colors.warning : advance ? colors.success : colors.textMuted,
-              }}
-            >
-              {formatINR(Math.abs(item.balance), { maximumFractionDigits: 0 })}
-            </Text>
-          </View>
-        )}
-
-        <View
-          style={{
-            position: "absolute",
-            left: tokens.separatorInset,
-            right: 0,
-            bottom: 0,
-            height: StyleSheet.hairlineWidth,
-            backgroundColor: colors.border,
-          }}
-        />
-      </TouchableOpacity>
-    );
-  };
-
-  return (
-    <BottomSheetModal
-      ref={sheetRef}
-      index={0}
-      snapPoints={snapPoints}
-      enablePanDownToClose
-      onDismiss={onClose}
-      backdropComponent={(props) => (
-        <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} opacity={0.4} pressBehavior="close" />
-      )}
-      keyboardBehavior="interactive"
-      keyboardBlurBehavior="restore"
-      handleStyle={{ paddingTop: 8 }}
-      handleIndicatorStyle={{
-        backgroundColor: tokens.handleColor,
-        width: tokens.handleWidth,
-        height: tokens.handleHeight,
-        borderRadius: 2,
-      }}
-      backgroundStyle={{
-        backgroundColor: tokens.background,
-        borderTopLeftRadius: tokens.borderTopRadius,
-        borderTopRightRadius: tokens.borderTopRadius,
-        shadowColor: colors.textPrimary,
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-      }}
-    >
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <View style={{ paddingTop: tokens.headerPaddingTop, paddingHorizontal: tokens.headerPaddingHorizontal }}>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-            <Text
-              style={{
-                fontSize: tokens.headerTitleSize,
-                fontWeight: tokens.headerTitleWeight,
-                color: colors.textPrimary,
-              }}
-            >
-              Select Customer
-            </Text>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={onClose}
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: colors.surfaceAlt,
-                borderWidth: 1,
-                borderColor: colors.border,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <X size={16} color={colors.textMuted} />
-            </TouchableOpacity>
-          </View>
 
           <View
             style={{
-              marginTop: 12,
-              height: 48,
-              borderRadius: tokens.searchBorderRadius,
-              backgroundColor: tokens.searchBackground,
-              paddingHorizontal: 12,
-              flexDirection: "row",
-              alignItems: "center",
-              borderWidth: searchFocused ? 1.5 : 0,
-              borderColor: searchFocused ? `${colors.primary}66` : "transparent",
+              position: "absolute",
+              left: tokens.separatorInset,
+              right: 0,
+              bottom: 0,
+              height: StyleSheet.hairlineWidth,
+              backgroundColor: colors.border,
             }}
-          >
-            <Search size={18} color={colors.textMuted} />
-            <TextInput
-              style={{ flex: 1, marginLeft: 10, fontSize: 15, color: colors.textPrimary }}
-              placeholder="Search by name or phone"
-              placeholderTextColor={colors.textMuted}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onFocus={() => {
-                setSearchFocused(true);
-                sheetRef.current?.snapToIndex(1);
-              }}
-              onBlur={() => setSearchFocused(false)}
-            />
+          />
+        </TouchableOpacity>
+      );
+    },
+    [
+      colors.border,
+      colors.primary,
+      colors.success,
+      colors.textMuted,
+      colors.textPrimary,
+      colors.warning,
+      handleSelectCustomer,
+      selectedCustomerId,
+      tokens.avatarSize,
+      tokens.rowHeight,
+      tokens.separatorInset,
+    ],
+  );
 
-            <Animated.View
-              style={{
-                opacity: clearAnim,
-                transform: [{ scale: clearAnim }],
-              }}
-            >
-              {searchQuery.length > 0 ? (
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => setSearchQuery("")}
-                  style={{
-                    borderRadius: 999,
-                    backgroundColor: colors.border,
-                    paddingHorizontal: 8,
-                    paddingVertical: 4,
-                  }}
-                >
-                  <Text style={{ color: colors.textMuted, fontWeight: "700" }}>✕</Text>
-                </TouchableOpacity>
-              ) : null}
-            </Animated.View>
-          </View>
-        </View>
-
+  const listHeader = useMemo(
+    () => (
+      <>
         {!searchQuery.trim() && recents.length > 0 ? (
           <View style={{ marginTop: 10 }}>
-            <Text
-              style={{
-                marginLeft: 20,
-                marginBottom: 8,
-                fontSize: 11,
-                letterSpacing: 1.2,
-                color: colors.textMuted,
-                fontWeight: "700",
-              }}
-            >
-              FREQUENT
-            </Text>
+            <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>FREQUENT</Text>
 
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 12, gap: 8 }}
+              contentContainerStyle={styles.recentsContainer}
             >
               {recents.map((customer) => (
                 <TouchableOpacity
                   key={customer.id}
                   activeOpacity={0.7}
-                  onPress={async () => {
-                    await Haptics.selectionAsync();
-                    onSelectCustomer(customer);
-                    onClose();
-                  }}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 8,
-                    paddingHorizontal: 14,
-                    paddingVertical: 8,
-                    borderRadius: 999,
-                    backgroundColor: selectedCustomerId === customer.id ? `${colors.primary}15` : colors.surface,
-                    borderWidth: 1,
-                    borderColor: selectedCustomerId === customer.id ? colors.primary : colors.border,
-                  }}
+                  onPress={() => void handleSelectCustomer(customer)}
+                  style={[
+                    styles.recentChip,
+                    {
+                      backgroundColor: selectedCustomerId === customer.id ? `${colors.primary}15` : colors.surface,
+                      borderColor: selectedCustomerId === customer.id ? colors.primary : colors.border,
+                    },
+                  ]}
                 >
                   <CustomerAvatar name={customer.name} size={28} selected={selectedCustomerId === customer.id} />
                   <Text
@@ -390,119 +339,299 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
               ))}
             </ScrollView>
 
-            <View style={{ height: 1, backgroundColor: colors.border, marginHorizontal: 20 }} />
+            <View style={[styles.recentsSeparator, { backgroundColor: colors.border }]} />
           </View>
         ) : null}
 
-        <Text
-          style={{
-            marginTop: recents.length ? 16 : 14,
-            marginBottom: 4,
-            marginLeft: 20,
-            fontSize: 11,
-            letterSpacing: 1.5,
-            color: colors.textMuted,
-            fontWeight: "700",
-          }}
-        >
+        <Text style={[styles.sectionLabelAll, { color: colors.textMuted, marginTop: recents.length ? 16 : 14 }]}>
           ALL CUSTOMERS
         </Text>
+      </>
+    ),
+    [
+      colors.border,
+      colors.primary,
+      colors.surface,
+      colors.textMuted,
+      colors.textPrimary,
+      handleSelectCustomer,
+      recents,
+      searchQuery,
+      selectedCustomerId,
+    ],
+  );
+
+  const listEmpty = useMemo(
+    () =>
+      searchQuery.trim() ? (
+        <View style={styles.emptyWrap}>
+          <UserSearch size={40} color={colors.textMuted} />
+          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No one named &apos;{searchQuery}&apos;</Text>
+          <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>Add them as a new customer?</Text>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => handleAddNew(searchQuery)}>
+            <Text style={[styles.emptyAction, { color: colors.primary }]}>Add {searchQuery}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.emptyWrapNoData}>
+          <Users size={48} color={colors.textMuted} />
+          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No customers yet</Text>
+          <Text style={[styles.emptySubtitleCenter, { color: colors.textMuted }]}>Add your first customer to start recording entries</Text>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => handleAddNew()}
+            style={[styles.emptyPrimaryButton, { backgroundColor: colors.primary }]}
+          >
+            <Text style={[styles.emptyPrimaryText, { color: colors.surface }]}>Add Customer</Text>
+          </TouchableOpacity>
+        </View>
+      ),
+    [colors.primary, colors.surface, colors.textMuted, colors.textPrimary, handleAddNew, searchQuery],
+  );
+
+  if (!visible) return null;
+
+  return (
+    <BottomSheetModal
+      ref={sheetRef}
+      index={0}
+      snapPoints={snapPoints}
+      enableDynamicSizing={false}
+      enablePanDownToClose
+      onDismiss={onClose}
+      backdropComponent={(props) => (
+        <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} opacity={0.4} pressBehavior="close" />
+      )}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      android_keyboardInputMode="adjustResize"
+      handleStyle={styles.handleStyle}
+      footerComponent={renderFooter}
+      handleIndicatorStyle={{
+        backgroundColor: tokens.handleColor,
+        width: tokens.handleWidth,
+        height: tokens.handleHeight,
+        borderRadius: 2,
+      }}
+      backgroundStyle={{
+        backgroundColor: tokens.background,
+        borderTopLeftRadius: tokens.borderTopRadius,
+        borderTopRightRadius: tokens.borderTopRadius,
+        shadowColor: colors.textPrimary,
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+      }}
+    >
+      <View style={styles.container}>
+        <View style={{ paddingTop: tokens.headerPaddingTop, paddingHorizontal: tokens.headerPaddingHorizontal }}>
+          <View style={styles.headerRow}>
+            <Text style={{ fontSize: tokens.headerTitleSize, fontWeight: tokens.headerTitleWeight, color: colors.textPrimary }}>
+              Select Customer
+            </Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={handleClosePress}
+              style={[
+                styles.closeButton,
+                {
+                  backgroundColor: colors.surfaceAlt,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <X size={16} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+
+          <View
+            style={[
+              styles.searchWrap,
+              {
+                borderRadius: tokens.searchBorderRadius,
+                backgroundColor: tokens.searchBackground,
+                borderWidth: searchFocused ? 1.5 : 0,
+                borderColor: searchFocused ? `${colors.primary}66` : "transparent",
+              },
+            ]}
+          >
+            <Search size={18} color={colors.textMuted} />
+            <BottomSheetTextInput
+              style={[styles.searchInput, { color: colors.textPrimary }]}
+              placeholder="Search by name or phone"
+              placeholderTextColor={colors.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onFocus={() => {
+                setSearchFocused(true);
+                sheetRef.current?.snapToIndex(0);
+              }}
+              onBlur={() => setSearchFocused(false)}
+            />
+
+            <Animated.View
+              style={{
+                opacity: clearAnim,
+                transform: [{ scale: clearAnim }],
+              }}
+            >
+              {searchQuery.length > 0 ? (
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setSearchQuery("")}
+                  style={[styles.clearSearchButton, { backgroundColor: colors.border }]}
+                >
+                  <Text style={{ color: colors.textMuted, fontWeight: "700" }}>x</Text>
+                </TouchableOpacity>
+              ) : null}
+            </Animated.View>
+          </View>
+        </View>
 
         {isLoading ? (
-          <View style={{ paddingTop: 10 }}>
+          <View style={styles.skeletonWrap}>
             {[0, 1, 2].map((idx) => (
-              <Animated.View
-                key={String(idx)}
-                style={{
-                  opacity: shimmerAnim,
-                  height: tokens.rowHeight,
-                  paddingHorizontal: 20,
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.border }} />
-                <View style={{ width: 16 }} />
-                <View style={{ flex: 1 }}>
-                  <View style={{ height: 12, width: "50%", backgroundColor: colors.border, borderRadius: 4 }} />
-                  <View style={{ height: 10, width: "30%", backgroundColor: colors.border, borderRadius: 4, marginTop: 8 }} />
+              <Animated.View key={String(idx)} style={[styles.skeletonRow, { opacity: shimmerAnim, height: tokens.rowHeight }]}>
+                <View style={[styles.skeletonAvatar, { backgroundColor: colors.border }]} />
+                <View style={styles.skeletonGap} />
+                <View style={styles.skeletonBody}>
+                  <View style={[styles.skeletonLineOne, { backgroundColor: colors.border }]} />
+                  <View style={[styles.skeletonLineTwo, { backgroundColor: colors.border }]} />
                 </View>
               </Animated.View>
             ))}
           </View>
         ) : (
           <BottomSheetFlatList
+            ref={listRef}
+            style={styles.list}
             data={filtered}
             keyExtractor={(item) => item.id}
             renderItem={renderRow}
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ paddingBottom: 20 }}
-            ListEmptyComponent={
-              searchQuery.trim() ? (
-                <View style={{ alignItems: "center", paddingHorizontal: 20, paddingVertical: 24 }}>
-                  <UserSearch size={40} color={colors.textMuted} />
-                  <Text style={{ marginTop: 10, color: colors.textPrimary, fontWeight: "600" }}>
-                    No one named &apos;{searchQuery}&apos;
-                  </Text>
-                  <Text style={{ marginTop: 4, color: colors.textMuted }}>Add them as a new customer?</Text>
-                  <TouchableOpacity activeOpacity={0.7} onPress={() => onAddNew(searchQuery)}>
-                    <Text style={{ marginTop: 8, color: colors.primary, fontWeight: "700" }}>Add {searchQuery}</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={{ alignItems: "center", paddingHorizontal: 20, paddingVertical: 28 }}>
-                  <Users size={48} color={colors.textMuted} />
-                  <Text style={{ marginTop: 10, color: colors.textPrimary, fontWeight: "600" }}>No customers yet</Text>
-                  <Text style={{ marginTop: 4, color: colors.textMuted, textAlign: "center" }}>
-                    Add your first customer to start recording entries
-                  </Text>
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={() => onAddNew()}
-                    style={{ marginTop: 14, width: "100%", backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 12, alignItems: "center" }}
-                  >
-                    <Text style={{ color: colors.surface, fontWeight: "700" }}>Add Customer</Text>
-                  </TouchableOpacity>
-                </View>
-              )
-            }
-            ListFooterComponent={<View style={{ height: 8 }} />}
+            showsVerticalScrollIndicator
+            onScroll={debugScroll}
+            scrollEventThrottle={16}
+            onContentSizeChange={debugContentSize}
+            contentContainerStyle={{ paddingBottom: footerHeight + 16 }}
+            ListHeaderComponent={listHeader}
+            ListEmptyComponent={listEmpty}
+            ListFooterComponent={<View style={styles.listFooterSpacer} />}
           />
         )}
-
-        <View
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-            paddingBottom: insets.bottom + 12,
-            backgroundColor: colors.background,
-            borderTopWidth: 1,
-            borderTopColor: colors.border,
-          }}
-        >
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => onAddNew()}
-            style={{
-              height: 52,
-              borderRadius: 14,
-              backgroundColor: colors.primaryDark,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <UserPlus size={18} color={colors.surface} style={{ marginRight: 8 }} />
-            <Text style={{ color: colors.surface, fontWeight: "600", fontSize: 15 }}>Add New Customer</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+      </View>
     </BottomSheetModal>
   );
+});
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  handleStyle: { paddingTop: 8 },
+  list: { flex: 1 },
+  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  searchWrap: {
+    marginTop: 12,
+    height: 48,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchInput: { flex: 1, marginLeft: 10, fontSize: 15 },
+  clearSearchButton: {
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  rowMainContent: { flex: 1, marginLeft: 14, justifyContent: "center" },
+  rowTitle: { fontSize: 15, fontWeight: "600" },
+  badge: {
+    marginTop: 3,
+    alignSelf: "flex-start",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  badgeSpacer: { height: 18 },
+  selectedWrap: { alignItems: "flex-end", marginLeft: 8 },
+  selectedText: {
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  amountWrap: { width: 80, alignItems: "flex-end", marginLeft: 8 },
+  sectionLabel: {
+    marginLeft: 20,
+    marginBottom: 8,
+    fontSize: 11,
+    letterSpacing: 1.2,
+    fontWeight: "700",
+  },
+  sectionLabelAll: {
+    marginBottom: 4,
+    marginLeft: 20,
+    fontSize: 11,
+    letterSpacing: 1.5,
+    fontWeight: "700",
+  },
+  recentsContainer: { paddingHorizontal: 20, paddingBottom: 12, gap: 8 },
+  recentChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  recentsSeparator: { height: 1, marginHorizontal: 20 },
+  emptyWrap: { alignItems: "center", paddingHorizontal: 20, paddingVertical: 24 },
+  emptyWrapNoData: { alignItems: "center", paddingHorizontal: 20, paddingVertical: 28 },
+  emptyTitle: { marginTop: 10, fontWeight: "600" },
+  emptySubtitle: { marginTop: 4 },
+  emptySubtitleCenter: { marginTop: 4, textAlign: "center" },
+  emptyAction: { marginTop: 8, fontWeight: "700" },
+  emptyPrimaryButton: {
+    marginTop: 14,
+    width: "100%",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  emptyPrimaryText: { fontWeight: "700" },
+  skeletonWrap: { paddingTop: 10 },
+  skeletonRow: { paddingHorizontal: 20, flexDirection: "row", alignItems: "center" },
+  skeletonAvatar: { width: 44, height: 44, borderRadius: 22 },
+  skeletonGap: { width: 16 },
+  skeletonBody: { flex: 1 },
+  skeletonLineOne: { height: 12, width: "50%", borderRadius: 4 },
+  skeletonLineTwo: { height: 10, width: "30%", borderRadius: 4, marginTop: 8 },
+  footerWrap: { paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1 },
+  footerButton: {
+    height: 52,
+    borderRadius: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  footerIcon: { marginRight: 8 },
+  footerText: { fontWeight: "600", fontSize: 15 },
+  listFooterSpacer: { height: 8 },
 });
 
 export default CustomerPickerSheet;
