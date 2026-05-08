@@ -31,6 +31,13 @@ export function useDashboardPresentation({
     dashboardData?.totalCustomersCount ?? dashboardData?.total_customers_count ?? 0,
   );
 
+  const collectedThisMonth = useMemo(() => {
+    const sum = (recentActivity ?? [])
+      .filter((item) => item.type === "payment")
+      .reduce((acc, item) => acc + Number(item.amount ?? 0), 0);
+    return Number.isFinite(sum) ? sum : 0;
+  }, [recentActivity]);
+
   const followUpPeople = useMemo(() => {
     return [...overdueCustomers].sort((a, b) => b.daysSince - a.daysSince).slice(0, 5);
   }, [overdueCustomers]);
@@ -56,6 +63,7 @@ export function useDashboardPresentation({
     totalOutstanding,
     displayOutstanding,
     totalCustomersCount,
+    collectedThisMonth,
     followUpPeople,
   };
 }

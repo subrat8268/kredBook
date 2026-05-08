@@ -38,11 +38,14 @@ export default function DashboardRecentActivity({
         </Pressable>
       </View>
 
-      <View className="mt-3 rounded-2xl border border-border-soft bg-surface p-4 dark:border-border-dark dark:bg-surface-dark" style={{ position: "relative", overflow: "hidden" }}>
+      <View
+        className="mt-3 rounded-2xl bg-surface p-4"
+        style={{ position: "relative", overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1 }}
+      >
         {isLoading ? (
           <SkeletonText lines={4} />
         ) : errorMessage ? (
-          <View className="flex-row">
+          <View className="flex-row rounded-xl border border-danger-light bg-danger-bg p-3 dark:border-danger-dark dark:bg-danger-bg-dark">
             <View className="mr-3 mt-0.5">
               <AlertTriangle size={16} color={colors.danger} strokeWidth={2.2} />
             </View>
@@ -83,13 +86,13 @@ export default function DashboardRecentActivity({
           ))
         )}
 
-        {items.length > 0 ? (
+        {items.length >= 3 ? (
           <LinearGradient
             colors={["transparent", colors.surface]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
             pointerEvents="none"
-            style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 24 }}
+            style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 16 }}
           />
         ) : null}
       </View>

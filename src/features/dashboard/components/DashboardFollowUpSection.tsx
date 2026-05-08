@@ -6,6 +6,7 @@ import { SkeletonCard } from "@/src/components/ui/Skeleton";
 
 type Props = {
   colors: any;
+  spacing: any;
   overdueTotalCount: number;
   isLoading: boolean;
   isFetching: boolean;
@@ -18,6 +19,7 @@ type Props = {
 
 export default function DashboardFollowUpSection({
   colors,
+  spacing,
   overdueTotalCount,
   isLoading,
   errorMessage,
@@ -31,7 +33,7 @@ export default function DashboardFollowUpSection({
       <View className="mt-section-md flex-row items-center justify-between">
         <View className="flex-row items-center">
           <Text className="text-section-title text-textPrimary dark:text-textPrimary-dark">Top follow-up</Text>
-          <View className="ml-2 rounded-full px-2 py-0.5" style={{ backgroundColor: colors.surfaceAlt }}>
+          <View className="ml-2 rounded-full bg-border px-2 py-0.5 dark:bg-border-dark">
             <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: "600" }}>{overdueTotalCount}</Text>
           </View>
         </View>
@@ -51,11 +53,11 @@ export default function DashboardFollowUpSection({
           <SkeletonCard />
         </View>
       ) : errorMessage ? (
-        <View className="mt-3 flex-row rounded-2xl border border-danger-light bg-danger-bg p-4 dark:border-danger-dark dark:bg-danger-bg-dark">
+        <View className="mt-3 flex-row items-start rounded-2xl bg-danger-bg p-4 dark:bg-danger-bg-dark">
           <View className="mr-3 mt-0.5">
             <AlertTriangle size={16} color={colors.danger} strokeWidth={2.2} />
           </View>
-          <View className="flex-1 border-l border-danger-light pl-3 dark:border-danger-dark">
+          <View className="flex-1 pl-3">
             <Text className="text-card-title text-danger-text">Couldn&apos;t load follow-up list</Text>
             <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={2}>
               {errorMessage}
@@ -71,22 +73,36 @@ export default function DashboardFollowUpSection({
           </View>
         </View>
       ) : followUpPeople.length === 0 ? (
-        <View className="mt-3 rounded-2xl border border-success-light bg-success-bg p-4 dark:border-success-dark dark:bg-success-bg-dark">
-          <View className="flex-row items-start">
-            <View className="mr-3 mt-0.5">
-              <CircleCheckBig size={16} color={colors.success} strokeWidth={2.2} />
-            </View>
-            <View className="flex-1">
-              <Text className="text-card-title text-success-dark">All clear! No overdue customers</Text>
-              <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark">Great job - payments are on track for now.</Text>
-              <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark">When customers go overdue, they&apos;ll show up here.</Text>
-            </View>
+        <View className="mt-3 flex-row items-start rounded-2xl bg-success-bg p-4 dark:bg-success-bg-dark">
+          <View className="mr-3 mt-0.5">
+            <CircleCheckBig size={16} color={colors.success} strokeWidth={2.2} />
+          </View>
+          <View className="flex-1">
+            <Text className="text-card-title text-success-dark">All clear! No overdue customers</Text>
+            <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark">Great job - payments are on track for now.</Text>
+            <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark">When customers go overdue, they&apos;ll show up here.</Text>
           </View>
         </View>
       ) : (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-3">
-          {followUpPeople.map((person) => (
-            <DashboardFollowUpCard key={person.id} person={person} onCollect={onCollect} />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingLeft: spacing.xs,
+            // Extra right inset so the last card's CTA isn't under the global FAB.
+            paddingRight: spacing.screenPadding + spacing.fabSize,
+            paddingTop: spacing.md,
+            paddingBottom: spacing.lg,
+          }}
+          className="mt-3"
+        >
+          {followUpPeople.map((person, idx) => (
+            <View
+              key={person.id}
+              style={{ marginRight: idx === followUpPeople.length - 1 ? 0 : spacing.md }}
+            >
+              <DashboardFollowUpCard person={person} onCollect={onCollect} />
+            </View>
           ))}
         </ScrollView>
       )}

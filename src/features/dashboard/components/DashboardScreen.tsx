@@ -137,7 +137,8 @@ export default function DashboardScreen({
         refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refreshDashboard} tintColor={colors.brand} />}
         contentContainerStyle={{
           paddingHorizontal: spacing.screenPadding,
-          paddingBottom: spacing.screenContentBottom + spacing.sectionGapSm,
+          // Bottom inset so the global SpeedDialFAB + tab bar never cover content.
+          paddingBottom: spacing.tabBarHeight + spacing.fabSize + spacing.sectionGapMd,
         }}
       >
         <DashboardHeader
@@ -161,6 +162,7 @@ export default function DashboardScreen({
 
         <DashboardQuickStats
           colors={colors}
+          spacing={spacing}
           totalCustomersCount={totalCustomersCount}
           overdueTotalCount={overdueTotalCount}
           collectedThisMonth={collectedThisMonth}
@@ -170,6 +172,7 @@ export default function DashboardScreen({
 
         <DashboardFollowUpSection
           colors={colors}
+          spacing={spacing}
           overdueTotalCount={overdueTotalCount}
           isLoading={isLoading}
           isFetching={isFetching}

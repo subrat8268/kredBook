@@ -41,18 +41,25 @@ export default function DashboardHeroCard({
         </Text>
       </View>
 
-      <View className="mt-4 flex-row" style={{ gap: 10 }}>
+      <View className="mt-4 flex-row items-center" style={{ gap: 10 }}>
         <Pressable
           onPress={onCollectNow}
           disabled={isCollecting}
-          className="flex-1 rounded-full border border-success-light bg-success px-3 py-3"
-          style={{ opacity: isCollecting ? 0.65 : 1 }}
+          className="flex-1 rounded-full bg-surface px-3 py-3"
+          style={{
+            opacity: isCollecting ? 0.65 : 1,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.18,
+            shadowRadius: 6,
+            elevation: 3,
+          }}
           accessibilityRole="button"
           accessibilityLabel="Record payment"
           accessibilityHint="Opens customer picker to record a payment"
           accessibilityState={{ disabled: isCollecting }}
         >
-          <Text className="text-center font-inter-semibold text-surface">Record Payment</Text>
+          <Text className="text-center font-inter-semibold text-success-dark">Record Payment</Text>
         </Pressable>
         <Pressable
           onPress={async () => {
@@ -60,13 +67,12 @@ export default function DashboardHeroCard({
               message: `Hi, you have an outstanding amount of ${formatINR(totalOutstanding)} with ${businessName}. Please make the payment at your earliest. Thank you!`,
             });
           }}
-          className="flex-1 rounded-full px-3 py-3"
-          style={{ borderWidth: 1.5, borderColor: colors.surface }}
+          className="flex-1 rounded-full border border-dashboard-hero-chip-border bg-dashboard-hero-chip-bg px-3 py-3"
           accessibilityRole="button"
           accessibilityLabel="Send reminder"
           accessibilityHint="Shares a payment reminder via the system share sheet"
         >
-          <Text className="text-center font-inter-semibold" style={{ color: colors.surface }}>Send Reminder</Text>
+          <Text className="text-center font-inter-semibold text-dashboard-hero-text">Send Reminder</Text>
         </Pressable>
       </View>
     </LinearGradient>

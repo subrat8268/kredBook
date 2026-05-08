@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 
 type Props = {
   colors: any;
+  spacing: any;
   totalCustomersCount: number;
   overdueTotalCount: number;
   collectedThisMonth: number;
@@ -13,20 +14,26 @@ type Props = {
 
 export default function DashboardQuickStats({
   colors,
+  spacing,
   totalCustomersCount,
   overdueTotalCount,
   collectedThisMonth,
   onOpenPeople,
   onOpenEntries,
 }: Props) {
+  const safeCollectedThisMonth = (() => {
+    const n = Number(collectedThisMonth ?? 0);
+    return Number.isFinite(n) ? n : 0;
+  })();
+
   const quickStats = [
     { title: "Customers", value: `${totalCustomersCount}`, icon: Users, onPress: onOpenPeople },
     { title: "Overdue", value: `${overdueTotalCount}`, icon: Clock3, onPress: onOpenPeople },
-    { title: "This Month", value: formatINR(collectedThisMonth), icon: Wallet, onPress: onOpenEntries },
+    { title: "This Month", value: formatINR(safeCollectedThisMonth), icon: Wallet, onPress: onOpenEntries },
   ] as const;
 
   return (
-    <View className="mt-section-md flex-row" style={{ gap: 10 }}>
+    <View className="mt-section-md flex-row" style={{ gap: spacing.sm }}>
       {quickStats.map((stat) => {
         const isOverdue = stat.title === "Overdue";
         return (
@@ -36,11 +43,18 @@ export default function DashboardQuickStats({
             accessibilityRole="button"
             accessibilityLabel={`${stat.title}: ${stat.value}`}
             hitSlop={6}
-            className={`flex-1 rounded-xl border p-3 ${
+            className={`flex-1 rounded-2xl py-3 px-3 ${
               isOverdue
-                ? "border-warning-light bg-warning-bg dark:border-warning-dark dark:bg-warning-bg-dark"
-                : "border-border-soft bg-surface dark:border-border-dark dark:bg-surface-dark"
+                ? "bg-warning-bg"
+                : "bg-surface"
             }`}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: isOverdue ? 0.04 : 0.06,
+              shadowRadius: isOverdue ? 2 : 4,
+              elevation: isOverdue ? 1 : 2,
+            }}
           >
             <stat.icon size={16} color={isOverdue ? colors.warning : colors.brand} strokeWidth={2.2} />
             <Text className="mt-2 text-caption text-textMuted" numberOfLines={1}>
