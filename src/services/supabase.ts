@@ -108,3 +108,39 @@ export async function executeWithOfflineQueue<T>(
   }
 }
 
+export type OfflineQueueResult<T> =
+  | { status: "confirmed"; result: T }
+  | { status: "queued" };
+
+/**
+ * Variant of executeWithOfflineQueue that preserves queue vs confirmed signal.
+ * Intended for UX flows that must not imply server-confirmed success when queued.
+ */
+export async function executeWithOfflineQueueResult<T>(
+  mutationFn: () => Promise<T>,
+  queuePayload: Omit<QueuedMutation, 'id' | 'timestamp' | 'retryCount'>,
+): Promise<OfflineQueueResult<T>> {
+  try {
+    const result = await mutationFn();
+    return { status: "confirmed", result };
+  } catch (error) {
+    if (isNetworkError(error)) {
+      console.log(
+        `[OfflineQueue] Network error detected, queueing ${queuePayload.operation} ${queuePayload.entity}`,
+      );
+      syncQueue.enqueue(queuePayload);
+      emitOfflineQueued({
+        entity: queuePayload.entity,
+        operation: queuePayload.operation,
+      });
+      return { status: "queued" };
+    }
+
+    console.error(
+      `[OfflineQueue] Non-network error in ${queuePayload.operation} ${queuePayload.entity}:`,
+      error,
+    );
+    throw error;
+  }
+}
+

@@ -27,6 +27,25 @@ type Props = {
 
 const MODES: PaymentMode[] = ["Cash", "UPI", "NEFT", "Draft", "Cheque"];
 
+function sanitizeAmountInput(raw: string) {
+  // Keep only digits and one decimal point, cap to 2 decimals.
+  const cleaned = raw.replace(/[^0-9.]/g, "");
+  const [intPartRaw, ...rest] = cleaned.split(".");
+  const intPart = (intPartRaw || "").replace(/^0+(?=\d)/, "0");
+  if (rest.length === 0) return intPart;
+  const decPart = rest.join("").slice(0, 2);
+  return `${intPart}.${decPart}`;
+}
+
+function parseAmount(value: string) {
+  if (!value) return null;
+  if (value === ".") return null;
+  const n = Number(value);
+  if (!Number.isFinite(n)) return null;
+  if (n <= 0) return null;
+  return n;
+}
+
 const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
   (
     { onSuccess, orderId, balanceDue, customerId, customerName, onDismiss, initialAmount },
@@ -51,33 +70,47 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
       setNotes("");
     }, [balanceDue, initialAmount]);
 
-    const parsedAmount = parseFloat(amount) || 0;
-    const isFullPaid = parsedAmount >= balanceDue;
+    const parsedAmount = parseAmount(amount);
+    const hasBalance = balanceDue > 0;
+    const isFullPaid = hasBalance && (parsedAmount ?? 0) >= balanceDue;
+    const payAmount = !hasBalance ? 0 : isFullPaid ? balanceDue : parsedAmount ?? 0;
 
     const handleSubmit = async () => {
-      const payAmount = isFullPaid ? balanceDue : parsedAmount;
-      if (!isFullPaid && (!payAmount || payAmount <= 0)) {
+      if (!hasBalance) {
+        Alert.alert("No balance", "This entry has no outstanding balance.");
+        return;
+      }
+
+      if (!isFullPaid && payAmount <= 0) {
         Alert.alert("Error", "Enter a valid amount.");
         return;
       }
+
       try {
-        await recordPayment({
+        const result = await recordPayment({
           amount: payAmount,
           mode,
           notes: notes.trim() || undefined,
         });
 
-        const locale = i18n.language?.toLowerCase().startsWith("hi") ? "hi" : "en";
-        await Share.share({
-          message: buildPaymentShareMessage({
-            locale,
-            customerName,
-            amount: payAmount,
-            paymentDate: new Date(),
-            remainingBalance: Math.max(0, balanceDue - payAmount),
-            businessName: profile?.business_name || profile?.name || "KredBook",
-          }),
-        });
+        if (result.status === "confirmed") {
+          const locale = i18n.language?.toLowerCase().startsWith("hi") ? "hi" : "en";
+          await Share.share({
+            message: buildPaymentShareMessage({
+              locale,
+              customerName,
+              amount: payAmount,
+              paymentDate: new Date(),
+              remainingBalance: Math.max(0, balanceDue - payAmount),
+              businessName: profile?.business_name || profile?.name || "KredBook",
+            }),
+          });
+        } else {
+          Alert.alert(
+            "Saved offline",
+            "Payment saved offline. It will sync when you're online.",
+          );
+        }
 
         setAmount(String(balanceDue));
         setMode("Cash");
@@ -144,7 +177,7 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
           <Input
             placeholder="0"
             value={amount}
-            onChangeText={(value) => setAmount(value.replace(/[^0-9.]/g, ""))}
+            onChangeText={(value) => setAmount(sanitizeAmountInput(value))}
             keyboardType="decimal-pad"
             icon={<Text className="text-textPrimary text-lg font-bold">₹</Text>}
           />
@@ -211,7 +244,7 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
           <Button
             title={isRecording ? "Recording..." : isFullPaid ? "Mark Full Paid" : "Record Payment"}
             onPress={handleSubmit}
-            disabled={!isFullPaid && parsedAmount <= 0}
+            disabled={!hasBalance || (!isFullPaid && payAmount <= 0)}
             loading={isRecording}
             icon={!isRecording && isFullPaid ? <Check size={16} color={colors.surface} strokeWidth={3} /> : undefined}
           />

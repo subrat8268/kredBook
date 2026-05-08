@@ -1,5 +1,5 @@
 import { toApiError } from "../lib/supabaseQuery";
-import { supabase, executeWithOfflineQueue } from "../services/supabase";
+import { supabase, executeWithOfflineQueue, executeWithOfflineQueueResult } from "../services/supabase";
 
 export interface OrderItem {
   id: string;
@@ -201,9 +201,10 @@ export async function recordPayment(
   paymentMode: PaymentMode,
   markFull: boolean,
   notes?: string,
-): Promise<void> {
-  // Wrap mutation with offline queue fallback
-  return executeWithOfflineQueue(
+): Promise<{ status: "confirmed" | "queued" }> {
+  // Wrap mutation with offline queue fallback.
+  // This flow needs to differentiate confirmed vs queued (offline) for honest UX.
+  const res = await executeWithOfflineQueueResult(
     async () => {
       // 1. Get current order to calculate balance
       const { data: order, error: orderErr } = await supabase
@@ -252,6 +253,8 @@ export async function recordPayment(
       },
     }
   );
+
+  return { status: res.status };
 }
 
 /**

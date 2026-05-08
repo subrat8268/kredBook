@@ -12,6 +12,8 @@ interface RecordPaymentInput {
   notes?: string;
 }
 
+type RecordPaymentResult = { status: "confirmed" | "queued" };
+
 /**
  * Standalone mutation-only hook for recording a payment.
  * Used directly by RecordCustomerPaymentModal so the modal
@@ -27,11 +29,11 @@ export function useRecordPayment(
   const queryClient = useQueryClient();
   const { addUpdatingOrderId, removeUpdatingOrderId } = useOrderStore();
 
-  const mutation = useMutation<void, ApiError, RecordPaymentInput>({
+  const mutation = useMutation<RecordPaymentResult, ApiError, RecordPaymentInput>({
     mutationFn: async ({ amount, mode, notes }) => {
       if (!vendorId) throw new Error("Vendor ID is required");
       // Always pass false for markFull — the caller resolves the amount upfront.
-      await recordPayment(orderId, vendorId, amount, mode, false, notes);
+      return await recordPayment(orderId, vendorId, amount, mode, false, notes);
     },
 
     onMutate: async ({ amount, mode, notes }) => {
