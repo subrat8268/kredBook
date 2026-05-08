@@ -13,9 +13,18 @@
 
 export const colors = {
   // ─ Brand Green (Primary UI actions)
+  brand: "#16A34A", // nav/tab/icon brand green
+  brandDark: "#15803D",
+  brandLight: "#DCFCE7",
+
   primary: "#16A34A", // green-600
   primaryDark: "#15803D", // green-700
   primaryLight: "#DCFCE7", // green-100
+
+  // ─ Hero green (dashboard gradient surface)
+  heroBgStart: "#15803D",
+  heroBgEnd: "#166534",
+  heroBg: "#166534",
 
   // ─ Accent (Overdue/urgency)
   accent: "#F59E0B", // amber-500
@@ -203,9 +212,15 @@ export const lightColors: ColorTokens = colors;
 
 export const darkColors: ColorTokens = {
   ...colors,
+  brand: "#22C55E", // green-500
+  brandDark: "#16A34A",
+  brandLight: "#14532D",
   primary: "#22C55E", // green-500
   primaryDark: "#16A34A", // green-600
   primaryLight: "#14532D", // green-900 surface
+  heroBgStart: "#14532D",
+  heroBgEnd: "#052E16",
+  heroBg: "#052E16",
   fab: "#22C55E",
   fabBg: "#22C55E",
   danger: "#FCA5A5",
@@ -293,8 +308,8 @@ export const darkColors: ColorTokens = {
 export const gradients = {
   // Dashboard hero card — green gradient
   dashboardHero: {
-    start: "#15803D", // green-700
-    end: "#166534", // green-800
+    start: colors.heroBgStart,
+    end: colors.heroBgEnd,
   },
 
   // Person balance card — green gradient
@@ -355,8 +370,8 @@ export const lightGradients: GradientTokens = gradients;
 export const darkGradients: GradientTokens = {
   ...gradients,
   dashboardHero: {
-    start: "#14532D", // green-900
-    end: "#052E16", // green-950
+    start: darkColors.heroBgStart,
+    end: darkColors.heroBgEnd,
   },
   customerHero: {
     start: "#14532D",

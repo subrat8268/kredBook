@@ -156,11 +156,22 @@
 ### Phase 4.1 — Core Loop Screens (Daily Driver) 🔄 In Progress
 
 > Depends On: All of 4.0 ✅ Done
-> **This is the most important block. Complete 4.1.4 and 4.1.5 before any 4.2/4.3/4.4 work.**
+> **This is the most important block. Complete 4.1.1x, 4.1.4, and 4.1.5 before any 4.2/4.3/4.4 work.**
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
 | 4.1.1 | Dashboard redesign — hero card, quick stats row, activity feed, SpeedDialFAB | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `(main)/dashboard/index.tsx` ([f690c3c](https://github.com/subrat8268/kredBook/commit/f690c3c)) |
+### Phase 4.1.1x — Dashboard code health & UX polish
+
+> Depends On: 4.1.1 ✅ Done
+> **Do not start any 4.2/4.3/4.4 work until every row in this block is ✅ Done.**
+
+| # | Task | Status | Priority | Command | Skills | Screen/Files |
+|---|---|---|---|---|---|---|
+| 4.1.1x.1 | Split the dashboard route into a thin wrapper plus `DashboardScreen` orchestrator | ⏳ Not Started | P0 | `/refactor` | `refactor-engineer`, `code-reviewer` | `app/(main)/dashboard/index.tsx`, `src/features/dashboard/**/*` |
+| 4.1.1x.2 | Normalize dashboard data access and derived metrics into a feature hook + logic layer | ⏳ Not Started | P0 | `/refactor` | `refactor-engineer`, `systematic-debugging` | `src/hooks/useDashboard.ts`, `src/api/dashboard.ts`, `src/features/dashboard/logic/**/*` |
+| 4.1.1x.3 | Extract dashboard hero, stats, activity, empty, and payment-flow UI into token-aligned components | ⏳ Not Started | P0 | `/build` | `ui-ux-pro-max`, `building-native-ui`, `react-native-skills` | `src/features/dashboard/components/**/*`, `src/components/dashboard/DashboardHeader.tsx`, `src/components/dashboard/StatusBadge.tsx` |
+| 4.1.1x.4 | Tighten loading, empty, error, and quick-action states without changing core flows | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `src/features/dashboard/components/**/*`, `src/components/ui/Skeleton.tsx` |
 | 4.1.2 | Tab navigation redesign — theme-aware tab bar, lucide icons, SpeedDialFAB record-payment routing fix | ✅ Done | P0 | `/refactor` | `ui-ux-pro-max`, `react-native-skills` | `(main)/_layout.tsx` ([fa4f3b2](https://github.com/subrat8268/kredBook/commit/fa4f3b24e2ca07a2edb27f42a410a94ca02ffcad)) |
 | 4.1.3 | Create Entry redesign — full-screen numpad, bottom sheet customer picker, quick due-date chips | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/create.tsx` ([5d588b8](https://github.com/subrat8268/kredBook/commit/5d588b8)) |
 | 4.1.3a | Create Entry bug fixes — params override draft, due-date format normalization, numpad guard, Bill/Payment toggle, recent customers first | ✅ Done | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max` | `(main)/entries/create.tsx`, `CustomerPicker.tsx`, `BillFooter.tsx` |

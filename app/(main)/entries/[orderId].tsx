@@ -2,7 +2,7 @@ import EmptyState from "@/src/components/feedback/EmptyState";
 import Loader from "@/src/components/feedback/Loader";
 import { useToast } from "@/src/components/feedback/Toast";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
-import StatusBadge from "@/src/components/dashboard/StatusBadge";
+import StatusBadge from "@/src/components/layer2/StatusBadge";
 import Avatar from "@/src/components/ui/Avatar";
 import Button from "@/src/components/ui/Button";
 import Card from "@/src/components/ui/Card";

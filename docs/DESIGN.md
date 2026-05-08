@@ -30,6 +30,8 @@ KredBook's canvas is a warm off-white — not clinical white, not dark mode. For
 | `green-100` | `#dcfce7` | Success card border fill |
 | `green-200` | `#bbf7d0` | Success border, badge border |
 
+> Token intent split: use **brand green** for navigation/icon identity, **success green** for payment/collection CTAs and financial-positive actions, and **hero green gradient** only for high-emphasis summary surfaces like Dashboard hero cards.
+
 ### 2.2 Canvas & Surfaces
 
 | Token | Hex | Usage |

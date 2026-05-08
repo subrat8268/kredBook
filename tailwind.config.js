@@ -9,6 +9,9 @@ module.exports = {
     extend: {
       colors: {
         // ── Brand ────────────────────────────────
+        brand: theme.colors.brand,
+        "brand-dark": theme.colors.brandDark,
+        "brand-light": theme.colors.brandLight,
         primary: theme.colors.primary,
         "primary-dark": theme.colors.primaryDark,
         "primary-light": theme.colors.primaryLight,
@@ -84,6 +87,9 @@ module.exports = {
         "search-dark": theme.darkColors.surfaceAlt,
 
         // ── Dashboard hero accents ───────────────
+        hero: theme.colors.heroBg,
+        "hero-start": theme.colors.heroBgStart,
+        "hero-end": theme.colors.heroBgEnd,
         "dashboard-hero-text": theme.colors.dashboard.heroText,
         "dashboard-hero-text-muted": theme.colors.dashboard.heroTextMuted,
         "dashboard-hero-chip-bg": theme.colors.dashboard.heroChipBg,

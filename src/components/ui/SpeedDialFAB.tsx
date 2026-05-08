@@ -147,7 +147,7 @@ export default function SpeedDialFAB({ onAction, bottom = 24, right = 20 }: Spee
                     <Text style={styles.childLabelText}>{item.label}</Text>
                   </View>
                   <View style={styles.childIconWrap}>
-                    <Icon name={item.icon} size={20} color={colors.primary} />
+                    <Icon name={item.icon} size={20} color={colors.brand} />
                   </View>
                 </Pressable>
               </Animated.View>
@@ -186,8 +186,8 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.primary,
-    shadowColor: colors.primary,
+    backgroundColor: colors.brand,
+    shadowColor: colors.brand,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 15,
