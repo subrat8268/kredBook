@@ -2,7 +2,7 @@ import StatusBadge from "@/src/components/layer2/StatusBadge";
 import { SkeletonText } from "@/src/components/ui/Skeleton";
 import { formatINR } from "@/src/utils/format";
 import { LinearGradient } from "expo-linear-gradient";
-import { Receipt } from "lucide-react-native";
+import { AlertTriangle, ClipboardList, Receipt } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 type ActivityItem = {
@@ -27,7 +27,7 @@ type Props = {
 export default function DashboardRecentActivityCard({ colors, isFetching, errorMessage, recentActivity, onOpenEntries, onRetry }: Props) {
   return (
     <>
-      <View className="mt-6 flex-row items-center justify-between">
+      <View className="mt-section-md flex-row items-center justify-between">
         <Text className="text-section-title text-textPrimary dark:text-textPrimary-dark">Recent activity</Text>
         <Pressable onPress={onOpenEntries}>
           <Text className="text-caption font-inter-semibold text-brand">View entries</Text>
@@ -38,17 +38,27 @@ export default function DashboardRecentActivityCard({ colors, isFetching, errorM
         {isFetching ? (
           <SkeletonText lines={4} />
         ) : errorMessage ? (
-          <View>
-            <Text className="text-card-title text-danger-text">Couldn&apos;t load recent activity</Text>
-            <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={2}>{errorMessage}</Text>
-            <Pressable onPress={onRetry} className="mt-3 self-start rounded-full border border-border bg-surface px-4 py-2 dark:border-border-dark dark:bg-surface-dark">
-              <Text className="text-caption font-inter-semibold text-brand">Refresh</Text>
-            </Pressable>
+          <View className="flex-row">
+            <View className="mr-3 mt-0.5">
+              <AlertTriangle size={16} color={colors.danger} strokeWidth={2.2} />
+            </View>
+            <View className="flex-1 border-l border-danger-light pl-3 dark:border-danger-dark">
+              <Text className="text-card-title text-danger-text">Couldn&apos;t load recent activity</Text>
+              <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={2}>{errorMessage}</Text>
+              <Pressable onPress={onRetry} className="mt-3 self-start rounded-full border border-border bg-surface px-4 py-2 dark:border-border-dark dark:bg-surface-dark">
+                <Text className="text-caption font-inter-semibold text-brand">Refresh</Text>
+              </Pressable>
+            </View>
           </View>
         ) : recentActivity.slice(0, 5).length === 0 ? (
-          <View>
-            <Text className="text-card-title text-textPrimary dark:text-textPrimary-dark">No recent transactions yet</Text>
-            <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark">Create an entry or record a payment to see activity here.</Text>
+          <View className="flex-row">
+            <View className="mr-3 mt-0.5">
+              <ClipboardList size={16} color={colors.textMuted} strokeWidth={2.2} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-card-title text-textPrimary dark:text-textPrimary-dark">No recent transactions yet</Text>
+              <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark">Create an entry or record a payment to see activity here.</Text>
+            </View>
           </View>
         ) : (
           recentActivity.slice(0, 5).map((item, index) => {

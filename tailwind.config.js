@@ -138,6 +138,12 @@ module.exports = {
         "2xl": theme.radius["2xl"],
         full: theme.radius.full,
       },
+      spacing: {
+        "section-sm": `${theme.spacing.sectionGapSm}px`,
+        section: `${theme.spacing.sectionGapMd}px`,
+        "section-md": `${theme.spacing.sectionGapMd}px`,
+        "section-lg": `${theme.spacing.sectionGapLg}px`,
+      },
     },
   },
   plugins: [],

@@ -25,7 +25,7 @@ export default function DashboardHeroCard({
   onCollectNow,
 }: Props) {
   return (
-    <LinearGradient colors={[gradients.dashboardHero.end, gradients.dashboardHero.start]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} className="mt-4 overflow-hidden rounded-2xl px-5 py-5">
+    <LinearGradient colors={[gradients.dashboardHero.end, gradients.dashboardHero.start]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} className="mt-section-md overflow-hidden rounded-2xl px-5 py-5">
       <View className="flex-row items-center justify-between">
         <Text className="text-caption uppercase tracking-widest text-dashboard-hero-text-muted">Collect Outstanding</Text>
         <View className="rounded-full border border-dashboard-hero-chip-border bg-dashboard-hero-chip-bg px-3 py-1">
@@ -41,7 +41,7 @@ export default function DashboardHeroCard({
         </Text>
       </View>
 
-      <View style={{ marginTop: 16, flexDirection: "row", gap: 10 }}>
+      <View className="mt-4 flex-row" style={{ gap: 10 }}>
         <Pressable onPress={onCollectNow} disabled={isCollecting} className="flex-1 rounded-full bg-surface px-4 py-3" style={{ opacity: isCollecting ? 0.65 : 1 }}>
           <Text className="text-center font-inter-semibold text-success">Record Payment</Text>
         </Pressable>

@@ -19,7 +19,7 @@ export default function DashboardStatsRow({ colors, totalCustomersCount, overdue
   ] as const;
 
   return (
-    <View className="mt-4 flex-row" style={{ gap: 10 }}>
+    <View className="mt-section-md flex-row" style={{ gap: 10 }}>
       {quickStats.map((stat) => {
         const isOverdue = stat.title === "Overdue";
         return (
@@ -29,8 +29,8 @@ export default function DashboardStatsRow({ colors, totalCustomersCount, overdue
             className={`flex-1 rounded-xl border p-3 ${isOverdue ? "border-warning-light bg-warning-bg" : "border-border bg-surface dark:border-border-dark dark:bg-surface-dark"}`}
           >
             <stat.icon size={16} color={isOverdue ? colors.warning : colors.brand} strokeWidth={2.2} />
-            <Text style={{ marginTop: 8, fontSize: 12, fontWeight: "400", color: colors.textMuted }} numberOfLines={1}>{stat.title}</Text>
-            <Text style={{ marginTop: 4, fontSize: 22, fontWeight: "700", color: isOverdue ? colors.warning : colors.textPrimary }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{stat.value}</Text>
+            <Text className="mt-2" style={{ fontSize: 12, fontWeight: "400", color: colors.textMuted }} numberOfLines={1}>{stat.title}</Text>
+            <Text className="mt-1" style={{ fontSize: 22, fontWeight: "700", color: isOverdue ? colors.warning : colors.textPrimary }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{stat.value}</Text>
           </Pressable>
         );
       })}

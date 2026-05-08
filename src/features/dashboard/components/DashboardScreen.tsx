@@ -172,7 +172,7 @@ export default function DashboardScreen({
     return (
       <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={["top"]}>
         <StatusBar barStyle={statusBarStyle} backgroundColor={colors.background} translucent={false} />
-        <ScrollView className="px-4" contentContainerStyle={{ paddingBottom: 120 }}>
+        <ScrollView className="px-4" contentContainerStyle={{ paddingBottom: spacing.screenContentBottom }}>
           <View className="mt-4">
             <Skeleton width="55%" height={18} />
           </View>
@@ -201,10 +201,11 @@ export default function DashboardScreen({
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refreshDashboard} tintColor={colors.brand} />}
-        contentContainerStyle={{ paddingHorizontal: spacing.screenPadding, paddingBottom: 120 }}
+        contentContainerStyle={{ paddingHorizontal: spacing.screenPadding, paddingBottom: spacing.screenContentBottom }}
       >
         <DashboardHeader
           colors={colors}
+          spacing={spacing}
           businessName={businessName}
           overdueTotalCount={overdueTotalCount}
           onPressNotifications={onOpenEntriesOverdue}

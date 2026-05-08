@@ -16,19 +16,20 @@ function getBusinessInitials(name: string | undefined) {
 
 type Props = {
   colors: any;
+  spacing: any;
   businessName: string;
   overdueTotalCount: number;
   onPressNotifications: () => void;
 };
 
-export default function DashboardHeader({ colors, businessName, overdueTotalCount, onPressNotifications }: Props) {
+export default function DashboardHeader({ colors, spacing, businessName, overdueTotalCount, onPressNotifications }: Props) {
   return (
-    <View style={{ paddingHorizontal: 4, paddingTop: 12, paddingBottom: 8, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-      <View style={{ flexDirection: "row", alignItems: "center", flex: 1, paddingRight: 12 }}>
+    <View style={{ paddingHorizontal: spacing.xs, paddingTop: spacing.md, paddingBottom: spacing.sm, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+      <View style={{ flexDirection: "row", alignItems: "center", flex: 1, paddingRight: spacing.md }}>
         <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.brand, alignItems: "center", justifyContent: "center" }}>
           <Text style={{ color: colors.surface, fontSize: 14, fontWeight: "700" }}>{getBusinessInitials(businessName)}</Text>
         </View>
-        <View style={{ marginLeft: 10, flex: 1 }}>
+        <View style={{ marginLeft: spacing.md, flex: 1 }}>
           <Text numberOfLines={1} style={{ fontSize: 15, fontWeight: "700", color: colors.textPrimary }}>{businessName}</Text>
           <Text numberOfLines={1} style={{ fontSize: 12, color: colors.textMuted }}>{getGreetingOnly()} 👋</Text>
         </View>

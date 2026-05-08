@@ -231,20 +231,20 @@ export const darkColors: ColorTokens = {
   success: "#22C55E",
   successDark: "#16A34A",
   successLight: "#14532D",
-  background: "#0B1220",
-  surface: "#111A2B",
-  textPrimary: "#E5E7EB",
-  textSecondary: "#94A3B8",
-  border: "#25324A",
-  borderLight: "#1B2538",
+  background: "#08111F",
+  surface: "#122036",
+  textPrimary: "#F3F4F6",
+  textSecondary: "#B4C0D4",
+  border: "#31415D",
+  borderLight: "#24334D",
   primaryBlue: "#3B82F6",
   primaryBlueBg: "#172554",
   successBg: "#0F2A1A",
   dangerBg: "#3A1118",
   warningBg: "#3A2A0E",
   warningBadgeBg: "#4A3411",
-  surfaceAlt: "#172033",
-  textMuted: "#9CA3AF",
+  surfaceAlt: "#1A2A43",
+  textMuted: "#A3AEC0",
   paid: {
     bg: "#14532D",
     text: "#86EFAC",
@@ -287,10 +287,10 @@ export const darkColors: ColorTokens = {
   },
   dashboard: {
     heroText: "rgba(255,255,255,0.96)",
-    heroTextMuted: "rgba(255,255,255,0.72)",
-    heroChipBg: "rgba(255,255,255,0.12)",
-    heroChipBorder: "rgba(255,255,255,0.20)",
-    heroOrb: "rgba(255,255,255,0.08)",
+    heroTextMuted: "rgba(255,255,255,0.80)",
+    heroChipBg: "rgba(255,255,255,0.16)",
+    heroChipBorder: "rgba(255,255,255,0.28)",
+    heroOrb: "rgba(255,255,255,0.10)",
   },
   customerDetail: {
     heroText: "rgba(255,255,255,0.96)",
@@ -436,6 +436,10 @@ export const spacing = {
 
   // ─ Screen-level
   screenPadding: 16, // Horizontal padding on all screens (16dp)
+  screenContentBottom: 120, // Scroll content bottom padding above FAB/tab
+  sectionGapSm: 12, // Tight gap between linked section blocks
+  sectionGapMd: 16, // Standard gap between dashboard sections
+  sectionGapLg: 24, // Spacious gap between major groups
 
   // ─ Component dimensions
   inputHeight: 48, // Text input, select input fields
