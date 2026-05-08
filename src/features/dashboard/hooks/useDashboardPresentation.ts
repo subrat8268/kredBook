@@ -31,17 +31,8 @@ export function useDashboardPresentation({
     dashboardData?.totalCustomersCount ?? dashboardData?.total_customers_count ?? 0,
   );
 
-  const collectedThisMonth = useMemo(
-    () => recentActivity.filter((item) => item.type === "payment").reduce((sum, item) => sum + Number(item.amount ?? 0), 0),
-    [recentActivity],
-  );
-
   const followUpPeople = useMemo(() => {
-    const uniqueById = new Map<string, DashboardPerson>();
-    overdueCustomers.forEach((item) => {
-      if (!uniqueById.has(item.id)) uniqueById.set(item.id, item);
-    });
-    return Array.from(uniqueById.values()).sort((a, b) => b.daysSince - a.daysSince).slice(0, 5);
+    return [...overdueCustomers].sort((a, b) => b.daysSince - a.daysSince).slice(0, 5);
   }, [overdueCustomers]);
 
   useEffect(() => {
@@ -65,7 +56,6 @@ export function useDashboardPresentation({
     totalOutstanding,
     displayOutstanding,
     totalCustomersCount,
-    collectedThisMonth,
     followUpPeople,
   };
 }

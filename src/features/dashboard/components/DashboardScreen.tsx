@@ -171,6 +171,7 @@ export default function DashboardScreen({
         <DashboardFollowUpSection
           colors={colors}
           overdueTotalCount={overdueTotalCount}
+          isLoading={isLoading}
           isFetching={isFetching}
           errorMessage={dashboardErrorMessage}
           followUpPeople={followUpPeople}
@@ -181,7 +182,7 @@ export default function DashboardScreen({
 
         <DashboardRecentActivity
           colors={colors}
-          isFetching={isFetching}
+          isLoading={isLoading}
           errorMessage={dashboardErrorMessage}
           recentActivity={recentActivity}
           onOpenEntries={onOpenEntries}

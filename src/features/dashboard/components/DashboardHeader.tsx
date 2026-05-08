@@ -34,7 +34,14 @@ export default function DashboardHeader({ colors, spacing, businessName, overdue
           <Text numberOfLines={1} style={{ fontSize: 12, color: colors.textMuted }}>{getGreetingOnly()} 👋</Text>
         </View>
       </View>
-      <Pressable onPress={onPressNotifications} style={{ width: 36, height: 36, alignItems: "center", justifyContent: "center" }}>
+      <Pressable
+        onPress={onPressNotifications}
+        accessibilityRole="button"
+        accessibilityLabel={`Notifications${overdueTotalCount > 0 ? `, ${overdueTotalCount} overdue` : ""}`}
+        accessibilityHint="Opens overdue entries"
+        hitSlop={10}
+        style={{ width: 36, height: 36, alignItems: "center", justifyContent: "center" }}
+      >
         <Bell size={22} color={colors.textMuted} strokeWidth={2} />
         {overdueTotalCount > 0 ? <View style={{ position: "absolute", right: 6, top: 6, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.danger }} /> : null}
       </Pressable>

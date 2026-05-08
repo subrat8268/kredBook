@@ -47,6 +47,10 @@ export default function DashboardHeroCard({
           disabled={isCollecting}
           className="flex-1 rounded-full border border-success-light bg-success px-3 py-3"
           style={{ opacity: isCollecting ? 0.65 : 1 }}
+          accessibilityRole="button"
+          accessibilityLabel="Record payment"
+          accessibilityHint="Opens customer picker to record a payment"
+          accessibilityState={{ disabled: isCollecting }}
         >
           <Text className="text-center font-inter-semibold text-surface">Record Payment</Text>
         </Pressable>
@@ -58,6 +62,9 @@ export default function DashboardHeroCard({
           }}
           className="flex-1 rounded-full px-3 py-3"
           style={{ borderWidth: 1.5, borderColor: colors.surface }}
+          accessibilityRole="button"
+          accessibilityLabel="Send reminder"
+          accessibilityHint="Shares a payment reminder via the system share sheet"
         >
           <Text className="text-center font-inter-semibold" style={{ color: colors.surface }}>Send Reminder</Text>
         </Pressable>

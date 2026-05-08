@@ -7,6 +7,7 @@ import { SkeletonCard } from "@/src/components/ui/Skeleton";
 type Props = {
   colors: any;
   overdueTotalCount: number;
+  isLoading: boolean;
   isFetching: boolean;
   errorMessage?: string;
   followUpPeople: DashboardPerson[];
@@ -18,7 +19,7 @@ type Props = {
 export default function DashboardFollowUpSection({
   colors,
   overdueTotalCount,
-  isFetching,
+  isLoading,
   errorMessage,
   followUpPeople,
   onOpenPeople,
@@ -34,12 +35,17 @@ export default function DashboardFollowUpSection({
             <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: "600" }}>{overdueTotalCount}</Text>
           </View>
         </View>
-        <Pressable onPress={onOpenPeople}>
+        <Pressable
+          onPress={onOpenPeople}
+          accessibilityRole="button"
+          accessibilityLabel={`See all ${overdueTotalCount} overdue customers`}
+          hitSlop={8}
+        >
           <Text className="text-caption font-inter-semibold text-brand">See all</Text>
         </Pressable>
       </View>
 
-      {isFetching ? (
+      {isLoading ? (
         <View className="mt-3" style={{ gap: 10 }}>
           <SkeletonCard />
           <SkeletonCard />
@@ -54,7 +60,12 @@ export default function DashboardFollowUpSection({
             <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={2}>
               {errorMessage}
             </Text>
-            <Pressable onPress={onRetry} className="mt-3 self-start rounded-full bg-surface px-4 py-2 dark:bg-surface-dark">
+            <Pressable
+              onPress={onRetry}
+              className="mt-3 self-start rounded-full bg-surface px-4 py-2 dark:bg-surface-dark"
+              accessibilityRole="button"
+              accessibilityLabel="Retry loading follow-up list"
+            >
               <Text className="text-caption font-inter-semibold text-brand">Try again</Text>
             </Pressable>
           </View>

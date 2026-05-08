@@ -126,7 +126,7 @@
       "source_file": "src\\api\\auth.ts",
       "source_location": "L1",
       "id": "src_api_auth_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "auth.ts"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "src\\api\\auth.ts",
       "source_location": "L6",
       "id": "api_auth_loginapi",
-      "community": 5,
+      "community": 6,
       "norm_label": "loginapi()"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "src\\api\\auth.ts",
       "source_location": "L12",
       "id": "api_auth_signupapi",
-      "community": 5,
+      "community": 6,
       "norm_label": "signupapi()"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "src\\api\\auth.ts",
       "source_location": "L30",
       "id": "api_auth_signinwithgoogleapi",
-      "community": 5,
+      "community": 6,
       "norm_label": "signinwithgoogleapi()"
     },
     {
@@ -162,7 +162,7 @@
       "source_file": "src\\api\\auth.ts",
       "source_location": "L82",
       "id": "api_auth_resetpasswordapi",
-      "community": 5,
+      "community": 6,
       "norm_label": "resetpasswordapi()"
     },
     {
@@ -171,7 +171,7 @@
       "source_file": "src\\api\\auth.ts",
       "source_location": "L92",
       "id": "api_auth_logoutapi",
-      "community": 5,
+      "community": 6,
       "norm_label": "logoutapi()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "src\\api\\dashboard.ts",
       "source_location": "L1",
       "id": "src_api_dashboard_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "dashboard.ts"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "src\\api\\dashboard.ts",
       "source_location": "L73",
       "id": "api_dashboard_getdashboardsummary",
-      "community": 2,
+      "community": 4,
       "norm_label": "getdashboardsummary()"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "src\\api\\dashboard.ts",
       "source_location": "L80",
       "id": "api_dashboard_getdashboarddata",
-      "community": 2,
+      "community": 4,
       "norm_label": "getdashboarddata()"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "src\\api\\dashboard.ts",
       "source_location": "L306",
       "id": "api_dashboard_getinitials",
-      "community": 2,
+      "community": 4,
       "norm_label": "getinitials()"
     },
     {
@@ -216,7 +216,7 @@
       "source_file": "src\\api\\dashboard.ts",
       "source_location": "L315",
       "id": "api_dashboard_getnetpositionreport",
-      "community": 2,
+      "community": 4,
       "norm_label": "getnetpositionreport()"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "src\\api\\dashboard.ts",
       "source_location": "L430",
       "id": "api_dashboard_exportnetpositionreport",
-      "community": 2,
+      "community": 4,
       "norm_label": "exportnetpositionreport()"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "src\\api\\entries.ts",
       "source_location": "L282",
       "id": "api_entries_getcustomerpreviousbalance",
-      "community": 1,
+      "community": 0,
       "norm_label": "getcustomerpreviousbalance()"
     },
     {
@@ -315,7 +315,7 @@
       "source_file": "src\\api\\export.ts",
       "source_location": "L1",
       "id": "src_api_export_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "export.ts"
     },
     {
@@ -324,7 +324,7 @@
       "source_file": "src\\api\\export.ts",
       "source_location": "L24",
       "id": "api_export_isorange",
-      "community": 2,
+      "community": 4,
       "norm_label": "isorange()"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "src\\api\\export.ts",
       "source_location": "L32",
       "id": "api_export_fetchordersforexport",
-      "community": 2,
+      "community": 4,
       "norm_label": "fetchordersforexport()"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "src\\api\\exportCustomer.ts",
       "source_location": "L1",
       "id": "src_api_exportcustomer_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "exportcustomer.ts"
     },
     {
@@ -351,7 +351,7 @@
       "source_file": "src\\api\\exportCustomer.ts",
       "source_location": "L33",
       "id": "api_exportcustomer_isorange",
-      "community": 2,
+      "community": 4,
       "norm_label": "isorange()"
     },
     {
@@ -360,7 +360,7 @@
       "source_file": "src\\api\\exportCustomer.ts",
       "source_location": "L39",
       "id": "api_exportcustomer_fetchledgerforexport",
-      "community": 2,
+      "community": 4,
       "norm_label": "fetchledgerforexport()"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "src\\api\\exportCustomer.ts",
       "source_location": "L147",
       "id": "api_exportcustomer_fetchledgercsvrows",
-      "community": 2,
+      "community": 4,
       "norm_label": "fetchledgercsvrows()"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "src\\api\\overdueReminders.ts",
       "source_location": "L1",
       "id": "src_api_overduereminders_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "overduereminders.ts"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "src\\api\\overdueReminders.ts",
       "source_location": "L5",
       "id": "api_overduereminders_fetchoverduereminders",
-      "community": 2,
+      "community": 4,
       "norm_label": "fetchoverduereminders()"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "src\\api\\people.ts",
       "source_location": "L1",
       "id": "src_api_people_ts",
-      "community": 9,
+      "community": 4,
       "norm_label": "people.ts"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "src\\api\\people.ts",
       "source_location": "L8",
       "id": "api_people_fetchpeople",
-      "community": 9,
+      "community": 4,
       "norm_label": "fetchpeople()"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "src\\api\\people.ts",
       "source_location": "L118",
       "id": "api_people_fetchpersondetail",
-      "community": 9,
+      "community": 0,
       "norm_label": "fetchpersondetail()"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "src\\api\\profiles.ts",
       "source_location": "L1",
       "id": "src_api_profiles_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "profiles.ts"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "src\\api\\profiles.ts",
       "source_location": "L5",
       "id": "api_profiles_getprofile",
-      "community": 2,
+      "community": 4,
       "norm_label": "getprofile()"
     },
     {
@@ -504,7 +504,7 @@
       "source_file": "src\\components\\common\\CustomerAvatar.tsx",
       "source_location": "L1",
       "id": "src_components_common_customeravatar_tsx",
-      "community": 20,
+      "community": 21,
       "norm_label": "customeravatar.tsx"
     },
     {
@@ -513,7 +513,7 @@
       "source_file": "src\\components\\common\\CustomerAvatar.tsx",
       "source_location": "L14",
       "id": "common_customeravatar_getinitials",
-      "community": 20,
+      "community": 21,
       "norm_label": "getinitials()"
     },
     {
@@ -522,7 +522,7 @@
       "source_file": "src\\components\\common\\CustomerAvatar.tsx",
       "source_location": "L21",
       "id": "common_customeravatar_getpairfromname",
-      "community": 20,
+      "community": 21,
       "norm_label": "getpairfromname()"
     },
     {
@@ -538,64 +538,10 @@
       "label": "getBalanceText()",
       "file_type": "code",
       "source_file": "src\\components\\customer\\CustomerPickerSheet.tsx",
-      "source_location": "L40",
+      "source_location": "L37",
       "id": "customer_customerpickersheet_getbalancetext",
       "community": 0,
       "norm_label": "getbalancetext()"
-    },
-    {
-      "label": "onAddNew()",
-      "file_type": "code",
-      "source_file": "src\\components\\customer\\CustomerPickerSheet.tsx",
-      "source_location": "L128",
-      "id": "customer_customerpickersheet_onaddnew",
-      "community": 0,
-      "norm_label": "onaddnew()"
-    },
-    {
-      "label": "renderRow()",
-      "file_type": "code",
-      "source_file": "src\\components\\customer\\CustomerPickerSheet.tsx",
-      "source_location": "L135",
-      "id": "customer_customerpickersheet_renderrow",
-      "community": 0,
-      "norm_label": "renderrow()"
-    },
-    {
-      "label": "DashboardHeader.tsx",
-      "file_type": "code",
-      "source_file": "src\\components\\dashboard\\DashboardHeader.tsx",
-      "source_location": "L1",
-      "id": "src_components_dashboard_dashboardheader_tsx",
-      "community": 21,
-      "norm_label": "dashboardheader.tsx"
-    },
-    {
-      "label": "getInitials()",
-      "file_type": "code",
-      "source_file": "src\\components\\dashboard\\DashboardHeader.tsx",
-      "source_location": "L13",
-      "id": "dashboard_dashboardheader_getinitials",
-      "community": 21,
-      "norm_label": "getinitials()"
-    },
-    {
-      "label": "getGreeting()",
-      "file_type": "code",
-      "source_file": "src\\components\\dashboard\\DashboardHeader.tsx",
-      "source_location": "L18",
-      "id": "dashboard_dashboardheader_getgreeting",
-      "community": 21,
-      "norm_label": "getgreeting()"
-    },
-    {
-      "label": "StatusBadge.tsx",
-      "file_type": "code",
-      "source_file": "src\\components\\dashboard\\StatusBadge.tsx",
-      "source_location": "L1",
-      "id": "src_components_dashboard_statusbadge_tsx",
-      "community": 50,
-      "norm_label": "statusbadge.tsx"
     },
     {
       "label": "EmptyState.tsx",
@@ -648,7 +594,7 @@
       "source_file": "src\\components\\feedback\\OfflineToastListener.tsx",
       "source_location": "L1",
       "id": "src_components_feedback_offlinetoastlistener_tsx",
-      "community": 6,
+      "community": 5,
       "norm_label": "offlinetoastlistener.tsx"
     },
     {
@@ -657,7 +603,7 @@
       "source_file": "src\\components\\feedback\\OfflineToastListener.tsx",
       "source_location": "L7",
       "id": "feedback_offlinetoastlistener_offlinetoastlistener",
-      "community": 6,
+      "community": 5,
       "norm_label": "offlinetoastlistener()"
     },
     {
@@ -666,7 +612,7 @@
       "source_file": "src\\components\\feedback\\Skeleton.tsx",
       "source_location": "L1",
       "id": "src_components_feedback_skeleton_tsx",
-      "community": 28,
+      "community": 30,
       "norm_label": "skeleton.tsx"
     },
     {
@@ -675,7 +621,7 @@
       "source_file": "src\\components\\feedback\\Skeleton.tsx",
       "source_location": "L22",
       "id": "feedback_skeleton_skeleton",
-      "community": 28,
+      "community": 30,
       "norm_label": "skeleton()"
     },
     {
@@ -684,7 +630,7 @@
       "source_file": "src\\components\\feedback\\SyncStatus.tsx",
       "source_location": "L1",
       "id": "src_components_feedback_syncstatus_tsx",
-      "community": 4,
+      "community": 12,
       "norm_label": "syncstatus.tsx"
     },
     {
@@ -693,7 +639,7 @@
       "source_file": "src\\components\\feedback\\Toast.tsx",
       "source_location": "L1",
       "id": "src_components_feedback_toast_tsx",
-      "community": 6,
+      "community": 5,
       "norm_label": "toast.tsx"
     },
     {
@@ -702,7 +648,7 @@
       "source_file": "src\\components\\feedback\\Toast.tsx",
       "source_location": "L41",
       "id": "feedback_toast_usetoast",
-      "community": 6,
+      "community": 5,
       "norm_label": "usetoast()"
     },
     {
@@ -801,7 +747,7 @@
       "source_file": "src\\components\\people\\CustomerCard.tsx",
       "source_location": "L1",
       "id": "src_components_people_customercard_tsx",
-      "community": 4,
+      "community": 3,
       "norm_label": "customercard.tsx"
     },
     {
@@ -810,7 +756,7 @@
       "source_file": "src\\components\\people\\CustomerCard.tsx",
       "source_location": "L23",
       "id": "people_customercard_getstatus",
-      "community": 4,
+      "community": 3,
       "norm_label": "getstatus()"
     },
     {
@@ -819,7 +765,7 @@
       "source_file": "src\\components\\people\\CustomerCard.tsx",
       "source_location": "L54",
       "id": "people_customercard_handlecall",
-      "community": 4,
+      "community": 3,
       "norm_label": "handlecall()"
     },
     {
@@ -828,7 +774,7 @@
       "source_file": "src\\components\\people\\CustomerList.tsx",
       "source_location": "L1",
       "id": "src_components_people_customerlist_tsx",
-      "community": 4,
+      "community": 12,
       "norm_label": "customerlist.tsx"
     },
     {
@@ -837,7 +783,7 @@
       "source_file": "src\\components\\people\\CustomerList.tsx",
       "source_location": "L60",
       "id": "people_customerlist_onlongpressperson",
-      "community": 4,
+      "community": 12,
       "norm_label": "onlongpressperson()"
     },
     {
@@ -909,7 +855,7 @@
       "source_file": "src\\components\\ui\\AuthCard.tsx",
       "source_location": "L1",
       "id": "src_components_ui_authcard_tsx",
-      "community": 29,
+      "community": 31,
       "norm_label": "authcard.tsx"
     },
     {
@@ -918,7 +864,7 @@
       "source_file": "src\\components\\ui\\AuthCard.tsx",
       "source_location": "L10",
       "id": "ui_authcard_authcard",
-      "community": 29,
+      "community": 31,
       "norm_label": "authcard()"
     },
     {
@@ -927,7 +873,7 @@
       "source_file": "src\\components\\ui\\AuthDivider.tsx",
       "source_location": "L1",
       "id": "src_components_ui_authdivider_tsx",
-      "community": 30,
+      "community": 32,
       "norm_label": "authdivider.tsx"
     },
     {
@@ -936,7 +882,7 @@
       "source_file": "src\\components\\ui\\AuthDivider.tsx",
       "source_location": "L4",
       "id": "ui_authdivider_authdivider",
-      "community": 30,
+      "community": 32,
       "norm_label": "authdivider()"
     },
     {
@@ -945,7 +891,7 @@
       "source_file": "src\\components\\ui\\AuthHeader.tsx",
       "source_location": "L1",
       "id": "src_components_ui_authheader_tsx",
-      "community": 31,
+      "community": 33,
       "norm_label": "authheader.tsx"
     },
     {
@@ -954,7 +900,7 @@
       "source_file": "src\\components\\ui\\AuthHeader.tsx",
       "source_location": "L9",
       "id": "ui_authheader_authheader",
-      "community": 31,
+      "community": 33,
       "norm_label": "authheader()"
     },
     {
@@ -1062,7 +1008,7 @@
       "source_file": "src\\components\\ui\\EmptyState.tsx",
       "source_location": "L1",
       "id": "src_components_ui_emptystate_tsx",
-      "community": 32,
+      "community": 34,
       "norm_label": "emptystate.tsx"
     },
     {
@@ -1071,7 +1017,7 @@
       "source_file": "src\\components\\ui\\EmptyState.tsx",
       "source_location": "L20",
       "id": "ui_emptystate_illustration",
-      "community": 32,
+      "community": 34,
       "norm_label": "illustration()"
     },
     {
@@ -1098,7 +1044,7 @@
       "source_file": "src\\components\\ui\\GoogleButton.tsx",
       "source_location": "L1",
       "id": "src_components_ui_googlebutton_tsx",
-      "community": 33,
+      "community": 35,
       "norm_label": "googlebutton.tsx"
     },
     {
@@ -1107,7 +1053,7 @@
       "source_file": "src\\components\\ui\\GoogleButton.tsx",
       "source_location": "L11",
       "id": "ui_googlebutton_googlebutton",
-      "community": 33,
+      "community": 35,
       "norm_label": "googlebutton()"
     },
     {
@@ -1116,7 +1062,7 @@
       "source_file": "src\\components\\ui\\GoogleLogo.tsx",
       "source_location": "L1",
       "id": "src_components_ui_googlelogo_tsx",
-      "community": 34,
+      "community": 36,
       "norm_label": "googlelogo.tsx"
     },
     {
@@ -1125,7 +1071,7 @@
       "source_file": "src\\components\\ui\\GoogleLogo.tsx",
       "source_location": "L4",
       "id": "ui_googlelogo_googlelogo",
-      "community": 34,
+      "community": 36,
       "norm_label": "googlelogo()"
     },
     {
@@ -1188,7 +1134,7 @@
       "source_file": "src\\components\\ui\\OfflineBanner.tsx",
       "source_location": "L1",
       "id": "src_components_ui_offlinebanner_tsx",
-      "community": 4,
+      "community": 12,
       "norm_label": "offlinebanner.tsx"
     },
     {
@@ -1215,7 +1161,7 @@
       "source_file": "src\\components\\ui\\Skeleton.tsx",
       "source_location": "L1",
       "id": "src_components_ui_skeleton_tsx",
-      "community": 35,
+      "community": 19,
       "norm_label": "skeleton.tsx"
     },
     {
@@ -1224,7 +1170,7 @@
       "source_file": "src\\components\\ui\\Skeleton.tsx",
       "source_location": "L14",
       "id": "ui_skeleton_skeleton",
-      "community": 35,
+      "community": 19,
       "norm_label": "skeleton()"
     },
     {
@@ -1242,7 +1188,7 @@
       "source_file": "src\\components\\ui\\SyncStatusBanner.tsx",
       "source_location": "L1",
       "id": "src_components_ui_syncstatusbanner_tsx",
-      "community": 4,
+      "community": 12,
       "norm_label": "syncstatusbanner.tsx"
     },
     {
@@ -1251,8 +1197,233 @@
       "source_file": "src\\components\\ui\\SyncStatusBanner.tsx",
       "source_location": "L115",
       "id": "ui_syncstatusbanner_handledismiss",
-      "community": 4,
+      "community": 12,
       "norm_label": "handledismiss()"
+    },
+    {
+      "label": "types.ts",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\types.ts",
+      "source_location": "L1",
+      "id": "src_features_dashboard_types_ts",
+      "community": 63,
+      "norm_label": "types.ts"
+    },
+    {
+      "label": "DashboardFollowUpCard.tsx",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardFollowUpCard.tsx",
+      "source_location": "L1",
+      "id": "src_features_dashboard_components_dashboardfollowupcard_tsx",
+      "community": 0,
+      "norm_label": "dashboardfollowupcard.tsx"
+    },
+    {
+      "label": "DashboardFollowUpCard()",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardFollowUpCard.tsx",
+      "source_location": "L11",
+      "id": "components_dashboardfollowupcard_dashboardfollowupcard",
+      "community": 0,
+      "norm_label": "dashboardfollowupcard()"
+    },
+    {
+      "label": "DashboardFollowUpSection.tsx",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardFollowUpSection.tsx",
+      "source_location": "L1",
+      "id": "src_features_dashboard_components_dashboardfollowupsection_tsx",
+      "community": 64,
+      "norm_label": "dashboardfollowupsection.tsx"
+    },
+    {
+      "label": "DashboardHeader.tsx",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardHeader.tsx",
+      "source_location": "L1",
+      "id": "src_features_dashboard_components_dashboardheader_tsx",
+      "community": 25,
+      "norm_label": "dashboardheader.tsx"
+    },
+    {
+      "label": "getGreetingOnly()",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardHeader.tsx",
+      "source_location": "L4",
+      "id": "components_dashboardheader_getgreetingonly",
+      "community": 25,
+      "norm_label": "getgreetingonly()"
+    },
+    {
+      "label": "getBusinessInitials()",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardHeader.tsx",
+      "source_location": "L9",
+      "id": "components_dashboardheader_getbusinessinitials",
+      "community": 25,
+      "norm_label": "getbusinessinitials()"
+    },
+    {
+      "label": "DashboardHeroCard.tsx",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardHeroCard.tsx",
+      "source_location": "L1",
+      "id": "src_features_dashboard_components_dashboardherocard_tsx",
+      "community": 0,
+      "norm_label": "dashboardherocard.tsx"
+    },
+    {
+      "label": "DashboardPaymentFlow.tsx",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardPaymentFlow.tsx",
+      "source_location": "L1",
+      "id": "src_features_dashboard_components_dashboardpaymentflow_tsx",
+      "community": 65,
+      "norm_label": "dashboardpaymentflow.tsx"
+    },
+    {
+      "label": "DashboardQuickStats.tsx",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardQuickStats.tsx",
+      "source_location": "L1",
+      "id": "src_features_dashboard_components_dashboardquickstats_tsx",
+      "community": 0,
+      "norm_label": "dashboardquickstats.tsx"
+    },
+    {
+      "label": "DashboardRecentActivity.tsx",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardRecentActivity.tsx",
+      "source_location": "L1",
+      "id": "src_features_dashboard_components_dashboardrecentactivity_tsx",
+      "community": 66,
+      "norm_label": "dashboardrecentactivity.tsx"
+    },
+    {
+      "label": "DashboardRecentActivityRow.tsx",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardRecentActivityRow.tsx",
+      "source_location": "L1",
+      "id": "src_features_dashboard_components_dashboardrecentactivityrow_tsx",
+      "community": 0,
+      "norm_label": "dashboardrecentactivityrow.tsx"
+    },
+    {
+      "label": "DashboardRecentActivityRow()",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardRecentActivityRow.tsx",
+      "source_location": "L14",
+      "id": "components_dashboardrecentactivityrow_dashboardrecentactivityrow",
+      "community": 0,
+      "norm_label": "dashboardrecentactivityrow()"
+    },
+    {
+      "label": "DashboardScreen.tsx",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardScreen.tsx",
+      "source_location": "L1",
+      "id": "src_features_dashboard_components_dashboardscreen_tsx",
+      "community": 5,
+      "norm_label": "dashboardscreen.tsx"
+    },
+    {
+      "label": "DashboardScreen()",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardScreen.tsx",
+      "source_location": "L54",
+      "id": "components_dashboardscreen_dashboardscreen",
+      "community": 5,
+      "norm_label": "dashboardscreen()"
+    },
+    {
+      "label": "DashboardSkeleton.tsx",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardSkeleton.tsx",
+      "source_location": "L1",
+      "id": "src_features_dashboard_components_dashboardskeleton_tsx",
+      "community": 19,
+      "norm_label": "dashboardskeleton.tsx"
+    },
+    {
+      "label": "DashboardSkeleton()",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\components\\DashboardSkeleton.tsx",
+      "source_location": "L8",
+      "id": "components_dashboardskeleton_dashboardskeleton",
+      "community": 19,
+      "norm_label": "dashboardskeleton()"
+    },
+    {
+      "label": "useDashboardPaymentFlow.ts",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\hooks\\useDashboardPaymentFlow.ts",
+      "source_location": "L1",
+      "id": "src_features_dashboard_hooks_usedashboardpaymentflow_ts",
+      "community": 5,
+      "norm_label": "usedashboardpaymentflow.ts"
+    },
+    {
+      "label": "useDashboardPaymentFlow()",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\hooks\\useDashboardPaymentFlow.ts",
+      "source_location": "L13",
+      "id": "hooks_usedashboardpaymentflow_usedashboardpaymentflow",
+      "community": 5,
+      "norm_label": "usedashboardpaymentflow()"
+    },
+    {
+      "label": "useDashboardPresentation.ts",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\hooks\\useDashboardPresentation.ts",
+      "source_location": "L1",
+      "id": "src_features_dashboard_hooks_usedashboardpresentation_ts",
+      "community": 5,
+      "norm_label": "usedashboardpresentation.ts"
+    },
+    {
+      "label": "useDashboardPresentation()",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\hooks\\useDashboardPresentation.ts",
+      "source_location": "L14",
+      "id": "hooks_usedashboardpresentation_usedashboardpresentation",
+      "community": 5,
+      "norm_label": "usedashboardpresentation()"
+    },
+    {
+      "label": "dashboardViewModel.ts",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\logic\\dashboardViewModel.ts",
+      "source_location": "L1",
+      "id": "src_features_dashboard_logic_dashboardviewmodel_ts",
+      "community": 5,
+      "norm_label": "dashboardviewmodel.ts"
+    },
+    {
+      "label": "dedupeOverduePeople()",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\logic\\dashboardViewModel.ts",
+      "source_location": "L11",
+      "id": "logic_dashboardviewmodel_dedupeoverduepeople",
+      "community": 5,
+      "norm_label": "dedupeoverduepeople()"
+    },
+    {
+      "label": "buildDashboardViewModel()",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\logic\\dashboardViewModel.ts",
+      "source_location": "L19",
+      "id": "logic_dashboardviewmodel_builddashboardviewmodel",
+      "community": 5,
+      "norm_label": "builddashboardviewmodel()"
+    },
+    {
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "src\\features\\dashboard\\logic\\index.ts",
+      "source_location": "L1",
+      "id": "src_features_dashboard_logic_index_ts",
+      "community": 67,
+      "norm_label": "index.ts"
     },
     {
       "label": "useAuth.ts",
@@ -1260,7 +1431,7 @@
       "source_file": "src\\hooks\\useAuth.ts",
       "source_location": "L1",
       "id": "src_hooks_useauth_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "useauth.ts"
     },
     {
@@ -1269,7 +1440,7 @@
       "source_file": "src\\hooks\\useAuth.ts",
       "source_location": "L17",
       "id": "hooks_useauth_useauth",
-      "community": 5,
+      "community": 2,
       "norm_label": "useauth()"
     },
     {
@@ -1278,7 +1449,7 @@
       "source_file": "src\\hooks\\useAuth.ts",
       "source_location": "L57",
       "id": "hooks_useauth_uselogin",
-      "community": 5,
+      "community": 6,
       "norm_label": "uselogin()"
     },
     {
@@ -1287,7 +1458,7 @@
       "source_file": "src\\hooks\\useAuth.ts",
       "source_location": "L75",
       "id": "hooks_useauth_usegooglesignin",
-      "community": 5,
+      "community": 6,
       "norm_label": "usegooglesignin()"
     },
     {
@@ -1296,7 +1467,7 @@
       "source_file": "src\\hooks\\useAuth.ts",
       "source_location": "L95",
       "id": "hooks_useauth_friendlysignuperror",
-      "community": 5,
+      "community": 6,
       "norm_label": "friendlysignuperror()"
     },
     {
@@ -1305,7 +1476,7 @@
       "source_file": "src\\hooks\\useAuth.ts",
       "source_location": "L114",
       "id": "hooks_useauth_usesignup",
-      "community": 5,
+      "community": 6,
       "norm_label": "usesignup()"
     },
     {
@@ -1314,7 +1485,7 @@
       "source_file": "src\\hooks\\useAuth.ts",
       "source_location": "L140",
       "id": "hooks_useauth_useresetpassword",
-      "community": 5,
+      "community": 6,
       "norm_label": "useresetpassword()"
     },
     {
@@ -1323,7 +1494,7 @@
       "source_file": "src\\hooks\\useAuth.ts",
       "source_location": "L150",
       "id": "hooks_useauth_uselogout",
-      "community": 5,
+      "community": 6,
       "norm_label": "uselogout()"
     },
     {
@@ -1332,25 +1503,25 @@
       "source_file": "src\\hooks\\useDashboard.ts",
       "source_location": "L1",
       "id": "src_hooks_usedashboard_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "usedashboard.ts"
     },
     {
       "label": "useDashboard()",
       "file_type": "code",
       "source_file": "src\\hooks\\useDashboard.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "id": "hooks_usedashboard_usedashboard",
-      "community": 6,
+      "community": 5,
       "norm_label": "usedashboard()"
     },
     {
       "label": "useNetPositionReport()",
       "file_type": "code",
       "source_file": "src\\hooks\\useDashboard.ts",
-      "source_location": "L85",
+      "source_location": "L73",
       "id": "hooks_usedashboard_usenetpositionreport",
-      "community": 2,
+      "community": 4,
       "norm_label": "usenetpositionreport()"
     },
     {
@@ -1359,7 +1530,7 @@
       "source_file": "src\\hooks\\useDebounce.ts",
       "source_location": "L1",
       "id": "src_hooks_usedebounce_ts",
-      "community": 9,
+      "community": 3,
       "norm_label": "usedebounce.ts"
     },
     {
@@ -1368,7 +1539,7 @@
       "source_file": "src\\hooks\\useDebounce.ts",
       "source_location": "L2",
       "id": "hooks_usedebounce_usedebounce",
-      "community": 9,
+      "community": 3,
       "norm_label": "usedebounce()"
     },
     {
@@ -1386,7 +1557,7 @@
       "source_file": "src\\hooks\\useEntries.ts",
       "source_location": "L27",
       "id": "hooks_useentries_useorders",
-      "community": 4,
+      "community": 3,
       "norm_label": "useorders()"
     },
     {
@@ -1413,7 +1584,7 @@
       "source_file": "src\\hooks\\useEntries.ts",
       "source_location": "L206",
       "id": "hooks_useentries_usecreateorder",
-      "community": 4,
+      "community": 3,
       "norm_label": "usecreateorder()"
     },
     {
@@ -1422,7 +1593,7 @@
       "source_file": "src\\hooks\\useFontsLoader.ts",
       "source_location": "L1",
       "id": "src_hooks_usefontsloader_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "usefontsloader.ts"
     },
     {
@@ -1431,7 +1602,7 @@
       "source_file": "src\\hooks\\useFontsLoader.ts",
       "source_location": "L9",
       "id": "hooks_usefontsloader_usefontsloader",
-      "community": 3,
+      "community": 2,
       "norm_label": "usefontsloader()"
     },
     {
@@ -1440,7 +1611,7 @@
       "source_file": "src\\hooks\\useInfiniteScroll.ts",
       "source_location": "L1",
       "id": "src_hooks_useinfinitescroll_ts",
-      "community": 4,
+      "community": 3,
       "norm_label": "useinfinitescroll.ts"
     },
     {
@@ -1449,7 +1620,7 @@
       "source_file": "src\\hooks\\useInfiniteScroll.ts",
       "source_location": "L3",
       "id": "hooks_useinfinitescroll_useinfinitescroll",
-      "community": 4,
+      "community": 3,
       "norm_label": "useinfinitescroll()"
     },
     {
@@ -1458,7 +1629,7 @@
       "source_file": "src\\hooks\\useLogin.ts",
       "source_location": "L1",
       "id": "src_hooks_uselogin_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "uselogin.ts"
     },
     {
@@ -1467,7 +1638,7 @@
       "source_file": "src\\hooks\\useLogin.ts",
       "source_location": "L7",
       "id": "hooks_uselogin_uselogin",
-      "community": 5,
+      "community": 6,
       "norm_label": "uselogin()"
     },
     {
@@ -1494,7 +1665,7 @@
       "source_file": "src\\hooks\\useNetworkSync.ts",
       "source_location": "L150",
       "id": "hooks_usenetworksync_usenetworksync",
-      "community": 4,
+      "community": 12,
       "norm_label": "usenetworksync()"
     },
     {
@@ -1503,7 +1674,7 @@
       "source_file": "src\\hooks\\useOverdueNotifications.ts",
       "source_location": "L1",
       "id": "src_hooks_useoverduenotifications_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "useoverduenotifications.ts"
     },
     {
@@ -1512,7 +1683,7 @@
       "source_file": "src\\hooks\\useOverdueNotifications.ts",
       "source_location": "L17",
       "id": "hooks_useoverduenotifications_gettodaydatestring",
-      "community": 3,
+      "community": 2,
       "norm_label": "gettodaydatestring()"
     },
     {
@@ -1521,7 +1692,7 @@
       "source_file": "src\\hooks\\useOverdueNotifications.ts",
       "source_location": "L25",
       "id": "hooks_useoverduenotifications_fetchoverduegroups",
-      "community": 3,
+      "community": 2,
       "norm_label": "fetchoverduegroups()"
     },
     {
@@ -1530,7 +1701,7 @@
       "source_file": "src\\hooks\\useOverdueNotifications.ts",
       "source_location": "L69",
       "id": "hooks_useoverduenotifications_buildsignature",
-      "community": 3,
+      "community": 2,
       "norm_label": "buildsignature()"
     },
     {
@@ -1539,7 +1710,7 @@
       "source_file": "src\\hooks\\useOverdueNotifications.ts",
       "source_location": "L78",
       "id": "hooks_useoverduenotifications_useoverduenotifications",
-      "community": 3,
+      "community": 2,
       "norm_label": "useoverduenotifications()"
     },
     {
@@ -1701,7 +1872,7 @@
       "source_file": "src\\hooks\\usePeople.ts",
       "source_location": "L1",
       "id": "src_hooks_usepeople_ts",
-      "community": 9,
+      "community": 3,
       "norm_label": "usepeople.ts"
     },
     {
@@ -1710,7 +1881,7 @@
       "source_file": "src\\hooks\\usePeople.ts",
       "source_location": "L21",
       "id": "hooks_usepeople_dedupebyid",
-      "community": 9,
+      "community": 3,
       "norm_label": "dedupebyid()"
     },
     {
@@ -1719,7 +1890,7 @@
       "source_file": "src\\hooks\\usePeople.ts",
       "source_location": "L32",
       "id": "hooks_usepeople_partytoperson",
-      "community": 9,
+      "community": 3,
       "norm_label": "partytoperson()"
     },
     {
@@ -1728,7 +1899,7 @@
       "source_file": "src\\hooks\\usePeople.ts",
       "source_location": "L55",
       "id": "hooks_usepeople_usecustomers",
-      "community": 9,
+      "community": 3,
       "norm_label": "usecustomers()"
     },
     {
@@ -1737,7 +1908,7 @@
       "source_file": "src\\hooks\\usePeople.ts",
       "source_location": "L83",
       "id": "hooks_usepeople_useaddcustomer",
-      "community": 9,
+      "community": 3,
       "norm_label": "useaddcustomer()"
     },
     {
@@ -1746,7 +1917,7 @@
       "source_file": "src\\hooks\\usePeople.ts",
       "source_location": "L169",
       "id": "hooks_usepeople_usecustomerdetail",
-      "community": 9,
+      "community": 3,
       "norm_label": "usecustomerdetail()"
     },
     {
@@ -1773,7 +1944,7 @@
       "source_file": "src\\hooks\\useSyncStatus.ts",
       "source_location": "L1",
       "id": "src_hooks_usesyncstatus_ts",
-      "community": 4,
+      "community": 12,
       "norm_label": "usesyncstatus.ts"
     },
     {
@@ -1782,7 +1953,7 @@
       "source_file": "src\\hooks\\useSyncStatus.ts",
       "source_location": "L7",
       "id": "hooks_usesyncstatus_usesyncstatus",
-      "community": 4,
+      "community": 12,
       "norm_label": "usesyncstatus()"
     },
     {
@@ -1791,7 +1962,7 @@
       "source_file": "src\\hooks\\useWhatsAppShare.ts",
       "source_location": "L1",
       "id": "src_hooks_usewhatsappshare_ts",
-      "community": 6,
+      "community": 5,
       "norm_label": "usewhatsappshare.ts"
     },
     {
@@ -1800,7 +1971,7 @@
       "source_file": "src\\hooks\\useWhatsAppShare.ts",
       "source_location": "L18",
       "id": "hooks_usewhatsappshare_usewhatsappshare",
-      "community": 6,
+      "community": 5,
       "norm_label": "usewhatsappshare()"
     },
     {
@@ -1809,7 +1980,7 @@
       "source_file": "src\\i18n\\en.ts",
       "source_location": "L1",
       "id": "src_i18n_en_ts",
-      "community": 63,
+      "community": 68,
       "norm_label": "en.ts"
     },
     {
@@ -1818,7 +1989,7 @@
       "source_file": "src\\i18n\\hi.ts",
       "source_location": "L1",
       "id": "src_i18n_hi_ts",
-      "community": 64,
+      "community": 69,
       "norm_label": "hi.ts"
     },
     {
@@ -1827,7 +1998,7 @@
       "source_file": "src\\i18n\\index.ts",
       "source_location": "L1",
       "id": "src_i18n_index_ts",
-      "community": 65,
+      "community": 70,
       "norm_label": "index.ts"
     },
     {
@@ -1836,7 +2007,7 @@
       "source_file": "src\\lib\\mmkvPersister.ts",
       "source_location": "L1",
       "id": "src_lib_mmkvpersister_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "mmkvpersister.ts"
     },
     {
@@ -1845,7 +2016,7 @@
       "source_file": "src\\lib\\mmkvPersister.ts",
       "source_location": "L34",
       "id": "lib_mmkvpersister_createmmkvpersister",
-      "community": 3,
+      "community": 2,
       "norm_label": "createmmkvpersister()"
     },
     {
@@ -1872,7 +2043,7 @@
       "source_file": "src\\lib\\notifications.ts",
       "source_location": "L37",
       "id": "lib_notifications_configurenotificationchannels",
-      "community": 3,
+      "community": 2,
       "norm_label": "configurenotificationchannels()"
     },
     {
@@ -1917,7 +2088,7 @@
       "source_file": "src\\lib\\offlineEvents.ts",
       "source_location": "L1",
       "id": "src_lib_offlineevents_ts",
-      "community": 6,
+      "community": 5,
       "norm_label": "offlineevents.ts"
     },
     {
@@ -1926,7 +2097,7 @@
       "source_file": "src\\lib\\offlineEvents.ts",
       "source_location": "L10",
       "id": "lib_offlineevents_onofflinequeued",
-      "community": 6,
+      "community": 5,
       "norm_label": "onofflinequeued()"
     },
     {
@@ -1944,7 +2115,7 @@
       "source_file": "src\\lib\\secureStorage.ts",
       "source_location": "L1",
       "id": "src_lib_securestorage_ts",
-      "community": 36,
+      "community": 37,
       "norm_label": "securestorage.ts"
     },
     {
@@ -1953,7 +2124,7 @@
       "source_file": "src\\lib\\secureStorage.ts",
       "source_location": "L26",
       "id": "lib_securestorage_tochunks",
-      "community": 36,
+      "community": 37,
       "norm_label": "tochunks()"
     },
     {
@@ -1989,7 +2160,7 @@
       "source_file": "src\\lib\\supabaseQuery.ts",
       "source_location": "L45",
       "id": "lib_supabasequery_toapierror",
-      "community": 2,
+      "community": 4,
       "norm_label": "toapierror()"
     },
     {
@@ -2007,7 +2178,7 @@
       "source_file": "src\\lib\\syncQueue.ts",
       "source_location": "L50",
       "id": "lib_syncqueue_initializesyncqueue",
-      "community": 3,
+      "community": 2,
       "norm_label": "initializesyncqueue()"
     },
     {
@@ -2133,7 +2304,7 @@
       "source_file": "src\\lib\\syncQueueStorage.ts",
       "source_location": "L1",
       "id": "src_lib_syncqueuestorage_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "syncqueuestorage.ts"
     },
     {
@@ -2142,7 +2313,7 @@
       "source_file": "src\\lib\\syncQueueStorage.ts",
       "source_location": "L8",
       "id": "lib_syncqueuestorage_generatekey",
-      "community": 3,
+      "community": 2,
       "norm_label": "generatekey()"
     },
     {
@@ -2151,7 +2322,7 @@
       "source_file": "src\\lib\\syncQueueStorage.ts",
       "source_location": "L17",
       "id": "lib_syncqueuestorage_getorcreatesyncqueuekey",
-      "community": 3,
+      "community": 2,
       "norm_label": "getorcreatesyncqueuekey()"
     },
     {
@@ -2160,7 +2331,7 @@
       "source_file": "src\\services\\sentry.ts",
       "source_location": "L1",
       "id": "src_services_sentry_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "sentry.ts"
     },
     {
@@ -2169,7 +2340,7 @@
       "source_file": "src\\services\\sentry.ts",
       "source_location": "L3",
       "id": "services_sentry_initsentry",
-      "community": 3,
+      "community": 2,
       "norm_label": "initsentry()"
     },
     {
@@ -2205,7 +2376,7 @@
       "source_file": "src\\store\\authStore.ts",
       "source_location": "L1",
       "id": "src_store_authstore_ts",
-      "community": 66,
+      "community": 71,
       "norm_label": "authstore.ts"
     },
     {
@@ -2214,7 +2385,7 @@
       "source_file": "src\\store\\languageStore.ts",
       "source_location": "L1",
       "id": "src_store_languagestore_ts",
-      "community": 67,
+      "community": 72,
       "norm_label": "languagestore.ts"
     },
     {
@@ -2223,7 +2394,7 @@
       "source_file": "src\\store\\orderStore.ts",
       "source_location": "L1",
       "id": "src_store_orderstore_ts",
-      "community": 68,
+      "community": 73,
       "norm_label": "orderstore.ts"
     },
     {
@@ -2232,7 +2403,7 @@
       "source_file": "src\\store\\preferencesStore.ts",
       "source_location": "L1",
       "id": "src_store_preferencesstore_ts",
-      "community": 69,
+      "community": 74,
       "norm_label": "preferencesstore.ts"
     },
     {
@@ -2241,7 +2412,7 @@
       "source_file": "src\\theme\\index.ts",
       "source_location": "L1",
       "id": "src_theme_index_ts",
-      "community": 70,
+      "community": 75,
       "norm_label": "index.ts"
     },
     {
@@ -2250,7 +2421,7 @@
       "source_file": "src\\theme\\theme.ts",
       "source_location": "L1",
       "id": "src_theme_theme_ts",
-      "community": 37,
+      "community": 38,
       "norm_label": "theme.ts"
     },
     {
@@ -2259,7 +2430,7 @@
       "source_file": "src\\theme\\theme.ts",
       "source_location": "L471",
       "id": "theme_theme_buildtheme",
-      "community": 37,
+      "community": 38,
       "norm_label": "buildtheme()"
     },
     {
@@ -2313,7 +2484,7 @@
       "source_file": "src\\types\\auth.ts",
       "source_location": "L1",
       "id": "src_types_auth_ts",
-      "community": 71,
+      "community": 76,
       "norm_label": "auth.ts"
     },
     {
@@ -2322,7 +2493,7 @@
       "source_file": "src\\types\\customer.ts",
       "source_location": "L1",
       "id": "src_types_customer_ts",
-      "community": 72,
+      "community": 77,
       "norm_label": "customer.ts"
     },
     {
@@ -2331,7 +2502,7 @@
       "source_file": "src\\types\\database.types.ts",
       "source_location": "L1",
       "id": "src_types_database_types_ts",
-      "community": 73,
+      "community": 78,
       "norm_label": "database.types.ts"
     },
     {
@@ -2340,7 +2511,7 @@
       "source_file": "src\\types\\party.ts",
       "source_location": "L1",
       "id": "src_types_party_ts",
-      "community": 74,
+      "community": 79,
       "norm_label": "party.ts"
     },
     {
@@ -2349,7 +2520,7 @@
       "source_file": "src\\types\\svg.d.ts",
       "source_location": "L1",
       "id": "src_types_svg_d_ts",
-      "community": 75,
+      "community": 80,
       "norm_label": "svg.d.ts"
     },
     {
@@ -2358,7 +2529,7 @@
       "source_file": "src\\utils\\dashboardUi.ts",
       "source_location": "L1",
       "id": "src_utils_dashboardui_ts",
-      "community": 38,
+      "community": 39,
       "norm_label": "dashboardui.ts"
     },
     {
@@ -2367,7 +2538,7 @@
       "source_file": "src\\utils\\dashboardUi.ts",
       "source_location": "L8",
       "id": "utils_dashboardui_formatdashboarddate",
-      "community": 38,
+      "community": 39,
       "norm_label": "formatdashboarddate()"
     },
     {
@@ -2376,7 +2547,7 @@
       "source_file": "src\\utils\\exportCsv.ts",
       "source_location": "L1",
       "id": "src_utils_exportcsv_ts",
-      "community": 2,
+      "community": 9,
       "norm_label": "exportcsv.ts"
     },
     {
@@ -2385,7 +2556,7 @@
       "source_file": "src\\utils\\exportCsv.ts",
       "source_location": "L4",
       "id": "utils_exportcsv_escapecell",
-      "community": 2,
+      "community": 9,
       "norm_label": "escapecell()"
     },
     {
@@ -2394,7 +2565,7 @@
       "source_file": "src\\utils\\exportCsv.ts",
       "source_location": "L12",
       "id": "utils_exportcsv_tocsv",
-      "community": 2,
+      "community": 9,
       "norm_label": "tocsv()"
     },
     {
@@ -2403,7 +2574,7 @@
       "source_file": "src\\utils\\exportCsv.ts",
       "source_location": "L22",
       "id": "utils_exportcsv_sharecsv",
-      "community": 2,
+      "community": 9,
       "norm_label": "sharecsv()"
     },
     {
@@ -2412,7 +2583,7 @@
       "source_file": "src\\utils\\exportLedgerPdf.ts",
       "source_location": "L1",
       "id": "src_utils_exportledgerpdf_ts",
-      "community": 0,
+      "community": 9,
       "norm_label": "exportledgerpdf.ts"
     },
     {
@@ -2421,7 +2592,7 @@
       "source_file": "src\\utils\\exportLedgerPdf.ts",
       "source_location": "L6",
       "id": "utils_exportledgerpdf_formatdate",
-      "community": 0,
+      "community": 9,
       "norm_label": "formatdate()"
     },
     {
@@ -2430,7 +2601,7 @@
       "source_file": "src\\utils\\exportLedgerPdf.ts",
       "source_location": "L16",
       "id": "utils_exportledgerpdf_signamount",
-      "community": 0,
+      "community": 9,
       "norm_label": "signamount()"
     },
     {
@@ -2439,7 +2610,7 @@
       "source_file": "src\\utils\\exportLedgerPdf.ts",
       "source_location": "L22",
       "id": "utils_exportledgerpdf_statuscolor",
-      "community": 0,
+      "community": 9,
       "norm_label": "statuscolor()"
     },
     {
@@ -2448,7 +2619,7 @@
       "source_file": "src\\utils\\exportLedgerPdf.ts",
       "source_location": "L29",
       "id": "utils_exportledgerpdf_entryrow",
-      "community": 0,
+      "community": 9,
       "norm_label": "entryrow()"
     },
     {
@@ -2457,7 +2628,7 @@
       "source_file": "src\\utils\\exportLedgerPdf.ts",
       "source_location": "L63",
       "id": "utils_exportledgerpdf_generateledgerpdf",
-      "community": 0,
+      "community": 9,
       "norm_label": "generateledgerpdf()"
     },
     {
@@ -2466,7 +2637,7 @@
       "source_file": "src\\utils\\exportLedgerPdf.ts",
       "source_location": "L189",
       "id": "utils_exportledgerpdf_shareledgerpdf",
-      "community": 0,
+      "community": 9,
       "norm_label": "shareledgerpdf()"
     },
     {
@@ -2502,7 +2673,7 @@
       "source_file": "src\\utils\\formatCurrency.ts",
       "source_location": "L1",
       "id": "src_utils_formatcurrency_ts",
-      "community": 76,
+      "community": 81,
       "norm_label": "formatcurrency.ts"
     },
     {
@@ -2511,7 +2682,7 @@
       "source_file": "src\\utils\\formatDate.ts",
       "source_location": "L1",
       "id": "src_utils_formatdate_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "formatdate.ts"
     },
     {
@@ -2520,7 +2691,7 @@
       "source_file": "src\\utils\\formatDate.ts",
       "source_location": "L1",
       "id": "utils_formatdate_formatdateddmmmyyyy",
-      "community": 2,
+      "community": 4,
       "norm_label": "formatdateddmmmyyyy()"
     },
     {
@@ -2547,7 +2718,7 @@
       "source_file": "src\\utils\\helper.ts",
       "source_location": "L1",
       "id": "src_utils_helper_ts",
-      "community": 0,
+      "community": 3,
       "norm_label": "helper.ts"
     },
     {
@@ -2556,7 +2727,7 @@
       "source_file": "src\\utils\\helper.ts",
       "source_location": "L2",
       "id": "utils_helper_formatrupeeinput",
-      "community": 0,
+      "community": 3,
       "norm_label": "formatrupeeinput()"
     },
     {
@@ -2565,7 +2736,7 @@
       "source_file": "src\\utils\\helper.ts",
       "source_location": "L14",
       "id": "utils_helper_formatdate",
-      "community": 0,
+      "community": 3,
       "norm_label": "formatdate()"
     },
     {
@@ -2574,7 +2745,7 @@
       "source_file": "src\\utils\\helper.ts",
       "source_location": "L25",
       "id": "utils_helper_formatrelativeactivity",
-      "community": 4,
+      "community": 3,
       "norm_label": "formatrelativeactivity()"
     },
     {
@@ -2583,7 +2754,7 @@
       "source_file": "src\\utils\\helper.ts",
       "source_location": "L40",
       "id": "utils_helper_dayssince",
-      "community": 0,
+      "community": 3,
       "norm_label": "dayssince()"
     },
     {
@@ -2628,7 +2799,7 @@
       "source_file": "src\\utils\\phone.ts",
       "source_location": "L1",
       "id": "src_utils_phone_ts",
-      "community": 39,
+      "community": 40,
       "norm_label": "phone.ts"
     },
     {
@@ -2637,7 +2808,7 @@
       "source_file": "src\\utils\\phone.ts",
       "source_location": "L1",
       "id": "utils_phone_normalizephone",
-      "community": 39,
+      "community": 40,
       "norm_label": "normalizephone()"
     },
     {
@@ -2646,7 +2817,7 @@
       "source_file": "src\\utils\\recentCustomers.ts",
       "source_location": "L1",
       "id": "src_utils_recentcustomers_ts",
-      "community": 25,
+      "community": 26,
       "norm_label": "recentcustomers.ts"
     },
     {
@@ -2655,7 +2826,7 @@
       "source_file": "src\\utils\\recentCustomers.ts",
       "source_location": "L6",
       "id": "utils_recentcustomers_getrecentcustomerids",
-      "community": 25,
+      "community": 26,
       "norm_label": "getrecentcustomerids()"
     },
     {
@@ -2664,7 +2835,7 @@
       "source_file": "src\\utils\\recentCustomers.ts",
       "source_location": "L17",
       "id": "utils_recentcustomers_prependrecentcustomer",
-      "community": 25,
+      "community": 26,
       "norm_label": "prependrecentcustomer()"
     },
     {
@@ -2673,7 +2844,7 @@
       "source_file": "src\\utils\\schemas.ts",
       "source_location": "L1",
       "id": "src_utils_schemas_ts",
-      "community": 77,
+      "community": 82,
       "norm_label": "schemas.ts"
     },
     {
@@ -2727,16 +2898,16 @@
       "source_file": "src\\utils\\theme.ts",
       "source_location": "L1",
       "id": "src_utils_theme_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "theme.ts"
     },
     {
       "label": "getThemeTokens()",
       "file_type": "code",
       "source_file": "src\\utils\\theme.ts",
-      "source_location": "L400",
+      "source_location": "L415",
       "id": "utils_theme_getthemetokens",
-      "community": 3,
+      "community": 2,
       "norm_label": "getthemetokens()"
     },
     {
@@ -2745,7 +2916,7 @@
       "source_file": "src\\utils\\ThemeProvider.tsx",
       "source_location": "L1",
       "id": "src_utils_themeprovider_tsx",
-      "community": 3,
+      "community": 2,
       "norm_label": "themeprovider.tsx"
     },
     {
@@ -2754,7 +2925,7 @@
       "source_file": "src\\utils\\ThemeProvider.tsx",
       "source_location": "L43",
       "id": "utils_themeprovider_themeprovider",
-      "community": 3,
+      "community": 2,
       "norm_label": "themeprovider()"
     },
     {
@@ -2763,7 +2934,7 @@
       "source_file": "src\\utils\\uploadPdfToSupabase.ts",
       "source_location": "L1",
       "id": "src_utils_uploadpdftosupabase_ts",
-      "community": 40,
+      "community": 41,
       "norm_label": "uploadpdftosupabase.ts"
     },
     {
@@ -2772,15 +2943,69 @@
       "source_file": "src\\utils\\uploadPdfToSupabase.ts",
       "source_location": "L5",
       "id": "utils_uploadpdftosupabase_uploadpdftosupabase",
-      "community": 40,
+      "community": 41,
       "norm_label": "uploadpdftosupabase()"
+    },
+    {
+      "label": "onAddNew()",
+      "file_type": "code",
+      "source_file": "src\\components\\customer\\CustomerPickerSheet.tsx",
+      "source_location": "L128",
+      "community": 0,
+      "norm_label": "onaddnew()",
+      "id": "customer_customerpickersheet_onaddnew"
+    },
+    {
+      "label": "renderRow()",
+      "file_type": "code",
+      "source_file": "src\\components\\customer\\CustomerPickerSheet.tsx",
+      "source_location": "L135",
+      "community": 0,
+      "norm_label": "renderrow()",
+      "id": "customer_customerpickersheet_renderrow"
+    },
+    {
+      "label": "DashboardHeader.tsx",
+      "file_type": "code",
+      "source_file": "src\\components\\dashboard\\DashboardHeader.tsx",
+      "source_location": "L1",
+      "community": 27,
+      "norm_label": "dashboardheader.tsx",
+      "id": "src_components_dashboard_dashboardheader_tsx"
+    },
+    {
+      "label": "getInitials()",
+      "file_type": "code",
+      "source_file": "src\\components\\dashboard\\DashboardHeader.tsx",
+      "source_location": "L13",
+      "community": 27,
+      "norm_label": "getinitials()",
+      "id": "dashboard_dashboardheader_getinitials"
+    },
+    {
+      "label": "getGreeting()",
+      "file_type": "code",
+      "source_file": "src\\components\\dashboard\\DashboardHeader.tsx",
+      "source_location": "L18",
+      "community": 27,
+      "norm_label": "getgreeting()",
+      "id": "dashboard_dashboardheader_getgreeting"
+    },
+    {
+      "label": "StatusBadge.tsx",
+      "file_type": "code",
+      "source_file": "src\\components\\dashboard\\StatusBadge.tsx",
+      "source_location": "L1",
+      "community": 83,
+      "norm_label": "statusbadge.tsx",
+      "id": "src_components_dashboard_statusbadge_tsx"
     },
     {
       "label": "CustomerPicker.tsx",
       "file_type": "code",
       "source_file": "src\\components\\picker\\CustomerPicker.tsx",
       "source_location": "L1",
-      "community": 4,
+      "community": 12,
       "norm_label": "customerpicker.tsx",
       "id": "src_components_picker_customerpicker_tsx"
     },
@@ -2789,7 +3014,7 @@
       "file_type": "code",
       "source_file": "babel.config.js",
       "source_location": "L1",
-      "community": 78,
+      "community": 84,
       "norm_label": "babel.config.js",
       "id": "babel_config_js"
     },
@@ -2798,7 +3023,7 @@
       "file_type": "code",
       "source_file": "eslint.config.js",
       "source_location": "L1",
-      "community": 79,
+      "community": 85,
       "norm_label": "eslint.config.js",
       "id": "eslint_config_js"
     },
@@ -2807,7 +3032,7 @@
       "file_type": "code",
       "source_file": "expo-env.d.ts",
       "source_location": "L1",
-      "community": 80,
+      "community": 86,
       "norm_label": "expo-env.d.ts",
       "id": "expo_env_d_ts"
     },
@@ -2816,7 +3041,7 @@
       "file_type": "code",
       "source_file": "metro.config.js",
       "source_location": "L1",
-      "community": 81,
+      "community": 87,
       "norm_label": "metro.config.js",
       "id": "metro_config_js"
     },
@@ -2825,7 +3050,7 @@
       "file_type": "code",
       "source_file": "nativewind-env.d.ts",
       "source_location": "L1",
-      "community": 82,
+      "community": 88,
       "norm_label": "nativewind-env.d.ts",
       "id": "nativewind_env_d_ts"
     },
@@ -2834,7 +3059,7 @@
       "file_type": "code",
       "source_file": "tailwind.config.js",
       "source_location": "L1",
-      "community": 83,
+      "community": 89,
       "norm_label": "tailwind.config.js",
       "id": "tailwind_config_js"
     },
@@ -2843,7 +3068,7 @@
       "file_type": "code",
       "source_file": "app\\index.tsx",
       "source_location": "L1",
-      "community": 84,
+      "community": 90,
       "norm_label": "index.tsx",
       "id": "app_index_tsx"
     },
@@ -2852,7 +3077,7 @@
       "file_type": "code",
       "source_file": "app\\profile-error.tsx",
       "source_location": "L1",
-      "community": 26,
+      "community": 28,
       "norm_label": "profile-error.tsx",
       "id": "app_profile_error_tsx"
     },
@@ -2861,7 +3086,7 @@
       "file_type": "code",
       "source_file": "app\\profile-error.tsx",
       "source_location": "L12",
-      "community": 26,
+      "community": 28,
       "norm_label": "handleretry()",
       "id": "app_profile_error_handleretry"
     },
@@ -2870,7 +3095,7 @@
       "file_type": "code",
       "source_file": "app\\profile-error.tsx",
       "source_location": "L22",
-      "community": 26,
+      "community": 28,
       "norm_label": "handlelogout()",
       "id": "app_profile_error_handlelogout"
     },
@@ -2879,7 +3104,7 @@
       "file_type": "code",
       "source_file": "app\\_layout.tsx",
       "source_location": "L1",
-      "community": 3,
+      "community": 2,
       "norm_label": "_layout.tsx",
       "id": "app_layout_tsx"
     },
@@ -2888,7 +3113,7 @@
       "file_type": "code",
       "source_file": "app\\_layout.tsx",
       "source_location": "L74",
-      "community": 3,
+      "community": 2,
       "norm_label": "init()",
       "id": "app_layout_init"
     },
@@ -2897,7 +3122,7 @@
       "file_type": "code",
       "source_file": "app\\_layout.tsx",
       "source_location": "L95",
-      "community": 3,
+      "community": 2,
       "norm_label": "setupnotifications()",
       "id": "app_layout_setupnotifications"
     },
@@ -2906,7 +3131,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\login.tsx",
       "source_location": "L1",
-      "community": 5,
+      "community": 6,
       "norm_label": "login.tsx",
       "id": "app_auth_login_tsx"
     },
@@ -2942,7 +3167,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\signup.tsx",
       "source_location": "L1",
-      "community": 5,
+      "community": 6,
       "norm_label": "signup.tsx",
       "id": "app_auth_signup_tsx"
     },
@@ -2951,7 +3176,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\_layout.tsx",
       "source_location": "L1",
-      "community": 85,
+      "community": 91,
       "norm_label": "_layout.tsx",
       "id": "app_auth_layout_tsx"
     },
@@ -2960,7 +3185,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\bank.tsx",
       "source_location": "L1",
-      "community": 19,
+      "community": 20,
       "norm_label": "bank.tsx",
       "id": "app_auth_onboarding_bank_tsx"
     },
@@ -2969,7 +3194,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\bank.tsx",
       "source_location": "L33",
-      "community": 19,
+      "community": 20,
       "norm_label": "handlecontinue()",
       "id": "onboarding_bank_handlecontinue"
     },
@@ -2978,7 +3203,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\bank.tsx",
       "source_location": "L62",
-      "community": 19,
+      "community": 20,
       "norm_label": "handleskip()",
       "id": "onboarding_bank_handleskip"
     },
@@ -2987,7 +3212,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\bank.tsx",
       "source_location": "L71",
-      "community": 19,
+      "community": 20,
       "norm_label": "optionalbadge()",
       "id": "onboarding_bank_optionalbadge"
     },
@@ -2996,7 +3221,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\business.tsx",
       "source_location": "L1",
-      "community": 27,
+      "community": 29,
       "norm_label": "business.tsx",
       "id": "app_auth_onboarding_business_tsx"
     },
@@ -3005,7 +3230,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\business.tsx",
       "source_location": "L35",
-      "community": 27,
+      "community": 29,
       "norm_label": "handlecontinue()",
       "id": "onboarding_business_handlecontinue"
     },
@@ -3014,7 +3239,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\business.tsx",
       "source_location": "L64",
-      "community": 27,
+      "community": 29,
       "norm_label": "handleskip()",
       "id": "onboarding_business_handleskip"
     },
@@ -3023,7 +3248,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\index.tsx",
       "source_location": "L1",
-      "community": 41,
+      "community": 42,
       "norm_label": "index.tsx",
       "id": "app_auth_onboarding_index_tsx"
     },
@@ -3032,7 +3257,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\index.tsx",
       "source_location": "L6",
-      "community": 41,
+      "community": 42,
       "norm_label": "onboardingindex()",
       "id": "onboarding_index_onboardingindex"
     },
@@ -3041,7 +3266,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\ready.tsx",
       "source_location": "L1",
-      "community": 6,
+      "community": 5,
       "norm_label": "ready.tsx",
       "id": "app_auth_onboarding_ready_tsx"
     },
@@ -3050,7 +3275,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\ready.tsx",
       "source_location": "L18",
-      "community": 6,
+      "community": 5,
       "norm_label": "completeonboarding()",
       "id": "onboarding_ready_completeonboarding"
     },
@@ -3059,7 +3284,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\ready.tsx",
       "source_location": "L41",
-      "community": 6,
+      "community": 5,
       "norm_label": "handleaddperson()",
       "id": "onboarding_ready_handleaddperson"
     },
@@ -3068,7 +3293,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\ready.tsx",
       "source_location": "L51",
-      "community": 6,
+      "community": 5,
       "norm_label": "handlegodashboard()",
       "id": "onboarding_ready_handlegodashboard"
     },
@@ -3077,7 +3302,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\_layout.tsx",
       "source_location": "L1",
-      "community": 42,
+      "community": 43,
       "norm_label": "_layout.tsx",
       "id": "app_auth_onboarding_layout_tsx"
     },
@@ -3086,7 +3311,7 @@
       "file_type": "code",
       "source_file": "app\\(auth)\\onboarding\\_layout.tsx",
       "source_location": "L3",
-      "community": 42,
+      "community": 43,
       "norm_label": "onboardinglayout()",
       "id": "onboarding_layout_onboardinglayout"
     },
@@ -3095,7 +3320,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\new-entry.tsx",
       "source_location": "L1",
-      "community": 43,
+      "community": 44,
       "norm_label": "new-entry.tsx",
       "id": "app_main_new_entry_tsx"
     },
@@ -3104,7 +3329,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\new-entry.tsx",
       "source_location": "L7",
-      "community": 43,
+      "community": 44,
       "norm_label": "newbillphantom()",
       "id": "main_new_entry_newbillphantom"
     },
@@ -3113,7 +3338,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\_layout.tsx",
       "source_location": "L1",
-      "community": 44,
+      "community": 45,
       "norm_label": "_layout.tsx",
       "id": "app_main_layout_tsx"
     },
@@ -3122,7 +3347,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\_layout.tsx",
       "source_location": "L9",
-      "community": 44,
+      "community": 45,
       "norm_label": "newbillbutton()",
       "id": "main_layout_newbillbutton"
     },
@@ -3131,7 +3356,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\dashboard\\index.tsx",
       "source_location": "L1",
-      "community": 6,
+      "community": 5,
       "norm_label": "index.tsx",
       "id": "app_main_dashboard_index_tsx"
     },
@@ -3140,7 +3365,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\dashboard\\index.tsx",
       "source_location": "L32",
-      "community": 6,
+      "community": 5,
       "norm_label": "dashboardscreen()",
       "id": "dashboard_index_dashboardscreen"
     },
@@ -3149,7 +3374,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\dashboard\\_layout.tsx",
       "source_location": "L1",
-      "community": 45,
+      "community": 46,
       "norm_label": "_layout.tsx",
       "id": "app_main_dashboard_layout_tsx"
     },
@@ -3158,7 +3383,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\dashboard\\_layout.tsx",
       "source_location": "L3",
-      "community": 45,
+      "community": 46,
       "norm_label": "dashboardlayout()",
       "id": "dashboard_layout_dashboardlayout"
     },
@@ -3221,7 +3446,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\entries\\index.tsx",
       "source_location": "L1",
-      "community": 4,
+      "community": 3,
       "norm_label": "index.tsx",
       "id": "app_main_entries_index_tsx"
     },
@@ -3230,7 +3455,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\entries\\index.tsx",
       "source_location": "L204",
-      "community": 4,
+      "community": 3,
       "norm_label": "isfetchingnextpage()",
       "id": "entries_index_isfetchingnextpage"
     },
@@ -3284,7 +3509,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\entries\\_layout.tsx",
       "source_location": "L1",
-      "community": 46,
+      "community": 47,
       "norm_label": "_layout.tsx",
       "id": "app_main_entries_layout_tsx"
     },
@@ -3293,7 +3518,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\entries\\_layout.tsx",
       "source_location": "L3",
-      "community": 46,
+      "community": 47,
       "norm_label": "orderslayout()",
       "id": "entries_layout_orderslayout"
     },
@@ -3338,7 +3563,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\export\\index.tsx",
       "source_location": "L1",
-      "community": 2,
+      "community": 9,
       "norm_label": "index.tsx",
       "id": "app_main_export_index_tsx"
     },
@@ -3347,7 +3572,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\export\\_layout.tsx",
       "source_location": "L1",
-      "community": 47,
+      "community": 48,
       "norm_label": "_layout.tsx",
       "id": "app_main_export_layout_tsx"
     },
@@ -3356,7 +3581,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\export\\_layout.tsx",
       "source_location": "L3",
-      "community": 47,
+      "community": 48,
       "norm_label": "exportlayout()",
       "id": "export_layout_exportlayout"
     },
@@ -3365,7 +3590,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\create.tsx",
       "source_location": "L1",
-      "community": 86,
+      "community": 92,
       "norm_label": "create.tsx",
       "id": "app_main_people_create_tsx"
     },
@@ -3374,7 +3599,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\index.tsx",
       "source_location": "L1",
-      "community": 4,
+      "community": 3,
       "norm_label": "index.tsx",
       "id": "app_main_people_index_tsx"
     },
@@ -3383,7 +3608,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\index.tsx",
       "source_location": "L36",
-      "community": 4,
+      "community": 3,
       "norm_label": "getcustomerstatus()",
       "id": "people_index_getcustomerstatus"
     },
@@ -3392,7 +3617,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\index.tsx",
       "source_location": "L100",
-      "community": 4,
+      "community": 3,
       "norm_label": "handleaddcustomer()",
       "id": "people_index_handleaddcustomer"
     },
@@ -3401,7 +3626,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\[customerId].tsx",
       "source_location": "L1",
-      "community": 12,
+      "community": 0,
       "norm_label": "[customerid].tsx",
       "id": "app_main_people_customerid_tsx"
     },
@@ -3410,7 +3635,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\[customerId].tsx",
       "source_location": "L59",
-      "community": 12,
+      "community": 0,
       "norm_label": "formattime()",
       "id": "people_customerid_formattime"
     },
@@ -3419,7 +3644,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\[customerId].tsx",
       "source_location": "L67",
-      "community": 12,
+      "community": 0,
       "norm_label": "getdatelabel()",
       "id": "people_customerid_getdatelabel"
     },
@@ -3428,7 +3653,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\[customerId].tsx",
       "source_location": "L84",
-      "community": 12,
+      "community": 0,
       "norm_label": "formatlastentrydate()",
       "id": "people_customerid_formatlastentrydate"
     },
@@ -3437,7 +3662,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\[customerId].tsx",
       "source_location": "L93",
-      "community": 12,
+      "community": 0,
       "norm_label": "getlastactivelabel()",
       "id": "people_customerid_getlastactivelabel"
     },
@@ -3446,7 +3671,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\[customerId].tsx",
       "source_location": "L102",
-      "community": 12,
+      "community": 0,
       "norm_label": "buildstatementhtml()",
       "id": "people_customerid_buildstatementhtml"
     },
@@ -3455,7 +3680,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\[customerId].tsx",
       "source_location": "L141",
-      "community": 12,
+      "community": 0,
       "norm_label": "quickactiontile()",
       "id": "people_customerid_quickactiontile"
     },
@@ -3464,7 +3689,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\[customerId].tsx",
       "source_location": "L327",
-      "community": 12,
+      "community": 0,
       "norm_label": "sendwhatsappreminder()",
       "id": "people_customerid_sendwhatsappreminder"
     },
@@ -3473,7 +3698,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\[customerId].tsx",
       "source_location": "L355",
-      "community": 12,
+      "community": 0,
       "norm_label": "callcustomer()",
       "id": "people_customerid_callcustomer"
     },
@@ -3482,7 +3707,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\[customerId].tsx",
       "source_location": "L361",
-      "community": 12,
+      "community": 0,
       "norm_label": "downloadstatement()",
       "id": "people_customerid_downloadstatement"
     },
@@ -3491,7 +3716,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\[customerId].tsx",
       "source_location": "L395",
-      "community": 12,
+      "community": 0,
       "norm_label": "openpaymentflow()",
       "id": "people_customerid_openpaymentflow"
     },
@@ -3500,7 +3725,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\_layout.tsx",
       "source_location": "L1",
-      "community": 48,
+      "community": 49,
       "norm_label": "_layout.tsx",
       "id": "app_main_people_layout_tsx"
     },
@@ -3509,7 +3734,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\people\\_layout.tsx",
       "source_location": "L3",
-      "community": 48,
+      "community": 49,
       "norm_label": "customerslayout()",
       "id": "people_layout_customerslayout"
     },
@@ -3554,7 +3779,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\profile\\index.tsx",
       "source_location": "L1",
-      "community": 3,
+      "community": 2,
       "norm_label": "index.tsx",
       "id": "app_main_profile_index_tsx"
     },
@@ -3563,7 +3788,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\profile\\index.tsx",
       "source_location": "L41",
-      "community": 3,
+      "community": 2,
       "norm_label": "maskaccount()",
       "id": "profile_index_maskaccount"
     },
@@ -3572,7 +3797,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\profile\\index.tsx",
       "source_location": "L125",
-      "community": 3,
+      "community": 2,
       "norm_label": "handlesignout()",
       "id": "profile_index_handlesignout"
     },
@@ -3581,7 +3806,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\profile\\_layout.tsx",
       "source_location": "L1",
-      "community": 49,
+      "community": 50,
       "norm_label": "_layout.tsx",
       "id": "app_main_profile_layout_tsx"
     },
@@ -3590,7 +3815,7 @@
       "file_type": "code",
       "source_file": "app\\(main)\\profile\\_layout.tsx",
       "source_location": "L3",
-      "community": 49,
+      "community": 50,
       "norm_label": "profilelayout()",
       "id": "profile_layout_profilelayout"
     },
@@ -3599,7 +3824,7 @@
       "file_type": "code",
       "source_file": "assets\\icons\\main.tsx",
       "source_location": "L1",
-      "community": 87,
+      "community": 93,
       "norm_label": "main.tsx",
       "id": "assets_icons_main_tsx"
     },
@@ -3608,7 +3833,7 @@
       "file_type": "code",
       "source_file": "src\\hooks\\usePeople.ts",
       "source_location": "L58",
-      "community": 9,
+      "community": 3,
       "norm_label": "fetchcustomersfromparties()",
       "id": "hooks_usepeople_fetchcustomersfromparties"
     }
@@ -4808,9 +5033,9 @@
       "source_file": "src\\components\\common\\CustomerAvatar.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_common_customeravatar_tsx",
-      "target": "common_customeravatar_getinitials",
-      "confidence_score": 1.0
+      "target": "common_customeravatar_getinitials"
     },
     {
       "relation": "contains",
@@ -4818,9 +5043,9 @@
       "source_file": "src\\components\\common\\CustomerAvatar.tsx",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_common_customeravatar_tsx",
-      "target": "common_customeravatar_getpairfromname",
-      "confidence_score": 1.0
+      "target": "common_customeravatar_getpairfromname"
     },
     {
       "relation": "imports",
@@ -4829,9 +5054,9 @@
       "source_file": "src\\components\\customer\\CustomerPickerSheet.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_customer_customerpickersheet_tsx",
-      "target": "utils_format_formatinr",
-      "confidence_score": 1.0
+      "target": "utils_format_formatinr"
     },
     {
       "relation": "contains",
@@ -4839,9 +5064,9 @@
       "source_file": "src\\components\\customer\\CustomerPickerSheet.tsx",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_customer_customerpickersheet_tsx",
-      "target": "customer_customerpickersheet_getbalancetext",
-      "confidence_score": 1.0
+      "target": "customer_customerpickersheet_getbalancetext"
     },
     {
       "relation": "contains",
@@ -4849,9 +5074,9 @@
       "source_file": "src\\components\\customer\\CustomerPickerSheet.tsx",
       "source_location": "L128",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_customer_customerpickersheet_tsx",
-      "target": "customer_customerpickersheet_onaddnew",
-      "confidence_score": 1.0
+      "target": "customer_customerpickersheet_onaddnew"
     },
     {
       "relation": "contains",
@@ -4859,20 +5084,9 @@
       "source_file": "src\\components\\customer\\CustomerPickerSheet.tsx",
       "source_location": "L135",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_customer_customerpickersheet_tsx",
-      "target": "customer_customerpickersheet_renderrow",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src\\components\\customer\\CustomerPickerSheet.tsx",
-      "source_location": "L137",
-      "weight": 1.0,
-      "source": "customer_customerpickersheet_renderrow",
-      "target": "customer_customerpickersheet_getbalancetext",
-      "confidence_score": 1.0
+      "target": "customer_customerpickersheet_renderrow"
     },
     {
       "relation": "calls",
@@ -4886,24 +5100,15 @@
       "target": "utils_format_formatinr"
     },
     {
-      "relation": "contains",
+      "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
-      "source_file": "src\\components\\dashboard\\DashboardHeader.tsx",
-      "source_location": "L13",
+      "source_file": "src\\components\\customer\\CustomerPickerSheet.tsx",
+      "source_location": "L137",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_components_dashboard_dashboardheader_tsx",
-      "target": "dashboard_dashboardheader_getinitials"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src\\components\\dashboard\\DashboardHeader.tsx",
-      "source_location": "L18",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_components_dashboard_dashboardheader_tsx",
-      "target": "dashboard_dashboardheader_getgreeting"
+      "source": "customer_customerpickersheet_renderrow",
+      "target": "customer_customerpickersheet_getbalancetext"
     },
     {
       "relation": "contains",
@@ -5025,11 +5230,55 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardScreen.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardscreen_tsx",
+      "target": "feedback_toast_usetoast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\hooks\\useDashboardPaymentFlow.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "src_features_dashboard_hooks_usedashboardpaymentflow_ts",
+      "target": "feedback_toast_usetoast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src\\hooks\\useWhatsAppShare.ts",
       "source_location": "L11",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_hooks_usewhatsappshare_ts",
+      "target": "feedback_toast_usetoast"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\features\\dashboard\\components\\DashboardScreen.tsx",
+      "source_location": "L87",
+      "weight": 1.0,
+      "source": "components_dashboardscreen_dashboardscreen",
+      "target": "feedback_toast_usetoast"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\features\\dashboard\\hooks\\useDashboardPaymentFlow.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "hooks_usedashboardpaymentflow_usedashboardpaymentflow",
       "target": "feedback_toast_usetoast"
     },
     {
@@ -5488,9 +5737,9 @@
       "source_file": "src\\components\\ui\\Icon.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_ui_icon_tsx",
-      "target": "ui_icon_icon",
-      "confidence_score": 1.0
+      "target": "ui_icon_icon"
     },
     {
       "relation": "imports",
@@ -5499,9 +5748,9 @@
       "source_file": "src\\components\\ui\\SpeedDialFAB.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_ui_speeddialfab_tsx",
-      "target": "ui_icon_icon",
-      "confidence_score": 1.0
+      "target": "ui_icon_icon"
     },
     {
       "relation": "imports",
@@ -5552,7 +5801,18 @@
       "source_file": "src\\components\\ui\\Skeleton.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_components_ui_skeleton_tsx",
+      "target": "ui_skeleton_skeleton"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardSkeleton.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardskeleton_tsx",
       "target": "ui_skeleton_skeleton",
       "confidence_score": 1.0
     },
@@ -5576,6 +5836,227 @@
       "confidence_score": 1.0,
       "source": "src_components_ui_syncstatusbanner_tsx",
       "target": "ui_syncstatusbanner_handledismiss"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardFollowUpCard.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardfollowupcard_tsx",
+      "target": "utils_format_formatinr",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardFollowUpCard.tsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardfollowupcard_tsx",
+      "target": "components_dashboardfollowupcard_dashboardfollowupcard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardHeader.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardheader_tsx",
+      "target": "components_dashboardheader_getgreetingonly",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardHeader.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardheader_tsx",
+      "target": "components_dashboardheader_getbusinessinitials",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardHeroCard.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardherocard_tsx",
+      "target": "utils_format_formatinr",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardQuickStats.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardquickstats_tsx",
+      "target": "utils_format_formatinr",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardRecentActivityRow.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardrecentactivityrow_tsx",
+      "target": "utils_format_formatinr",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardRecentActivityRow.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardrecentactivityrow_tsx",
+      "target": "components_dashboardrecentactivityrow_dashboardrecentactivityrow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\features\\dashboard\\components\\DashboardRecentActivityRow.tsx",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "components_dashboardrecentactivityrow_dashboardrecentactivityrow",
+      "target": "utils_format_formatinr"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardScreen.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardscreen_tsx",
+      "target": "hooks_usedashboardpaymentflow_usedashboardpaymentflow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardScreen.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardscreen_tsx",
+      "target": "hooks_usedashboardpresentation_usedashboardpresentation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardScreen.tsx",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardscreen_tsx",
+      "target": "components_dashboardscreen_dashboardscreen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\features\\dashboard\\components\\DashboardScreen.tsx",
+      "source_location": "L96",
+      "weight": 1.0,
+      "source": "components_dashboardscreen_dashboardscreen",
+      "target": "hooks_usedashboardpresentation_usedashboardpresentation"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\features\\dashboard\\components\\DashboardScreen.tsx",
+      "source_location": "L115",
+      "weight": 1.0,
+      "source": "components_dashboardscreen_dashboardscreen",
+      "target": "hooks_usedashboardpaymentflow_usedashboardpaymentflow"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\components\\DashboardSkeleton.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "src_features_dashboard_components_dashboardskeleton_tsx",
+      "target": "components_dashboardskeleton_dashboardskeleton",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\hooks\\useDashboardPaymentFlow.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "src_features_dashboard_hooks_usedashboardpaymentflow_ts",
+      "target": "hooks_usedashboardpaymentflow_usedashboardpaymentflow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\hooks\\useDashboardPresentation.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "src_features_dashboard_hooks_usedashboardpresentation_ts",
+      "target": "hooks_usedashboardpresentation_usedashboardpresentation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\logic\\dashboardViewModel.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "src_features_dashboard_logic_dashboardviewmodel_ts",
+      "target": "logic_dashboardviewmodel_dedupeoverduepeople",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\logic\\dashboardViewModel.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "src_features_dashboard_logic_dashboardviewmodel_ts",
+      "target": "logic_dashboardviewmodel_builddashboardviewmodel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\features\\dashboard\\logic\\dashboardViewModel.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "logic_dashboardviewmodel_builddashboardviewmodel",
+      "target": "logic_dashboardviewmodel_dedupeoverduepeople",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\hooks\\useDashboard.ts",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "hooks_usedashboard_usedashboard",
+      "target": "logic_dashboardviewmodel_builddashboardviewmodel"
     },
     {
       "relation": "contains",
@@ -7856,9 +8337,9 @@
       "source_file": "src\\utils\\recentCustomers.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_utils_recentcustomers_ts",
-      "target": "utils_recentcustomers_getrecentcustomerids",
-      "confidence_score": 1.0
+      "target": "utils_recentcustomers_getrecentcustomerids"
     },
     {
       "relation": "contains",
@@ -7866,9 +8347,9 @@
       "source_file": "src\\utils\\recentCustomers.ts",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_utils_recentcustomers_ts",
-      "target": "utils_recentcustomers_prependrecentcustomer",
-      "confidence_score": 1.0
+      "target": "utils_recentcustomers_prependrecentcustomer"
     },
     {
       "relation": "calls",
@@ -7877,9 +8358,9 @@
       "source_file": "src\\utils\\recentCustomers.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_recentcustomers_prependrecentcustomer",
-      "target": "utils_recentcustomers_getrecentcustomerids",
-      "confidence_score": 1.0
+      "target": "utils_recentcustomers_getrecentcustomerids"
     },
     {
       "relation": "contains",
@@ -8049,6 +8530,26 @@
       "confidence_score": 1.0,
       "source": "src_utils_uploadpdftosupabase_ts",
       "target": "utils_uploadpdftosupabase_uploadpdftosupabase"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\dashboard\\DashboardHeader.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_components_dashboard_dashboardheader_tsx",
+      "target": "dashboard_dashboardheader_getinitials"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\components\\dashboard\\DashboardHeader.tsx",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_components_dashboard_dashboardheader_tsx",
+      "target": "dashboard_dashboardheader_getgreeting"
     },
     {
       "relation": "contains",

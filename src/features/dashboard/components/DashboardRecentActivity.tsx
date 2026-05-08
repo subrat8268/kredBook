@@ -7,7 +7,7 @@ import type { DashboardActivityItem } from "../types";
 
 type Props = {
   colors: any;
-  isFetching: boolean;
+  isLoading: boolean;
   errorMessage?: string;
   recentActivity: DashboardActivityItem[];
   onOpenEntries: () => void;
@@ -16,7 +16,7 @@ type Props = {
 
 export default function DashboardRecentActivity({
   colors,
-  isFetching,
+  isLoading,
   errorMessage,
   recentActivity,
   onOpenEntries,
@@ -28,13 +28,18 @@ export default function DashboardRecentActivity({
     <>
       <View className="mt-section-md flex-row items-center justify-between">
         <Text className="text-section-title text-textPrimary dark:text-textPrimary-dark">Recent activity</Text>
-        <Pressable onPress={onOpenEntries}>
+        <Pressable
+          onPress={onOpenEntries}
+          accessibilityRole="button"
+          accessibilityLabel="View all entries"
+          hitSlop={8}
+        >
           <Text className="text-caption font-inter-semibold text-brand">View entries</Text>
         </Pressable>
       </View>
 
       <View className="mt-3 rounded-2xl border border-border-soft bg-surface p-4 dark:border-border-dark dark:bg-surface-dark" style={{ position: "relative", overflow: "hidden" }}>
-        {isFetching ? (
+        {isLoading ? (
           <SkeletonText lines={4} />
         ) : errorMessage ? (
           <View className="flex-row">
@@ -46,7 +51,12 @@ export default function DashboardRecentActivity({
               <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={2}>
                 {errorMessage}
               </Text>
-              <Pressable onPress={onRetry} className="mt-3 self-start rounded-full border border-border bg-surface px-4 py-2 dark:border-border-dark dark:bg-surface-dark">
+              <Pressable
+                onPress={onRetry}
+                className="mt-3 self-start rounded-full border border-border bg-surface px-4 py-2 dark:border-border-dark dark:bg-surface-dark"
+                accessibilityRole="button"
+                accessibilityLabel="Retry loading recent activity"
+              >
                 <Text className="text-caption font-inter-semibold text-brand">Refresh</Text>
               </Pressable>
             </View>
@@ -73,7 +83,7 @@ export default function DashboardRecentActivity({
           ))
         )}
 
-        {!isFetching && items.length > 0 ? (
+        {items.length > 0 ? (
           <LinearGradient
             colors={["transparent", colors.surface]}
             start={{ x: 0, y: 0 }}

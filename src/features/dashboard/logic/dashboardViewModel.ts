@@ -41,7 +41,7 @@ export function buildDashboardViewModel(data: DashboardData | null) {
     activeSuppliers: data?.activeSuppliers ?? 0,
     overduePayments: data?.overduePayments ?? 0,
     overdueSuppliers: data?.overdueSuppliersList ?? [],
-    overdueCustomers: overdueCustomersAll.slice(0, 3),
+    overdueCustomers: dedupedOverduePeople,
     overdueCustomersAll,
     overdueTotalCount: data?.overdueCustomers ?? 0,
     recentActivity,

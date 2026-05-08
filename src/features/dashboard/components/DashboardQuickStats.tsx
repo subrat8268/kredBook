@@ -33,6 +33,9 @@ export default function DashboardQuickStats({
           <Pressable
             key={stat.title}
             onPress={stat.onPress}
+            accessibilityRole="button"
+            accessibilityLabel={`${stat.title}: ${stat.value}`}
+            hitSlop={6}
             className={`flex-1 rounded-xl border p-3 ${
               isOverdue
                 ? "border-warning-light bg-warning-bg dark:border-warning-dark dark:bg-warning-bg-dark"
@@ -40,12 +43,12 @@ export default function DashboardQuickStats({
             }`}
           >
             <stat.icon size={16} color={isOverdue ? colors.warning : colors.brand} strokeWidth={2.2} />
-            <Text className="mt-2" style={{ fontSize: 12, fontWeight: "400", color: colors.textMuted }} numberOfLines={1}>
+            <Text className="mt-2 text-caption text-textMuted" numberOfLines={1}>
               {stat.title}
             </Text>
             <Text
-              className="mt-1"
-              style={{ fontSize: 22, fontWeight: "700", color: isOverdue ? colors.warning : colors.textPrimary }}
+              className="mt-1 text-[22px] font-inter-bold"
+              style={{ color: isOverdue ? colors.warning : colors.textPrimary }}
               numberOfLines={1}
               adjustsFontSizeToFit
               minimumFontScale={0.6}

@@ -21,7 +21,13 @@ export default function DashboardFollowUpCard({ person, onCollect }: Props) {
         {person.name}
       </Text>
       <Text className="mt-1 text-card-title text-overdue-text">{formatINR(person.balance)}</Text>
-      <Pressable className="mt-3 rounded-full bg-success px-4 py-2.5" onPress={() => onCollect(person.id, person.name)}>
+      <Pressable
+        className="mt-3 rounded-full bg-success px-4 py-2.5"
+        onPress={() => onCollect(person.id, person.name)}
+        accessibilityRole="button"
+        accessibilityLabel={`Collect ${person.balance} from ${person.name}`}
+        accessibilityHint="Opens the payment form for this customer"
+      >
         <Text className="text-center text-caption font-inter-semibold text-surface">Collect</Text>
       </Pressable>
     </View>
