@@ -39,7 +39,7 @@ export default function DashboardRecentActivity({
       </View>
 
       <View
-        className="mt-3 rounded-2xl bg-surface p-4"
+        className="mt-3 rounded-2xl bg-surface p-4 dark:border dark:border-border-soft-dark dark:bg-surface-dark"
         style={{ position: "relative", overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1 }}
       >
         {isLoading ? (

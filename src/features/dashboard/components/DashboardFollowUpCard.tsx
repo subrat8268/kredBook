@@ -11,7 +11,7 @@ type Props = {
 export default function DashboardFollowUpCard({ person, onCollect }: Props) {
   return (
     <View
-      className="rounded-2xl bg-surface p-4"
+      className="rounded-2xl bg-surface p-4 dark:border dark:border-border-soft-dark dark:bg-surface-dark"
       style={{
         width: 200,
         shadowColor: "#000",
@@ -30,7 +30,7 @@ export default function DashboardFollowUpCard({ person, onCollect }: Props) {
       <Text className="mt-3 text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>
         {person.name}
       </Text>
-      <Text className="mt-1 text-card-title text-overdue-text">{formatINR(person.balance)}</Text>
+      <Text className="mt-1 text-card-title text-overdue-text dark:text-danger">{formatINR(person.balance)}</Text>
       <Pressable
         className="mt-4 rounded-full bg-success px-4 py-2.5"
         onPress={() => onCollect(person.id, person.name)}

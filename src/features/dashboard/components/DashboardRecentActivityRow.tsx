@@ -35,7 +35,7 @@ export default function DashboardRecentActivityRow({ item, isLast, onOpenEntries
           </View>
         </View>
       </Pressable>
-      {!isLast ? <View className="my-3 h-px bg-border-soft dark:bg-border-dark" /> : null}
+      {!isLast ? <View className="my-3 h-px bg-border-soft dark:bg-border-soft-dark" /> : null}
     </View>
   );
 }

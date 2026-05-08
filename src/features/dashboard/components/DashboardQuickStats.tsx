@@ -45,8 +45,8 @@ export default function DashboardQuickStats({
             hitSlop={6}
             className={`flex-1 rounded-2xl py-3 px-3 ${
               isOverdue
-                ? "bg-warning-bg"
-                : "bg-surface"
+                ? "bg-warning-bg dark:border dark:border-warning-dark/30 dark:bg-surface-dark"
+                : "bg-surface dark:bg-surface-dark dark:border dark:border-border-soft-dark"
             }`}
             style={{
               shadowColor: "#000",

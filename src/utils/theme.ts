@@ -59,16 +59,16 @@ export const colors = {
   primaryBlueBg: "#EFF6FF", // legacy light info surface
 
   // ─ Semantic backgrounds (tinted panels)
-  successBg: "#F0FDF4",  // Green-50: YOU RECEIVE panel
-  dangerBg: "#FEF2F2",   // Red-50: YOU OWE panel
-  warningBg: "#FFFBEB",  // Amber-50: Pending/Caution panel
+  successBg: "#F0FDF4", // Green-50: YOU RECEIVE panel
+  dangerBg: "#FEF2F2", // Red-50: YOU OWE panel
+  warningBg: "#FFFBEB", // Amber-50: Pending/Caution panel
   warningBadgeBg: "#FEF3C7", // Amber-100 — Remind action bar button bg (= pending.bg)
 
   // ─ Surface variants
-  surfaceAlt: "#F8FAFC",  // Slate-50 — inner sub-boxes on cards
+  surfaceAlt: "#F8FAFC", // Slate-50 — inner sub-boxes on cards
 
   // ─ Text variants
-  textMuted: "#64748B",   // Slate-500 — secondary labels inside cards
+  textMuted: "#64748B", // Slate-500 — secondary labels inside cards
 
   // ─ Status chip colors
   paid: {
@@ -90,15 +90,15 @@ export const colors = {
 
   // ─ Specialized tool palettes
   reports: {
-    bg: "#EDE9FE",   // Purple-100
+    bg: "#EDE9FE", // Purple-100
     text: "#7C3AED", // Purple-600
   },
   export: {
-    bg: "#F3F4F6",   // Gray-100
+    bg: "#F3F4F6", // Gray-100
     text: "#374151", // Gray-700
   },
   orange: {
-    bg: "#FFF7ED",   // Orange-50
+    bg: "#FFF7ED", // Orange-50
     border: "#FFEDD5", // Orange-100
     text: "#EA580C", // Orange-600
   },
@@ -136,7 +136,7 @@ export const colors = {
   ] as string[],
 
   // ─ Supplier tint surfaces (pink-50 / pink-100)
-  supplierBg: "#FDF2F8",  // pink-50  — summary panel inner, status badge bg
+  supplierBg: "#FDF2F8", // pink-50  — summary panel inner, status badge bg
   supplierBadgeBg: "#FCE7F3", // pink-100 — header "I Owe" badge bg
 
   // ─ Icon backgrounds
@@ -144,12 +144,12 @@ export const colors = {
 
   // ─ Sync status tokens (for SyncStatusBanner component)
   sync: {
-    offlineBg: "#FEF3C7",   // Amber-100 — Light amber tint
+    offlineBg: "#FEF3C7", // Amber-100 — Light amber tint
     offlineText: "#D97706", // Amber-600
-    syncingBg: "#DBEAFE",   // Blue-100 — Light blue tint
+    syncingBg: "#DBEAFE", // Blue-100 — Light blue tint
     syncingText: "#2563EB", // Blue-600
-    syncedBg: "#ECFDF5",    // Green-50 — Light green tint
-    syncedText: "#16A34A",  // Green-600 (= success)
+    syncedBg: "#ECFDF5", // Green-50 — Light green tint
+    syncedText: "#16A34A", // Green-600 (= success)
   },
 
   // ─ Dashboard hero accents
@@ -159,6 +159,8 @@ export const colors = {
     heroChipBg: "rgba(255,255,255,0.10)",
     heroChipBorder: "rgba(255,255,255,0.16)",
     heroOrb: "rgba(255,255,255,0.06)",
+    arrowUp: "#16A34A", // green-600 — positive delta
+    arrowDown: "#F59E0B", // amber-500 — negative delta
   },
 
   // ─ Customer detail hero accents
@@ -179,15 +181,15 @@ export type ThemeMode = "light" | "dark";
 
 export const motion = {
   duration: {
-    fast: 150,   // ms — icon swaps, badge updates
-    base: 250,  // ms — screen transitions, modal open/close
-    slow: 400,  // ms — hero number counter, skeleton fade-in
+    fast: 150, // ms — icon swaps, badge updates
+    base: 250, // ms — screen transitions, modal open/close
+    slow: 400, // ms — hero number counter, skeleton fade-in
   },
   easing: {
-    spring: "cubic-bezier(0.16, 1, 0.3, 1)",   // Expo spring feel
-    smooth: "cubic-bezier(0.4, 0, 0.2, 1)",   // Material-style smooth
+    spring: "cubic-bezier(0.16, 1, 0.3, 1)", // Expo spring feel
+    smooth: "cubic-bezier(0.4, 0, 0.2, 1)", // Material-style smooth
     entrance: "cubic-bezier(0.0, 0.0, 0.2, 1)", // Decelerate in
-    exit: "cubic-bezier(0.4, 0.0, 1, 1)",     // Accelerate out
+    exit: "cubic-bezier(0.4, 0.0, 1, 1)", // Accelerate out
   },
   springConfig: {
     default: { damping: 20, stiffness: 200, mass: 1 },
@@ -291,6 +293,8 @@ export const darkColors: ColorTokens = {
     heroChipBg: "rgba(255,255,255,0.16)",
     heroChipBorder: "rgba(255,255,255,0.28)",
     heroOrb: "rgba(255,255,255,0.10)",
+    arrowUp: "#22C55E", // green-500 — bright positive delta for dark mode
+    arrowDown: "#F59E0B", // amber-500 — stays same for visibility
   },
   customerDetail: {
     heroText: "rgba(255,255,255,0.96)",
@@ -326,13 +330,13 @@ export const gradients = {
   // Supplier payable card — pink gradient
   supplierHero: {
     start: "#DB2777", // Pink-600
-    end: "#BE185D",   // Pink-800
+    end: "#BE185D", // Pink-800
   },
 
   // Supplier detail hero — deeper rose gradient (hero card on supplier detail screen)
   supplierDetailHero: {
     start: "#BE2D5C", // Rose-700
-    end: "#E8427D",   // Rose-500
+    end: "#E8427D", // Rose-500
   } as { start: string; end: string },
 
   // Net position card — solid dark navy
