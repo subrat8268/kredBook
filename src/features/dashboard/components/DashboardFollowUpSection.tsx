@@ -1,28 +1,30 @@
-import Avatar from "@/src/components/ui/Avatar";
-import { SkeletonCard } from "@/src/components/ui/Skeleton";
-import { formatINR } from "@/src/utils/format";
 import { AlertTriangle, CircleCheckBig } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
-
-type FollowUpPerson = {
-  id: string;
-  name: string;
-  balance: number;
-  daysSince: number;
-};
+import DashboardFollowUpCard from "./DashboardFollowUpCard";
+import type { DashboardPerson } from "../types";
+import { SkeletonCard } from "@/src/components/ui/Skeleton";
 
 type Props = {
   colors: any;
   overdueTotalCount: number;
   isFetching: boolean;
   errorMessage?: string;
-  followUpPeople: FollowUpPerson[];
+  followUpPeople: DashboardPerson[];
   onOpenPeople: () => void;
   onCollect: (customerId: string, customerName: string) => Promise<void>;
   onRetry: () => void;
 };
 
-export default function DashboardFollowUpCarousel({ colors, overdueTotalCount, isFetching, errorMessage, followUpPeople, onOpenPeople, onCollect, onRetry }: Props) {
+export default function DashboardFollowUpSection({
+  colors,
+  overdueTotalCount,
+  isFetching,
+  errorMessage,
+  followUpPeople,
+  onOpenPeople,
+  onCollect,
+  onRetry,
+}: Props) {
   return (
     <>
       <View className="mt-section-md flex-row items-center justify-between">
@@ -49,7 +51,9 @@ export default function DashboardFollowUpCarousel({ colors, overdueTotalCount, i
           </View>
           <View className="flex-1 border-l border-danger-light pl-3 dark:border-danger-dark">
             <Text className="text-card-title text-danger-text">Couldn&apos;t load follow-up list</Text>
-            <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={2}>{errorMessage}</Text>
+            <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={2}>
+              {errorMessage}
+            </Text>
             <Pressable onPress={onRetry} className="mt-3 self-start rounded-full bg-surface px-4 py-2 dark:bg-surface-dark">
               <Text className="text-caption font-inter-semibold text-brand">Try again</Text>
             </Pressable>
@@ -71,19 +75,7 @@ export default function DashboardFollowUpCarousel({ colors, overdueTotalCount, i
       ) : (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-3">
           {followUpPeople.map((person) => (
-            <View key={person.id} className="mr-3 w-64 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
-              <View className="flex-row items-center justify-between">
-                <Avatar name={person.name} size="sm" />
-                <View className="rounded-full bg-warning-bg px-2 py-1">
-                  <Text className="text-[11px] font-inter-semibold text-warning-dark">{person.daysSince}d overdue</Text>
-                </View>
-              </View>
-              <Text className="mt-3 text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>{person.name}</Text>
-              <Text className="mt-1 text-card-title text-overdue-text">{formatINR(person.balance)}</Text>
-              <Pressable className="mt-3 rounded-full bg-success px-4 py-2" onPress={() => onCollect(person.id, person.name)}>
-                <Text className="text-center text-caption font-inter-semibold text-surface">Collect</Text>
-              </Pressable>
-            </View>
+            <DashboardFollowUpCard key={person.id} person={person} onCollect={onCollect} />
           ))}
         </ScrollView>
       )}

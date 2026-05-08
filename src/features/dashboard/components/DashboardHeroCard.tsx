@@ -42,8 +42,13 @@ export default function DashboardHeroCard({
       </View>
 
       <View className="mt-4 flex-row" style={{ gap: 10 }}>
-        <Pressable onPress={onCollectNow} disabled={isCollecting} className="flex-1 rounded-full bg-surface px-4 py-3" style={{ opacity: isCollecting ? 0.65 : 1 }}>
-          <Text className="text-center font-inter-semibold text-success">Record Payment</Text>
+        <Pressable
+          onPress={onCollectNow}
+          disabled={isCollecting}
+          className="flex-1 rounded-full border border-success-light bg-success px-3 py-3"
+          style={{ opacity: isCollecting ? 0.65 : 1 }}
+        >
+          <Text className="text-center font-inter-semibold text-surface">Record Payment</Text>
         </Pressable>
         <Pressable
           onPress={async () => {
@@ -51,7 +56,7 @@ export default function DashboardHeroCard({
               message: `Hi, you have an outstanding amount of ${formatINR(totalOutstanding)} with ${businessName}. Please make the payment at your earliest. Thank you!`,
             });
           }}
-          className="flex-1 rounded-full px-4 py-3"
+          className="flex-1 rounded-full px-3 py-3"
           style={{ borderWidth: 1.5, borderColor: colors.surface }}
         >
           <Text className="text-center font-inter-semibold" style={{ color: colors.surface }}>Send Reminder</Text>
