@@ -107,6 +107,7 @@ export default function DashboardPaymentFlow({
       {paymentContext ? (
         <RecordCustomerPaymentModal
           ref={paymentSheetRef}
+          autoPresent
           onSuccess={onPaymentSuccess}
           orderId={paymentContext.orderId}
           balanceDue={paymentContext.balanceDue}

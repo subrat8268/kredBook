@@ -111,12 +111,11 @@ export default function DashboardScreen({
     paymentContext,
     setPaymentContext,
     handleOpenRecordPaymentForCustomer,
-    handleCollectNow,
+    handleOpenPicker,
   } = useDashboardPaymentFlow({
     actionParam,
     clearActionParam,
     openRecordPaymentForCustomer,
-    followUpPeople,
   });
 
   if (isLoading) {
@@ -157,7 +156,7 @@ export default function DashboardScreen({
           totalOutstanding={totalOutstanding}
           businessName={businessName}
           isCollecting={isCollecting}
-          onCollectNow={handleCollectNow}
+          onRecordPayment={handleOpenPicker}
         />
 
         <DashboardQuickStats

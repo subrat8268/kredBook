@@ -1,20 +1,18 @@
 import { useToast } from "@/src/components/feedback/Toast";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { DashboardPaymentContext, DashboardPerson } from "../types";
+import type { DashboardPaymentContext } from "../types";
 
 type Params = {
   actionParam?: string;
   clearActionParam: () => void;
   openRecordPaymentForCustomer: (customerId: string, customerName: string) => Promise<DashboardPaymentContext | null>;
-  followUpPeople: DashboardPerson[];
 };
 
 export function useDashboardPaymentFlow({
   actionParam,
   clearActionParam,
   openRecordPaymentForCustomer,
-  followUpPeople,
 }: Params) {
   const { show: showToast } = useToast();
   const paymentSheetRef = useRef<BottomSheetModal>(null);
@@ -37,7 +35,7 @@ export function useDashboardPaymentFlow({
       try {
         const context = await openRecordPaymentForCustomer(customerId, customerName);
         if (!context) {
-          showToast({ message: "No outstanding balance to collect for this customer.", type: "error" });
+          showToast({ message: "No outstanding balance for this customer.", type: "error" });
           return;
         }
 
@@ -51,14 +49,9 @@ export function useDashboardPaymentFlow({
     [openRecordPaymentForCustomer, showToast],
   );
 
-  const handleCollectNow = useCallback(async () => {
-    const first = followUpPeople[0];
-    if (first) {
-      await handleOpenRecordPaymentForCustomer(first.id, first.name);
-      return;
-    }
+  const handleOpenPicker = useCallback(() => {
     setIsCustomerPickerOpen(true);
-  }, [followUpPeople, handleOpenRecordPaymentForCustomer]);
+  }, []);
 
   return {
     paymentSheetRef,
@@ -70,6 +63,6 @@ export function useDashboardPaymentFlow({
     paymentContext,
     setPaymentContext,
     handleOpenRecordPaymentForCustomer,
-    handleCollectNow,
+    handleOpenPicker,
   };
 }

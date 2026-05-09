@@ -11,7 +11,7 @@ type Props = {
   totalOutstanding: number;
   businessName: string;
   isCollecting: boolean;
-  onCollectNow: () => Promise<void>;
+  onRecordPayment: () => void;
 };
 
 export default function DashboardHeroCard({
@@ -22,7 +22,7 @@ export default function DashboardHeroCard({
   totalOutstanding,
   businessName,
   isCollecting,
-  onCollectNow,
+  onRecordPayment,
 }: Props) {
   return (
     <LinearGradient
@@ -67,7 +67,7 @@ export default function DashboardHeroCard({
 
       <View className="flex-row items-center mt-4" style={{ gap: 10 }}>
         <Pressable
-          onPress={onCollectNow}
+          onPress={onRecordPayment}
           disabled={isCollecting}
           className="flex-1 px-3 py-3 rounded-full bg-surface"
           style={{
