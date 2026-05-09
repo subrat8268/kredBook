@@ -1,6 +1,7 @@
 import { Payment, fetchPayments, recordPayment } from "@/src/api/entries";
 import { ApiError } from "@/src/lib/supabaseQuery";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { useOrderStore } from "../store/orderStore";
 import { orderKeys } from "./useEntries";
 
@@ -21,19 +22,20 @@ type RecordPaymentResult = { status: "confirmed" | "queued" };
  *
  * Includes optimistic updates for offline-first architecture.
  */
-export function useRecordPayment(
-  orderId: string,
-  vendorId?: string,
-  customerId?: string,
-) {
+export function useRecordPayment(orderId: string, vendorId?: string, customerId?: string) {
+  const orderIdRef = useRef(orderId);
+
+  useEffect(() => {
+    orderIdRef.current = orderId;
+  }, [orderId]);
+
   const queryClient = useQueryClient();
   const { addUpdatingOrderId, removeUpdatingOrderId } = useOrderStore();
 
   const mutation = useMutation<RecordPaymentResult, ApiError, RecordPaymentInput>({
     mutationFn: async ({ amount, mode, notes }) => {
       if (!vendorId) throw new Error("Vendor ID is required");
-      // Always pass false for markFull — the caller resolves the amount upfront.
-      return await recordPayment(orderId, vendorId, amount, mode, false, notes);
+      return await recordPayment(orderIdRef.current, vendorId, amount, mode, false, notes);
     },
 
     onMutate: async ({ amount, mode, notes }) => {

@@ -1,4 +1,6 @@
 import { useRecordPayment } from "@/src/hooks/usePayments";
+import { fetchPersonDetail } from "@/src/api/people";
+import type { PersonDetail } from "@/src/types/customer";
 import { useAuthStore } from "@/src/store/authStore";
 import BaseBottomSheet from "@/src/components/layer2/BaseBottomSheet";
 import Avatar from "@/src/components/ui/Avatar";
@@ -63,26 +65,39 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
       customerId,
     );
 
-    // Present the sheet as soon as it mounts — the component that owns the sheet controls its presentation.
+// Present the sheet as soon as it mounts — the component that owns the sheet controls its presentation.
     useEffect(() => {
       if (!ref || typeof ref === "function") return;
-      const timer = setTimeout(() => {
-        ref.current?.present();
-      }, 0);
-      return () => clearTimeout(timer);
+      ref.current?.present();
     }, [ref]);
 
-    // Sync default amount when balanceDue changes (e.g. parent rerenders or loads)
+    const [pendingDetail, setPendingDetail] = useState<PersonDetail | null>(null);
+
+    // Fetch fresh balance in background — modal opens immediately with prop balance,
+    // then updates to real data when fetch resolves.
     useEffect(() => {
-      setAmount(String(initialAmount ?? balanceDue));
+      if (!customerId) return;
+      let cancelled = false;
+      fetchPersonDetail(customerId).then((detail) => {
+        if (!cancelled) setPendingDetail(detail ?? null);
+      });
+      return () => { cancelled = true; };
+    }, [customerId]);
+
+// Sync default amount when balanceDue or detail changes
+    useEffect(() => {
+      const bal = pendingDetail?.pendingOrderBalance ?? balanceDue;
+      setAmount(String(initialAmount ?? bal));
       setMode("Cash");
       setNotes("");
-    }, [balanceDue, initialAmount]);
+}, [balanceDue, initialAmount, pendingDetail]);
 
     const parsedAmount = parseAmount(amount);
-    const hasBalance = balanceDue > 0;
-    const isFullPaid = hasBalance && (parsedAmount ?? 0) >= balanceDue;
-    const payAmount = !hasBalance ? 0 : isFullPaid ? balanceDue : parsedAmount ?? 0;
+    const effectiveBalance = pendingDetail?.pendingOrderBalance ?? balanceDue;
+    const _effectiveOrderId = pendingDetail?.pendingOrderId ?? orderId;
+    const hasBalance = effectiveBalance > 0;
+    const isFullPaid = hasBalance && (parsedAmount ?? 0) >= effectiveBalance;
+    const payAmount = !hasBalance ? 0 : isFullPaid ? effectiveBalance : parsedAmount ?? 0;
 
     const handleSubmit = async () => {
       if (!hasBalance) {
@@ -110,7 +125,7 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
               customerName,
               amount: payAmount,
               paymentDate: new Date(),
-              remainingBalance: Math.max(0, balanceDue - payAmount),
+              remainingBalance: Math.max(0, effectiveBalance - payAmount),
               businessName: profile?.business_name || profile?.name || "KredBook",
             }),
           });
@@ -121,12 +136,10 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
           );
         }
 
-        setAmount(String(balanceDue));
+        setAmount(String(effectiveBalance));
         setMode("Cash");
         setNotes("");
         onSuccess();
-        // Since we are using a ref from parent, the parent should call sheetRef.current?.dismiss() 
-        // We trigger onSuccess so parent can manage state.
         if (ref && typeof ref !== "function" && ref.current) {
           ref.current.dismiss();
         }
@@ -169,8 +182,8 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
                 <Text style={[typography.caption, { color: colors.textSecondary }]}> 
                   Due: 
                 </Text>
-                <MoneyAmount
-                  value={balanceDue}
+<MoneyAmount
+                  value={effectiveBalance}
                   color={colors.danger}
                   style={[typography.caption, { fontWeight: "700" }]}
                 />
@@ -193,7 +206,7 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
 
           {/* Tap-to-fill full balance hint */}
           <TouchableOpacity
-            onPress={() => setAmount(String(balanceDue))}
+            onPress={() => setAmount(String(effectiveBalance))}
             activeOpacity={0.7}
             className="mb-5"
           >
@@ -202,7 +215,7 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
                 Full balance: 
               </Text>
               <MoneyAmount
-                value={balanceDue}
+                value={effectiveBalance}
                 color={colors.primary}
                 style={[typography.small, { fontWeight: "600" as const }]}
               />
