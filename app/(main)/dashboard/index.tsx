@@ -76,7 +76,16 @@ export default function DashboardRoute() {
     [addCustomerMutation],
   );
 
-  const pickerList = useMemo(() => pickerPeople.map((person) => ({ id: person.id, name: person.name })), [pickerPeople]);
+  const pickerList = useMemo(
+    () =>
+      pickerPeople.map((person) => ({
+        id: person.id,
+        name: person.name,
+        phone: person.phone,
+        balance: person.outstandingBalance ?? 0,
+      })),
+    [pickerPeople],
+  );
 
   if (!profile) return null;
 

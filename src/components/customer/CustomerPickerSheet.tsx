@@ -32,6 +32,12 @@ interface Props {
   recentIds: string[];
   onSelectCustomer: (customer: Customer) => void;
   isLoading?: boolean;
+  title?: string;
+  showAddCustomer?: boolean;
+  searchQuery?: string;
+  onSearchQueryChange?: (value: string) => void;
+  onEndReached?: () => void;
+  isFetchingNextPage?: boolean;
 }
 
 function getBalanceText(balance: number) {
@@ -48,16 +54,35 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
   recentIds,
   onSelectCustomer,
   isLoading = false,
+  title = "Select Customer",
+  showAddCustomer = true,
+  searchQuery: searchQueryProp,
+  onSearchQueryChange,
+  onEndReached,
+  isFetchingNextPage = false,
 }: Props) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const sheetRef = useRef<BottomSheetModal>(null);
   const listRef = useRef<BottomSheetFlatList<Customer>>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQueryState, setSearchQueryState] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const clearAnim = useRef(new Animated.Value(0)).current;
   const shimmerAnim = useRef(new Animated.Value(0.4)).current;
+
+  const isSearchControlled = typeof searchQueryProp === "string" && !!onSearchQueryChange;
+  const searchQuery = isSearchControlled ? searchQueryProp : searchQueryState;
+  const setSearchQuery = useCallback(
+    (value: string) => {
+      if (isSearchControlled) {
+        onSearchQueryChange?.(value);
+        return;
+      }
+      setSearchQueryState(value);
+    },
+    [isSearchControlled, onSearchQueryChange],
+  );
 
   const tokens = useMemo(() => getSheetTokens(colors), [colors]);
   const snapPoints = useMemo(() => ["85%"], []);
@@ -76,7 +101,7 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
     setSearchQuery("");
     setSearchFocused(false);
     sheetRef.current?.dismiss();
-  }, [visible]);
+  }, [setSearchQuery, visible]);
 
   useEffect(() => {
     Animated.timing(clearAnim, {
@@ -138,6 +163,7 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
 
   const handleAddNew = useCallback(
     (prefillName?: string) => {
+      if (!showAddCustomer) return;
       sheetRef.current?.close();
       setTimeout(() => {
         const name = prefillName?.trim();
@@ -148,7 +174,7 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
         router.push("/(main)/people/create" as never);
       }, 200);
     },
-    [router],
+    [router, showAddCustomer],
   );
 
   const handleSelectCustomer = useCallback(
@@ -173,18 +199,20 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
             },
           ]}
         >
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => handleAddNew()}
-            style={[styles.footerButton, { backgroundColor: colors.primaryDark }]}
-          >
-            <UserPlus size={18} color={colors.surface} style={styles.footerIcon} />
-            <Text style={[styles.footerText, { color: colors.surface }]}>Add New Customer</Text>
-          </TouchableOpacity>
+          {showAddCustomer ? (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => handleAddNew()}
+              style={[styles.footerButton, { backgroundColor: colors.primaryDark }]}
+            >
+              <UserPlus size={18} color={colors.surface} style={styles.footerIcon} />
+              <Text style={[styles.footerText, { color: colors.surface }]}>Add New Customer</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       </BottomSheetFooter>
     ),
-    [colors.background, colors.border, colors.primaryDark, colors.surface, footerInset, handleAddNew],
+    [colors.background, colors.border, colors.primaryDark, colors.surface, footerInset, handleAddNew, showAddCustomer],
   );
 
   const debugScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -343,9 +371,9 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
           </View>
         ) : null}
 
-        <Text style={[styles.sectionLabelAll, { color: colors.textMuted, marginTop: recents.length ? 16 : 14 }]}>
-          ALL CUSTOMERS
-        </Text>
+          <Text style={[styles.sectionLabelAll, { color: colors.textMuted, marginTop: recents.length ? 16 : 14 }]}> 
+            ALL CUSTOMERS
+          </Text>
       </>
     ),
     [
@@ -367,26 +395,34 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
         <View style={styles.emptyWrap}>
           <UserSearch size={40} color={colors.textMuted} />
           <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No one named &apos;{searchQuery}&apos;</Text>
-          <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>Add them as a new customer?</Text>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => handleAddNew(searchQuery)}>
-            <Text style={[styles.emptyAction, { color: colors.primary }]}>Add {searchQuery}</Text>
-          </TouchableOpacity>
+          {showAddCustomer ? (
+            <>
+              <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>Add them as a new customer?</Text>
+              <TouchableOpacity activeOpacity={0.7} onPress={() => handleAddNew(searchQuery)}>
+                <Text style={[styles.emptyAction, { color: colors.primary }]}>Add {searchQuery}</Text>
+              </TouchableOpacity>
+            </>
+          ) : null}
         </View>
       ) : (
         <View style={styles.emptyWrapNoData}>
           <Users size={48} color={colors.textMuted} />
           <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No customers yet</Text>
-          <Text style={[styles.emptySubtitleCenter, { color: colors.textMuted }]}>Add your first customer to start recording entries</Text>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => handleAddNew()}
-            style={[styles.emptyPrimaryButton, { backgroundColor: colors.primary }]}
-          >
-            <Text style={[styles.emptyPrimaryText, { color: colors.surface }]}>Add Customer</Text>
-          </TouchableOpacity>
+          {showAddCustomer ? (
+            <>
+              <Text style={[styles.emptySubtitleCenter, { color: colors.textMuted }]}>Add your first customer to start recording entries</Text>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handleAddNew()}
+                style={[styles.emptyPrimaryButton, { backgroundColor: colors.primary }]}
+              >
+                <Text style={[styles.emptyPrimaryText, { color: colors.surface }]}>Add Customer</Text>
+              </TouchableOpacity>
+            </>
+          ) : null}
         </View>
       ),
-    [colors.primary, colors.surface, colors.textMuted, colors.textPrimary, handleAddNew, searchQuery],
+    [colors.primary, colors.surface, colors.textMuted, colors.textPrimary, handleAddNew, searchQuery, showAddCustomer],
   );
 
   if (!visible) return null;
@@ -427,7 +463,7 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
         <View style={{ paddingTop: tokens.headerPaddingTop, paddingHorizontal: tokens.headerPaddingHorizontal }}>
           <View style={styles.headerRow}>
             <Text style={{ fontSize: tokens.headerTitleSize, fontWeight: tokens.headerTitleWeight, color: colors.textPrimary }}>
-              Select Customer
+              {title}
             </Text>
             <TouchableOpacity
               activeOpacity={0.7}
@@ -510,13 +546,23 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
             renderItem={renderRow}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator
+            onEndReached={onEndReached}
+            onEndReachedThreshold={0.3}
             onScroll={debugScroll}
             scrollEventThrottle={16}
             onContentSizeChange={debugContentSize}
             contentContainerStyle={{ paddingBottom: footerHeight + 16 }}
             ListHeaderComponent={listHeader}
             ListEmptyComponent={listEmpty}
-            ListFooterComponent={<View style={styles.listFooterSpacer} />}
+            ListFooterComponent={
+              isFetchingNextPage ? (
+                <View style={styles.loaderWrap}>
+                  <Text style={{ color: colors.textMuted, fontSize: 12 }}>Loading more...</Text>
+                </View>
+              ) : (
+                <View style={styles.listFooterSpacer} />
+              )
+            }
           />
         )}
       </View>

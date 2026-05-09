@@ -3,6 +3,7 @@ import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetScrollView,
+  BottomSheetView,
   type BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
 import { X } from "lucide-react-native";
@@ -146,7 +147,9 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomS
           {content}
         </BottomSheetScrollView>
       ) : (
-        <View style={[styles.content, contentContainerStyle as object]}>{content}</View>
+        <BottomSheetView style={[styles.content, { flex: 1 }, contentContainerStyle as object]}>
+          {content}
+        </BottomSheetView>
       )}
     </BottomSheetModal>
   );

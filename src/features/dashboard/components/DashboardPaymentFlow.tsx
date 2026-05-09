@@ -1,9 +1,7 @@
 import NewCustomerModal from "@/src/components/people/NewCustomerModal";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
-import BottomSheetPicker from "@/src/components/picker/BottomSheetPicker";
-import Avatar from "@/src/components/ui/Avatar";
+import CustomerPickerSheet from "@/src/components/customer/CustomerPickerSheet";
 import type { RefObject } from "react";
-import { Pressable, Text, View } from "react-native";
 import type { DashboardPaymentContext, DashboardPickerPerson } from "../types";
 
 type Props = {
@@ -70,38 +68,30 @@ export default function DashboardPaymentFlow({
         errorMessage={addCustomerError}
       />
 
-      <BottomSheetPicker
+      <CustomerPickerSheet
         visible={isCustomerPickerOpen}
         onClose={() => setIsCustomerPickerOpen(false)}
         title="Select customer"
-        items={pickerPeople}
+        showAddCustomer={false}
+        customerList={pickerPeople.map((item) => ({
+          id: item.id,
+          name: item.name,
+          phone: item.phone,
+          balance: item.balance ?? 0,
+        }))}
+        selectedCustomerId={null}
+        recentIds={[]}
         isLoading={isPickerLoading}
-        isFetchingNextPage={pickerIsFetchingNextPage}
+        searchQuery={search}
+        onSearchQueryChange={setSearch}
         onEndReached={() => {
           if (pickerHasNextPage) fetchMorePickerPeople();
         }}
-        search={search}
-        setSearch={setSearch}
-        keyExtractor={(item) => item.id}
-        renderItem={(item) => (
-          <Pressable
-            className="flex-row items-center rounded-xl border border-soft bg-surface px-4 py-3 dark:border-border-soft-dark dark:bg-surface-dark"
-            onPress={() => {
-              setIsCustomerPickerOpen(false);
-              onSelectCustomer(item.id, item.name);
-            }}
-          >
-            <Avatar name={item.name} size="sm" />
-            <View className="ml-3 flex-1">
-              <Text className="text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>
-                {item.name}
-              </Text>
-              <Text className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={1}>
-                Open to record a payment
-              </Text>
-            </View>
-          </Pressable>
-        )}
+        isFetchingNextPage={pickerIsFetchingNextPage}
+        onSelectCustomer={async (customer) => {
+          setIsCustomerPickerOpen(false);
+          await onSelectCustomer(customer.id, customer.name);
+        }}
       />
 
       {paymentContext ? (

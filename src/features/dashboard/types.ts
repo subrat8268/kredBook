@@ -23,4 +23,9 @@ export type DashboardPaymentContext = {
   initialAmount?: number;
 };
 
-export type DashboardPickerPerson = { id: string; name: string };
+export type DashboardPickerPerson = {
+  id: string;
+  name: string;
+  phone?: string;
+  balance?: number;
+};
