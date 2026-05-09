@@ -14,7 +14,16 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { Search, UserPlus, UserSearch, Users, X } from "lucide-react-native";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Animated, NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Animated,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Customer = {
@@ -65,13 +74,14 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const sheetRef = useRef<BottomSheetModal>(null);
-  const listRef = useRef<BottomSheetFlatList<Customer>>(null);
+  const listRef = useRef<any>(null);
   const [searchQueryState, setSearchQueryState] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const clearAnim = useRef(new Animated.Value(0)).current;
   const shimmerAnim = useRef(new Animated.Value(0.4)).current;
 
-  const isSearchControlled = typeof searchQueryProp === "string" && !!onSearchQueryChange;
+  const isSearchControlled =
+    typeof searchQueryProp === "string" && !!onSearchQueryChange;
   const searchQuery = isSearchControlled ? searchQueryProp : searchQueryState;
   const setSearchQuery = useCallback(
     (value: string) => {
@@ -87,7 +97,7 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
   const tokens = useMemo(() => getSheetTokens(colors), [colors]);
   const snapPoints = useMemo(() => ["85%"], []);
   const footerInset = Math.max(insets.bottom, 8);
-  const footerHeight = 52 + 12 + 12 + footerInset;
+  const footerHeight = showAddCustomer ? 52 + 12 + 12 + footerInset : 0;
 
   useEffect(() => {
     if (visible) {
@@ -115,8 +125,16 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
     if (!isLoading) return;
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(shimmerAnim, { toValue: 0.8, duration: 450, useNativeDriver: true }),
-        Animated.timing(shimmerAnim, { toValue: 0.4, duration: 450, useNativeDriver: true }),
+        Animated.timing(shimmerAnim, {
+          toValue: 0.8,
+          duration: 450,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnim, {
+          toValue: 0.4,
+          duration: 450,
+          useNativeDriver: true,
+        }),
       ]),
     );
     loop.start();
@@ -138,7 +156,8 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
 
       const aAdvance = a.balance < 0;
       const bAdvance = b.balance < 0;
-      if (aAdvance && bAdvance) return Math.abs(a.balance) - Math.abs(b.balance);
+      if (aAdvance && bAdvance)
+        return Math.abs(a.balance) - Math.abs(b.balance);
       return 0;
     });
   }, [customerList]);
@@ -147,14 +166,19 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
     const q = searchQuery.trim().toLowerCase();
     if (!q) return sortedList;
     return sortedList.filter(
-      (c) => c.name.toLowerCase().includes(q) || (c.phone || "").toLowerCase().includes(q),
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        (c.phone || "").toLowerCase().includes(q),
     );
   }, [searchQuery, sortedList]);
 
   const recents = useMemo(() => {
     if (searchQuery.trim() || !recentIds.length) return [] as Customer[];
     const byId = new Map(customerList.map((c) => [c.id, c]));
-    return recentIds.map((id) => byId.get(id)).filter(Boolean).slice(0, 5) as Customer[];
+    return recentIds
+      .map((id) => byId.get(id))
+      .filter(Boolean)
+      .slice(0, 5) as Customer[];
   }, [customerList, recentIds, searchQuery]);
 
   const handleClosePress = useCallback(() => {
@@ -168,7 +192,9 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
       setTimeout(() => {
         const name = prefillName?.trim();
         if (name) {
-          router.push(`/(main)/people/create?name=${encodeURIComponent(name)}` as never);
+          router.push(
+            `/(main)/people/create?name=${encodeURIComponent(name)}` as never,
+          );
           return;
         }
         router.push("/(main)/people/create" as never);
@@ -203,41 +229,68 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => handleAddNew()}
-              style={[styles.footerButton, { backgroundColor: colors.primaryDark }]}
+              style={[
+                styles.footerButton,
+                { backgroundColor: colors.primaryDark },
+              ]}
             >
-              <UserPlus size={18} color={colors.surface} style={styles.footerIcon} />
-              <Text style={[styles.footerText, { color: colors.surface }]}>Add New Customer</Text>
+              <UserPlus
+                size={18}
+                color={colors.surface}
+                style={styles.footerIcon}
+              />
+              <Text style={[styles.footerText, { color: colors.surface }]}>
+                Add New Customer
+              </Text>
             </TouchableOpacity>
           ) : null}
         </View>
       </BottomSheetFooter>
     ),
-    [colors.background, colors.border, colors.primaryDark, colors.surface, footerInset, handleAddNew, showAddCustomer],
+    [
+      colors.background,
+      colors.border,
+      colors.primaryDark,
+      colors.surface,
+      footerInset,
+      handleAddNew,
+      showAddCustomer,
+    ],
   );
 
-  const debugScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (!__DEV__) return;
-    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
-    const maxOffsetY = Math.max(contentSize.height - layoutMeasurement.height, 0);
-    const distanceToBottom = Math.max(maxOffsetY - contentOffset.y, 0);
-    if (distanceToBottom < 24) {
-      console.log("[CustomerPickerSheet] reached bottom", {
-        y: Math.round(contentOffset.y),
-        maxY: Math.round(maxOffsetY),
-        contentH: Math.round(contentSize.height),
-        viewportH: Math.round(layoutMeasurement.height),
-      });
-    }
-  }, []);
+  const debugScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (!__DEV__) return;
+      const { contentOffset, contentSize, layoutMeasurement } =
+        event.nativeEvent;
+      const maxOffsetY = Math.max(
+        contentSize.height - layoutMeasurement.height,
+        0,
+      );
+      const distanceToBottom = Math.max(maxOffsetY - contentOffset.y, 0);
+      if (distanceToBottom < 24) {
+        console.log("[CustomerPickerSheet] reached bottom", {
+          y: Math.round(contentOffset.y),
+          maxY: Math.round(maxOffsetY),
+          contentH: Math.round(contentSize.height),
+          viewportH: Math.round(layoutMeasurement.height),
+        });
+      }
+    },
+    [],
+  );
 
-  const debugContentSize = useCallback((width: number, height: number) => {
-    if (!__DEV__) return;
-    console.log("[CustomerPickerSheet] content size", {
-      w: Math.round(width),
-      h: Math.round(height),
-      rows: filtered.length,
-    });
-  }, [filtered.length]);
+  const debugContentSize = useCallback(
+    (width: number, height: number) => {
+      if (!__DEV__) return;
+      console.log("[CustomerPickerSheet] content size", {
+        w: Math.round(width),
+        h: Math.round(height),
+        rows: filtered.length,
+      });
+    },
+    [filtered.length],
+  );
 
   const renderRow = useCallback(
     ({ item }: { item: Customer }) => {
@@ -258,20 +311,38 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
             },
           ]}
         >
-          <CustomerAvatar name={item.name} size={tokens.avatarSize} selected={selected} />
+          <CustomerAvatar
+            name={item.name}
+            size={tokens.avatarSize}
+            selected={selected}
+          />
 
           <View style={styles.rowMainContent}>
-            <Text numberOfLines={1} style={[styles.rowTitle, { color: colors.textPrimary }]}>
+            <Text
+              numberOfLines={1}
+              style={[styles.rowTitle, { color: colors.textPrimary }]}
+            >
               {item.name}
             </Text>
             {balanceLabel ? (
               <View
                 style={[
                   styles.badge,
-                  { backgroundColor: due ? `${colors.warning}1A` : `${colors.success}1A` },
+                  {
+                    backgroundColor: due
+                      ? `${colors.warning}1A`
+                      : `${colors.success}1A`,
+                  },
                 ]}
               >
-                <Text style={{ fontSize: 11, color: due ? colors.warning : colors.success }}>{balanceLabel}</Text>
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: due ? colors.warning : colors.success,
+                  }}
+                >
+                  {balanceLabel}
+                </Text>
               </View>
             ) : (
               <View style={styles.badgeSpacer} />
@@ -280,7 +351,15 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
 
           {selected ? (
             <View style={styles.selectedWrap}>
-              <Text style={[styles.selectedText, { color: colors.primary, backgroundColor: `${colors.primary}15` }]}>
+              <Text
+                style={[
+                  styles.selectedText,
+                  {
+                    color: colors.primary,
+                    backgroundColor: `${colors.primary}15`,
+                  },
+                ]}
+              >
                 SELECTED
               </Text>
             </View>
@@ -290,10 +369,16 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
                 style={{
                   fontSize: 16,
                   fontWeight: item.balance === 0 ? "500" : "700",
-                  color: due ? colors.warning : advance ? colors.success : colors.textMuted,
+                  color: due
+                    ? colors.warning
+                    : advance
+                      ? colors.success
+                      : colors.textMuted,
                 }}
               >
-                {formatINR(Math.abs(item.balance), { maximumFractionDigits: 0 })}
+                {formatINR(Math.abs(item.balance), {
+                  maximumFractionDigits: 0,
+                })}
               </Text>
             </View>
           )}
@@ -331,7 +416,9 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
       <>
         {!searchQuery.trim() && recents.length > 0 ? (
           <View style={{ marginTop: 10 }}>
-            <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>FREQUENT</Text>
+            <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
+              FREQUENT
+            </Text>
 
             <ScrollView
               horizontal
@@ -346,17 +433,30 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
                   style={[
                     styles.recentChip,
                     {
-                      backgroundColor: selectedCustomerId === customer.id ? `${colors.primary}15` : colors.surface,
-                      borderColor: selectedCustomerId === customer.id ? colors.primary : colors.border,
+                      backgroundColor:
+                        selectedCustomerId === customer.id
+                          ? `${colors.primary}15`
+                          : colors.surface,
+                      borderColor:
+                        selectedCustomerId === customer.id
+                          ? colors.primary
+                          : colors.border,
                     },
                   ]}
                 >
-                  <CustomerAvatar name={customer.name} size={28} selected={selectedCustomerId === customer.id} />
+                  <CustomerAvatar
+                    name={customer.name}
+                    size={28}
+                    selected={selectedCustomerId === customer.id}
+                  />
                   <Text
                     numberOfLines={1}
                     style={{
                       fontSize: 14,
-                      color: selectedCustomerId === customer.id ? colors.primary : colors.textPrimary,
+                      color:
+                        selectedCustomerId === customer.id
+                          ? colors.primary
+                          : colors.textPrimary,
                       fontWeight: "600",
                       maxWidth: 140,
                     }}
@@ -367,13 +467,23 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
               ))}
             </ScrollView>
 
-            <View style={[styles.recentsSeparator, { backgroundColor: colors.border }]} />
+            <View
+              style={[
+                styles.recentsSeparator,
+                { backgroundColor: colors.border },
+              ]}
+            />
           </View>
         ) : null}
 
-          <Text style={[styles.sectionLabelAll, { color: colors.textMuted, marginTop: recents.length ? 16 : 14 }]}> 
-            ALL CUSTOMERS
-          </Text>
+        <Text
+          style={[
+            styles.sectionLabelAll,
+            { color: colors.textMuted, marginTop: recents.length ? 16 : 14 },
+          ]}
+        >
+          ALL CUSTOMERS
+        </Text>
       </>
     ),
     [
@@ -394,12 +504,21 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
       searchQuery.trim() ? (
         <View style={styles.emptyWrap}>
           <UserSearch size={40} color={colors.textMuted} />
-          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No one named &apos;{searchQuery}&apos;</Text>
+          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>
+            No one named &apos;{searchQuery}&apos;
+          </Text>
           {showAddCustomer ? (
             <>
-              <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>Add them as a new customer?</Text>
-              <TouchableOpacity activeOpacity={0.7} onPress={() => handleAddNew(searchQuery)}>
-                <Text style={[styles.emptyAction, { color: colors.primary }]}>Add {searchQuery}</Text>
+              <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
+                Add them as a new customer?
+              </Text>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handleAddNew(searchQuery)}
+              >
+                <Text style={[styles.emptyAction, { color: colors.primary }]}>
+                  Add {searchQuery}
+                </Text>
               </TouchableOpacity>
             </>
           ) : null}
@@ -407,22 +526,46 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
       ) : (
         <View style={styles.emptyWrapNoData}>
           <Users size={48} color={colors.textMuted} />
-          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No customers yet</Text>
+          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>
+            No customers yet
+          </Text>
           {showAddCustomer ? (
             <>
-              <Text style={[styles.emptySubtitleCenter, { color: colors.textMuted }]}>Add your first customer to start recording entries</Text>
+              <Text
+                style={[
+                  styles.emptySubtitleCenter,
+                  { color: colors.textMuted },
+                ]}
+              >
+                Add your first customer to start recording entries
+              </Text>
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() => handleAddNew()}
-                style={[styles.emptyPrimaryButton, { backgroundColor: colors.primary }]}
+                style={[
+                  styles.emptyPrimaryButton,
+                  { backgroundColor: colors.primary },
+                ]}
               >
-                <Text style={[styles.emptyPrimaryText, { color: colors.surface }]}>Add Customer</Text>
+                <Text
+                  style={[styles.emptyPrimaryText, { color: colors.surface }]}
+                >
+                  Add Customer
+                </Text>
               </TouchableOpacity>
             </>
           ) : null}
         </View>
       ),
-    [colors.primary, colors.surface, colors.textMuted, colors.textPrimary, handleAddNew, searchQuery, showAddCustomer],
+    [
+      colors.primary,
+      colors.surface,
+      colors.textMuted,
+      colors.textPrimary,
+      handleAddNew,
+      searchQuery,
+      showAddCustomer,
+    ],
   );
 
   if (!visible) return null;
@@ -436,13 +579,19 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
       enablePanDownToClose
       onDismiss={onClose}
       backdropComponent={(props) => (
-        <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} opacity={0.4} pressBehavior="close" />
+        <BottomSheetBackdrop
+          {...props}
+          appearsOnIndex={0}
+          disappearsOnIndex={-1}
+          opacity={0.4}
+          pressBehavior="close"
+        />
       )}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
       handleStyle={styles.handleStyle}
-      footerComponent={renderFooter}
+      footerComponent={showAddCustomer ? renderFooter : undefined}
       handleIndicatorStyle={{
         backgroundColor: tokens.handleColor,
         width: tokens.handleWidth,
@@ -460,9 +609,20 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
       }}
     >
       <View style={styles.container}>
-        <View style={{ paddingTop: tokens.headerPaddingTop, paddingHorizontal: tokens.headerPaddingHorizontal }}>
+        <View
+          style={{
+            paddingTop: tokens.headerPaddingTop,
+            paddingHorizontal: tokens.headerPaddingHorizontal,
+          }}
+        >
           <View style={styles.headerRow}>
-            <Text style={{ fontSize: tokens.headerTitleSize, fontWeight: tokens.headerTitleWeight, color: colors.textPrimary }}>
+            <Text
+              style={{
+                fontSize: tokens.headerTitleSize,
+                fontWeight: tokens.headerTitleWeight,
+                color: colors.textPrimary,
+              }}
+            >
               {title}
             </Text>
             <TouchableOpacity
@@ -487,7 +647,9 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
                 borderRadius: tokens.searchBorderRadius,
                 backgroundColor: tokens.searchBackground,
                 borderWidth: searchFocused ? 1.5 : 0,
-                borderColor: searchFocused ? `${colors.primary}66` : "transparent",
+                borderColor: searchFocused
+                  ? `${colors.primary}66`
+                  : "transparent",
               },
             ]}
           >
@@ -515,9 +677,14 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => setSearchQuery("")}
-                  style={[styles.clearSearchButton, { backgroundColor: colors.border }]}
+                  style={[
+                    styles.clearSearchButton,
+                    { backgroundColor: colors.border },
+                  ]}
                 >
-                  <Text style={{ color: colors.textMuted, fontWeight: "700" }}>x</Text>
+                  <Text style={{ color: colors.textMuted, fontWeight: "700" }}>
+                    x
+                  </Text>
                 </TouchableOpacity>
               ) : null}
             </Animated.View>
@@ -527,12 +694,33 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
         {isLoading ? (
           <View style={styles.skeletonWrap}>
             {[0, 1, 2].map((idx) => (
-              <Animated.View key={String(idx)} style={[styles.skeletonRow, { opacity: shimmerAnim, height: tokens.rowHeight }]}>
-                <View style={[styles.skeletonAvatar, { backgroundColor: colors.border }]} />
+              <Animated.View
+                key={String(idx)}
+                style={[
+                  styles.skeletonRow,
+                  { opacity: shimmerAnim, height: tokens.rowHeight },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.skeletonAvatar,
+                    { backgroundColor: colors.border },
+                  ]}
+                />
                 <View style={styles.skeletonGap} />
                 <View style={styles.skeletonBody}>
-                  <View style={[styles.skeletonLineOne, { backgroundColor: colors.border }]} />
-                  <View style={[styles.skeletonLineTwo, { backgroundColor: colors.border }]} />
+                  <View
+                    style={[
+                      styles.skeletonLineOne,
+                      { backgroundColor: colors.border },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.skeletonLineTwo,
+                      { backgroundColor: colors.border },
+                    ]}
+                  />
                 </View>
               </Animated.View>
             ))}
@@ -548,16 +736,20 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
             showsVerticalScrollIndicator
             onEndReached={onEndReached}
             onEndReachedThreshold={0.3}
-            onScroll={debugScroll}
-            scrollEventThrottle={16}
             onContentSizeChange={debugContentSize}
-            contentContainerStyle={{ paddingBottom: footerHeight + 16 }}
+            contentContainerStyle={{
+              paddingBottom: showAddCustomer
+                ? footerHeight + 16
+                : Math.max(insets.bottom, 16),
+            }}
             ListHeaderComponent={listHeader}
             ListEmptyComponent={listEmpty}
             ListFooterComponent={
               isFetchingNextPage ? (
                 <View style={styles.loaderWrap}>
-                  <Text style={{ color: colors.textMuted, fontSize: 12 }}>Loading more...</Text>
+                  <Text style={{ color: colors.textMuted, fontSize: 12 }}>
+                    Loading more...
+                  </Text>
                 </View>
               ) : (
                 <View style={styles.listFooterSpacer} />
@@ -574,7 +766,11 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   handleStyle: { paddingTop: 8 },
   list: { flex: 1 },
-  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   closeButton: {
     width: 32,
     height: 32,
@@ -646,8 +842,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   recentsSeparator: { height: 1, marginHorizontal: 20 },
-  emptyWrap: { alignItems: "center", paddingHorizontal: 20, paddingVertical: 24 },
-  emptyWrapNoData: { alignItems: "center", paddingHorizontal: 20, paddingVertical: 28 },
+  emptyWrap: {
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+  },
+  emptyWrapNoData: {
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 28,
+  },
   emptyTitle: { marginTop: 10, fontWeight: "600" },
   emptySubtitle: { marginTop: 4 },
   emptySubtitleCenter: { marginTop: 4, textAlign: "center" },
@@ -660,8 +864,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyPrimaryText: { fontWeight: "700" },
+  loaderWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+  },
   skeletonWrap: { paddingTop: 10 },
-  skeletonRow: { paddingHorizontal: 20, flexDirection: "row", alignItems: "center" },
+  skeletonRow: {
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   skeletonAvatar: { width: 44, height: 44, borderRadius: 22 },
   skeletonGap: { width: 16 },
   skeletonBody: { flex: 1 },

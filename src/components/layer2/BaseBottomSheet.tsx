@@ -1,6 +1,7 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
 import {
   BottomSheetBackdrop,
+  BottomSheetFooterProps,
   BottomSheetModal,
   BottomSheetScrollView,
   BottomSheetView,
@@ -25,7 +26,7 @@ type Props = {
   title?: string;
   snapPoints?: string[];
   children: React.ReactNode;
-  footer?: React.ReactNode;
+  footer?: (props: BottomSheetFooterProps) => React.ReactNode;
   withScroll?: boolean;
   contentContainerStyle?: StyleProp<ViewStyle>;
 };
@@ -117,7 +118,6 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomS
         </View>
       ) : null}
       {children}
-      {footer}
     </>
   );
 
@@ -131,8 +131,10 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomS
       onChange={(index) => {
         if (index === -1) onClose();
       }}
+      footerComponent={footer}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
+      android_keyboardInputMode="adjustResize"
       handleIndicatorStyle={styles.indicator}
       backgroundStyle={styles.background}
     >
