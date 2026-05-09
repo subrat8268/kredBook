@@ -53,7 +53,8 @@ export default function RecordPaymentResult({
         <Text className="mt-1 text-center" style={[typography.caption, { color: colors.textSecondary }]}>{subtitle}</Text>
       </View>
 
-      <View className="mt-4 rounded-2xl border p-4" style={{ borderColor: colors.border, backgroundColor: colors.background }}>
+      <View className="mt-4 rounded-2xl border p-4" style={{ borderColor: colors.border, backgroundColor: colors.surface }}>
+        <Text style={[typography.caption, { color: colors.textSecondary, marginBottom: spacing.sm }]}>Payment receipt</Text>
         <View className="flex-row items-center justify-between">
           <Text style={[typography.caption, { color: colors.textSecondary }]}>Customer</Text>
           <Text style={[typography.body, { color: colors.textPrimary, fontWeight: "600" }]}>{customerName}</Text>

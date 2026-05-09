@@ -1,10 +1,12 @@
 import { useRecordPayment } from "@/src/hooks/usePayments";
 import { useAuthStore } from "@/src/store/authStore";
+import { backspaceNumpadInput, handleNumpadInput, type NumpadKey } from "@/src/utils/numpad";
 import { buildPaymentShareMessage } from "@/src/utils/shareTemplates";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Alert, Share } from "react-native";
 
 export type PaymentMode = "Cash" | "UPI" | "NEFT" | "Draft" | "Cheque";
+export type PaymentIntent = "full" | "partial";
 export type ModalStage = "form" | "confirmed" | "queued";
 
 const MODES: PaymentMode[] = ["Cash", "UPI", "NEFT", "Draft", "Cheque"];
@@ -16,6 +18,11 @@ function sanitizeAmountInput(raw: string) {
   if (rest.length === 0) return intPart;
   const decPart = rest.join("").slice(0, 2);
   return `${intPart}.${decPart}`;
+}
+
+function resolveInitialIntent(balanceDue: number, initialAmount?: number): PaymentIntent {
+  if (!initialAmount || initialAmount <= 0) return "full";
+  return initialAmount >= balanceDue ? "full" : "partial";
 }
 
 function parseAmount(value: string) {
@@ -50,6 +57,9 @@ export function useRecordCustomerPaymentModal({
   const { recordPayment, isRecording } = useRecordPayment(orderId, profile?.id, customerId);
 
   const [amount, setAmount] = useState(String(initialAmount ?? balanceDue));
+  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent>(
+    resolveInitialIntent(balanceDue, initialAmount),
+  );
   const [mode, setMode] = useState<PaymentMode>("Cash");
   const [notes, setNotes] = useState("");
   const [stage, setStage] = useState<ModalStage>("form");
@@ -79,6 +89,7 @@ export function useRecordCustomerPaymentModal({
 
   const reset = useCallback(() => {
     setAmount(String(initialAmount ?? balanceDue));
+    setPaymentIntent(resolveInitialIntent(balanceDue, initialAmount));
     setMode("Cash");
     setNotes("");
     setStage("form");
@@ -89,12 +100,39 @@ export function useRecordCustomerPaymentModal({
   }, [balanceDue, initialAmount]);
 
   const setAmountSanitized = useCallback((value: string) => {
-    setAmount(sanitizeAmountInput(value));
+    const next = sanitizeAmountInput(value);
+    setAmount(next);
+    if (next.length > 0) {
+      setPaymentIntent("partial");
+    }
   }, []);
 
   const quickSetAmount = useCallback((next: number) => {
     const safe = Math.max(0, Number(next) || 0);
     setAmount(safe === 0 ? "" : String(Number(safe.toFixed(2))));
+    setPaymentIntent(safe >= effectiveBalance ? "full" : "partial");
+  }, [effectiveBalance]);
+
+  const selectFullPayment = useCallback(() => {
+    setPaymentIntent("full");
+    setAmount(String(Number(effectiveBalance.toFixed(2))));
+  }, [effectiveBalance]);
+
+  const selectPartialPayment = useCallback(() => {
+    setPaymentIntent("partial");
+    if (amount === String(Number(effectiveBalance.toFixed(2)))) {
+      setAmount("");
+    }
+  }, [amount, effectiveBalance]);
+
+  const appendAmountKey = useCallback((key: Exclude<NumpadKey, "⌫">) => {
+    setPaymentIntent("partial");
+    setAmount((prev) => handleNumpadInput(prev, key));
+  }, []);
+
+  const backspaceAmount = useCallback(() => {
+    setPaymentIntent("partial");
+    setAmount((prev) => backspaceNumpadInput(prev));
   }, []);
 
   const submit = useCallback(async () => {
@@ -149,6 +187,7 @@ export function useRecordCustomerPaymentModal({
       amount,
       mode,
       notes,
+      paymentIntent,
       stage,
       parsedAmount,
       isFullPaid,
@@ -166,6 +205,10 @@ export function useRecordCustomerPaymentModal({
       setNotes,
       setAmountSanitized,
       quickSetAmount,
+      selectFullPayment,
+      selectPartialPayment,
+      appendAmountKey,
+      backspaceAmount,
       submit,
       shareReceipt,
       reset,
@@ -175,6 +218,7 @@ export function useRecordCustomerPaymentModal({
       amount,
       mode,
       notes,
+      paymentIntent,
       stage,
       parsedAmount,
       isFullPaid,
@@ -190,6 +234,10 @@ export function useRecordCustomerPaymentModal({
       lastRemainingBalance,
       setAmountSanitized,
       quickSetAmount,
+      selectFullPayment,
+      selectPartialPayment,
+      appendAmountKey,
+      backspaceAmount,
       submit,
       shareReceipt,
       reset,

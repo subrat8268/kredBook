@@ -29,6 +29,7 @@ type Props = {
   footer?: (props: BottomSheetFooterProps) => React.ReactNode;
   withScroll?: boolean;
   contentContainerStyle?: StyleProp<ViewStyle>;
+  enableDynamicSizing?: boolean;
 };
 
 const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomSheet(
@@ -41,6 +42,7 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomS
     footer,
     withScroll = true,
     contentContainerStyle,
+    enableDynamicSizing = true,
   },
   ref,
 ) {
@@ -126,6 +128,7 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomS
       ref={modalRef}
       index={0}
       snapPoints={resolvedSnapPoints}
+      enableDynamicSizing={enableDynamicSizing}
       backdropComponent={renderBackdrop}
       onDismiss={onClose}
       onChange={(index) => {

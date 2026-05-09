@@ -97,6 +97,7 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
           onDismiss?.();
         }}
         snapPoints={["90%"]}
+        enableDynamicSizing={false}
         footer={vm.stage === "form" ? renderFormFooter : undefined}
         withScroll
       >
@@ -105,17 +106,18 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
             <RecordPaymentForm
               customerName={customerName}
               amount={vm.amount}
-              amountError={vm.amountError}
               effectiveBalance={vm.effectiveBalance}
               hasBalance={vm.hasBalance}
               isFullPaid={vm.isFullPaid}
               remainingBalance={vm.remainingBalance}
+              paymentIntent={vm.paymentIntent}
               mode={vm.mode}
               modes={vm.modes}
               notes={vm.notes}
-              onAmountChange={vm.setAmountSanitized}
-              onQuickAmount={vm.quickSetAmount}
-              onClearAmount={() => vm.quickSetAmount(0)}
+              onSelectFull={vm.selectFullPayment}
+              onSelectPartial={vm.selectPartialPayment}
+              onAppendAmountKey={vm.appendAmountKey}
+              onBackspaceAmount={vm.backspaceAmount}
               onModeChange={vm.setMode}
               onNotesChange={vm.setNotes}
             />

@@ -13,6 +13,7 @@ import { usePeople } from "@/src/hooks/usePeople";
 import { useAuthStore } from "@/src/store/authStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
+import { handleNumpadInput } from "@/src/utils/numpad";
 import { getRecentCustomerIds, prependRecentCustomer } from "@/src/utils/recentCustomers";
 import { buildEntryShareMessage } from "@/src/utils/shareTemplates";
 import { useQueryClient } from "@tanstack/react-query";
@@ -71,33 +72,6 @@ function formatChipDate(dateStr?: string) {
   if (!dateStr) return "Custom";
   const d = new Date(dateStr);
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
-}
-
-// A3: Numpad input guard
-function handleNumpadInput(current: string, key: string): string {
-  if (key === "0" && current === "") return "0";
-  if (key === ".") {
-    if (current === "") return "0.";
-    if (current.includes(".")) return current;
-    return `${current}.`;
-  }
-  
-  // Handle decimal digits - max 2 decimal places
-  if (current.includes(".")) {
-    const [, decimals] = current.split(".");
-    if (decimals.length >= 2) return current;
-  }
-  
-  // Strip leading zeros from whole number part
-  let newValue = `${current}${key}`;
-  if (!newValue.includes(".")) {
-    const num = parseInt(newValue, 10);
-    if (num === 0 && newValue.length > 1) {
-      newValue = newValue.replace(/^0+/, "");
-    }
-  }
-  
-  return newValue || "0";
 }
 
 export default function CreateOrderScreen() {
@@ -881,12 +855,12 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                           className="flex-1 items-center justify-center border border-border"
                           style={{ borderRadius: 14, height: 72 }}
                           activeOpacity={0.75}
-                          onPress={() => {
-                            if (key === "⌫") {
-                              setQuickAmount((prev) => prev.slice(0, -1));
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                              return;
-                            }
+                            onPress={() => {
+                              if (key === "⌫") {
+                                setQuickAmount((prev) => handleNumpadInput(prev, "⌫"));
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                return;
+                              }
                             setQuickAmount((prev) => handleNumpadInput(prev, key));
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           }}
@@ -1121,7 +1095,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                             activeOpacity={0.75}
                             onPress={() => {
                               if (key === "⌫") {
-                                setItemRateInput((prev) => prev.slice(0, -1));
+                                setItemRateInput((prev) => handleNumpadInput(prev, "⌫"));
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                                 return;
                               }
