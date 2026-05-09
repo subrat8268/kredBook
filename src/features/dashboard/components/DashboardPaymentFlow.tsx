@@ -88,7 +88,9 @@ export default function DashboardPaymentFlow({
             className="flex-row items-center rounded-xl border border-soft bg-surface px-4 py-3 dark:border-border-soft-dark dark:bg-surface-dark"
             onPress={() => {
               setIsCustomerPickerOpen(false);
-              onSelectCustomer(item.id, item.name);
+              setTimeout(() => {
+                onSelectCustomer(item.id, item.name);
+              }, 0);
             }}
           >
             <Avatar name={item.name} size="sm" />

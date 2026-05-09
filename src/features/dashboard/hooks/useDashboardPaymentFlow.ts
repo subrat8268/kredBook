@@ -42,7 +42,6 @@ export function useDashboardPaymentFlow({
         }
 
         setPaymentContext(context);
-        paymentSheetRef.current?.present();
       } catch {
         showToast({ message: "Could not open collection flow.", type: "error" });
       } finally {

@@ -16,6 +16,7 @@ import {
   useRef,
 } from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = {
   visible?: boolean;
@@ -42,6 +43,7 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomS
   ref,
 ) {
   const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const modalRef = useRef<BottomSheetModal>(null);
   const resolvedSnapPoints = useMemo(() => snapPoints ?? ["90%"], [snapPoints]);
   const styles = useMemo(
@@ -58,7 +60,8 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomS
         },
         content: {
           paddingHorizontal: spacing.screenPadding,
-          paddingBottom: spacing["3xl"],
+          // Keep CTA above Android navigation / safe area.
+          paddingBottom: spacing["3xl"] + insets.bottom,
         },
         header: {
           flexDirection: "row",
@@ -76,7 +79,7 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomS
           padding: spacing.xs,
         },
       }),
-    [colors, spacing],
+    [colors, insets.bottom, spacing],
   );
 
   useImperativeHandle(ref, () => modalRef.current as BottomSheetModal, []);

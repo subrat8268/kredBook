@@ -63,6 +63,15 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
       customerId,
     );
 
+    // Present the sheet as soon as it mounts — the component that owns the sheet controls its presentation.
+    useEffect(() => {
+      if (!ref || typeof ref === "function") return;
+      const timer = setTimeout(() => {
+        ref.current?.present();
+      }, 0);
+      return () => clearTimeout(timer);
+    }, [ref]);
+
     // Sync default amount when balanceDue changes (e.g. parent rerenders or loads)
     useEffect(() => {
       setAmount(String(initialAmount ?? balanceDue));
