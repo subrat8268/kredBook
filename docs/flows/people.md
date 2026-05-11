@@ -65,6 +65,41 @@ The **People** screen is the customer list view — where shopkeepers manage Cus
 └─────────────────────────────────────────────┘
 ```
 
+## Reference Layout States
+
+#### Default list
+
+```text
+People                               [Add Person]
+[Search people...]
+
+- Ankit Shah           ₹12,400   PENDING
+- Priya Patel           ₹5,000   OVERDUE  [Call] [WhatsApp]
+- Amit Kumar               ₹0    PAID
+```
+
+#### Inline add expanded
+
+```text
+People                               [Add Person]
+[Search people...]
+
+ADD PERSON
+[Name input]
+[Phone input]
+[Add Person]
+```
+
+#### Empty state
+
+```text
+People                               [Add Person]
+[Search people...]
+
+No customers yet
+Add your first customer to get started.
+```
+
 ---
 
 ## Component Specifications

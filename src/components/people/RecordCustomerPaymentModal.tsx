@@ -137,6 +137,7 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
                     ? "Mark Fully Paid"
                     : "Record Payment"
               }
+              size="lg"
               onPress={vm.submit}
               loading={vm.isRecording}
               disabled={!vm.canSubmit}

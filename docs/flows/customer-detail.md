@@ -76,6 +76,58 @@ Ignored on purpose (outdated / out of scope):
 └─────────────────────────────────────────────┘
 ```
 
+## Reference Layout States
+
+#### Default (All tab)
+
+```text
+[←] Ankit Shah                     [PDF] [Call]
+
+┌────────────────────────────────────┐
+│ TOTAL BALANCE DUE        [OVERDUE] │
+│ ₹25,000                            │
+│ Last entry: 15 Jan                 │
+└────────────────────────────────────┘
+
+[Add Entry] [Record Payment]
+[Share] [Quick Pay ₹2k]
+
+[All] [Entries] [Payments]
+- Entry #001       ₹5,000
+- Payment         -₹2,000
+```
+
+#### Payments tab selected
+
+```text
+[←] Ankit Shah                     [PDF] [Call]
+
+┌────────────────────────────────────┐
+│ TOTAL BALANCE DUE        [OVERDUE] │
+│ ₹25,000                            │
+└────────────────────────────────────┘
+
+[Add Entry] [Record Payment]
+
+[All] [Entries] [Payments*]
+- Payment         -₹2,000
+- Payment         -₹1,500
+```
+
+#### Cleared balance state
+
+```text
+[←] Ankit Shah                     [PDF] [Call]
+
+┌────────────────────────────────────┐
+│ NO OUTSTANDING BALANCE             │
+│ ₹0                                 │
+│ Status: Cleared                    │
+└────────────────────────────────────┘
+
+[Add Entry] [Record Payment (muted)]
+```
+
 ---
 
 ## Component Specifications

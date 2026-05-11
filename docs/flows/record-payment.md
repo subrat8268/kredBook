@@ -47,6 +47,8 @@ Owns all local modal state and handlers:
 
 ### Reference Layout (Checkout Sheet)
 
+#### Full Payment (default)
+
 ```text
 [AS] Ankit Shah                         X
 Balance due: ₹12,400
@@ -67,6 +69,54 @@ PAYMENT MODE
 + Add note
 
 [✓ Mark Fully Paid]
+```
+
+#### Partial Payment (empty amount)
+
+```text
+[AS] Ankit Shah                         X
+Balance due: ₹12,400
+
+┌────────────────────────────────────┐
+│        AMOUNT RECEIVED             │
+│              0                     │
+│                                    │
+│   [ Full Payment ] [ Partial ]     │
+└────────────────────────────────────┘
+
+• Enter amount received
+
+PAYMENT MODE
+[Cash] [UPI]
+[Bank] [Cheque]
+
++ Add note
+
+[Record Payment] (disabled)
+```
+
+#### Partial Payment (valid amount)
+
+```text
+[AS] Ankit Shah                         X
+Balance due: ₹12,400
+
+┌────────────────────────────────────┐
+│        AMOUNT RECEIVED             │
+│            ₹4,000                  │
+│                                    │
+│   [ Full Payment ] [ Partial ]     │
+└────────────────────────────────────┘
+
+• Remaining ₹8,400 after payment
+
+PAYMENT MODE
+[Cash] [UPI]
+[Bank] [Cheque]
+
++ Add note
+
+[Record Payment]
 ```
 
 - Customer-led header shows avatar, customer name, and current balance due.

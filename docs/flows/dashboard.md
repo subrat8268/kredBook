@@ -67,6 +67,52 @@ What changed vs previous dashboard attempt:
 - Loading: shows `Loader` (“Loading dashboard...”).
 - No overdue Customers: shows “Nothing needs action now”.
 
+## Reference Layout States
+
+#### Default (overdue exists)
+
+```text
+[KB] KredBook                            [People]
+Good evening
+
+┌────────────────────────────────────┐
+│ TOTAL OUTSTANDING                   │
+│ ₹1,24,000                           │
+│ [Collect Now] [View Customers]      │
+└────────────────────────────────────┘
+
+[Needs action now] [Collected this week]
+
+PRIORITY CUSTOMERS
+- Ankit Shah          ₹12,400   [Collect]
+- Mohit Traders       ₹9,800    [Collect]
+```
+
+#### No Overdue (collect fallback)
+
+```text
+[KB] KredBook                            [People]
+Good evening
+
+┌────────────────────────────────────┐
+│ TOTAL OUTSTANDING                   │
+│ ₹1,24,000                           │
+│ [Collect Now] [View Customers]      │
+└────────────────────────────────────┘
+
+Nothing needs action now
+Collect Now -> opens customer picker
+```
+
+#### Loading
+
+```text
+Loading dashboard...
+[Hero skeleton]
+[Stats skeleton]
+[List skeleton]
+```
+
 ## Notes / Gotchas
 
 - Dashboard header currently uses a bell-style icon as a shortcut into People; treat it as navigation, not a notifications product surface.

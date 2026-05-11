@@ -79,6 +79,44 @@ The **Entry Detail** screen shows a single entry's full details — items, summa
 └─────────────────────────────────────────────┘
 ```
 
+## Reference Layout States
+
+#### Pending entry
+
+```text
+[←] Entry #INV-001                 [Edit] [Share]
+
+┌────────────────────────────────────┐
+│ TOTAL AMOUNT                       │
+│ ₹25,000                            │
+│ [PENDING]                          │
+└────────────────────────────────────┘
+
+[Send Entry] [Record Payment]
+```
+
+#### Paid entry
+
+```text
+[←] Entry #INV-001                        [Share]
+
+┌────────────────────────────────────┐
+│ TOTAL AMOUNT                       │
+│ ₹25,000                            │
+│ [PAID]                             │
+└────────────────────────────────────┘
+
+[Send Entry] [Record Payment]
+```
+
+#### No payments history yet
+
+```text
+PAYMENTS
+No payments recorded yet.
+Tap Record Payment to add first payment.
+```
+
 ---
 
 ## Component Specifications

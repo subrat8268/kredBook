@@ -49,6 +49,39 @@ The **Export** screen allows users to download a CSV backup of all their data. I
 └─────────────────────────────────────────────┘
 ```
 
+## Reference Layout States
+
+#### Default
+
+```text
+[←] Backup & Download
+Export all your entries
+
+DOWNLOAD
+[Download CSV Backup]
+Exports all your entries (entries, customers, payments).
+
+[i] Your data is never shared.
+Files are saved only to your device.
+```
+
+#### Download in progress
+
+```text
+[←] Backup & Download
+
+DOWNLOAD
+[Download CSV Backup] (loading)
+```
+
+#### Export error (if generation fails)
+
+```text
+[Error] Could not generate export file.
+Try again.
+[Download CSV Backup]
+```
+
 ---
 
 ## Component Specifications

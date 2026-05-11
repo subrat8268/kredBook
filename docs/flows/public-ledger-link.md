@@ -25,6 +25,30 @@ Implementation note: the public view uses transitional “vendor/customer” ter
    - balance summary
    - transaction history (Entry-like “Sale” rows and Payment rows)
 
+## Reference Layout States
+
+#### Shared ledger view (valid token)
+
+```text
+Business Name
+Customer Ledger (read-only)
+
+Balance summary
+Outstanding: ₹12,400
+
+Transactions
+- Entry   +₹5,000
+- Payment -₹2,000
+```
+
+#### Invalid or expired token
+
+```text
+Link unavailable
+This ledger link is invalid or expired.
+Please ask the business to share a new link.
+```
+
 ## What the recipient can and cannot do
 
 Can:

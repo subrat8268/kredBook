@@ -61,6 +61,48 @@ The **Sign Up** screen is for new users to create an account. It's where new use
 └─────────────────────────────────────────────┘
 ```
 
+## Reference Layout States
+
+#### Default
+
+```text
+[←]
+Create Account
+Set up your CreditBook in 2 minutes
+
+Full Name
+[________________]
+Email Address
+[________________]
+Password
+[________________] [👁]
+Confirm Password
+[________________] [👁]
+
+[Create Account]
+-------- or --------
+[Continue with Google]
+
+Already have an account? Log In
+```
+
+#### Password mismatch
+
+```text
+Confirm Password
+[________________] [👁]
+
+[Error] Passwords do not match.
+[Create Account] (disabled)
+```
+
+#### Loading create account
+
+```text
+[Create Account] (loading)
+Inputs disabled until response.
+```
+
 ---
 
 ## Component Specifications

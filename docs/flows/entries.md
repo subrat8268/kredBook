@@ -57,6 +57,44 @@ The **Entries** screen is the central ledger — showing all entries across all 
 └─────────────────────────────────────────────┘
 ```
 
+## Reference Layout States
+
+#### Default (All)
+
+```text
+Entries
+[All*] [Paid] [Pending] [Overdue]
+[Search entry or customer...]
+
+- Ankit Shah        ₹12,400   PENDING
+- Priya Traders      ₹5,000   PAID
+- Mohit Stores      ₹18,900   OVERDUE
+
+[+]
+```
+
+#### Overdue filter selected
+
+```text
+Entries
+[All] [Paid] [Pending] [Overdue*]
+[Search entry or customer...]
+
+- Mohit Stores      ₹18,900   OVERDUE
+- Kiran Retail       ₹7,200   OVERDUE
+```
+
+#### Empty search result
+
+```text
+Entries
+[All*] [Paid] [Pending] [Overdue]
+[Search: "xyz"]
+
+No entries found
+Try another customer name or bill number.
+```
+
 ---
 
 ## Component Specifications

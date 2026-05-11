@@ -81,6 +81,46 @@ The **Profile** screen is the settings and account management screen. It's where
 └─────────────────────────────────────────────┘
 ```
 
+## Reference Layout States
+
+#### Default
+
+```text
+[←] Profile & Settings
+
+[Avatar]
+KredBook Traders
+owner@example.com
+[Edit Profile]
+
+BUSINESS DETAILS
+- Name
+- GSTIN
+- Prefix
+- UPI
+
+DATA
+- Export All Data
+
+[Sign Out]
+```
+
+#### Language switched
+
+```text
+[←] Profile & Settings
+
+APP PREFERENCES
+Language: [EN] [Hindi*]
+```
+
+#### Sign out confirm
+
+```text
+Sign out of KredBook?
+[Cancel] [Sign Out]
+```
+
 ---
 
 ## Component Specifications

@@ -25,6 +25,32 @@ Sign Up/Phone Setup → business.tsx (Step 1) → bank.tsx (Step 2) → ready.ts
 
 ## Screen 1: Business Setup (Step 1 of 2)
 
+### Reference Layout States
+
+#### Default (collapsed advanced settings)
+
+```text
+[←]
+Step 1 of 2
+[████████░░]
+
+Set up your business
+[Business Name *]
+
+Advanced Settings (optional) [▼]
+
+[Continue]
+[Skip for now]
+```
+
+#### Advanced settings expanded
+
+```text
+Advanced Settings (optional) [▲]
+[GSTIN]
+[Invoice Prefix]
+```
+
 ### Layout
 
 ```
@@ -72,6 +98,25 @@ Sign Up/Phone Setup → business.tsx (Step 1) → bank.tsx (Step 2) → ready.ts
 ---
 
 ## Screen 2: Bank Setup (Step 2 of 2)
+
+### Reference Layout States
+
+#### Default
+
+```text
+[←]
+Step 2 of 2
+[████████████]
+
+Bank & Payment Info
+[UPI ID]
+[Bank Name]
+[Account Number]
+[IFSC]
+
+[Continue]
+[Skip for now]
+```
 
 ### Layout
 
@@ -127,6 +172,18 @@ Sign Up/Phone Setup → business.tsx (Step 1) → bank.tsx (Step 2) → ready.ts
 ---
 
 ## Screen 3: Ready (Completion)
+
+### Reference Layout States
+
+#### Completion
+
+```text
+[Success Illustration]
+You're all set!
+
+KredBook is ready.
+[Add Your First Customer]
+```
 
 ### Layout
 

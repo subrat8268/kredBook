@@ -77,6 +77,52 @@ Use **Customer** as the product noun here. Current UI still shows some `Person`/
 └─────────────────────────────────────────────┘
 ```
 
+## Reference Layout States
+
+#### Entry mode (default)
+
+```text
+[←] Add Entry                     [Sync] [INV]
+
+Customer: Select Customer
+Amount: ₹0
+
+[Entry] [Payment]
+
+Note (optional)
+
+[Save & Share]
+```
+
+#### Payment mode selected
+
+```text
+[←] Add Entry                     [Sync] [PAY]
+
+Customer: Ankit Shah
+Outstanding: ₹12,400
+
+[Entry] [Payment*]
+Amount received: ₹4,000
+
+Remaining after payment: ₹8,400
+
+[Record Payment]
+```
+
+#### Disabled submit state
+
+```text
+[←] Add Entry                     [Sync] [INV]
+
+Customer: Select Customer
+Amount: ₹0
+
+[Entry] [Payment]
+
+[Save & Share] (disabled)
+```
+
 ---
 
 ## Component Specifications

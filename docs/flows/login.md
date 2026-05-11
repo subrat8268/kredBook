@@ -58,6 +58,49 @@ The **Login** screen is the entry point for returning users. It's the first scre
 └─────────────────────────────────────────────┘
 ```
 
+## Reference Layout States
+
+#### Default
+
+```text
+[←]
+Welcome Back
+Sign in to your kredBook
+
+Email Address
+[________________]
+
+Password
+[________________] [👁]
+
+[Forgot password?]
+[Sign In]
+-------- or --------
+[Continue with Google]
+
+New to KredBook? Sign Up
+```
+
+#### Invalid credentials
+
+```text
+[Error] Invalid email or password.
+
+Email Address
+[________________]
+Password
+[________________] [👁]
+
+[Sign In]
+```
+
+#### Loading submit
+
+```text
+[Sign In] (loading)
+Inputs disabled until response.
+```
+
 ---
 
 ## Component Specifications
