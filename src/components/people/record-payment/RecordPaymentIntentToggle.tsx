@@ -12,36 +12,48 @@ export default function RecordPaymentIntentToggle({ paymentIntent, onSelectFull,
   const { colors, spacing, radius, typography } = useTheme();
 
   return (
-    <View className="flex-row" style={{ gap: spacing.xs, marginBottom: spacing.xs }}>
+    <View
+      className="flex-row"
+      style={{
+        gap: spacing.xs,
+        borderRadius: radius.full,
+        padding: 4,
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.borderLight,
+      }}
+    >
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={onSelectFull}
         style={{
-          flex: 1,
           borderRadius: radius.full,
-          borderWidth: 1,
-          borderColor: paymentIntent === "full" ? colors.success : colors.border,
-          backgroundColor: paymentIntent === "full" ? colors.successBg : colors.surfaceAlt,
-          paddingVertical: spacing.xs,
+          borderWidth: paymentIntent === "full" ? 1 : 0,
+          borderColor: colors.primary,
+          backgroundColor: paymentIntent === "full" ? colors.primaryLight : "transparent",
+          paddingHorizontal: spacing.md,
+          paddingVertical: 6,
           alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <Text style={[typography.caption, { color: paymentIntent === "full" ? colors.successDark : colors.textSecondary, fontWeight: "700" }]}>Full payment</Text>
+        <Text style={[typography.caption, { color: paymentIntent === "full" ? colors.primaryDark : colors.textSecondary, fontWeight: "700" }]}>Full Payment</Text>
       </TouchableOpacity>
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={onSelectPartial}
         style={{
-          flex: 1,
           borderRadius: radius.full,
-          borderWidth: 1,
-          borderColor: paymentIntent === "partial" ? colors.success : colors.border,
-          backgroundColor: paymentIntent === "partial" ? colors.successBg : colors.surfaceAlt,
-          paddingVertical: spacing.xs,
+          borderWidth: paymentIntent === "partial" ? 1 : 0,
+          borderColor: colors.primary,
+          backgroundColor: paymentIntent === "partial" ? colors.primaryLight : "transparent",
+          paddingHorizontal: spacing.md,
+          paddingVertical: 6,
           alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <Text style={[typography.caption, { color: paymentIntent === "partial" ? colors.successDark : colors.textSecondary, fontWeight: "700" }]}>Partial</Text>
+        <Text style={[typography.caption, { color: paymentIntent === "partial" ? colors.primaryDark : colors.textSecondary, fontWeight: "700" }]}>Partial</Text>
       </TouchableOpacity>
     </View>
   );

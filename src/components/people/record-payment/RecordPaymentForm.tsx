@@ -1,78 +1,169 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
-import PaymentContextCard from "./PaymentContextCard";
-import PaymentSheetHeader from "./PaymentSheetHeader";
 import RecordPaymentAmountConsole from "./RecordPaymentAmountConsole";
-import RecordPaymentIntentToggle from "./RecordPaymentIntentToggle";
+import { formatINR } from "@/src/utils/format";
+import { useTheme } from "@/src/utils/ThemeProvider";
 import RecordPaymentModeChips from "./RecordPaymentModeChips";
-import RecordPaymentNotesDisclosure from "./RecordPaymentNotesDisclosure";
-import RecordPaymentNumpad from "./RecordPaymentNumpad";
-import type { PaymentIntent, PaymentMode } from "./useRecordCustomerPaymentModal";
-import { View } from "react-native";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import Avatar from "@/src/components/ui/Avatar";
+import { ChevronDown, ChevronUp, X } from "lucide-react-native";
+import type {
+	PaymentIntent,
+	PaymentMode,
+} from "./useRecordCustomerPaymentModal";
+import { useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 
 type Props = {
-  customerName: string;
-  amount: string;
-  effectiveBalance: number;
-  hasBalance: boolean;
-  isFullPaid: boolean;
-  remainingBalance: number;
-  paymentIntent: PaymentIntent;
-  mode: PaymentMode;
-  modes: PaymentMode[];
-  notes: string;
-  onSelectFull: () => void;
-  onSelectPartial: () => void;
-  onAppendAmountKey: (value: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | ".") => void;
-  onBackspaceAmount: () => void;
-  onModeChange: (mode: PaymentMode) => void;
-  onNotesChange: (value: string) => void;
+	customerName: string;
+	onClose: () => void;
+	amount: string;
+	effectiveBalance: number;
+	hasBalance: boolean;
+	isFullPaid: boolean;
+	remainingBalance: number;
+	paymentIntent: PaymentIntent;
+	mode: PaymentMode;
+	modes: PaymentMode[];
+	notes: string;
+	amountError?: string;
+	onSelectFull: () => void;
+	onSelectPartial: () => void;
+	onAmountChange: (value: string) => void;
+	onPartialInputFocus?: () => void;
+	onModeChange: (mode: PaymentMode) => void;
+	onNotesChange: (value: string) => void;
 };
 
 export default function RecordPaymentForm({
-  customerName,
-  amount,
-  effectiveBalance,
-  hasBalance,
-  isFullPaid,
-  remainingBalance,
-  paymentIntent,
-  mode,
-  modes,
-  notes,
-  onSelectFull,
-  onSelectPartial,
-  onAppendAmountKey,
-  onBackspaceAmount,
-  onModeChange,
-  onNotesChange,
+	customerName,
+	onClose,
+	amount,
+	effectiveBalance,
+	hasBalance,
+	isFullPaid,
+	remainingBalance,
+	paymentIntent,
+	mode,
+	modes,
+	notes,
+	amountError,
+	onSelectFull,
+	onSelectPartial,
+	onAmountChange,
+	onPartialInputFocus,
+	onModeChange,
+	onNotesChange,
 }: Props) {
-  const { spacing } = useTheme();
+	const { spacing, colors, radius, typography } = useTheme();
+	const [notesExpanded, setNotesExpanded] = useState(false);
 
-  return (
-    <>
-      <PaymentSheetHeader customerName={customerName} />
-      <PaymentContextCard customerName={customerName} effectiveBalance={effectiveBalance} />
+	useEffect(() => {
+		if (!notes.trim()) setNotesExpanded(false);
+	}, [notes]);
 
-      <RecordPaymentAmountConsole
-        amount={amount}
-        hasBalance={hasBalance}
-        isFullPaid={isFullPaid}
-        remainingBalance={remainingBalance}
-      />
+	return (
+		<>
+			<View className="flex-row items-center justify-between mb-4">
+				<View className="flex-row items-center">
+					<Avatar name={customerName} size="sm" />
+					<View style={{ marginLeft: spacing.sm }}>
+						<Text
+							style={[
+								typography.body,
+								{ color: colors.textPrimary, fontWeight: "700" },
+							]}
+						>
+							{customerName}
+						</Text>
+						<Text style={[typography.caption, { color: colors.textSecondary }]}>
+							Balance due: {formatINR(effectiveBalance)}
+						</Text>
+					</View>
+				</View>
 
-      <RecordPaymentIntentToggle
-        paymentIntent={paymentIntent}
-        onSelectFull={onSelectFull}
-        onSelectPartial={onSelectPartial}
-      />
+				<Pressable
+					onPress={onClose}
+					style={{
+						width: 32,
+						height: 32,
+						borderRadius: radius.full,
+						alignItems: "center",
+						justifyContent: "center",
+						backgroundColor: colors.surfaceAlt,
+					}}
+				>
+					<X size={16} color={colors.textSecondary} strokeWidth={2.4} />
+				</Pressable>
+			</View>
 
-      <RecordPaymentNumpad onAppendKey={onAppendAmountKey} onBackspace={onBackspaceAmount} />
+			<RecordPaymentAmountConsole
+				amount={amount}
+				hasBalance={hasBalance}
+				isFullPaid={isFullPaid}
+				remainingBalance={remainingBalance}
+				paymentIntent={paymentIntent}
+				onSelectFull={onSelectFull}
+				onSelectPartial={onSelectPartial}
+				onAmountChange={onAmountChange}
+				onPartialInputFocus={onPartialInputFocus}
+				amountError={amountError}
+			/>
 
-      <RecordPaymentModeChips mode={mode} modes={modes} onModeChange={onModeChange} />
+			<RecordPaymentModeChips
+				mode={mode}
+				modes={modes}
+				onModeChange={onModeChange}
+			/>
+			<Pressable
+				onPress={() => setNotesExpanded((prev) => !prev)}
+				className="flex-row items-center"
+				style={{ gap: spacing.xs, marginBottom: spacing.sm }}
+			>
+				<Text
+					style={[
+						typography.caption,
+						{ color: colors.textSecondary, fontWeight: "700" },
+					]}
+				>
+					Note (optional)
+				</Text>
+				{notesExpanded ? (
+					<ChevronUp size={14} color={colors.textSecondary} strokeWidth={2.4} />
+				) : (
+					<ChevronDown
+						size={14}
+						color={colors.textSecondary}
+						strokeWidth={2.4}
+					/>
+				)}
+			</Pressable>
 
-      <RecordPaymentNotesDisclosure notes={notes} onNotesChange={onNotesChange} />
-
-      <View style={{ height: spacing.sm }} />
-    </>
-  );
+			<View
+				style={{
+					borderWidth: 1,
+					borderColor: colors.borderLight,
+					borderRadius: radius.lg,
+					backgroundColor: colors.surfaceAlt,
+					paddingHorizontal: spacing.sm,
+					paddingVertical: spacing.xs,
+				}}
+			>
+				<BottomSheetTextInput
+					value={notes}
+					onChangeText={onNotesChange}
+					placeholder="Write a note about this payment..."
+					placeholderTextColor={colors.textSecondary}
+					multiline
+					numberOfLines={3}
+					style={{
+						color: colors.textPrimary,
+						minHeight: 50,
+						textAlignVertical: "top",
+						paddingTop: spacing.xs,
+						paddingBottom: spacing.xs,
+						fontFamily: typography.fontFamilies.regular,
+					}}
+				/>
+			</View>
+		</>
+	);
 }

@@ -1,15 +1,14 @@
 import { useRecordPayment } from "@/src/hooks/usePayments";
 import { useAuthStore } from "@/src/store/authStore";
-import { backspaceNumpadInput, handleNumpadInput, type NumpadKey } from "@/src/utils/numpad";
 import { buildPaymentShareMessage } from "@/src/utils/shareTemplates";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Alert, Share } from "react-native";
 
-export type PaymentMode = "Cash" | "UPI" | "NEFT" | "Draft" | "Cheque";
+export type PaymentMode = "Cash" | "UPI" | "NEFT" | "Cheque";
 export type PaymentIntent = "full" | "partial";
 export type ModalStage = "form" | "confirmed" | "queued";
 
-const MODES: PaymentMode[] = ["Cash", "UPI", "NEFT", "Draft", "Cheque"];
+const MODES: PaymentMode[] = ["Cash", "UPI", "NEFT", "Cheque"];
 
 function sanitizeAmountInput(raw: string) {
   const cleaned = raw.replace(/[^0-9.]/g, "");
@@ -62,6 +61,9 @@ export function useRecordCustomerPaymentModal({
   );
   const [mode, setMode] = useState<PaymentMode>("Cash");
   const [notes, setNotes] = useState("");
+  const [lastPartialAmount, setLastPartialAmount] = useState("");
+  const [amountTouched, setAmountTouched] = useState(false);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [stage, setStage] = useState<ModalStage>("form");
   const [lastPaidAmount, setLastPaidAmount] = useState(0);
   const [lastRemainingBalance, setLastRemainingBalance] = useState(0);
@@ -81,62 +83,67 @@ export function useRecordCustomerPaymentModal({
       ? undefined
       : !hasBalance
         ? undefined
-        : amount.length === 0 || amount === "."
-          ? "Enter amount received"
-          : parsedAmount === null
-            ? "Enter a valid amount"
-            : undefined;
+        : paymentIntent !== "partial"
+          ? undefined
+          : !amountTouched && !hasAttemptedSubmit
+            ? undefined
+            : amount.length === 0 || amount === "."
+              ? "Enter amount received"
+              : parsedAmount === null
+                ? "Enter a valid amount"
+                : undefined;
 
   const reset = useCallback(() => {
     setAmount(String(initialAmount ?? balanceDue));
     setPaymentIntent(resolveInitialIntent(balanceDue, initialAmount));
     setMode("Cash");
     setNotes("");
+    setLastPartialAmount(
+      initialAmount && initialAmount > 0 && initialAmount < balanceDue
+        ? String(Number(initialAmount.toFixed(2)))
+        : "",
+    );
     setStage("form");
     setLastPaidAmount(0);
     setLastRemainingBalance(0);
     setIsSharingReceipt(false);
+    setAmountTouched(false);
+    setHasAttemptedSubmit(false);
     hasNotifiedSuccessRef.current = false;
   }, [balanceDue, initialAmount]);
 
   const setAmountSanitized = useCallback((value: string) => {
     const next = sanitizeAmountInput(value);
     setAmount(next);
-    if (next.length > 0) {
-      setPaymentIntent("partial");
-    }
+    setPaymentIntent("partial");
+    setLastPartialAmount(next);
+    setAmountTouched(true);
   }, []);
-
-  const quickSetAmount = useCallback((next: number) => {
-    const safe = Math.max(0, Number(next) || 0);
-    setAmount(safe === 0 ? "" : String(Number(safe.toFixed(2))));
-    setPaymentIntent(safe >= effectiveBalance ? "full" : "partial");
-  }, [effectiveBalance]);
 
   const selectFullPayment = useCallback(() => {
+    if (paymentIntent === "partial") {
+      setLastPartialAmount(amount);
+    }
     setPaymentIntent("full");
     setAmount(String(Number(effectiveBalance.toFixed(2))));
-  }, [effectiveBalance]);
+    setHasAttemptedSubmit(false);
+  }, [amount, effectiveBalance, paymentIntent]);
 
   const selectPartialPayment = useCallback(() => {
+    const fullAmount = String(Number(effectiveBalance.toFixed(2)));
     setPaymentIntent("partial");
-    if (amount === String(Number(effectiveBalance.toFixed(2)))) {
-      setAmount("");
+    if (amount === fullAmount) {
+      setAmount(lastPartialAmount || "");
     }
-  }, [amount, effectiveBalance]);
-
-  const appendAmountKey = useCallback((key: Exclude<NumpadKey, "⌫">) => {
-    setPaymentIntent("partial");
-    setAmount((prev) => handleNumpadInput(prev, key));
-  }, []);
-
-  const backspaceAmount = useCallback(() => {
-    setPaymentIntent("partial");
-    setAmount((prev) => backspaceNumpadInput(prev));
-  }, []);
+    setAmountTouched(Boolean(lastPartialAmount));
+    setHasAttemptedSubmit(false);
+  }, [amount, effectiveBalance, lastPartialAmount]);
 
   const submit = useCallback(async () => {
-    if (!hasBalance || stage !== "form" || isRecording || payAmount <= 0) return;
+    if (!hasBalance || stage !== "form" || isRecording || payAmount <= 0) {
+      setHasAttemptedSubmit(true);
+      return;
+    }
 
     try {
       const result = await recordPayment({
@@ -204,11 +211,8 @@ export function useRecordCustomerPaymentModal({
       setMode,
       setNotes,
       setAmountSanitized,
-      quickSetAmount,
       selectFullPayment,
       selectPartialPayment,
-      appendAmountKey,
-      backspaceAmount,
       submit,
       shareReceipt,
       reset,
@@ -233,11 +237,8 @@ export function useRecordCustomerPaymentModal({
       lastPaidAmount,
       lastRemainingBalance,
       setAmountSanitized,
-      quickSetAmount,
       selectFullPayment,
       selectPartialPayment,
-      appendAmountKey,
-      backspaceAmount,
       submit,
       shareReceipt,
       reset,

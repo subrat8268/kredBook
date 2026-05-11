@@ -1,19 +1,48 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
-import { CheckCircle2 } from "lucide-react-native";
+import { useEffect, useRef } from "react";
 import { Text, View } from "react-native";
+import BalanceStatusPill from "@/src/components/ui/BalanceStatusPill";
+import RecordPaymentIntentToggle from "./RecordPaymentIntentToggle";
+import type { PaymentIntent } from "./useRecordCustomerPaymentModal";
 
 type Props = {
   amount: string;
   hasBalance: boolean;
   isFullPaid: boolean;
   remainingBalance: number;
+  paymentIntent: PaymentIntent;
+  onSelectFull: () => void;
+  onSelectPartial: () => void;
+  onAmountChange: (value: string) => void;
+  onPartialInputFocus?: () => void;
+  amountError?: string;
 };
 
-export default function RecordPaymentAmountConsole({ amount, hasBalance, isFullPaid, remainingBalance }: Props) {
+export default function RecordPaymentAmountConsole({
+  amount,
+  hasBalance,
+  isFullPaid,
+  remainingBalance,
+  paymentIntent,
+  onSelectFull,
+  onSelectPartial,
+  onAmountChange,
+  onPartialInputFocus,
+  amountError,
+}: Props) {
   const { colors, spacing, radius, typography } = useTheme();
   const numeric = Number(amount || "0");
+  const amountInputRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (paymentIntent !== "partial") return;
+    const timer = setTimeout(() => amountInputRef.current?.focus(), 250);
+    return () => clearTimeout(timer);
+  }, [paymentIntent]);
+
 
   return (
     <View
@@ -48,43 +77,64 @@ export default function RecordPaymentAmountConsole({ amount, hasBalance, isFullP
         }}
       />
 
-      <Text style={[typography.caption, { color: colors.textSecondary, marginBottom: spacing.xs }]}>Amount Received</Text>
-      <Text
-        selectable
-        style={[
-          typography.h2,
-          {
-            color: numeric > 0 ? colors.textPrimary : colors.textMuted,
-            fontWeight: "800",
-            fontVariant: ["tabular-nums"],
-            letterSpacing: -0.3,
-          },
-        ]}
-      >
-        {formatINR(numeric, { maximumFractionDigits: 2 })}
-      </Text>
+      <Text style={[typography.caption, { color: colors.textSecondary, textAlign: "center", marginBottom: spacing.xs }]}>AMOUNT RECEIVED</Text>
 
-      <View className="mt-2 flex-row items-center" style={{ gap: spacing.xs }}>
-        {isFullPaid ? <CheckCircle2 size={14} color={colors.success} strokeWidth={2.4} /> : null}
-        <View
-          style={{
-            borderRadius: radius.full,
-            backgroundColor: isFullPaid ? colors.successBg : colors.surface,
-            borderWidth: isFullPaid ? 0 : 1,
-            borderColor: colors.borderLight,
-            paddingHorizontal: spacing.sm,
-            paddingVertical: 4,
-          }}
+      {paymentIntent === "partial" ? (
+        <BottomSheetTextInput
+          ref={amountInputRef}
+          value={amount}
+          onChangeText={onAmountChange}
+          onFocus={onPartialInputFocus}
+          placeholder="0"
+          placeholderTextColor={colors.textMuted}
+          keyboardType="decimal-pad"
+          style={[
+            typography.h2,
+            {
+              color: amount.length ? colors.textPrimary : colors.textMuted,
+              fontWeight: "800",
+              fontVariant: ["tabular-nums"],
+              letterSpacing: -0.3,
+              paddingVertical: 0,
+              textAlign: "center",
+            },
+          ]}
+        />
+      ) : (
+        <Text
+          selectable
+          style={[
+            typography.h2,
+            {
+              color: numeric > 0 ? colors.textPrimary : colors.textMuted,
+              fontWeight: "800",
+              fontVariant: ["tabular-nums"],
+              letterSpacing: -0.3,
+              textAlign: "center",
+            },
+          ]}
         >
-          {!hasBalance ? (
-            <Text style={[typography.caption, { color: colors.textSecondary }]}>No balance due</Text>
-          ) : isFullPaid ? (
-            <Text style={[typography.caption, { color: colors.successDark, fontWeight: "700" }]}>Fully paid</Text>
-          ) : (
-            <Text style={[typography.caption, { color: colors.textSecondary }]}>Remaining {formatINR(remainingBalance)}</Text>
-          )}
-        </View>
+          {formatINR(numeric, { maximumFractionDigits: 2 })}
+        </Text>
+      )}
+
+      <View className="items-center" style={{ marginTop: spacing.sm }}>
+        <RecordPaymentIntentToggle
+          paymentIntent={paymentIntent}
+          onSelectFull={onSelectFull}
+          onSelectPartial={onSelectPartial}
+        />
       </View>
+
+      <View className="mt-2 flex-row items-center justify-center" style={{ gap: spacing.xs }}>
+        <BalanceStatusPill
+          state={!hasBalance ? "noBalance" : isFullPaid ? "fullyPaid" : "remaining"}
+          remainingAmount={remainingBalance}
+        />
+      </View>
+      {paymentIntent === "partial" && amountError ? (
+        <Text style={[typography.caption, { color: colors.danger, marginTop: spacing.xs }]}>{amountError}</Text>
+      ) : null}
     </View>
   );
 }

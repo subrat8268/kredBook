@@ -30,6 +30,7 @@ type Props = {
   withScroll?: boolean;
   contentContainerStyle?: StyleProp<ViewStyle>;
   enableDynamicSizing?: boolean;
+  maxDynamicContentSize?: number;
 };
 
 const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomSheet(
@@ -43,13 +44,18 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomS
     withScroll = true,
     contentContainerStyle,
     enableDynamicSizing = true,
+    maxDynamicContentSize,
   },
   ref,
 ) {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const modalRef = useRef<BottomSheetModal>(null);
-  const resolvedSnapPoints = useMemo(() => snapPoints ?? ["90%"], [snapPoints]);
+  const resolvedSnapPoints = useMemo(() => {
+    if (snapPoints) return snapPoints;
+    if (enableDynamicSizing) return ["CONTENT_HEIGHT"];
+    return ["90%"];
+  }, [enableDynamicSizing, snapPoints]);
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -129,6 +135,7 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(function BaseBottomS
       index={0}
       snapPoints={resolvedSnapPoints}
       enableDynamicSizing={enableDynamicSizing}
+      maxDynamicContentSize={maxDynamicContentSize}
       backdropComponent={renderBackdrop}
       onDismiss={onClose}
       onChange={(index) => {

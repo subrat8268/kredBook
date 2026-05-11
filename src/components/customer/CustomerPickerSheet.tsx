@@ -258,40 +258,6 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
     ],
   );
 
-  const debugScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (!__DEV__) return;
-      const { contentOffset, contentSize, layoutMeasurement } =
-        event.nativeEvent;
-      const maxOffsetY = Math.max(
-        contentSize.height - layoutMeasurement.height,
-        0,
-      );
-      const distanceToBottom = Math.max(maxOffsetY - contentOffset.y, 0);
-      if (distanceToBottom < 24) {
-        console.log("[CustomerPickerSheet] reached bottom", {
-          y: Math.round(contentOffset.y),
-          maxY: Math.round(maxOffsetY),
-          contentH: Math.round(contentSize.height),
-          viewportH: Math.round(layoutMeasurement.height),
-        });
-      }
-    },
-    [],
-  );
-
-  const debugContentSize = useCallback(
-    (width: number, height: number) => {
-      if (!__DEV__) return;
-      console.log("[CustomerPickerSheet] content size", {
-        w: Math.round(width),
-        h: Math.round(height),
-        rows: filtered.length,
-      });
-    },
-    [filtered.length],
-  );
-
   const renderRow = useCallback(
     ({ item }: { item: Customer }) => {
       const selected = selectedCustomerId === item.id;
@@ -736,7 +702,6 @@ const CustomerPickerSheet = memo(function CustomerPickerSheet({
             showsVerticalScrollIndicator
             onEndReached={onEndReached}
             onEndReachedThreshold={0.3}
-            onContentSizeChange={debugContentSize}
             contentContainerStyle={{
               paddingBottom: showAddCustomer
                 ? footerHeight + 16
