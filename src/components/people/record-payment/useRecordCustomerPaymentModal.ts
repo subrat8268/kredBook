@@ -73,10 +73,24 @@ export function useRecordCustomerPaymentModal({
   const parsedAmount = parseAmount(amount);
   const effectiveBalance = balanceDue;
   const hasBalance = effectiveBalance > 0;
+  const isPartialOverpay =
+    paymentIntent === "partial" &&
+    parsedAmount !== null &&
+    parsedAmount > effectiveBalance;
   const isFullPaid = hasBalance && (parsedAmount ?? 0) >= effectiveBalance;
-  const payAmount = !hasBalance ? 0 : isFullPaid ? effectiveBalance : parsedAmount ?? 0;
+  const payAmount =
+    !hasBalance || isPartialOverpay
+      ? 0
+      : isFullPaid
+        ? effectiveBalance
+        : parsedAmount ?? 0;
   const remainingBalance = Math.max(0, effectiveBalance - (parsedAmount ?? 0));
-  const canSubmit = !isRecording && stage === "form" && hasBalance && payAmount > 0;
+  const canSubmit =
+    !isRecording &&
+    stage === "form" &&
+    hasBalance &&
+    payAmount > 0 &&
+    !isPartialOverpay;
 
   const amountError =
     stage !== "form"

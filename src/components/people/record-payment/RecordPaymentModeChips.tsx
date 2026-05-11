@@ -65,7 +65,7 @@ export default function RecordPaymentModeChips({ mode, modes, onModeChange }: Pr
                 borderWidth: 1,
                 borderColor: selected ? colors.primary : colors.borderLight,
                 backgroundColor: selected ? colors.primaryLight : colors.surfaceAlt,
-                minHeight: 68,
+                minHeight: 80,
                 paddingHorizontal: spacing.sm,
                 paddingVertical: spacing.xs,
               }}

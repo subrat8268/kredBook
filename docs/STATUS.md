@@ -184,7 +184,8 @@
 | 4.1.3d | Create Entry screenshot audit fixes — header toggle cleanup, duplicate total removal, custom chip state, share CTA polish, spacing, and numpad compliance | 🔄 In Progress | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max`, `code-reviewer` | `(main)/entries/create.tsx`, `BillFooter.tsx` |
 | 4.1.3e | Customer picker redesign — compact rows, recents, balance-first hierarchy, default due-first selection UX | ✅ Done | P0 | `/build` | `react-native-skills`, `ui-ux-pro-max` | `CustomerPickerSheet.tsx`, `(main)/entries/create.tsx`, `recentCustomers.ts` |
 | **4.1.4** | **Record Payment modal redesign — large numpad, partial toggle, payment method chips, WhatsApp receipt** | **🔄 In Progress** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
-| 4.1.4a | Record Payment payment-console form pass — shared numpad util, stable sheet sizing, intent toggle, compact chips, collapsed notes | 🔄 In Progress | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills`, `code-reviewer` | `RecordPaymentModal` (shared), `src/utils/numpad.ts` |
+| 4.1.4a | Record Payment payment-console form pass — shared numpad util, stable sheet sizing, intent toggle, compact chips, collapsed notes | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills`, `code-reviewer` | `RecordPaymentModal` (shared), `src/utils/numpad.ts` |
+| 4.1.4b | Record Payment result/receipt polish — confirmed + queued premium receipt states and CTA hierarchy | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `code-reviewer`, `verification-before-completion` | `RecordPaymentResult.tsx`, `docs/flows/record-payment.md` |
 | **4.1.5** | **Customer Detail redesign — hero card, sticky balance bar, entry timeline, swipe actions, one-tap Collect** | **⏳ Not Started** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
 
 ### Phase 4.2 — List + Detail Screens
