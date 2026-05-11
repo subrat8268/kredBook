@@ -16,23 +16,30 @@ export default function PaymentContextCard({ customerName, effectiveBalance }: P
       className="flex-row items-center"
       style={{
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.borderLight,
         backgroundColor: colors.surface,
         borderRadius: radius.lg,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        marginBottom: spacing.md,
+        paddingHorizontal: spacing.sm,
+        paddingVertical: spacing.xs,
+        marginBottom: spacing.sm,
       }}
     >
-      <View style={{ marginRight: spacing.md }}>
-        <Avatar name={customerName} size="md" />
+      <View style={{ marginRight: spacing.sm }}>
+        <Avatar name={customerName} size="sm" />
       </View>
       <View className="flex-1" style={{ gap: spacing.xs }}>
-        <Text style={[typography.cardTitle, { color: colors.textPrimary }]}>{customerName}</Text>
-        <View className="flex-row items-center" style={{ gap: spacing.xs }}>
-          <Text style={[typography.caption, { color: colors.textSecondary }]}>Outstanding</Text>
-          <MoneyAmount value={effectiveBalance} color={colors.danger} style={[typography.caption, { fontWeight: "700" }]} />
-        </View>
+        <Text style={[typography.caption, { color: colors.textSecondary }]}>Collecting from</Text>
+        <Text style={[typography.body, { color: colors.textPrimary, fontWeight: "700" }]}>{customerName}</Text>
+      </View>
+      <View
+        style={{
+          borderRadius: radius.full,
+          backgroundColor: colors.warningBg,
+          paddingHorizontal: spacing.sm,
+          paddingVertical: spacing.xs,
+        }}
+      >
+        <MoneyAmount value={effectiveBalance} color={colors.dangerStrong} style={[typography.caption, { fontWeight: "700" }]} />
       </View>
     </View>
   );

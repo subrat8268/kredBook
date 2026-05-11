@@ -12,7 +12,7 @@ export default function RecordPaymentIntentToggle({ paymentIntent, onSelectFull,
   const { colors, spacing, radius, typography } = useTheme();
 
   return (
-    <View className="flex-row" style={{ gap: spacing.sm, marginBottom: spacing.sm }}>
+    <View className="flex-row" style={{ gap: spacing.xs, marginBottom: spacing.xs }}>
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={onSelectFull}
@@ -21,8 +21,8 @@ export default function RecordPaymentIntentToggle({ paymentIntent, onSelectFull,
           borderRadius: radius.full,
           borderWidth: 1,
           borderColor: paymentIntent === "full" ? colors.success : colors.border,
-          backgroundColor: paymentIntent === "full" ? colors.successBg : colors.surface,
-          paddingVertical: spacing.sm,
+          backgroundColor: paymentIntent === "full" ? colors.successBg : colors.surfaceAlt,
+          paddingVertical: spacing.xs,
           alignItems: "center",
         }}
       >
@@ -36,8 +36,8 @@ export default function RecordPaymentIntentToggle({ paymentIntent, onSelectFull,
           borderRadius: radius.full,
           borderWidth: 1,
           borderColor: paymentIntent === "partial" ? colors.success : colors.border,
-          backgroundColor: paymentIntent === "partial" ? colors.successBg : colors.surface,
-          paddingVertical: spacing.sm,
+          backgroundColor: paymentIntent === "partial" ? colors.successBg : colors.surfaceAlt,
+          paddingVertical: spacing.xs,
           alignItems: "center",
         }}
       >

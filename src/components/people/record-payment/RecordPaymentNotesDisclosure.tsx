@@ -14,7 +14,7 @@ export default function RecordPaymentNotesDisclosure({ notes, onNotesChange }: P
   const [expanded, setExpanded] = useState(Boolean(notes.trim()));
 
   return (
-    <View style={{ marginTop: spacing.md }}>
+    <View style={{ marginTop: spacing.sm }}>
       {!expanded && !notes.trim() ? (
         <TouchableOpacity
           activeOpacity={0.75}
@@ -45,11 +45,11 @@ export default function RecordPaymentNotesDisclosure({ notes, onNotesChange }: P
             <View
               style={{
                 borderWidth: 1,
-                borderColor: colors.border,
+                borderColor: colors.borderLight,
                 borderRadius: radius.lg,
-                backgroundColor: colors.surface,
-                paddingHorizontal: spacing.md,
-                paddingVertical: spacing.sm,
+                backgroundColor: colors.surfaceAlt,
+                paddingHorizontal: spacing.sm,
+                paddingVertical: spacing.xs,
               }}
             >
               <BottomSheetTextInput

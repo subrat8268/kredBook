@@ -1,7 +1,11 @@
 import BaseBottomSheet from "@/src/components/layer2/BaseBottomSheet";
 import Button from "@/src/components/ui/Button";
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { BottomSheetFooter, BottomSheetFooterProps, BottomSheetModal } from "@gorhom/bottom-sheet";
+import {
+  BottomSheetFooter,
+  BottomSheetFooterProps,
+  BottomSheetModal,
+} from "@gorhom/bottom-sheet";
 import { Check } from "lucide-react-native";
 import { forwardRef, useCallback, useEffect } from "react";
 import { View } from "react-native";
@@ -24,7 +28,16 @@ type Props = {
 
 const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
   (
-    { onSuccess, orderId, balanceDue, customerId, customerName, onDismiss, initialAmount, autoPresent = false },
+    {
+      onSuccess,
+      orderId,
+      balanceDue,
+      customerId,
+      customerName,
+      onDismiss,
+      initialAmount,
+      autoPresent = false,
+    },
     ref,
   ) => {
     const { colors, spacing } = useTheme();
@@ -65,28 +78,46 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
       (props: BottomSheetFooterProps) => (
         <BottomSheetFooter {...props} bottomInset={insets.bottom}>
           <View
-            className="bg-surface px-4 pt-3"
+            className="px-4 pt-3 pb-3 bg-surface"
             style={{
               shadowColor: colors.textPrimary,
               shadowOffset: { width: 0, height: -2 },
               shadowOpacity: 0.06,
               shadowRadius: 8,
               elevation: 6,
-              paddingBottom: Math.max(insets.bottom, spacing.md) + spacing.md,
             }}
           >
             <Button
-              title={vm.isRecording ? "Recording..." : vm.isFullPaid ? "Mark Fully Paid" : "Record Payment"}
+              title={
+                vm.isRecording
+                  ? "Recording..."
+                  : vm.isFullPaid
+                    ? "Mark Fully Paid"
+                    : "Record Payment"
+              }
               onPress={vm.submit}
               disabled={!vm.canSubmit}
               size="lg"
               loading={vm.isRecording}
-              icon={!vm.isRecording && vm.isFullPaid ? <Check size={16} color={colors.surface} strokeWidth={3} /> : undefined}
+              icon={
+                !vm.isRecording && vm.isFullPaid ? (
+                  <Check size={16} color={colors.surface} strokeWidth={3} />
+                ) : undefined
+              }
             />
           </View>
         </BottomSheetFooter>
       ),
-      [colors.surface, colors.textPrimary, insets.bottom, spacing, vm.canSubmit, vm.isFullPaid, vm.isRecording, vm.submit],
+      [
+        colors.surface,
+        colors.textPrimary,
+        insets.bottom,
+        spacing,
+        vm.canSubmit,
+        vm.isFullPaid,
+        vm.isRecording,
+        vm.submit,
+      ],
     );
 
     return (
@@ -121,7 +152,7 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
               onModeChange={vm.setMode}
               onNotesChange={vm.setNotes}
             />
-            <View style={{ height: spacing.screenContentBottom + insets.bottom }} />
+            <View style={{ height: spacing.screenContentBottom }} />
           </>
         ) : (
           <RecordPaymentResult
