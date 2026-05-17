@@ -1,7 +1,7 @@
 # KredBook — Customer Detail Screen UX Specification
 
-> **Last Updated**: April 17, 2026
-> **Version**: v3.0 Enhanced
+> **Last Updated**: May 17, 2026
+> **Version**: v4.1.5d (final UX polish)
 
 ---
 
@@ -78,23 +78,27 @@ Ignored on purpose (outdated / out of scope):
 
 ## Reference Layout States
 
-#### Default (All tab)
+#### Default (balance due)
 
 ```text
-[←] Ankit Shah                     [PDF] [Call]
+[←] [AS] Ankit Shah                [Share] [PDF] [Call]
 
 ┌────────────────────────────────────┐
-│ TOTAL BALANCE DUE        [OVERDUE] │
+│ BALANCE DUE               [OVERDUE] │
 │ ₹25,000                            │
 │ Last entry: 15 Jan                 │
+│ Open entry due: ₹12,400            │
 └────────────────────────────────────┘
 
-[Add Entry] [Record Payment]
-[Share] [Quick Pay ₹2k]
+[Add Entry] [Reminder]
+[Share] [PDF]
 
 [All] [Entries] [Payments]
 - Entry #001       ₹5,000
 - Payment         -₹2,000
+
+[Sticky Collect Bar]
+Balance due ₹12,400   [Collect]
 ```
 
 #### Payments tab selected
@@ -107,7 +111,7 @@ Ignored on purpose (outdated / out of scope):
 │ ₹25,000                            │
 └────────────────────────────────────┘
 
-[Add Entry] [Record Payment]
+[Add Entry] [Reminder]
 
 [All] [Entries] [Payments*]
 - Payment         -₹2,000
@@ -117,15 +121,18 @@ Ignored on purpose (outdated / out of scope):
 #### Cleared balance state
 
 ```text
-[←] Ankit Shah                     [PDF] [Call]
+[←] [AS] Ankit Shah                [Share] [PDF] [Call]
 
 ┌────────────────────────────────────┐
-│ NO OUTSTANDING BALANCE             │
+│ ALL SETTLED                        │
 │ ₹0                                 │
-│ Status: Cleared                    │
+│ Status: no dues                    │
 └────────────────────────────────────┘
 
-[Add Entry] [Record Payment (muted)]
+[Add Entry] [Reminder]
+[Share] [PDF]
+
+No sticky collect bar
 ```
 
 ---
@@ -137,6 +144,7 @@ Ignored on purpose (outdated / out of scope):
 | Element | Spec |
 |---------|------|
 | Back button | 44×44dp touch target, ArrowLeft icon |
+| Identity | Avatar/initials + customer name + phone + last active |
 | Title | Customer name, 17px bold, single line |
 | Right actions | PDF (icon), Call (icon), 44dp each |
 
@@ -164,8 +172,21 @@ Ignored on purpose (outdated / out of scope):
 
 | Button | Style | Behavior |
 |--------|-------|----------|
-| Share | White with border | Share ledger via WhatsApp |
-| Quick Pay | Shows pending amount | One-tap to record payment |
+| Add Entry | Secondary action tile | Opens create entry pre-filled with customer |
+| Reminder | Secondary action tile | Sends WhatsApp reminder when phone exists |
+| Share | Secondary action tile | Opens ledger share flow |
+| PDF | Secondary action tile | Generates and shares statement PDF |
+
+### 3.1 Sticky Collect Bar
+
+Shows only when `outstandingBalance > 0` and `pendingOrderId` exists.
+
+| Element | Spec |
+|---------|------|
+| Left block | Compact `Balance due` + amount |
+| Main CTA | `Collect` (opens `RecordCustomerPaymentModal`) |
+| Secondary icon | Add Entry shortcut |
+| Position | Fixed above bottom safe area; does not cover timeline rows |
 
 ### 4. Transaction List
 

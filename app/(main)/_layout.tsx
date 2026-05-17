@@ -63,7 +63,10 @@ export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const { colors, spacing } = useTheme();
   const hideFabOnScreen =
-    pathname === "/entries/create" || pathname === "/(main)/entries/create";
+    pathname === "/entries/create" ||
+    pathname === "/(main)/entries/create" ||
+    pathname.startsWith("/people/") ||
+    pathname.startsWith("/(main)/people/");
 
   return (
     <View style={{ flex: 1 }}>

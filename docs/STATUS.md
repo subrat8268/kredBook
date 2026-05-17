@@ -37,11 +37,12 @@
 |---|---|---|
 | 🔴 P0 — NOW | **4.1.4** Record Payment modal redesign | Every "Collect" tap lands here. The money moment. Must feel like a cash register. |
 | 🔴 P0 | **4.1.5** Customer Detail redesign | Most-viewed screen after Dashboard. Balance hero + entry timeline unlocks trust. |
-| 🟠 P1 | **4.2.3** Entry Detail redesign | Audit trail screen — users need to verify amounts before collecting. |
-| 🟠 P1 | **4.2.2** Entry List redesign | Gateway to Entry Detail. |
-| 🟠 P1 | **4.2.1** Customer List redesign | Gateway to Customer Detail. |
-| 🟡 P2 | **4.3.x** Auth + Onboarding screens | First impression. Important but not blocking daily use. |
-| 🟡 P2 | **4.4.1** Profile redesign | ⚠️ Partial work already shipped (see 4.4.0 below). Align + complete. |
+| 🟠 P1 | **4.2.3a** Entry Detail audit + extraction | Audit trail — closest to money flow. Start here before lists. |
+| 🟠 P1 | **4.2.4a** Edit Entry audit + extraction | Completes the entry code health pass. |
+| 🟠 P1 | **4.2.1a** Customer List audit + extraction | Gateway to Customer Detail. |
+| 🟠 P1 | **4.2.2a** Entry List audit + extraction | Gateway to Entry Detail. |
+| 🟡 P2 | **4.3.1a** Welcome screen audit + extraction | First impression. Important but not blocking daily use. |
+| 🟡 P2 | **4.4.1a** Profile audit + extraction | ⚠️ Partial work already shipped (see 4.4.0 below). Align + complete. |
 | 🔵 Pull Forward | **5.3** UPI collect link + QR | UPI ID already in Profile. This is the highest-value Phase 5 item. Consider pulling into 4.4. |
 
 ---
@@ -138,6 +139,36 @@
 
 ## Phase 4 — UI/UX Redesign 🔄 In Progress
 
+### Mandatory Screen Redesign Routine
+
+Apply this routine to every remaining Phase 4 screen before marking it `✅ Done`.
+
+1. Functional audit
+2. Component extraction / refactor if screen is too large
+3. Premium redesign implementation
+4. Screenshot audit
+5. Bug + UX polish pass
+6. Flow verification
+7. Docs/status closeout
+
+#### Completion Criteria (Required)
+
+- `npm run lint` passes
+- Main happy path works end-to-end
+- Empty/loading/error states checked
+- Keyboard and safe-area behavior checked
+- Dark mode checked
+- Screenshots reviewed
+- No broken navigation contracts
+- Docs updated
+- Status row updated only after screenshot audit
+
+#### Phase 4 Quality Note
+
+- Dashboard is the quality benchmark.
+- No remaining Phase 4 screen should be marked `✅ Done` after only one build pass.
+- Use sub-rows like `4.x.a` refactor, `4.x.b` redesign, `4.x.c` screenshot polish when needed.
+
 ### Phase 4.0 — Design System Foundation ✅ Done
 
 > ⚠️ This block gates all other 4.x tasks. All 4.0.x are done.
@@ -186,46 +217,87 @@
 | **4.1.4** | **Record Payment modal redesign — large numpad, partial toggle, payment method chips, WhatsApp receipt** | **🔄 In Progress** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
 | 4.1.4a | Record Payment payment-console form pass — shared numpad util, stable sheet sizing, intent toggle, compact chips, collapsed notes | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills`, `code-reviewer` | `RecordPaymentModal` (shared), `src/utils/numpad.ts` |
 | 4.1.4b | Record Payment result/receipt polish — confirmed + queued premium receipt states and CTA hierarchy | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `code-reviewer`, `verification-before-completion` | `RecordPaymentResult.tsx`, `docs/flows/record-payment.md` |
-| **4.1.5** | **Customer Detail redesign — hero card, sticky balance bar, entry timeline, swipe actions, one-tap Collect** | **⏳ Not Started** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
+| **4.1.5** | **Customer Detail redesign — hero card, sticky balance bar, entry timeline, swipe actions, one-tap Collect** | **🔄 In Progress** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
+| 4.1.5a | Customer Detail refactor — extract route UI into focused customer-detail components without behavior change | ✅ Done | P0 | `/build` | `refactor-engineer`, `code-reviewer`, `verification-before-completion` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*` |
+| 4.1.5b | Customer Detail premium redesign — identity header, balance hero labels, sticky collect bar, secondary quick actions, timeline polish | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `frontend-design`, `code-reviewer` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*`, `docs/flows/customer-detail.md` |
+| 4.1.5c | Customer Detail screenshot polish — spacing, contrast, quick-action press feedback, sticky collect depth | ✅ Done | P0 | `/fix` | `ui-ux-pro-max`, `code-reviewer`, `verification-before-completion` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*` |
+| 4.1.5d | Customer Detail final UX polish — remove detail FAB overlap, simplify sticky bar, tighten timeline density/spacing | 🔄 In Progress | P0 | `/build` | `ui-ux-pro-max`, `frontend-design`, `verification-before-completion` | `app/(main)/_layout.tsx`, `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*`, `docs/flows/customer-detail.md` |
 
-### Phase 4.2 — List + Detail Screens
+### Phase 4.2 — Detail + List Screens (Audit → Redesign → Polish)
 
-> Depends On: 4.0 ✅ Done. Start after 4.1.4 + 4.1.5 are done.
+> Depends On: 4.0 ✅ Done. **Start with Entry Detail (4.2.3) — it's closest to the money/audit flow.**
+> **Each screen follows the mandatory redesign routine: audit → redesign → screenshot polish.**
+> **Order: Entry Detail → Edit Entry → Customer List → Entry List**
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
-| 4.2.1 | Customer List redesign — filter chips, swipe actions, sort options, alphabetical headers, empty state | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/index.tsx` |
-| 4.2.2 | Entry List redesign — filter chips, swipe actions, date section headers, summary banner | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/index.tsx` |
-| 4.2.3 | Entry Detail redesign — hero card, payment timeline, sticky "Record Payment" bar | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId].tsx` |
-| 4.2.4 | Edit Entry redesign — quick due-date chips, customer reassign, unsaved changes warning | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId]/edit.tsx` |
+| 4.2.3a | Entry Detail audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/entries/[orderId].tsx` |
+| 4.2.3b | Entry Detail premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId].tsx` |
+| 4.2.3c | Entry Detail screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/entries/[orderId].tsx` |
+| 4.2.4a | Edit Entry audit + extraction | ⏳ Not Started | P2 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/entries/[orderId]/edit.tsx` |
+| 4.2.4b | Edit Entry premium redesign | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId]/edit.tsx` |
+| 4.2.4c | Edit Entry screenshot polish + verification | ⏳ Not Started | P2 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/entries/[orderId]/edit.tsx` |
+| 4.2.1a | Customer List audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/people/index.tsx` |
+| 4.2.1b | Customer List premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/index.tsx` |
+| 4.2.1c | Customer List screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/people/index.tsx` |
+| 4.2.2a | Entry List audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/entries/index.tsx` |
+| 4.2.2b | Entry List premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/index.tsx` |
+| 4.2.2c | Entry List screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/entries/index.tsx` |
 
-### Phase 4.3 — Auth + Onboarding
+### Phase 4.3 — Auth + Onboarding (Audit → Redesign → Polish)
 
 > Depends On: 4.0 ✅ Done. Can run in parallel with 4.2 after 4.1 is complete.
+> **Each screen follows the mandatory redesign routine: audit → redesign → screenshot polish.**
+> **Order: Welcome → Login → Signup → Reset Password → Phone Setup → Onboarding Business → Onboarding Bank → Onboarding Ready**
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
-| 4.3.1 | Welcome screen redesign — illustrated full-bleed, tagline, social proof, language toggle, Lottie animation | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `app/index.tsx` |
-| 4.3.2 | Login redesign — show/hide password, Google OAuth, inline field errors, keyboard avoidance | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/login.tsx` |
-| 4.3.3 | Signup redesign — remove confirm password, add name field + terms checkbox + progress pill | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/signup.tsx` |
-| 4.3.4 | Reset Password redesign — full-screen success illustration state | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/resetPassword.tsx` |
-| 4.3.5 | Phone Setup redesign — flag + country code input, inline OTP, skip option, progress bar | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/phone-setup.tsx` |
-| 4.3.6 | Onboarding business.tsx — business type selector, logo upload, skip option | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/business.tsx` |
-| 4.3.7 | Onboarding bank.tsx — make optional, add UPI ID + QR preview, prominent skip | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/bank.tsx` |
-| 4.3.8 | Onboarding ready.tsx — confetti Lottie, feature highlights, "Take a Tour" trigger | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/ready.tsx` |
+| 4.3.1a | Welcome screen audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `app/index.tsx` |
+| 4.3.1b | Welcome screen premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `app/index.tsx` |
+| 4.3.1c | Welcome screen screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `app/index.tsx` |
+| 4.3.2a | Login audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(auth)/login.tsx` |
+| 4.3.2b | Login premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/login.tsx` |
+| 4.3.2c | Login screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(auth)/login.tsx` |
+| 4.3.3a | Signup audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(auth)/signup.tsx` |
+| 4.3.3b | Signup premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/signup.tsx` |
+| 4.3.3c | Signup screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(auth)/signup.tsx` |
+| 4.3.4a | Reset Password audit + extraction | ⏳ Not Started | P2 | `/audit` | `code-reviewer`, `refactor-engineer` | `(auth)/resetPassword.tsx` |
+| 4.3.4b | Reset Password premium redesign | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/resetPassword.tsx` |
+| 4.3.4c | Reset Password screenshot polish + verification | ⏳ Not Started | P2 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(auth)/resetPassword.tsx` |
+| 4.3.5a | Phone Setup audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(auth)/phone-setup.tsx` |
+| 4.3.5b | Phone Setup premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/phone-setup.tsx` |
+| 4.3.5c | Phone Setup screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(auth)/phone-setup.tsx` |
+| 4.3.6a | Onboarding Business audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(auth)/onboarding/business.tsx` |
+| 4.3.6b | Onboarding Business premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/business.tsx` |
+| 4.3.6c | Onboarding Business screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(auth)/onboarding/business.tsx` |
+| 4.3.7a | Onboarding Bank audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(auth)/onboarding/bank.tsx` |
+| 4.3.7b | Onboarding Bank premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/bank.tsx` |
+| 4.3.7c | Onboarding Bank screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(auth)/onboarding/bank.tsx` |
+| 4.3.8a | Onboarding Ready audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(auth)/onboarding/ready.tsx` |
+| 4.3.8b | Onboarding Ready premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/onboarding/ready.tsx` |
+| 4.3.8c | Onboarding Ready screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(auth)/onboarding/ready.tsx` |
 
-### Phase 4.4 — Profile, Export + Public Ledger
+### Phase 4.4 — Profile, Export + Public Ledger (Audit → Redesign → Polish)
 
-> Depends On: 4.0 ✅ Done, 4.2 ✅ Done
+> Depends On: 4.0 ✅ Done, 4.1 ✅ Done, 4.2 + 4.3 ✅ Done
 > ⚠️ **4.4.0 — Profile screen has partial implementation shipped** ([f6f73dd](https://github.com/subrat8268/kredBook/commit/f6f73dd26efd79c04d6cd1e594455988cb83430b)). See Drift Watchlist.
+> **Each screen follows the mandatory redesign routine: audit → redesign → screenshot polish.**
+> **Order: Profile → Profile Edit → Export → Public Ledger**
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
-| 4.4.0 | Profile screen — basic screen shipped (business details, account management, app preferences) | ✅ Partial | P1 | — | — | `(main)/profile/index.tsx` ([f6f73dd](https://github.com/subrat8268/kredBook/commit/f6f73dd26efd79c04d6cd1e594455988cb83430b)) |
-| 4.4.1 | Profile screen redesign — complete with editable header, UPI QR, danger zone, align to design system | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/profile/index.tsx` |
-| 4.4.2 | Profile Edit redesign — logo upload, UPI ID, address, sticky save bar, inline validation | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/profile/edit.tsx` |
-| 4.4.3 | Export — move from standalone tab into Profile, add customer filter, email export, export history | ⏳ Not Started | P1 | `/refactor` | `refactor-engineer`, `react-native-skills` | `(main)/export/index.tsx` |
-| 4.4.4 | Public Ledger redesign — business logo, UPI Pay Now button, WhatsApp CTA, mobile-responsive, KredBook footer | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `project-planner` | `app/l/[token].tsx` |
+| 4.4.1a | Profile audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/profile/index.tsx` |
+| 4.4.1b | Profile premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/profile/index.tsx` |
+| 4.4.1c | Profile screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/profile/index.tsx` |
+| 4.4.2a | Profile Edit audit + extraction | ⏳ Not Started | P2 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/profile/edit.tsx` |
+| 4.4.2b | Profile Edit premium redesign | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/profile/edit.tsx` |
+| 4.4.2c | Profile Edit screenshot polish + verification | ⏳ Not Started | P2 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/profile/edit.tsx` |
+| 4.4.3a | Export audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/export/index.tsx` |
+| 4.4.3b | Export premium redesign | ⏳ Not Started | P1 | `/refactor` | `refactor-engineer`, `react-native-skills` | `(main)/export/index.tsx` |
+| 4.4.3c | Export screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/export/index.tsx` |
+| 4.4.4a | Public Ledger audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `app/l/[token].tsx` |
+| 4.4.4b | Public Ledger premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `project-planner` | `app/l/[token].tsx` |
+| 4.4.4c | Public Ledger screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `app/l/[token].tsx` |
 
 ---
 
