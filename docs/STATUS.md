@@ -221,7 +221,37 @@ Apply this routine to every remaining Phase 4 screen before marking it `✅ Done
 | 4.1.5a | Customer Detail refactor — extract route UI into focused customer-detail components without behavior change | ✅ Done | P0 | `/build` | `refactor-engineer`, `code-reviewer`, `verification-before-completion` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*` |
 | 4.1.5b | Customer Detail premium redesign — identity header, balance hero labels, sticky collect bar, secondary quick actions, timeline polish | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `frontend-design`, `code-reviewer` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*`, `docs/flows/customer-detail.md` |
 | 4.1.5c | Customer Detail screenshot polish — spacing, contrast, quick-action press feedback, sticky collect depth | ✅ Done | P0 | `/fix` | `ui-ux-pro-max`, `code-reviewer`, `verification-before-completion` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*` |
-| 4.1.5d | Customer Detail final UX polish — remove detail FAB overlap, simplify sticky bar, tighten timeline density/spacing | 🔄 In Progress | P0 | `/build` | `ui-ux-pro-max`, `frontend-design`, `verification-before-completion` | `app/(main)/_layout.tsx`, `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*`, `docs/flows/customer-detail.md` |
+| 4.1.5d | Customer Detail final UX polish — remove detail FAB overlap, simplify sticky bar, tighten timeline density/spacing | ⏳ Pending manual verification | P0 | `/build` | `ui-ux-pro-max`, `frontend-design`, `verification-before-completion` | `app/(main)/_layout.tsx`, `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*`, `docs/flows/customer-detail.md` *(data-layer fix applied, awaiting app scroll/collect test)* |
+
+---
+
+**4.1.5d.1-fix — pendingOrderId gate + DB balance sync**
+Status: ✅ Done
+Date: 2026-05-18
+
+What was fixed:
+- Hardened pending-order detection in `fetchPersonDetail` (`src/api/people.ts`):
+  - Detects open orders by financial truth (`balance_due > 0`) first, status as secondary signal.
+  - Added fallback: computes due from `total_amount - amount_paid` if `balance_due` is null.
+  - `usePersonDetail` signature and `PersonDetail` return shape unchanged.
+- Applied Supabase migration: `sync_customer_balance_from_orders` (project: `sfmoefgjmgkwvauyaiyz`)
+  - Backfilled `parties.customer_balance` from unpaid `orders.balance_due` for all customers.
+  - Created trigger function `public.sync_party_customer_balance()`.
+  - Attached trigger `trg_sync_customer_balance` on `public.orders` `AFTER INSERT OR UPDATE OR DELETE`.
+  - DELETE path safe: trigger uses `COALESCE(NEW.customer_id, OLD.customer_id)`.
+
+Verification:
+- All 10 customers: `parties.customer_balance = expected SUM(orders.balance_due)` ✅
+- Happy Singh: `customer_balance = 12555.00`, `pendingOrderId` resolves non-null ✅
+- `stale_count = 0` ✅
+- No schema contract changes.
+- No modal API changes.
+- No offline queue changes.
+
+Remaining for 4.1.5d.1 closeout (manual, in app):
+- [ ] Open Happy Singh Customer Detail -> scroll past hero -> sticky Collect bar appears
+- [ ] Tap Collect -> modal opens with correct orderId and balanceDue = 12555
+- [ ] Share / PDF / Reminder / Add Entry still work
 
 ### Phase 4.2 — Detail + List Screens (Audit → Redesign → Polish)
 
