@@ -26,7 +26,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Linking, ScrollView, Share, View } from "react-native";
+import { Dimensions, Linking, ScrollView, Share, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -377,13 +377,14 @@ export default function CustomerDetailScreen() {
         className="flex-1"
         onScroll={(event) => {
           const offsetY = event.nativeEvent.contentOffset.y;
-          const shouldShowSticky = hasPendingPayment && offsetY > 250;
+          const shouldShowSticky = hasPendingPayment && offsetY > 180;
           if (shouldShowSticky !== showStickyCollectBar) {
             setShowStickyCollectBar(shouldShowSticky);
           }
         }}
         scrollEventThrottle={16}
         contentContainerStyle={{
+          minHeight: Dimensions.get("window").height,
           paddingBottom:
             spacing.xl +
             (hasPendingPayment

@@ -51,7 +51,8 @@ export default function CustomerStickyCollectBar({
       </View>
 
       <Pressable
-        className="flex-row items-center justify-center rounded-xl bg-danger px-5 py-3"
+        className="flex-row items-center justify-center rounded-xl px-5 py-3"
+        style={{ backgroundColor: colors.primary }}
         onPress={handleCollectPress}
         android_ripple={{ color: colors.surface + "40", borderless: false }}
       >

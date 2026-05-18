@@ -38,20 +38,29 @@ export default function CustomerTransactionRow({ tx, withBorder }: Props) {
   const modeLabel = tx.paymentMode ? (MODE_LABEL[tx.paymentMode.toLowerCase()] ?? tx.paymentMode) : "";
   const entryStatus = tx.status ?? "Pending";
   const chipLabel = isPayment ? modeLabel || "Payment" : entryStatus;
+  const normalizedStatus = String(entryStatus).toLowerCase();
+  const isOverdueStatus = normalizedStatus === "overdue";
+  const isPaidLikeStatus =
+    normalizedStatus === "paid" || normalizedStatus === "partially paid";
+  const isPendingStatus = normalizedStatus === "pending";
   const chipBg = isPayment
     ? "bg-success-bg dark:bg-success-bg-dark"
-    : entryStatus === "Paid"
+    : isPaidLikeStatus
       ? "bg-success-bg dark:bg-success-bg-dark"
-      : entryStatus === "Partially Paid"
+      : isPendingStatus
         ? "bg-warning-bg dark:bg-warning-bg-dark"
-        : "bg-danger-bg dark:bg-danger-bg-dark";
+        : isOverdueStatus
+          ? "bg-danger-bg dark:bg-danger-bg-dark"
+          : "bg-warning-bg dark:bg-warning-bg-dark";
   const chipText = isPayment
     ? colors.successDark
-    : entryStatus === "Paid"
+    : isPaidLikeStatus
       ? colors.successDark
-      : entryStatus === "Partially Paid"
+      : isPendingStatus
         ? colors.warning
-        : colors.dangerStrong;
+        : isOverdueStatus
+          ? colors.dangerStrong
+          : colors.warning;
   const subtitle = isPayment
     ? [modeLabel, tx.orderBillNumber ? `#${tx.orderBillNumber}` : formatTime(tx.created_at)]
         .filter(Boolean)
