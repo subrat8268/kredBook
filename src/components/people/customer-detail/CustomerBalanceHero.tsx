@@ -58,20 +58,20 @@ export default function CustomerBalanceHero({
         {formatINR(Math.abs(outstandingBalance), { maximumFractionDigits: 2 })}
       </Text>
 
-      <View className="mt-3 flex-row items-center justify-between gap-3">
+      <View className="mt-3 flex-row items-center gap-2">
         <View className="rounded-full border border-customer-hero-chip-border px-3 py-1.5" style={{ backgroundColor: stateChipTone.bg }}>
           <Text style={[typography.caption, { color: stateChipTone.text, fontWeight: "700", letterSpacing: 0.5 }]}>
             {stateLabel.toUpperCase()}
           </Text>
         </View>
-        <Text className="text-caption text-customer-hero-text-muted flex-1" numberOfLines={1} style={{ textAlign: "right" }}>
+        <Text className="flex-1 text-caption text-customer-hero-text-muted" numberOfLines={1}>
           {heroMetaText}
         </Text>
       </View>
 
       {pendingOrderBalance > 0 ? (
-        <View className="mt-3 rounded-lg border border-customer-hero-chip-border bg-customer-hero-chip-bg px-3 py-2">
-          <Text className="text-caption text-customer-hero-text-muted" style={{ fontWeight: "600" }}>
+        <View className="mt-2.5 rounded-lg border border-customer-hero-chip-border bg-customer-hero-chip-bg px-3 py-1.5">
+          <Text className="text-caption text-customer-hero-text-muted" style={{ fontWeight: "500" }}>
             Open entry due: {formatINR(pendingOrderBalance, { maximumFractionDigits: 2 })}
           </Text>
         </View>

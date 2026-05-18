@@ -144,6 +144,7 @@ export default function CustomerDetailScreen() {
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
   const [shareQueued, setShareQueued] = useState(false);
   const [isSharingLedgerLink, setIsSharingLedgerLink] = useState(false);
+  const [showStickyCollectBar, setShowStickyCollectBar] = useState(false);
 
   const hasPendingPayment =
     !!customer?.pendingOrderId && (customer.pendingOrderBalance ?? 0) > 0;
@@ -368,16 +369,20 @@ export default function CustomerDetailScreen() {
         phone={customer.phone || undefined}
         lastActiveLabel={getLastActiveLabel(customer.lastActiveAt)}
         onBack={() => router.back()}
-        onShare={handleShareLedger}
-        onDownload={downloadStatement}
         onCall={callCustomer}
-        isSharingLedgerLink={isSharingLedgerLink}
-        canDownload={customer.transactions.length > 0 && !exporting}
         hasPhone={Boolean(customer.phone)}
       />
 
       <ScrollView
         className="flex-1"
+        onScroll={(event) => {
+          const offsetY = event.nativeEvent.contentOffset.y;
+          const shouldShowSticky = hasPendingPayment && offsetY > 250;
+          if (shouldShowSticky !== showStickyCollectBar) {
+            setShowStickyCollectBar(shouldShowSticky);
+          }
+        }}
+        scrollEventThrottle={16}
         contentContainerStyle={{
           paddingBottom:
             spacing.xl +
@@ -446,10 +451,10 @@ export default function CustomerDetailScreen() {
         </CustomerDetailSectionShell>
       </ScrollView>
 
-      {hasPendingPayment ? (
+      {hasPendingPayment && showStickyCollectBar ? (
         <View
           className="border-t border-border bg-background px-4 pt-3 dark:border-border-dark dark:bg-background-dark"
-          style={{ paddingBottom: 10 }}
+          style={{ paddingBottom: Math.max(insets.bottom, 8) + spacing.sm }}
         >
           <CustomerStickyCollectBar
             balanceDue={customer.pendingOrderBalance ?? 0}

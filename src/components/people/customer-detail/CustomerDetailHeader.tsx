@@ -1,18 +1,14 @@
 import Avatar from "@/src/components/ui/Avatar";
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { ArrowLeft, FileText, Phone, Share2 } from "lucide-react-native";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ArrowLeft, Phone } from "lucide-react-native";
+import { Pressable, Text, View } from "react-native";
 
 type Props = {
   customerName: string;
   phone?: string;
   lastActiveLabel: string;
   onBack: () => void;
-  onShare: () => void;
-  onDownload: () => void;
   onCall: () => void;
-  isSharingLedgerLink: boolean;
-  canDownload: boolean;
   hasPhone: boolean;
 };
 
@@ -21,11 +17,7 @@ export default function CustomerDetailHeader({
   phone,
   lastActiveLabel,
   onBack,
-  onShare,
-  onDownload,
   onCall,
-  isSharingLedgerLink,
-  canDownload,
   hasPhone,
 }: Props) {
   const { colors } = useTheme();
@@ -49,33 +41,14 @@ export default function CustomerDetailHeader({
         </Text>
       </View>
 
-      <View className="flex-row gap-2">
+      {hasPhone ? (
         <Pressable
           className="h-10 w-10 items-center justify-center rounded-full bg-search dark:bg-search-dark"
-          onPress={onShare}
-          disabled={isSharingLedgerLink}
+          onPress={onCall}
         >
-          {isSharingLedgerLink ? (
-            <ActivityIndicator size="small" color={colors.primary} />
-          ) : (
-            <Share2 size={20} color={colors.primary} strokeWidth={2} />
-          )}
+          <Phone size={20} color={colors.primary} strokeWidth={2} />
         </Pressable>
-
-        <Pressable
-          className={`h-10 w-10 items-center justify-center rounded-full bg-search dark:bg-search-dark ${canDownload ? "" : "opacity-50"}`}
-          onPress={onDownload}
-          disabled={!canDownload}
-        >
-          <FileText size={20} color={colors.primary} strokeWidth={2} />
-        </Pressable>
-
-        {hasPhone ? (
-          <Pressable className="h-10 w-10 items-center justify-center rounded-full bg-search dark:bg-search-dark" onPress={onCall}>
-            <Phone size={20} color={colors.primary} strokeWidth={2} />
-          </Pressable>
-        ) : null}
-      </View>
+      ) : null}
     </View>
   );
 }
