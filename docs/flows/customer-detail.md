@@ -156,7 +156,7 @@ No sticky collect bar
 | Background | Subtle gradient: Red when overdue, Amber when pending, Deep green when settled |
 | Amount | 38px, bold, white |
 | Label | 11px, uppercase, white/70% |
-| Status badge | "OVERDUE · 15 days" pill when overdue |
+| Status badge | Dark translucent pill (`rgba(0,0,0,0.22)`) with white label; OVERDUE includes alert icon |
 | Fallback text | "No outstanding balance" when cleared |
 
 ### 3. Primary CTAs
@@ -176,7 +176,7 @@ No sticky collect bar
 | Share | Secondary action tile | Opens ledger share flow |
 | PDF | Secondary action tile | Generates and shares statement PDF |
 
-Layout note: these CTAs render as a flat 3-column row outside the card shell, between the filter tabs and the transaction timeline.
+Layout note: these CTAs render as three compact action cards inside a grouped card above the filter tabs.
 
 ### 3.1 Sticky Collect Bar
 
@@ -187,7 +187,7 @@ Shows only when `outstandingBalance > 0` and `pendingOrderId` exists.
 | Left block | Compact `Balance due` + amount |
 | Main CTA | `Collect` (opens `RecordCustomerPaymentModal`) |
 | Secondary icon | Add Entry shortcut |
-| Position | Fixed above bottom safe area; does not cover timeline rows |
+| Position | Fixed and fused to bottom container; no floating card gap |
 
 ### 4. Transaction List
 
@@ -203,12 +203,14 @@ Shows only when `outstandingBalance > 0` and `pendingOrderId` exists.
 
 | Element | Spec |
 |---------|------|
-| Left border | 4dp, Green for payment, Red for entry |
-| Icon | 38dp circle with arrow (up=entry, down=payment) |
+| Container | Individual card with subtle shadow and clipped left accent strip |
+| Left border | 4dp, Green for payment, Amber for pending entry, Red for overdue entry, Neutral for paid entry |
+| Icon | 32dp circle with arrow (down-left=payment, up-right=entry) |
 | Title | "Entry #001" or "Payment" |
 | Subtitle | Mode (Cash/UPI) or date |
 | Amount | Right-aligned, 16px bold, colored |
 | Running balance | Below title, 12px, gray |
+| Status chip | Inline below subtitle |
 
 ### 5. Empty State
 
@@ -225,12 +227,10 @@ When no transactions:
 
 | State | Background | Text |
 |-------|------------|------|
-| Balance Due | `#DC2626 → #B91C1C` (red gradient) | White |
+| Balance Due | `#DC2626 → #7F1D1D` (red gradient) | White |
 | Balance Pending | `#F59E0B → #B45309` (amber gradient) | White |
 | Balance Cleared | `#166534 → #052E16` (deep green gradient) | White |
 | Balance Overdue | `#991B1B → #B91C1C` (red gradient) | White |
-
-Hero surface includes soft decorative blobs layered behind the content, using state-matched translucent tokens.
 | Payment | Left border green | Amount green |
 | Entry | Left border red | Amount red |
 | Overdue badge | `rgba(255,255,255,0.18)` (white/18%) | White |

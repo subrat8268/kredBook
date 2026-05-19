@@ -1,4 +1,5 @@
 import type { PersonDetail } from "@/src/types/customer";
+import { useTheme } from "@/src/utils/ThemeProvider";
 import { Pressable, Text, View } from "react-native";
 import CustomerDetailEmptyState from "./CustomerDetailEmptyState";
 import CustomerTransactionRow from "./CustomerTransactionRow";
@@ -25,6 +26,8 @@ export default function CustomerTransactionTimeline({
   onAddEntry,
   onRecordPayment,
 }: Props) {
+  const { colors } = useTheme();
+
   if (listItems.length === 0) {
     return (
       <CustomerDetailEmptyState
@@ -36,25 +39,29 @@ export default function CustomerTransactionTimeline({
   }
 
   return (
-    <View className="pb-2">
-      {visibleListItems.map((item, index) => {
+    <View className="pb-2" style={{ backgroundColor: colors.background }}>
+      {visibleListItems.map((item) => {
         if (item.kind === "header") {
           return (
             <Text
               key={item.key}
-              className="px-4 pb-1.5 pt-3.5 text-caption font-inter-bold uppercase tracking-widest text-textSecondary dark:text-textSecondary-dark"
+              className="text-caption font-inter-bold uppercase tracking-widest text-textSecondary dark:text-textSecondary-dark"
+              style={{
+                paddingHorizontal: 16,
+                paddingTop: 20,
+                paddingBottom: 8,
+                fontSize: 11,
+                letterSpacing: 1.2,
+                color: colors.textSecondary,
+                opacity: 0.6,
+              }}
             >
               {item.label}
             </Text>
           );
         }
-
-        const next = visibleListItems[index + 1];
-        const withBorder = !!next && next.kind === "tx";
         return (
-          <View key={item.key} className="px-4">
-            <CustomerTransactionRow tx={item.data} withBorder={withBorder} />
-          </View>
+          <CustomerTransactionRow key={item.key} tx={item.data} />
         );
       })}
 

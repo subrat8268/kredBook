@@ -4,7 +4,6 @@ import { useToast } from "@/src/components/feedback/Toast";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
 import CustomerBalanceHero from "@/src/components/people/customer-detail/CustomerBalanceHero";
 import CustomerDetailHeader from "@/src/components/people/customer-detail/CustomerDetailHeader";
-import CustomerDetailSectionShell from "@/src/components/people/customer-detail/CustomerDetailSectionShell";
 import CustomerQuickActionsRow from "@/src/components/people/customer-detail/CustomerQuickActionsRow";
 import CustomerStickyCollectBar from "@/src/components/people/customer-detail/CustomerStickyCollectBar";
 import CustomerTransactionTabs from "@/src/components/people/customer-detail/CustomerTransactionTabs";
@@ -358,39 +357,37 @@ export default function CustomerDetailScreen() {
         canSendReminder={Boolean(customer.phone)}
       />
 
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{
-          paddingBottom:
-            spacing.xl +
-            (hasPendingPayment
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{
+            paddingBottom: hasPendingPayment
               ? 70 + Math.max(insets.bottom, 8)
-              : spacing.tabBarHeight + Math.max(insets.bottom, spacing.sm)),
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        <CustomerBalanceHero
-          outstandingBalance={customer.outstandingBalance}
-          isOverdue={customer.isOverdue}
-          pendingOrderBalance={customer.pendingOrderBalance ?? 0}
-          heroMetaText={heroMetaText}
-        />
+              : spacing.tabBarHeight + Math.max(insets.bottom, spacing.sm),
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <CustomerBalanceHero
+            outstandingBalance={customer.outstandingBalance}
+            isOverdue={customer.isOverdue}
+            pendingOrderBalance={customer.pendingOrderBalance ?? 0}
+            heroMetaText={heroMetaText}
+          />
 
-        <CustomerQuickActionsRow
-          isSharingLedgerLink={isSharingLedgerLink}
-          exporting={exporting}
-          canDownload={customer.transactions.length > 0}
-          onAddEntry={() =>
-            router.push({
-              pathname: "/(main)/entries/create",
-              params: { customer: JSON.stringify(customer) },
-            })
-          }
-          onShare={handleShareLedger}
-          onDownload={downloadStatement}
-        />
+          <CustomerQuickActionsRow
+            isSharingLedgerLink={isSharingLedgerLink}
+            exporting={exporting}
+            canDownload={customer.transactions.length > 0}
+            onAddEntry={() =>
+              router.push({
+                pathname: "/(main)/entries/create",
+                params: { customer: JSON.stringify(customer) },
+              })
+            }
+            onShare={handleShareLedger}
+            onDownload={downloadStatement}
+          />
 
-        <CustomerDetailSectionShell>
           <CustomerTransactionTabs
             txFilter={txFilter}
             onChangeFilter={(tab) => {
@@ -398,9 +395,7 @@ export default function CustomerDetailScreen() {
               setHistoryExpanded(false);
             }}
           />
-        </CustomerDetailSectionShell>
 
-        <CustomerDetailSectionShell>
           <CustomerTransactionTimeline
             customer={customer}
             visibleListItems={visibleListItems}
@@ -421,20 +416,15 @@ export default function CustomerDetailScreen() {
               } as never)
             }
           />
-        </CustomerDetailSectionShell>
-      </ScrollView>
+        </ScrollView>
 
-      {hasPendingPayment ? (
-        <View
-          className="border-t border-border bg-background px-4 pt-3 dark:border-border-dark dark:bg-background-dark"
-          style={{ paddingBottom: Math.max(insets.bottom, 8) + spacing.sm }}
-        >
+        {hasPendingPayment ? (
           <CustomerStickyCollectBar
             balanceDue={customer.pendingOrderBalance ?? 0}
             onRecordPayment={() => openPaymentFlow()}
           />
-        </View>
-      ) : null}
+        ) : null}
+      </View>
 
       {hasPendingPayment ? (
         <RecordCustomerPaymentModal

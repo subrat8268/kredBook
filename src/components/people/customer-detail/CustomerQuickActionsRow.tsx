@@ -1,6 +1,14 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { Download, Plus, Share2 } from "lucide-react-native";
-import { ActivityIndicator, Pressable, Text, View, type ReactNode } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  View,
+  type StyleProp,
+  type ReactNode,
+  type ViewStyle,
+} from "react-native";
 
 type QuickActionTileProps = {
   label: string;
@@ -8,6 +16,7 @@ type QuickActionTileProps = {
   onPress: () => void;
   disabled?: boolean;
   accent?: boolean;
+  style?: StyleProp<ViewStyle>;
 };
 
 type Props = {
@@ -19,25 +28,58 @@ type Props = {
   onDownload: () => void;
 };
 
-function QuickActionTile({ label, icon, onPress, disabled = false, accent = false }: QuickActionTileProps) {
+function QuickActionTile({
+  label,
+  icon,
+  onPress,
+  disabled = false,
+  accent = false,
+  style,
+}: QuickActionTileProps) {
   const { colors } = useTheme();
+  const iconBg = accent ? colors.primary + "18" : colors.textSecondary + "12";
+  const labelColor = accent ? colors.textPrimary : colors.textSecondary;
   return (
-      <Pressable
-        disabled={disabled}
-        onPress={onPress}
-        className={`items-center rounded-xl border border-border px-3 py-2.5 dark:border-border-dark ${disabled ? "opacity-50" : ""}`}
-        style={{ width: "31.5%", backgroundColor: accent ? colors.primaryLight : colors.surface }}
-        hitSlop={4}
-        android_ripple={{ color: colors.primaryLight || colors.primary + "20", borderless: false }}
-        unstable_pressDelay={0}
+    <Pressable
+      disabled={disabled}
+      onPress={onPress}
+      className={`flex-1 items-center rounded-xl border px-2 py-4 mb-2 ${disabled ? "opacity-50" : ""}`}
+      style={[
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border + "40",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.03,
+          shadowRadius: 1,
+          elevation: 1,
+        },
+        style,
+      ]}
+      hitSlop={4}
+      android_ripple={{
+        color: colors.primaryLight || colors.primary + "20",
+        borderless: false,
+      }}
+      unstable_pressDelay={0}
     >
       <View
-        className="mb-1.5 h-9 w-9 items-center justify-center rounded-full"
-        style={{ backgroundColor: accent ? colors.primaryLight : colors.search }}
+        className="items-center justify-center"
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: 22,
+          backgroundColor: iconBg,
+        }}
       >
         {icon}
       </View>
-      <Text className="text-caption font-inter-semibold text-textPrimary dark:text-textPrimary-dark">{label}</Text>
+      <Text
+        className="mt-2 text-caption"
+        style={{ color: labelColor, fontSize: 12, fontWeight: "500" }}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -53,10 +95,10 @@ export default function CustomerQuickActionsRow({
   const { colors } = useTheme();
 
   return (
-    <View className="mx-4 mt-3 flex-row justify-between">
+    <View className="mx-4 mt-3 flex-row gap-2">
       <QuickActionTile
         label="Add Entry"
-        icon={<Plus size={18} color={colors.primary} strokeWidth={2} />}
+        icon={<Plus size={20} color={colors.primary} strokeWidth={2} />}
         onPress={onAddEntry}
         accent
       />
@@ -67,7 +109,7 @@ export default function CustomerQuickActionsRow({
           isSharingLedgerLink ? (
             <ActivityIndicator size="small" color={colors.primary} />
           ) : (
-            <Share2 size={18} color={colors.primary} strokeWidth={2} />
+            <Share2 size={20} color={colors.textSecondary} strokeWidth={2} />
           )
         }
         onPress={onShare}
@@ -76,7 +118,9 @@ export default function CustomerQuickActionsRow({
 
       <QuickActionTile
         label={exporting ? "Exporting" : "PDF"}
-        icon={<Download size={18} color={colors.primary} strokeWidth={2} />}
+        icon={
+          <Download size={20} color={colors.textSecondary} strokeWidth={2} />
+        }
         onPress={onDownload}
         disabled={!canDownload || exporting}
       />

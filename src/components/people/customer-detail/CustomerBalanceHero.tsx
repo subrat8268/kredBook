@@ -1,8 +1,8 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
 import { LinearGradient } from "expo-linear-gradient";
-import { BookOpen } from "lucide-react-native";
-import { Text, View } from "react-native";
+import { AlertCircle } from "lucide-react-native";
+import { Image, Text, View } from "react-native";
 
 type Props = {
   outstandingBalance: number;
@@ -35,13 +35,6 @@ export default function CustomerBalanceHero({
         ? "ADVANCE"
         : "SETTLED";
 
-  const chipTone =
-    outstandingBalance > 0
-      ? { bg: colors.customerDetail.heroChipBg, text: colors.customerDetail.heroText }
-      : outstandingBalance < 0
-        ? { bg: colors.customerDetail.heroChipBg, text: colors.customerDetail.heroText }
-        : { bg: colors.customerDetail.heroChipBg, text: colors.customerDetail.heroText };
-
   const heroTone =
     outstandingBalance > 0
       ? isOverdue
@@ -65,21 +58,6 @@ export default function CustomerBalanceHero({
         elevation: 2,
       }}
     >
-      <View pointerEvents="none" className="absolute inset-0 overflow-hidden">
-        <View
-          className="absolute -right-8 -top-10 h-28 w-28 rounded-full"
-          style={{ backgroundColor: heroTone.blobA }}
-        />
-        <View
-          className="absolute -left-10 top-10 h-24 w-24 rounded-full"
-          style={{ backgroundColor: heroTone.blobB }}
-        />
-        <View
-          className="absolute bottom-0 left-1/3 h-16 w-16 rounded-full"
-          style={{ backgroundColor: heroTone.blobB, opacity: 0.9 }}
-        />
-      </View>
-
       <Text
         style={[
           typography.caption,
@@ -112,15 +90,31 @@ export default function CustomerBalanceHero({
 
       <View className="mt-3 flex-row items-center">
         {statusLabel ? (
-          <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: chipTone.bg }}>
+          <View
+            className="flex-row items-center rounded-full"
+            style={{
+              backgroundColor: "rgba(0, 0, 0, 0.22)",
+              paddingHorizontal: 10,
+              paddingVertical: 5,
+              borderRadius: 999,
+            }}
+          >
+            {statusLabel === "OVERDUE" ? (
+              <AlertCircle
+                size={11}
+                color="rgba(255,255,255,1.0)"
+                strokeWidth={2.2}
+                style={{ marginRight: 4 }}
+              />
+            ) : null}
             <Text
               style={[
                 typography.caption,
                 {
-                  color: chipTone.text,
+                  color: "rgba(255,255,255,1.0)",
                   fontSize: 11,
                   fontWeight: "700",
-                  letterSpacing: 0.5,
+                  letterSpacing: 0.8,
                 },
               ]}
             >
@@ -143,12 +137,17 @@ export default function CustomerBalanceHero({
         </Text>
       </View>
 
-      <BookOpen
-        size={52}
-        color={colors.customerDetail.heroText}
-        strokeWidth={1.7}
-        pointerEvents="none"
-        style={{ position: "absolute", right: 14, bottom: 12, opacity: 0.07 }}
+      <Image
+        source={require("../../../../assets/images/bg-wallet.png")}
+        resizeMode="contain"
+        style={{
+          position: "absolute",
+          right: 0,
+          bottom: -50,
+          width: 100,
+          height: 200,
+          opacity: 0.9,
+        }}
       />
 
       {pendingOrderBalance > 0 ? (
@@ -156,12 +155,14 @@ export default function CustomerBalanceHero({
           className="mt-1 text-caption"
           style={{
             fontWeight: "500",
-            color: colors.customerDetail.heroTextMuted,
+            color: "rgba(255,255,255,0.45)",
             fontSize: 11,
+            marginTop: 5,
           }}
           numberOfLines={1}
         >
-          1 open entry · {formatINR(pendingOrderBalance, { maximumFractionDigits: 2 })} due
+          1 open entry ·{" "}
+          {formatINR(pendingOrderBalance, { maximumFractionDigits: 2 })} due
         </Text>
       ) : null}
     </LinearGradient>

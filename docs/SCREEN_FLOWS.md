@@ -206,7 +206,8 @@ Route convention summary:
 - Header call icon — `callCustomer` — opens dialer when phone exists
 - `Add Entry` — inline handler — opens Create Entry with serialized customer
 - `Record Payment` — `openPaymentFlow` — opens shared payment modal when a payable order exists
-- Quick action row — flat 3-column CTA strip, no card shell
+- Quick action row — three compact action cards in a grouped card
+- Timeline rows — individual cards with left-border accent strips
 - Timeline action `Add Entry` — inline handler — opens Create Entry with serialized customer
 - Timeline action `Share` — `handleShareLedger`
 - Timeline action `PDF` — `downloadStatement`
