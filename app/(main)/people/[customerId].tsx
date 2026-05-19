@@ -26,7 +26,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Dimensions, Linking, ScrollView, Share, View } from "react-native";
+import { Linking, ScrollView, Share, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -117,7 +117,7 @@ function buildStatementHtml(
 }
 
 export default function CustomerDetailScreen() {
-  const { colors, gradients, spacing, isDark } = useTheme();
+  const { colors, spacing } = useTheme();
   const { i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -144,24 +144,9 @@ export default function CustomerDetailScreen() {
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
   const [shareQueued, setShareQueued] = useState(false);
   const [isSharingLedgerLink, setIsSharingLedgerLink] = useState(false);
-  const [showStickyCollectBar, setShowStickyCollectBar] = useState(false);
 
   const hasPendingPayment =
     !!customer?.pendingOrderId && (customer.pendingOrderBalance ?? 0) > 0;
-
-  const heroGradientColors = useMemo(() => {
-    if (!customer)
-      return [gradients.customerHero.start, gradients.customerHero.end];
-    if (customer.outstandingBalance > 0)
-      return [gradients.customerHero.start, gradients.customerHero.end];
-    return [gradients.zeroBalance.start, gradients.zeroBalance.end];
-  }, [
-    customer,
-    gradients.customerHero.start,
-    gradients.customerHero.end,
-    gradients.zeroBalance.start,
-    gradients.zeroBalance.end,
-  ]);
 
   const heroMetaText = useMemo(() => {
     if (!customer?.lastActiveAt) return "Add an entry to start this ledger";
@@ -366,25 +351,16 @@ export default function CustomerDetailScreen() {
 
       <CustomerDetailHeader
         customerName={customer.name}
-        phone={customer.phone || undefined}
         lastActiveLabel={getLastActiveLabel(customer.lastActiveAt)}
         onBack={() => router.back()}
+        onReminder={sendWhatsAppReminder}
         onCall={callCustomer}
-        hasPhone={Boolean(customer.phone)}
+        canSendReminder={Boolean(customer.phone)}
       />
 
       <ScrollView
         className="flex-1"
-        onScroll={(event) => {
-          const offsetY = event.nativeEvent.contentOffset.y;
-          const shouldShowSticky = hasPendingPayment && offsetY > 180;
-          if (shouldShowSticky !== showStickyCollectBar) {
-            setShowStickyCollectBar(shouldShowSticky);
-          }
-        }}
-        scrollEventThrottle={16}
         contentContainerStyle={{
-          minHeight: Dimensions.get("window").height,
           paddingBottom:
             spacing.xl +
             (hasPendingPayment
@@ -398,27 +374,21 @@ export default function CustomerDetailScreen() {
           isOverdue={customer.isOverdue}
           pendingOrderBalance={customer.pendingOrderBalance ?? 0}
           heroMetaText={heroMetaText}
-          heroGradientColors={heroGradientColors as [string, string]}
-          isDark={isDark}
         />
 
-        <CustomerDetailSectionShell className="p-3">
-          <CustomerQuickActionsRow
-            isSharingLedgerLink={isSharingLedgerLink}
-            exporting={exporting}
-            canSendReminder={Boolean(customer.phone)}
-            canDownload={customer.transactions.length > 0}
-            onAddEntry={() =>
-              router.push({
-                pathname: "/(main)/entries/create",
-                params: { customer: JSON.stringify(customer) },
-              })
-            }
-            onSendReminder={sendWhatsAppReminder}
-            onShare={handleShareLedger}
-            onDownload={downloadStatement}
-          />
-        </CustomerDetailSectionShell>
+        <CustomerQuickActionsRow
+          isSharingLedgerLink={isSharingLedgerLink}
+          exporting={exporting}
+          canDownload={customer.transactions.length > 0}
+          onAddEntry={() =>
+            router.push({
+              pathname: "/(main)/entries/create",
+              params: { customer: JSON.stringify(customer) },
+            })
+          }
+          onShare={handleShareLedger}
+          onDownload={downloadStatement}
+        />
 
         <CustomerDetailSectionShell>
           <CustomerTransactionTabs
@@ -428,7 +398,9 @@ export default function CustomerDetailScreen() {
               setHistoryExpanded(false);
             }}
           />
+        </CustomerDetailSectionShell>
 
+        <CustomerDetailSectionShell>
           <CustomerTransactionTimeline
             customer={customer}
             visibleListItems={visibleListItems}
@@ -452,7 +424,7 @@ export default function CustomerDetailScreen() {
         </CustomerDetailSectionShell>
       </ScrollView>
 
-      {hasPendingPayment && showStickyCollectBar ? (
+      {hasPendingPayment ? (
         <View
           className="border-t border-border bg-background px-4 pt-3 dark:border-border-dark dark:bg-background-dark"
           style={{ paddingBottom: Math.max(insets.bottom, 8) + spacing.sm }}

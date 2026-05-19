@@ -1,5 +1,5 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { Download, MessageCircle, Plus, Share2 } from "lucide-react-native";
+import { Download, Plus, Share2 } from "lucide-react-native";
 import { ActivityIndicator, Pressable, Text, View, type ReactNode } from "react-native";
 
 type QuickActionTileProps = {
@@ -7,32 +7,36 @@ type QuickActionTileProps = {
   icon: ReactNode;
   onPress: () => void;
   disabled?: boolean;
+  accent?: boolean;
 };
 
 type Props = {
   isSharingLedgerLink: boolean;
   exporting: boolean;
-  canSendReminder: boolean;
   canDownload: boolean;
   onAddEntry: () => void;
-  onSendReminder: () => void;
   onShare: () => void;
   onDownload: () => void;
 };
 
-function QuickActionTile({ label, icon, onPress, disabled = false }: QuickActionTileProps) {
+function QuickActionTile({ label, icon, onPress, disabled = false, accent = false }: QuickActionTileProps) {
   const { colors } = useTheme();
   return (
-    <Pressable
-      disabled={disabled}
-      onPress={onPress}
-      className={`items-center rounded-xl border border-border bg-surface px-3 py-2.5 dark:border-border-dark dark:bg-surface-dark ${disabled ? "opacity-50" : ""}`}
-      style={{ width: "48%" }}
-      hitSlop={4}
-      android_ripple={{ color: colors.primaryLight || colors.primary + "20", borderless: false }}
-      unstable_pressDelay={0}
+      <Pressable
+        disabled={disabled}
+        onPress={onPress}
+        className={`items-center rounded-xl border border-border px-3 py-2.5 dark:border-border-dark ${disabled ? "opacity-50" : ""}`}
+        style={{ width: "31.5%", backgroundColor: accent ? colors.primaryLight : colors.surface }}
+        hitSlop={4}
+        android_ripple={{ color: colors.primaryLight || colors.primary + "20", borderless: false }}
+        unstable_pressDelay={0}
     >
-      <View className="mb-1.5 h-9 w-9 items-center justify-center rounded-full bg-search dark:bg-search-dark">{icon}</View>
+      <View
+        className="mb-1.5 h-9 w-9 items-center justify-center rounded-full"
+        style={{ backgroundColor: accent ? colors.primaryLight : colors.search }}
+      >
+        {icon}
+      </View>
       <Text className="text-caption font-inter-semibold text-textPrimary dark:text-textPrimary-dark">{label}</Text>
     </Pressable>
   );
@@ -41,28 +45,20 @@ function QuickActionTile({ label, icon, onPress, disabled = false }: QuickAction
 export default function CustomerQuickActionsRow({
   isSharingLedgerLink,
   exporting,
-  canSendReminder,
   canDownload,
   onAddEntry,
-  onSendReminder,
   onShare,
   onDownload,
 }: Props) {
   const { colors } = useTheme();
 
   return (
-    <View className="mt-3 flex-row flex-wrap justify-between" style={{ rowGap: 8 }}>
+    <View className="mx-4 mt-3 flex-row justify-between">
       <QuickActionTile
         label="Add Entry"
         icon={<Plus size={18} color={colors.primary} strokeWidth={2} />}
         onPress={onAddEntry}
-      />
-
-      <QuickActionTile
-        label="Reminder"
-        icon={<MessageCircle size={18} color={colors.primary} strokeWidth={2} />}
-        onPress={onSendReminder}
-        disabled={!canSendReminder}
+        accent
       />
 
       <QuickActionTile

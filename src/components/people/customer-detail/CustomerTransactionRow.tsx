@@ -29,7 +29,6 @@ type Props = {
 export default function CustomerTransactionRow({ tx, withBorder }: Props) {
   const { colors } = useTheme();
   const isPayment = tx.type === "payment";
-  const amountColorClass = isPayment ? "text-success" : "text-danger-strong";
   const iconBgClass = isPayment
     ? "bg-success-bg dark:bg-success-bg-dark"
     : "bg-danger-bg dark:bg-danger-bg-dark";
@@ -93,7 +92,10 @@ export default function CustomerTransactionRow({ tx, withBorder }: Props) {
         </View>
 
         <View className="items-end">
-          <Text className={`text-card-title font-inter-bold ${amountColorClass}`}>
+          <Text
+            className="text-card-title font-inter-bold"
+            style={{ color: isPayment ? colors.success : colors.textPrimary }}
+          >
             {isPayment ? "+" : ""}
             {formatINR(tx.amount, { maximumFractionDigits: 2 })}
           </Text>

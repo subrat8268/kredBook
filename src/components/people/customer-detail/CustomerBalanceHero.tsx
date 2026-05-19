@@ -1,6 +1,7 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
 import { LinearGradient } from "expo-linear-gradient";
+import { BookOpen } from "lucide-react-native";
 import { Text, View } from "react-native";
 
 type Props = {
@@ -8,8 +9,6 @@ type Props = {
   isOverdue: boolean;
   pendingOrderBalance: number;
   heroMetaText: string;
-  heroGradientColors: [string, string];
-  isDark: boolean;
 };
 
 export default function CustomerBalanceHero({
@@ -17,64 +16,153 @@ export default function CustomerBalanceHero({
   isOverdue,
   pendingOrderBalance,
   heroMetaText,
-  heroGradientColors,
-  isDark,
 }: Props) {
-  const { colors, typography } = useTheme();
+  const { colors, gradients, typography } = useTheme();
+
   const amountLabel =
-    outstandingBalance > 0 ? "Balance due" : outstandingBalance < 0 ? "Advance" : "All settled";
-  const stateLabel =
+    outstandingBalance > 0
+      ? "Balance due"
+      : outstandingBalance < 0
+        ? "Advance"
+        : "All settled";
+
+  const statusLabel =
     outstandingBalance > 0
       ? isOverdue
-        ? "Overdue"
-        : "Pending"
+        ? "OVERDUE"
+        : "PENDING"
       : outstandingBalance < 0
-        ? "Advance available"
-        : "No dues";
-  const stateChipTone =
+        ? "ADVANCE"
+        : "SETTLED";
+
+  const chipTone =
+    outstandingBalance > 0
+      ? { bg: colors.customerDetail.heroChipBg, text: colors.customerDetail.heroText }
+      : outstandingBalance < 0
+        ? { bg: colors.customerDetail.heroChipBg, text: colors.customerDetail.heroText }
+        : { bg: colors.customerDetail.heroChipBg, text: colors.customerDetail.heroText };
+
+  const heroTone =
     outstandingBalance > 0
       ? isOverdue
-        ? { bg: colors.dangerBg, text: colors.dangerStrong }
-        : { bg: colors.warningBg, text: colors.warning }
+        ? gradients.customerDetailHero.overdue
+        : gradients.customerDetailHero.pending
       : outstandingBalance < 0
-        ? { bg: colors.primaryBlueBg, text: colors.primaryBlue }
-        : { bg: colors.successBg, text: colors.successDark };
+        ? gradients.customerDetailHero.advance
+        : gradients.customerDetailHero.settled;
 
   return (
     <LinearGradient
-      colors={heroGradientColors}
+      colors={[heroTone.start, heroTone.end]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       className="mx-4 mt-4 overflow-hidden rounded-xl px-5 py-5"
+      style={{
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        elevation: 2,
+      }}
     >
-      <View className={`absolute -right-8 -top-9 h-32 w-32 rounded-full ${isDark ? "bg-customer-hero-orb-dark" : "bg-customer-hero-orb"}`} />
-      <View className={`absolute bottom-[-40px] right-8 h-24 w-24 rounded-full ${isDark ? "bg-customer-hero-orb-dark" : "bg-customer-hero-orb"}`} />
+      <View pointerEvents="none" className="absolute inset-0 overflow-hidden">
+        <View
+          className="absolute -right-8 -top-10 h-28 w-28 rounded-full"
+          style={{ backgroundColor: heroTone.blobA }}
+        />
+        <View
+          className="absolute -left-10 top-10 h-24 w-24 rounded-full"
+          style={{ backgroundColor: heroTone.blobB }}
+        />
+        <View
+          className="absolute bottom-0 left-1/3 h-16 w-16 rounded-full"
+          style={{ backgroundColor: heroTone.blobB, opacity: 0.9 }}
+        />
+      </View>
 
-      <Text className="tracking-wider text-customer-hero-text-muted" style={[typography.label, { fontWeight: "600", fontSize: 12 }]}>
+      <Text
+        style={[
+          typography.caption,
+          {
+            color: colors.customerDetail.heroTextMuted,
+            fontSize: 11,
+            fontWeight: "600",
+            letterSpacing: 1.4,
+            marginBottom: 2,
+          },
+        ]}
+      >
         {amountLabel.toUpperCase()}
       </Text>
 
-      <Text className="mt-1 text-customer-hero-text" style={[typography.heroAmount, { letterSpacing: -0.5 }]}>
+      <Text
+        style={[
+          typography.heroAmount,
+          {
+            color: colors.customerDetail.heroText,
+            fontWeight: "800",
+            letterSpacing: -0.5,
+            marginTop: 2,
+            fontSize: 36,
+          },
+        ]}
+      >
         {formatINR(Math.abs(outstandingBalance), { maximumFractionDigits: 2 })}
       </Text>
 
-      <View className="mt-3 flex-row items-center gap-2">
-        <View className="rounded-full border border-customer-hero-chip-border px-3 py-1.5" style={{ backgroundColor: stateChipTone.bg }}>
-          <Text style={[typography.caption, { color: stateChipTone.text, fontWeight: "700", letterSpacing: 0.5 }]}>
-            {stateLabel.toUpperCase()}
-          </Text>
-        </View>
-        <Text className="flex-1 text-caption text-customer-hero-text-muted" numberOfLines={1}>
+      <View className="mt-3 flex-row items-center">
+        {statusLabel ? (
+          <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: chipTone.bg }}>
+            <Text
+              style={[
+                typography.caption,
+                {
+                  color: chipTone.text,
+                  fontSize: 11,
+                  fontWeight: "700",
+                  letterSpacing: 0.5,
+                },
+              ]}
+            >
+              {statusLabel}
+            </Text>
+          </View>
+        ) : null}
+
+        <Text
+          className="flex-1 text-caption"
+          style={{
+            marginLeft: statusLabel ? 8 : 0,
+            color: colors.customerDetail.heroTextMuted,
+            fontSize: 12,
+            fontWeight: "500",
+          }}
+          numberOfLines={1}
+        >
           {heroMetaText}
         </Text>
       </View>
 
+      <BookOpen
+        size={52}
+        color={colors.customerDetail.heroText}
+        strokeWidth={1.7}
+        pointerEvents="none"
+        style={{ position: "absolute", right: 14, bottom: 12, opacity: 0.07 }}
+      />
+
       {pendingOrderBalance > 0 ? (
-        <View className="mt-2.5 rounded-lg border border-customer-hero-chip-border bg-customer-hero-chip-bg px-3 py-1.5">
-          <Text className="text-caption text-customer-hero-text-muted" style={{ fontWeight: "500" }}>
-            Open entry due: {formatINR(pendingOrderBalance, { maximumFractionDigits: 2 })}
-          </Text>
-        </View>
+        <Text
+          className="mt-1 text-caption"
+          style={{
+            fontWeight: "500",
+            color: colors.customerDetail.heroTextMuted,
+            fontSize: 11,
+          }}
+          numberOfLines={1}
+        >
+          1 open entry · {formatINR(pendingOrderBalance, { maximumFractionDigits: 2 })} due
+        </Text>
       ) : null}
     </LinearGradient>
   );

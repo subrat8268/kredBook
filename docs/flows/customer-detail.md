@@ -81,7 +81,7 @@ Ignored on purpose (outdated / out of scope):
 #### Default (balance due)
 
 ```text
-[←] [AS] Ankit Shah                [Share] [PDF] [Call]
+[←] [AS] Ankit Shah                [Reminder] [Call]
 
 ┌────────────────────────────────────┐
 │ BALANCE DUE               [OVERDUE] │
@@ -90,7 +90,7 @@ Ignored on purpose (outdated / out of scope):
 │ Open entry due: ₹12,400            │
 └────────────────────────────────────┘
 
-[Add Entry] [Reminder]
+[Add Entry]
 [Share] [PDF]
 
 [All] [Entries] [Payments]
@@ -104,14 +104,14 @@ Balance due ₹12,400   [Collect]
 #### Payments tab selected
 
 ```text
-[←] Ankit Shah                     [PDF] [Call]
+[←] Ankit Shah                  [Reminder] [Call]
 
 ┌────────────────────────────────────┐
 │ TOTAL BALANCE DUE        [OVERDUE] │
 │ ₹25,000                            │
 └────────────────────────────────────┘
 
-[Add Entry] [Reminder]
+[Add Entry]
 
 [All] [Entries] [Payments*]
 - Payment         -₹2,000
@@ -121,7 +121,7 @@ Balance due ₹12,400   [Collect]
 #### Cleared balance state
 
 ```text
-[←] [AS] Ankit Shah                [Share] [PDF] [Call]
+[←] [AS] Ankit Shah                [Reminder] [Call]
 
 ┌────────────────────────────────────┐
 │ ALL SETTLED                        │
@@ -129,7 +129,7 @@ Balance due ₹12,400   [Collect]
 │ Status: no dues                    │
 └────────────────────────────────────┘
 
-[Add Entry] [Reminder]
+[Add Entry]
 [Share] [PDF]
 
 No sticky collect bar
@@ -144,16 +144,16 @@ No sticky collect bar
 | Element | Spec |
 |---------|------|
 | Back button | 44×44dp touch target, ArrowLeft icon |
-| Identity | Avatar/initials + customer name + phone + last active |
+| Identity | Avatar/initials + customer name + last active |
 | Title | Customer name, 17px bold, single line |
-| Right actions | PDF (icon), Call (icon), 44dp each |
+| Right actions | Reminder (icon), Call (icon), 44dp each |
 
 ### 2. Hero Balance Card
 
 | Element | Spec |
 |---------|------|
 | Height | 140dp |
-| Background | Gradient: Red when due, Green when clear |
+| Background | Subtle gradient: Red when overdue, Amber when pending, Deep green when settled |
 | Amount | 38px, bold, white |
 | Label | 11px, uppercase, white/70% |
 | Status badge | "OVERDUE · 15 days" pill when overdue |
@@ -168,14 +168,15 @@ No sticky collect bar
 | Add Entry | Primary (`colors.primary`), full-width | Opens create screen with customer pre-filled |
 | Record Payment | Danger (`colors.danger`) when due, gray when settled | Opens payment modal |
 
-**Row 2 — Quick Actions**
+**Row 2 — Timeline Actions**
 
 | Button | Style | Behavior |
 |--------|-------|----------|
 | Add Entry | Secondary action tile | Opens create entry pre-filled with customer |
-| Reminder | Secondary action tile | Sends WhatsApp reminder when phone exists |
 | Share | Secondary action tile | Opens ledger share flow |
 | PDF | Secondary action tile | Generates and shares statement PDF |
+
+Layout note: these CTAs render as a flat 3-column row outside the card shell, between the filter tabs and the transaction timeline.
 
 ### 3.1 Sticky Collect Bar
 
@@ -225,7 +226,11 @@ When no transactions:
 | State | Background | Text |
 |-------|------------|------|
 | Balance Due | `#DC2626 → #B91C1C` (red gradient) | White |
-| Balance Cleared | `#16A34A → #15803D` (green gradient) | White |
+| Balance Pending | `#F59E0B → #B45309` (amber gradient) | White |
+| Balance Cleared | `#166534 → #052E16` (deep green gradient) | White |
+| Balance Overdue | `#991B1B → #B91C1C` (red gradient) | White |
+
+Hero surface includes soft decorative blobs layered behind the content, using state-matched translucent tokens.
 | Payment | Left border green | Amount green |
 | Entry | Left border red | Amount red |
 | Overdue badge | `rgba(255,255,255,0.18)` (white/18%) | White |

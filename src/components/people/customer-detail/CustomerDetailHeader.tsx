@@ -1,24 +1,24 @@
 import Avatar from "@/src/components/ui/Avatar";
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { ArrowLeft, Phone } from "lucide-react-native";
+import { ArrowLeft, MessageCircle, Phone } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 type Props = {
   customerName: string;
-  phone?: string;
   lastActiveLabel: string;
   onBack: () => void;
+  onReminder: () => void;
   onCall: () => void;
-  hasPhone: boolean;
+  canSendReminder: boolean;
 };
 
 export default function CustomerDetailHeader({
   customerName,
-  phone,
   lastActiveLabel,
   onBack,
+  onReminder,
   onCall,
-  hasPhone,
+  canSendReminder,
 }: Props) {
   const { colors } = useTheme();
 
@@ -37,17 +37,26 @@ export default function CustomerDetailHeader({
           {customerName}
         </Text>
         <Text className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={1}>
-          {phone ? `${phone} · ${lastActiveLabel}` : lastActiveLabel}
+          {lastActiveLabel}
         </Text>
       </View>
 
-      {hasPhone ? (
-        <Pressable
-          className="h-10 w-10 items-center justify-center rounded-full bg-search dark:bg-search-dark"
-          onPress={onCall}
-        >
-          <Phone size={20} color={colors.primary} strokeWidth={2} />
-        </Pressable>
+      {canSendReminder ? (
+        <View className="flex-row items-center">
+          <Pressable
+            className="mr-2 h-10 w-10 items-center justify-center rounded-full bg-search dark:bg-search-dark"
+            onPress={onReminder}
+          >
+            <MessageCircle size={20} color={colors.primary} strokeWidth={2} />
+          </Pressable>
+
+          <Pressable
+            className="h-10 w-10 items-center justify-center rounded-full bg-search dark:bg-search-dark"
+            onPress={onCall}
+          >
+            <Phone size={20} color={colors.primary} strokeWidth={2} />
+          </Pressable>
+        </View>
       ) : null}
     </View>
   );

@@ -24,7 +24,7 @@ export default function CustomerStickyCollectBar({
 
   return (
     <View
-      className="flex-row items-center rounded-md border border-border bg-surface px-3 py-3 dark:border-border-dark dark:bg-surface-dark"
+      className="flex-row items-center rounded-md border border-border bg-surface px-3 py-2.5 dark:border-border-dark dark:bg-surface-dark"
       style={{
         shadowColor: colors.textPrimary,
         shadowOffset: { width: 0, height: -2 },

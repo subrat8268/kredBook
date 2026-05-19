@@ -321,6 +321,33 @@ export const gradients = {
     start: "#15803D", // green-700
     end: "#166534", // green-800
   },
+  // Customer detail hero states
+  customerDetailHero: {
+    overdue: {
+      start: "#DC2626", // red-600
+      end: "#7F1D1D", // red-900
+      blobA: "rgba(248, 113, 113, 0.28)",
+      blobB: "rgba(239, 68, 68, 0.18)",
+    },
+    pending: {
+      start: "#F59E0B", // amber-500
+      end: "#B45309", // amber-700
+      blobA: "rgba(251, 191, 36, 0.26)",
+      blobB: "rgba(245, 158, 11, 0.16)",
+    },
+    settled: {
+      start: "#166534", // green-700
+      end: "#052E16", // green-950
+      blobA: "rgba(74, 222, 128, 0.24)",
+      blobB: "rgba(34, 197, 94, 0.14)",
+    },
+    advance: {
+      start: "#2563EB", // blue-600
+      end: "#1D4ED8", // blue-700
+      blobA: "rgba(96, 165, 250, 0.24)",
+      blobB: "rgba(59, 130, 246, 0.14)",
+    },
+  },
   // Preferred alias (person naming)
   peopleHero: {
     start: "#15803D", // green-700
@@ -380,6 +407,32 @@ export const darkGradients: GradientTokens = {
   customerHero: {
     start: "#14532D",
     end: "#052E16",
+  },
+  customerDetailHero: {
+    overdue: {
+      start: "#991B1B",
+      end: "#B91C1C",
+      blobA: "rgba(239, 68, 68, 0.24)",
+      blobB: "rgba(127, 29, 29, 0.16)",
+    },
+    pending: {
+      start: "#A16207",
+      end: "#D97706",
+      blobA: "rgba(251, 191, 36, 0.22)",
+      blobB: "rgba(180, 83, 9, 0.14)",
+    },
+    settled: {
+      start: "#14532D",
+      end: "#052E16",
+      blobA: "rgba(34, 197, 94, 0.20)",
+      blobB: "rgba(20, 83, 45, 0.14)",
+    },
+    advance: {
+      start: "#1E40AF",
+      end: "#172554",
+      blobA: "rgba(96, 165, 250, 0.22)",
+      blobB: "rgba(37, 99, 235, 0.14)",
+    },
   },
   peopleHero: {
     start: "#14532D",

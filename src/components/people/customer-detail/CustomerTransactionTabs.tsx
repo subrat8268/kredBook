@@ -27,7 +27,7 @@ export default function CustomerTransactionTabs({ txFilter, onChangeFilter }: Pr
         })}
       </View>
 
-      <View className="mt-2 flex-row items-center justify-end">
+      <View className="mt-2 flex-row items-center justify-start">
         <SyncStatus variant="compact" />
       </View>
     </View>

@@ -202,15 +202,16 @@ Route convention summary:
 
 ### Buttons & Actions
 - Back icon — inline handler — returns to previous route
-- Header share icon — `handleShareLedger` — creates/updates public ledger token and opens native share
+- Header reminder icon — `sendWhatsAppReminder` — opens WhatsApp and logs reminder metadata
+- Header call icon — `callCustomer` — opens dialer when phone exists
 - `Add Entry` — inline handler — opens Create Entry with serialized customer
 - `Record Payment` — `openPaymentFlow` — opens shared payment modal when a payable order exists
-- Quick action `Share` — `handleShareLedger`
-- Quick action `PDF` — `downloadStatement`
-- Quick action `Call` — `callCustomer`
+- Quick action row — flat 3-column CTA strip, no card shell
+- Timeline action `Add Entry` — inline handler — opens Create Entry with serialized customer
+- Timeline action `Share` — `handleShareLedger`
+- Timeline action `PDF` — `downloadStatement`
 - Transaction tabs `All`, `Entries`, `Payments` — inline handler — switches local filter
 - `View Older History` — inline handler — expands transaction history
-- Footer WhatsApp action — `sendWhatsAppReminder` — opens WhatsApp and logs reminder metadata
 
 ### State
 - Local state: `txFilter`, `exporting`, `historyExpanded`, `quickPaymentAmount`, `shareQueued`, `isSharingLedgerLink`
