@@ -6,7 +6,6 @@ import CustomerBalanceHero from "@/src/components/people/customer-detail/Custome
 import CustomerDetailHeader from "@/src/components/people/customer-detail/CustomerDetailHeader";
 import CustomerQuickActionsRow from "@/src/components/people/customer-detail/CustomerQuickActionsRow";
 import CustomerStickyCollectBar from "@/src/components/people/customer-detail/CustomerStickyCollectBar";
-import CustomerTransactionTabs from "@/src/components/people/customer-detail/CustomerTransactionTabs";
 import CustomerTransactionTimeline from "@/src/components/people/customer-detail/CustomerTransactionTimeline";
 import type {
   TxFilter,
@@ -388,14 +387,6 @@ export default function CustomerDetailScreen() {
             onDownload={downloadStatement}
           />
 
-          <CustomerTransactionTabs
-            txFilter={txFilter}
-            onChangeFilter={(tab) => {
-              setTxFilter(tab);
-              setHistoryExpanded(false);
-            }}
-          />
-
           <CustomerTransactionTimeline
             customer={customer}
             visibleListItems={visibleListItems}
@@ -415,6 +406,11 @@ export default function CustomerDetailScreen() {
                 },
               } as never)
             }
+            txFilter={txFilter}
+            onChangeFilter={(tab) => {
+              setTxFilter(tab);
+              setHistoryExpanded(false);
+            }}
           />
         </ScrollView>
 

@@ -31,123 +31,96 @@ export default function CustomerTransactionRow({ tx }: Props) {
 
   const title = isPayment ? "Payment Received" : `Entry${tx.billNumber ? ` #${tx.billNumber}` : ""}`;
   const modeLabel = tx.paymentMode ? (MODE_LABEL[tx.paymentMode.toLowerCase()] ?? tx.paymentMode) : "";
-  const entryStatus = tx.status ?? "Pending";
-  const chipLabel = isPayment ? modeLabel || "Payment" : entryStatus;
-  const normalizedStatus = String(entryStatus).toLowerCase();
-  const isOverdueStatus = normalizedStatus === "overdue";
-  const isPaidLikeStatus =
-    normalizedStatus === "paid" || normalizedStatus === "partially paid";
-  const isPendingStatus = normalizedStatus === "pending";
-  const chipBg = isPayment
-    ? "bg-success-bg dark:bg-success-bg-dark"
-    : isPaidLikeStatus
-      ? "bg-success-bg dark:bg-success-bg-dark"
-      : isPendingStatus
-        ? "bg-warning-bg dark:bg-warning-bg-dark"
-        : isOverdueStatus
-          ? "bg-danger-bg dark:bg-danger-bg-dark"
-          : "bg-warning-bg dark:bg-warning-bg-dark";
-  const chipText = isPayment
-    ? colors.successDark
-    : isPaidLikeStatus
+  const normalizedStatus = String(tx.status ?? "pending").toLowerCase();
+  const isOverdue = normalizedStatus === "overdue";
+  const isPaid = normalizedStatus === "paid" || normalizedStatus === "partially paid";
+  const statusChipLabel = isPayment ? "" : tx.status ?? "Pending";
+  const statusChipBg = isOverdue
+    ? colors.danger + "15"
+    : isPaid
+      ? colors.success + "15"
+      : colors.warning + "18";
+  const statusChipText = isOverdue
+    ? colors.danger
+    : isPaid
       ? colors.successDark
-      : isPendingStatus
-        ? colors.warning
-        : isOverdueStatus
-          ? colors.dangerStrong
-          : colors.warning;
+      : colors.warning;
+
   const subtitle = isPayment
-    ? [modeLabel, tx.orderBillNumber ? `#${tx.orderBillNumber}` : formatTime(tx.created_at)]
-        .filter(Boolean)
-        .join(" · ")
+    ? [modeLabel || "Payment", formatTime(tx.created_at)].filter(Boolean).join(" · ")
     : [tx.itemCount ? `${tx.itemCount} items` : "Entry", formatTime(tx.created_at)].join(" · ");
-  const leftAccent = isPayment
-    ? colors.success
-    : isOverdueStatus
-      ? colors.danger
-      : isPaidLikeStatus
-        ? colors.textSecondary
-        : colors.warning;
+
+  const iconBg = isPayment
+    ? colors.success + "18"
+    : isOverdue
+      ? colors.danger + "15"
+      : isPaid
+        ? colors.textSecondary + "15"
+        : colors.warning + "18";
   const iconColor = isPayment
     ? colors.success
-    : isPaidLikeStatus
-      ? colors.textSecondary
-      : colors.warning;
-  const iconBg = isPayment
-    ? colors.success + "15"
-    : isPaidLikeStatus
-      ? colors.textSecondary + "15"
-      : colors.warning + "15";
+    : isOverdue
+      ? colors.danger
+      : isPaid
+        ? colors.textSecondary
+        : colors.warning;
+
   const amountColor = isPayment
     ? colors.success
-    : isPaidLikeStatus
+    : isPaid
       ? colors.textSecondary
       : colors.textPrimary;
-  const amountWeight: "700" | "500" = isPayment || !isPaidLikeStatus ? "700" : "500";
+  const amountWeight = isPayment || !isPaid ? "700" : "500";
   const amountPrefix = isPayment ? "+" : "";
 
   return (
-    <View
-      style={{
-        marginHorizontal: 16,
-        marginBottom: 8,
-        borderRadius: 12,
-        backgroundColor: colors.surface,
-        elevation: 1,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        overflow: "hidden",
-        flexDirection: "row",
-      }}
-    >
-      <View style={{ width: 4, alignSelf: "stretch", backgroundColor: leftAccent }} />
+    <View className="flex-row items-center px-3" style={{ paddingHorizontal: 14, paddingVertical: 11 }}>
+      <View
+        className="mr-3 items-center justify-center"
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          backgroundColor: iconBg,
+        }}
+      >
+        {isPayment ? (
+          <ArrowDownLeft size={16} color={iconColor} strokeWidth={2.1} />
+        ) : (
+          <ArrowUpRight size={16} color={iconColor} strokeWidth={2.1} />
+        )}
+      </View>
 
-      <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 12 }}>
-        <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-          <View
-            style={{
-              height: 32,
-              width: 32,
-              borderRadius: 16,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: iconBg,
-              marginRight: 10,
-            }}
-          >
-            {isPayment ? (
-              <ArrowDownLeft size={16} color={iconColor} strokeWidth={2.1} />
-            ) : (
-              <ArrowUpRight size={16} color={iconColor} strokeWidth={2.1} />
-            )}
-          </View>
+      <View className="flex-1 pr-2">
+        <Text className="text-[14px] font-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>
+          {title}
+        </Text>
+        <View className="mt-0.5 flex-row items-center" style={{ minHeight: 18 }}>
+          <Text className="text-[12px] text-textSecondary dark:text-textSecondary-dark" numberOfLines={1}>
+            {subtitle}
+          </Text>
 
-          <View style={{ flex: 1, paddingRight: 10 }}>
-            <Text className="text-card-title font-inter-bold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>
-              {title}
-            </Text>
-            <Text className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={1}>
-              {subtitle}
-            </Text>
-            <View className={`mt-1.5 self-start rounded-full px-2 py-0.5 ${chipBg}`}>
-              <Text className="text-caption" style={{ color: chipText, fontWeight: "700" }}>
-                {chipLabel}
+          {!isPayment && statusChipLabel ? (
+            <View className="ml-2 rounded-full px-2 py-0.5" style={{ backgroundColor: statusChipBg }}>
+              <Text className="text-[10px] font-semibold uppercase" style={{ color: statusChipText, letterSpacing: 0.6 }}>
+                {statusChipLabel}
               </Text>
             </View>
-          </View>
-
-          <View style={{ alignItems: "flex-end" }}>
-            <Text className="text-card-title" style={{ color: amountColor, fontWeight: amountWeight }}>
-              {amountPrefix}
-              {formatINR(tx.amount, { maximumFractionDigits: 2 })}
-            </Text>
-            <Text className="mt-0.5 text-caption text-textMuted dark:text-textMuted-dark" numberOfLines={1}>
-              Bal: {formatINR(tx.runningBalance, { maximumFractionDigits: 2 })}
-            </Text>
-          </View>
+          ) : null}
         </View>
+      </View>
+
+      <View className="items-end">
+        <Text
+          className="text-[14px]"
+          style={{ color: amountColor, fontWeight: amountWeight }}
+        >
+          {amountPrefix}
+          {formatINR(tx.amount, { maximumFractionDigits: 2 })}
+        </Text>
+        <Text className="mt-0.5 text-[11px] text-textMuted dark:text-textMuted-dark" numberOfLines={1}>
+          Bal: {formatINR(tx.runningBalance, { maximumFractionDigits: 2 })}
+        </Text>
       </View>
     </View>
   );

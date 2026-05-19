@@ -1,4 +1,3 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
 import { Pressable, Text, View } from "react-native";
 import type { TxFilter } from "./types";
 
@@ -11,38 +10,27 @@ export default function CustomerTransactionTabs({
   txFilter,
   onChangeFilter,
 }: Props) {
-  const { colors } = useTheme();
+  const tabs: { key: TxFilter; label: string }[] = [
+    { key: "All", label: "All" },
+    { key: "Entries", label: "Entries" },
+    { key: "Payments", label: "Payments" },
+  ];
 
   return (
-    <View
-      style={{
-        paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 8,
-      }}
-    >
-      <View
-        className="flex-row rounded-full bg-white p-2 dark:bg-search-dark"
-        style={{
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.03,
-          shadowRadius: 1,
-          elevation: 1,
-        }}
-      >
-        {(["All", "Entries", "Payments"] as TxFilter[]).map((tab) => {
-          const active = txFilter === tab;
+    <View className="px-2 py-2">
+      <View className="flex-row rounded-[22px] bg-surface p-1 dark:bg-surface-dark">
+        {tabs.map((tab) => {
+          const active = txFilter === tab.key;
           return (
             <Pressable
-              key={tab}
-              onPress={() => onChangeFilter(tab)}
-              className={`flex-1 rounded-full py-2 ${active ? "bg-primary" : ""}`}
+              key={tab.key}
+              onPress={() => onChangeFilter(tab.key)}
+              className={`flex-1 rounded-[18px] py-3 ${active ? "bg-primary" : ""}`}
             >
               <Text
-                className={`text-center text-body font-inter-semibold ${active ? "text-surface" : "text-textSecondary dark:text-textSecondary-dark"}`}
+                className={`text-center text-[16px] font-semibold ${active ? "text-surface" : "text-textSecondary dark:text-textSecondary-dark"}`}
               >
-                {tab}
+                {tab.label}
               </Text>
             </Pressable>
           );
