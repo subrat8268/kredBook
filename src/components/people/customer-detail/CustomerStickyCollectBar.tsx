@@ -1,8 +1,9 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
-import { ArrowDown } from "lucide-react-native";
+import { ArrowDownLeft } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { Platform, Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = {
   balanceDue: number;
@@ -13,7 +14,8 @@ export default function CustomerStickyCollectBar({
   balanceDue,
   onRecordPayment,
 }: Props) {
-  const { colors, typography } = useTheme();
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const handleCollectPress = () => {
     if (Platform.OS !== "web") {
@@ -24,43 +26,69 @@ export default function CustomerStickyCollectBar({
 
   return (
     <View
-      className="flex-row items-center bg-surface px-4 py-3 dark:bg-surface-dark"
+      className="flex-row items-center px-4 pt-3"
       style={{
+        backgroundColor: colors.surface,
         borderTopWidth: 1,
-        borderTopColor: colors.border + "50",
-        shadowColor: colors.textPrimary,
-        shadowOffset: { width: 0, height: -1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
+        borderTopColor: colors.border + "60",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 12,
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: 12,
       }}
     >
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          backgroundColor: colors.primary + "08",
+        }}
+      />
+
       <View className="flex-1 pr-2">
         <Text
-          className="text-caption text-textSecondary dark:text-textSecondary-dark"
-          style={{ fontWeight: "600" }}
+          className="mb-0.5 text-[10px] font-semibold uppercase tracking-[1.2px] text-textSecondary"
+          style={{ color: colors.textSecondary }}
         >
-          Balance due
+          BALANCE DUE
         </Text>
         <Text
-          style={[
-            typography.cardTitle,
-            { color: colors.textPrimary, fontWeight: "800" },
-          ]}
+          className="text-[20px] font-extrabold tracking-[-0.5px] text-textPrimary"
+          style={{ color: colors.textPrimary }}
         >
           {formatINR(balanceDue, { maximumFractionDigits: 2 })}
         </Text>
       </View>
 
       <Pressable
-        className="flex-row items-center justify-center rounded-xl px-5 py-3"
-        style={{ backgroundColor: colors.primary }}
+        className="min-w-[168px] flex-row items-center justify-center rounded-[14px] px-6 py-3.5"
+        style={{
+          backgroundColor: colors.primary,
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.35,
+          shadowRadius: 8,
+          elevation: 6,
+          paddingHorizontal: 22,
+          paddingVertical: 14,
+        }}
         onPress={handleCollectPress}
-        android_ripple={{ color: colors.surface + "40", borderless: false }}
+        android_ripple={{ color: "#ffffff30", borderless: false }}
       >
-        <ArrowDown size={18} color={colors.surface} strokeWidth={2.4} />
-        <Text className="ml-2 text-body font-inter-bold text-surface">
-          Collect
+        <ArrowDownLeft size={18} color="#fff" strokeWidth={2.5} />
+        <Text
+          className="ml-2 text-[15px] font-bold text-surface"
+          style={{ color: "#fff", letterSpacing: 0.2 }}
+        >
+          Collect Payment
         </Text>
       </Pressable>
     </View>

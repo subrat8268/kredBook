@@ -37,19 +37,23 @@ export default function CustomerTransactionRow({ tx }: Props) {
     : "";
   const normalizedStatus = String(tx.status ?? "pending").toLowerCase();
   const isOverdue = normalizedStatus === "overdue";
-  const isPaid =
-    normalizedStatus === "paid" || normalizedStatus === "partially paid";
-  const statusChipLabel = isPayment ? "" : (tx.status ?? "Pending");
+  const isPaid = normalizedStatus === "paid";
+  const isPartial =
+    normalizedStatus === "partially_paid" ||
+    normalizedStatus === "partially paid" ||
+    normalizedStatus === "partial";
+  const statusChipLabel = (() => {
+    if (isPayment || isPaid) return "";
+    if (isOverdue) return "OVERDUE";
+    if (isPartial) return "PENDING";
+    return "PENDING";
+  })();
   const statusChipBg = isOverdue
     ? colors.danger + "15"
-    : isPaid
-      ? colors.success + "15"
-      : colors.warning + "18";
+    : colors.warning + "18";
   const statusChipText = isOverdue
     ? colors.danger
-    : isPaid
-      ? colors.successDark
-      : colors.warning;
+    : colors.warning;
 
   const subtitle = isPayment
     ? [modeLabel || "Payment", formatTime(tx.created_at)]
