@@ -93,19 +93,7 @@ export default function CustomerTransactionTimeline({
 
           return (
             <View key={`${group.label}-${group.txs[0].key}`}>
-              <Text
-                className="text-caption uppercase font-inter-bold dark:text-textSecondary-dark"
-                style={{
-                  paddingHorizontal: 16,
-                  paddingTop: 20,
-                  paddingBottom: 8,
-                  fontSize: 11,
-                  fontWeight: "700",
-                  letterSpacing: 1.2,
-                  color: colors.textSecondary,
-                  opacity: 0.6,
-                }}
-              >
+              <Text className="bg-background text-caption uppercase font-inter-bold dark:text-textSecondary-dark text-textMuted pl-4 py-3">
                 {group.label}
               </Text>
 

@@ -29,12 +29,17 @@ export default function CustomerTransactionRow({ tx }: Props) {
   const { colors } = useTheme();
   const isPayment = tx.type === "payment";
 
-  const title = isPayment ? "Payment Received" : `Entry${tx.billNumber ? ` #${tx.billNumber}` : ""}`;
-  const modeLabel = tx.paymentMode ? (MODE_LABEL[tx.paymentMode.toLowerCase()] ?? tx.paymentMode) : "";
+  const title = isPayment
+    ? "Payment Received"
+    : `Entry${tx.billNumber ? ` #${tx.billNumber}` : ""}`;
+  const modeLabel = tx.paymentMode
+    ? (MODE_LABEL[tx.paymentMode.toLowerCase()] ?? tx.paymentMode)
+    : "";
   const normalizedStatus = String(tx.status ?? "pending").toLowerCase();
   const isOverdue = normalizedStatus === "overdue";
-  const isPaid = normalizedStatus === "paid" || normalizedStatus === "partially paid";
-  const statusChipLabel = isPayment ? "" : tx.status ?? "Pending";
+  const isPaid =
+    normalizedStatus === "paid" || normalizedStatus === "partially paid";
+  const statusChipLabel = isPayment ? "" : (tx.status ?? "Pending");
   const statusChipBg = isOverdue
     ? colors.danger + "15"
     : isPaid
@@ -47,8 +52,13 @@ export default function CustomerTransactionRow({ tx }: Props) {
       : colors.warning;
 
   const subtitle = isPayment
-    ? [modeLabel || "Payment", formatTime(tx.created_at)].filter(Boolean).join(" · ")
-    : [tx.itemCount ? `${tx.itemCount} items` : "Entry", formatTime(tx.created_at)].join(" · ");
+    ? [modeLabel || "Payment", formatTime(tx.created_at)]
+        .filter(Boolean)
+        .join(" · ")
+    : [
+        tx.itemCount ? `${tx.itemCount} items` : "Entry",
+        formatTime(tx.created_at),
+      ].join(" · ");
 
   const iconBg = isPayment
     ? colors.success + "18"
@@ -71,10 +81,13 @@ export default function CustomerTransactionRow({ tx }: Props) {
       ? colors.textSecondary
       : colors.textPrimary;
   const amountWeight = isPayment || !isPaid ? "700" : "500";
-  const amountPrefix = isPayment ? "+" : "";
+  const amountPrefix = isPayment ? "+ " : "";
 
   return (
-    <View className="flex-row items-center px-3" style={{ paddingHorizontal: 14, paddingVertical: 11 }}>
+    <View
+      className="flex-row items-center px-3"
+      style={{ paddingHorizontal: 14, paddingVertical: 11 }}
+    >
       <View
         className="mr-3 items-center justify-center"
         style={{
@@ -92,17 +105,32 @@ export default function CustomerTransactionRow({ tx }: Props) {
       </View>
 
       <View className="flex-1 pr-2">
-        <Text className="text-[14px] font-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>
+        <Text
+          className="text-[14px] font-semibold text-textPrimary dark:text-textPrimary-dark"
+          numberOfLines={1}
+        >
           {title}
         </Text>
-        <View className="mt-0.5 flex-row items-center" style={{ minHeight: 18 }}>
-          <Text className="text-[12px] text-textSecondary dark:text-textSecondary-dark" numberOfLines={1}>
+        <View
+          className="mt-0.5 flex-row items-center"
+          style={{ minHeight: 18 }}
+        >
+          <Text
+            className="text-[12px] text-textSecondary dark:text-textSecondary-dark"
+            numberOfLines={1}
+          >
             {subtitle}
           </Text>
 
           {!isPayment && statusChipLabel ? (
-            <View className="ml-2 rounded-full px-2 py-0.5" style={{ backgroundColor: statusChipBg }}>
-              <Text className="text-[10px] font-semibold uppercase" style={{ color: statusChipText, letterSpacing: 0.6 }}>
+            <View
+              className="ml-2 rounded-full px-2 py-0.5"
+              style={{ backgroundColor: statusChipBg }}
+            >
+              <Text
+                className="text-[10px] font-semibold uppercase"
+                style={{ color: statusChipText, letterSpacing: 0.6 }}
+              >
                 {statusChipLabel}
               </Text>
             </View>
@@ -112,13 +140,16 @@ export default function CustomerTransactionRow({ tx }: Props) {
 
       <View className="items-end">
         <Text
-          className="text-[14px]"
+          className="text-card-title"
           style={{ color: amountColor, fontWeight: amountWeight }}
         >
           {amountPrefix}
           {formatINR(tx.amount, { maximumFractionDigits: 2 })}
         </Text>
-        <Text className="mt-0.5 text-[11px] text-textMuted dark:text-textMuted-dark" numberOfLines={1}>
+        <Text
+          className="mt-0.5 text-[11px] text-textMuted dark:text-textMuted-dark"
+          numberOfLines={1}
+        >
           Bal: {formatINR(tx.runningBalance, { maximumFractionDigits: 2 })}
         </Text>
       </View>
