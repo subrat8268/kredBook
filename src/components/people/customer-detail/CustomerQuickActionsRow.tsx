@@ -47,7 +47,8 @@ function QuickActionTile({
       style={[
         {
           backgroundColor: colors.surface,
-          borderColor: colors.border + "40",
+          borderWidth: 1,
+          borderColor: colors.border + "60",
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: 0.03,

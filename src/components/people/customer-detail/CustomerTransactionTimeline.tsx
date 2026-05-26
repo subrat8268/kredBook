@@ -93,9 +93,21 @@ export default function CustomerTransactionTimeline({
 
           return (
             <View key={`${group.label}-${group.txs[0].key}`}>
-              <Text className="bg-background text-caption uppercase font-inter-bold dark:text-textSecondary-dark text-textMuted pl-4 py-3">
-                {group.label}
-              </Text>
+              <View
+                className="pl-4 py-3"
+                style={{
+                  backgroundColor:
+                    (colors as { surfaceOffset?: string }).surfaceOffset ??
+                    colors.background,
+                }}
+              >
+                <Text
+                  className="text-caption uppercase font-inter-bold dark:text-textSecondary-dark"
+                  style={{ color: colors.textSecondary }}
+                >
+                  {group.label}
+                </Text>
+              </View>
 
               <View className="overflow-hidden rounded-[14px] border border-transparent">
                 {group.txs.map((tx, index) => (
