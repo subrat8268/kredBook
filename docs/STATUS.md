@@ -30,14 +30,13 @@
 
 ## ⚡ Next Up (Priority Queue)
 
-> PM-reordered on 2026-05-05. Complete the core user loop before Profile polish.
+> Updated 2026-05-26. 4.1.4 and 4.1.5 are in final polish. Core loop nearly complete.
 > The loop is: **Add Customer → Create Entry → View What They Owe → Record Payment → See It Reflected.**
 
 | Priority | Task | Why Now |
 |---|---|---|
-| 🔴 P0 — NOW | **4.1.4** Record Payment modal redesign | Every "Collect" tap lands here. The money moment. Must feel like a cash register. |
-| 🔴 P0 | **4.1.5** Customer Detail redesign | Most-viewed screen after Dashboard. Balance hero + entry timeline unlocks trust. |
-| 🟠 P1 | **4.2.3a** Entry Detail audit + extraction | Audit trail — closest to money flow. Start here before lists. |
+| 🔴 P0 — NOW | **4.1.5d.5** Customer Detail final screenshot verification + closeout | One blocker remaining: safe-area inset on sticky collect bar. Verify on gesture-nav Android, then close. |
+| 🔴 P0 | **4.2.3a** Entry Detail audit + extraction | Next screen in the money flow. Start immediately after 4.1.5 closes. |
 | 🟠 P1 | **4.2.4a** Edit Entry audit + extraction | Completes the entry code health pass. |
 | 🟠 P1 | **4.2.1a** Customer List audit + extraction | Gateway to Customer Detail. |
 | 🟠 P1 | **4.2.2a** Entry List audit + extraction | Gateway to Entry Detail. |
@@ -75,6 +74,9 @@
 - Supplier / product surfaces are out of scope and must not be described as active features.
 - **4.4.1 (Profile redesign) is partially done** — basic screen shipped in [f6f73dd](https://github.com/subrat8268/kredBook/commit/f6f73dd26efd79c04d6cd1e594455988cb83430b). Full design-system-aligned redesign still pending. Do not mark 4.4.1 Done until UPI QR + danger zone + settings section are complete.
 - Customer picker bottom-sheet now reserves explicit footer space + Android bottom inset to avoid list clipping behind gesture navigation.
+- **Customer Detail sticky collect bar** — `useSafeAreaInsets` must be wired so `paddingBottom` respects Android gesture nav area. This is the last open item in 4.1.5d before closeout.
+- **Global FAB removed from Customer Detail** — Detail screens use contextual actions only. FAB belongs on broad/global screens (Dashboard, Customer List, Entry List).
+- **Header icons on Customer Detail** — Share and PDF removed from header; they exist in Quick Actions only. Call and WhatsApp remain in header.
 
 ---
 
@@ -192,6 +194,7 @@ Apply this routine to every remaining Phase 4 screen before marking it `✅ Done
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
 | 4.1.1 | Dashboard redesign — hero card, quick stats row, activity feed, SpeedDialFAB | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `(main)/dashboard/index.tsx` ([f690c3c](https://github.com/subrat8268/kredBook/commit/f690c3c)) |
+
 ### Phase 4.1.1x — Dashboard code health & UX polish
 
 > Depends On: 4.1.1 ✅ Done
@@ -214,20 +217,40 @@ Apply this routine to every remaining Phase 4 screen before marking it `✅ Done
 | 4.1.3c | Create Entry hotfix pass — payment clarity, due-date single picker, draft cleanup, formatINR, bill-item tap-to-edit, fractional qty, haptics, +New Person shortcut, avatar fix | ✅ Done | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max`, `code-reviewer` | `(main)/entries/create.tsx`, `CustomerPicker.tsx`, `BillFooter.tsx` ([5b036be](https://github.com/subrat8268/kredBook/commit/5b036be62e8e12d95f916e3dfc4d61a61b4763b1)) |
 | 4.1.3d | Create Entry screenshot audit fixes — header toggle cleanup, duplicate total removal, custom chip state, share CTA polish, spacing, and numpad compliance | 🔄 In Progress | P0 | `/fix` | `systematic-debugging`, `react-native-skills`, `ui-ux-pro-max`, `code-reviewer` | `(main)/entries/create.tsx`, `BillFooter.tsx` |
 | 4.1.3e | Customer picker redesign — compact rows, recents, balance-first hierarchy, default due-first selection UX | ✅ Done | P0 | `/build` | `react-native-skills`, `ui-ux-pro-max` | `CustomerPickerSheet.tsx`, `(main)/entries/create.tsx`, `recentCustomers.ts` |
-| **4.1.4** | **Record Payment modal redesign — large numpad, partial toggle, payment method chips, WhatsApp receipt** | **🔄 In Progress** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordPaymentModal` (shared) |
+| **4.1.4** | **Record Payment modal redesign — customer-led header, amount hero, Full/Partial intent, native keyboard, payment method cards, notes collapsed, intent-specific CTA** | **✅ Done** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordCustomerPaymentModal` (shared) |
 | 4.1.4a | Record Payment payment-console form pass — shared numpad util, stable sheet sizing, intent toggle, compact chips, collapsed notes | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills`, `code-reviewer` | `RecordPaymentModal` (shared), `src/utils/numpad.ts` |
-| 4.1.4b | Record Payment result/receipt polish — confirmed + queued premium receipt states and CTA hierarchy | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `code-reviewer`, `verification-before-completion` | `RecordPaymentResult.tsx`, `docs/flows/record-payment.md` |
-| **4.1.5** | **Customer Detail redesign — hero card, sticky balance bar, entry timeline, swipe actions, one-tap Collect** | **🔄 In Progress** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
-| 4.1.5a | Customer Detail refactor — extract route UI into focused customer-detail components without behavior change | ✅ Done | P0 | `/build` | `refactor-engineer`, `code-reviewer`, `verification-before-completion` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*` |
-| 4.1.5b | Customer Detail premium redesign — identity header, balance hero labels, sticky collect bar, secondary quick actions, timeline polish | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `frontend-design`, `code-reviewer` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*`, `docs/flows/customer-detail.md` |
-| 4.1.5c | Customer Detail screenshot polish — spacing, contrast, quick-action press feedback, sticky collect depth | ✅ Done | P0 | `/fix` | `ui-ux-pro-max`, `code-reviewer`, `verification-before-completion` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*` |
-| 4.1.5d | Customer Detail final UX polish — remove detail FAB overlap, simplify sticky bar, tighten timeline density/spacing | ⏳ Pending manual verification | P0 | `/build` | `ui-ux-pro-max`, `frontend-design`, `verification-before-completion` | `app/(main)/_layout.tsx`, `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*`, `docs/flows/customer-detail.md` *(data-layer fix applied, awaiting app scroll/collect test)* |
+| 4.1.4b | Record Payment result/receipt polish — confirmed + queued premium receipt states and CTA hierarchy | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `code-reviewer`, `verification-before-completion` | `RecordPaymentResult.tsx`, `docs/flows/record-payment.md` ([40203532](https://github.com/subrat8268/kredBook/commit/40203532f66dfb1bf6cb540934b7c359d481cb53)) |
+| **4.1.5** | **Customer Detail redesign — identity header, balance hero, sticky collect bar (scroll-triggered), transaction timeline, contextual quick actions** | **🔄 In Progress** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
+| 4.1.5a | Customer Detail refactor — extract route UI into focused customer-detail components without behavior change | ✅ Done | P0 | `/build` | `refactor-engineer`, `code-reviewer`, `verification-before-completion` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*` ([363018262](https://github.com/subrat8268/kredBook/commit/363018262172e5acf7de6c6d6ec89c66747703b3)) |
+| 4.1.5b | Customer Detail premium redesign — identity header, balance hero labels, sticky collect bar, secondary quick actions, timeline polish | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `frontend-design`, `code-reviewer` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*`, `docs/flows/customer-detail.md` ([6b6a66f](https://github.com/subrat8268/kredBook/commit/6b6a66f3093c2793207c694918f211d15a038ebe)) |
+| 4.1.5c | Customer Detail screenshot polish — hero label contrast, quick-action press states, sticky bar shadow/elevation, haptics on Collect, timeline padding, share toast, WhatsApp error message, lint clean | ✅ Done | P0 | `/fix` | `ui-ux-pro-max`, `code-reviewer`, `verification-before-completion` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*` ([53c95fea](https://github.com/subrat8268/kredBook/commit/53c95feab2d4d6f43ac32e22a4ea874e1f744b1f)) |
+| 4.1.5d | Customer Detail top-section polish — header cleanup (remove Share/PDF from header), hero metadata group, scroll-triggered sticky collect bar | 🔄 In Progress | P0 | `/build` | `ui-ux-pro-max`, `frontend-design`, `verification-before-completion` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*` |
 
 ---
 
-**4.1.5d.1-fix — pendingOrderId gate + DB balance sync**
-Status: ✅ Done
-Date: 2026-05-18
+### 4.1.5d Sub-passes
+
+| Sub-pass | Description | Status | Commit |
+|---|---|---|---|
+| 4.1.5d.1 | Header cleanup — remove Share/PDF from header, keep back/avatar/name/subtitle/Call/WhatsApp only | ✅ Done | [4e6d349](https://github.com/subrat8268/kredBook/commit/4e6d3494b487ac89e9f563173d5b2f37132665da) |
+| 4.1.5d.2 | Hero refinement — compact metadata row (status chip + last bill), semantic status colors, demote open-entry-due line | ✅ Done | [498fb5e](https://github.com/subrat8268/kredBook/commit/498fb5e2070f6812c269ba1354ee85c9149f96a1) |
+| 4.1.5d.3 | Scroll-triggered sticky collect bar — hidden at top, appears after ~220–280px scroll, hides on scroll up, safe-area + shadow | ✅ Done | [a11a77e](https://github.com/subrat8268/kredBook/commit/a11a77e3efaadb283eec217e7e1e1850b729f3df) |
+| 4.1.5d.4 | Quick actions + timeline density — `CustomerQuickActionsRow` + `CustomerTransactionTimeline` extracted, bottom padding adjusted | ✅ Done | [4e6d349](https://github.com/subrat8268/kredBook/commit/4e6d3494b487ac89e9f563173d5b2f37132665da) |
+| 4.1.5d.5 | Final screenshot verification + closeout — verify safe-area on gesture-nav Android, confirm Collect opens modal with correct orderId/balance, Reminder quick action confirmed present/absent | ⏳ Pending manual verification | — |
+
+**Open item for 4.1.5d.5 before closeout:**
+- [ ] Wire `useSafeAreaInsets` in `CustomerStickyCollectBar` — `paddingBottom: Math.max(insets.bottom, 12)` — to avoid bar clipping into Android gesture area.
+- [ ] Verify Collect opens `RecordCustomerPaymentModal` with correct `pendingOrderId` and `pendingOrderBalance` for a customer with a live order.
+- [ ] Confirm Reminder quick action status (present or intentionally removed — document decision).
+- [ ] Dark mode header/hero/sticky bar checked.
+- [ ] `npm run lint` passes.
+
+---
+
+### 4.1.5d.1-fix — pendingOrderId gate + DB balance sync
+
+**Status:** ✅ Done  
+**Date:** 2026-05-18
 
 What was fixed:
 - Hardened pending-order detection in `fetchPersonDetail` (`src/api/people.ts`):
@@ -244,14 +267,9 @@ Verification:
 - All 10 customers: `parties.customer_balance = expected SUM(orders.balance_due)` ✅
 - Happy Singh: `customer_balance = 12555.00`, `pendingOrderId` resolves non-null ✅
 - `stale_count = 0` ✅
-- No schema contract changes.
-- No modal API changes.
-- No offline queue changes.
+- No schema contract changes. No modal API changes. No offline queue changes.
 
-Remaining for 4.1.5d.1 closeout (manual, in app):
-- [ ] Open Happy Singh Customer Detail -> scroll past hero -> sticky Collect bar appears
-- [ ] Tap Collect -> modal opens with correct orderId and balanceDue = 12555
-- [ ] Share / PDF / Reminder / Add Entry still work
+---
 
 ### Phase 4.2 — Detail + List Screens (Audit → Redesign → Polish)
 
