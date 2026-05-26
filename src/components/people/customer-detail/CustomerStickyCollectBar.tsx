@@ -3,7 +3,6 @@ import { formatINR } from "@/src/utils/format";
 import { ArrowDownLeft } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { Platform, Pressable, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = {
   balanceDue: number;
@@ -15,7 +14,6 @@ export default function CustomerStickyCollectBar({
   onRecordPayment,
 }: Props) {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
 
   const handleCollectPress = () => {
     if (Platform.OS !== "web") {

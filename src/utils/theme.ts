@@ -330,14 +330,14 @@ export const gradients = {
       blobB: "rgba(239, 68, 68, 0.18)",
     },
     pending: {
-      start: "#F59E0B", // amber-500
-      end: "#B45309", // amber-700
-      blobA: "rgba(251, 191, 36, 0.26)",
-      blobB: "rgba(245, 158, 11, 0.16)",
+      start: "#EF4444", // red-500
+      end: "#991B1B", // red-900
+      blobA: "rgba(248, 113, 113, 0.26)",
+      blobB: "rgba(239, 68, 68, 0.16)",
     },
     settled: {
-      start: "#166534", // green-700
-      end: "#052E16", // green-950
+      start: "#22C55E", // green-500
+      end: "#047857", // green-600
       blobA: "rgba(74, 222, 128, 0.24)",
       blobB: "rgba(34, 197, 94, 0.14)",
     },
@@ -416,10 +416,10 @@ export const darkGradients: GradientTokens = {
       blobB: "rgba(127, 29, 29, 0.16)",
     },
     pending: {
-      start: "#A16207",
-      end: "#D97706",
-      blobA: "rgba(251, 191, 36, 0.22)",
-      blobB: "rgba(180, 83, 9, 0.14)",
+      start: "#B91C1C",
+      end: "#7F1D1D",
+      blobA: "rgba(248, 113, 113, 0.22)",
+      blobB: "rgba(185, 28, 28, 0.14)",
     },
     settled: {
       start: "#14532D",

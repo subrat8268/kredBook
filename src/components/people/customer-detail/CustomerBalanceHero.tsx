@@ -151,16 +151,7 @@ export default function CustomerBalanceHero({
       />
 
       {pendingOrderBalance > 0 ? (
-        <Text
-          className="mt-1 text-caption"
-          style={{
-            fontWeight: "500",
-            color: "rgba(255,255,255,0.45)",
-            fontSize: 11,
-            marginTop: 5,
-          }}
-          numberOfLines={1}
-        >
+        <Text className="mt-2 text-caption text-white" numberOfLines={1}>
           1 open entry ·{" "}
           {formatINR(pendingOrderBalance, { maximumFractionDigits: 2 })} due
         </Text>

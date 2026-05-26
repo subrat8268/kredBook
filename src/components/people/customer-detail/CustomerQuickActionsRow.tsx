@@ -95,7 +95,7 @@ export default function CustomerQuickActionsRow({
   const { colors } = useTheme();
 
   return (
-    <View className="mx-4 mt-3 flex-row gap-2">
+    <View className="mx-4 mt-4 flex-row gap-2">
       <QuickActionTile
         label="Add Entry"
         icon={<Plus size={20} color={colors.primary} strokeWidth={2} />}

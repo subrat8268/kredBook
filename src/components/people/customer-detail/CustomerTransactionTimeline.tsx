@@ -69,7 +69,7 @@ export default function CustomerTransactionTimeline({
 
   return (
     <View
-      className="mx-4 mt-4 overflow-hidden rounded-[28px] border bg-surface dark:bg-surface-dark dark:border-border-dark"
+      className="mx-4 mt-2 overflow-hidden rounded-[28px] border bg-surface dark:bg-surface-dark dark:border-border-dark"
       style={{
         backgroundColor: colors.surface,
         borderColor: colors.border + "40",
