@@ -2,10 +2,10 @@ import { useTheme } from "@/src/utils/ThemeProvider";
 import MoneyAmount from "@/src/components/ui/MoneyAmount";
 import StatusBadge from "@/src/components/layer2/StatusBadge";
 import { Text, View } from "react-native";
-import type { Order } from "@/src/types/entry";
+import type { OrderDetail } from "@/src/api/entries";
 
 type Props = {
-  order: Order;
+  order: OrderDetail;
   itemsSubtotal: number;
   taxAmount: number;
   grandTotal: number;
@@ -13,7 +13,7 @@ type Props = {
   fmt: (value: number) => string;
 };
 
-export default function EntryItemsSummaryCard({
+export default function EntryItemsSection({
   order,
   itemsSubtotal,
   taxAmount,

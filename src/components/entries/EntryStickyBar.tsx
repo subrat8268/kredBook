@@ -2,7 +2,7 @@ import { useTheme } from "@/src/utils/ThemeProvider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "react-native";
 import Button from "@/src/components/ui/Button";
-import { MessageCircle, Wallet } from "lucide-react-native";
+import { Send, Wallet } from "lucide-react-native";
 
 type Props = {
   isPaid: boolean;
@@ -29,61 +29,60 @@ export default function EntryStickyBar({
         right: 0,
         backgroundColor: colors.surface,
         borderTopWidth: 1,
-        borderTopColor: colors.border,
+        borderTopColor: colors.border + "60",
         paddingHorizontal: spacing.lg,
         paddingTop: spacing.sm,
         paddingBottom: Math.max(insets.bottom, spacing.sm),
         flexDirection: "row",
         gap: spacing.sm,
-        elevation: 4,
+        elevation: 12,
         shadowColor: "#000000",
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 6,
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
       }}
     >
+      <View
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          backgroundColor: colors.primary + "08",
+        }}
+      />
       {isPaid ? (
         <View style={{ flex: 1, alignItems: "center" }}>
-          <Button
-            title={sendingEntry ? "Generating…" : "Send Entry"}
-            variant="outline"
-            onPress={onSendEntry}
-            loading={sendingEntry}
-            icon={
-              <MessageCircle
-                size={18}
-                color={colors.primary}
-                strokeWidth={2}
-              />
-            }
-            style={{ width: "80%" }} // Center the single button
-          />
+          <View style={{ width: "80%" }}>
+            <Button
+              title={sendingEntry ? "Generating…" : "Send Receipt"}
+              variant="primary"
+              onPress={onSendEntry}
+              loading={sendingEntry}
+              icon={<Send size={18} color={colors.surface} strokeWidth={2} />}
+              fullWidth
+            />
+          </View>
         </View>
       ) : (
         <>
+          <View style={{ flex: 1 }}>
+            <Button
+              title="Record Payment"
+              variant="primary"
+              onPress={onRecordPayment}
+              icon={<Wallet size={18} color={colors.surface} strokeWidth={2} />}
+            />
+          </View>
+
           <View style={{ flex: 1 }}>
             <Button
               title={sendingEntry ? "Generating…" : "Send Entry"}
               variant="outline"
               onPress={onSendEntry}
               loading={sendingEntry}
-              icon={
-                <MessageCircle
-                  size={18}
-                  color={colors.primary}
-                  strokeWidth={2}
-                />
-              }
-            />
-          </View>
-
-          <View style={{ flex: 1 }}>
-            <Button
-              title="Record Payment"
-              onPress={onRecordPayment}
-              icon={
-                <Wallet size={18} color={colors.surface} strokeWidth={2} />
-              }
+              icon={<Send size={18} color={colors.primary} strokeWidth={2} />}
             />
           </View>
         </>

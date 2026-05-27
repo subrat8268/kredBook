@@ -20,7 +20,7 @@ export default function EntryHeroCard({
   createdAt,
   isOverdue,
 }: Props) {
-  const { colors, gradients, typography } = useTheme();
+  const { colors, gradients, typography, spacing } = useTheme();
 
   const getGradient = () => {
     // Determine the actual status key based on isOverdue prop
@@ -47,8 +47,9 @@ export default function EntryHeroCard({
       colors={[heroTone.start, heroTone.end]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      className="mx-4 overflow-hidden rounded-2xl px-5 py-5"
+      className="mx-4 overflow-hidden px-5 py-5"
       style={{
+        borderRadius: spacing.cardRadius,
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
@@ -57,10 +58,15 @@ export default function EntryHeroCard({
       }}
     >
       <View
-        className="absolute inset-0 border-2 border-white/10 rounded-2xl"
+        className="absolute inset-0 border-2 border-white/10"
+        style={{ borderRadius: spacing.cardRadius }}
       />
       <View
         className="absolute -right-16 -top-16 w-48 h-48 rounded-full"
+        style={{ backgroundColor: colors.dashboard.heroOrb + "08" }}
+      />
+      <View
+        className="absolute -right-8 -bottom-16 w-48 h-48 rounded-full"
         style={{ backgroundColor: colors.dashboard.heroOrb + "08" }}
       />
       <Text

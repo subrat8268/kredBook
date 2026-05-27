@@ -332,7 +332,7 @@ export default function OrderDetailScreen() {
           <EntryCustomerCard
             customerName={customerName}
             customerPhone={customerPhone}
-            previousBalance={order.previous_balance}
+            onCustomerTap={() => router.push(`/(main)/people/${order.customer_id}` as never)}
           />
         ) : null}
 
