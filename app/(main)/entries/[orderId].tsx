@@ -3,18 +3,17 @@ import Loader from "@/src/components/feedback/Loader";
 import { useToast } from "@/src/components/feedback/Toast";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
 import DetailHeader from "@/src/components/layer2/DetailHeader";
-import EntryDetailHero from "@/src/components/entries/EntryDetailHero";
+import EntryHeroCard from "@/src/components/entries/EntryHeroCard";
 import EntryQuickActions from "@/src/components/entries/EntryQuickActions";
 import EntryCustomerCard from "@/src/components/entries/EntryCustomerCard";
-import EntryItemsSummaryCard from "@/src/components/entries/EntryItemsSummaryCard";
+import EntryItemsSection from "@/src/components/entries/EntryItemsSection";
 import EntryPaymentsSection from "@/src/components/entries/EntryPaymentsSection";
-import EntryStickyActionBar from "@/src/components/entries/EntryStickyActionBar";
+import EntryStickyBar from "@/src/components/entries/EntryStickyBar";
 import { usePayments } from "@/src/hooks/usePayments";
 import { useAuthStore } from "@/src/store/authStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { generateBillPdf } from "@/src/utils/generateBillPdf";
 import { formatDate } from "@/src/utils/helper";
-import { formatINR } from "@/src/utils/format";
 import { buildEntryShareMessage } from "@/src/utils/shareTemplates";
 import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -25,6 +24,7 @@ import { Alert, Linking, ScrollView } from "react-native";
 import { Phone } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { orderKeys, useOrderDetail } from "@/src/hooks/useEntries";
+import { formatINR } from "@/src/utils/format";
 
 export default function OrderDetailScreen() {
   const { colors, spacing } = useTheme();
@@ -132,7 +132,7 @@ export default function OrderDetailScreen() {
   }, [customerPhone, handleCall, colors.primary]);
 
   // ── Send Entry ──────────────────────────────────────────────────
-  const handleSendEntry = useCallback(async () => {
+  const handleShareLedgerLink = useCallback(async () => {
     if (!order) return;
     setSendingEntry(true);
     try {
@@ -184,8 +184,19 @@ export default function OrderDetailScreen() {
       } else {
         throw new Error("sharing-unavailable");
       }
-    } catch (error: any) {
-      // Fallback: pre-filled WhatsApp message
+    } catch (_error: any) {
+      showToast({
+        message: `Error sharing PDF: ${_error?.message || "Unknown error"}`,
+        type: "error",
+      });
+    } finally {
+      setSendingEntry(false);
+    }
+  }, [order, customerName, profile, showToast, itemsSubtotal, taxAmount]);
+
+  const handleWhatsApp = useCallback(async () => {
+    if (!order) return;
+    try {
       const cleanPhone = customerPhone.replace(/\D/g, "");
       const msg = encodeURIComponent(
         buildEntryShareMessage({
@@ -198,36 +209,22 @@ export default function OrderDetailScreen() {
         }),
       );
       const wa = `https://wa.me/91${cleanPhone}?text=${msg}`;
+      await Linking.openURL(wa);
       showToast({
-        message:
-          error?.message === "sharing-unavailable"
-            ? "Sharing unavailable, opened WhatsApp"
-            : "Entry sent via WhatsApp",
+        message: "WhatsApp opened with Entry details",
         type: "success",
       });
-      Linking.openURL(wa).catch(() => {
-        showToast({
-          message: "Cannot open WhatsApp",
-          type: "error",
-        });
-        Alert.alert(
-          "Cannot open WhatsApp",
-          "Please install WhatsApp and try again.",
-        );
+    } catch (error: any) {
+      showToast({
+        message: "Cannot open WhatsApp",
+        type: "error",
       });
-    } finally {
-      setSendingEntry(false);
+      Alert.alert(
+        "Cannot open WhatsApp",
+        "Please install WhatsApp and try again.",
+      );
     }
-  }, [
-    order,
-    customerName,
-    customerPhone,
-    profile,
-    showToast,
-    itemsSubtotal,
-    taxAmount,
-    shareLocale,
-  ]);
+  }, [order, customerName, customerPhone, profile, showToast, shareLocale]);
 
   // ── Payment success ─────────────────────────────────────────────
   const handlePaymentSuccess = useCallback(() => {
@@ -310,19 +307,23 @@ export default function OrderDetailScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: 100 }}
       >
-        {order ? <EntryDetailHero order={order} /> : null}
+        {order ? (
+          <EntryHeroCard
+            balanceDue={order.balance_due}
+            status={order.status}
+            billNumber={order.bill_number}
+            createdAt={order.created_at}
+            isOverdue={isOverdue}
+          />
+        ) : null}
 
         {order ? (
           <EntryQuickActions
-            orderId={order.id}
-            orderTotalAmount={order.total_amount}
-            orderCreatedAt={order.created_at}
-            orderDueDate={dueDateValue}
-            customerName={customerName}
-            customerPhone={customerPhone}
             onEdit={() =>
               router.push(`/(main)/entries/${order.id}/edit` as never)
             }
+            onShare={handleShareLedgerLink}
+            onWhatsApp={handleWhatsApp}
             isPaid={isPaid}
           />
         ) : null}
@@ -336,7 +337,7 @@ export default function OrderDetailScreen() {
         ) : null}
 
         {order ? (
-          <EntryItemsSummaryCard
+          <EntryItemsSection
             order={order}
             itemsSubtotal={itemsSubtotal}
             taxAmount={taxAmount}
@@ -370,10 +371,10 @@ export default function OrderDetailScreen() {
         }
       />
       {order && (
-        <EntryStickyActionBar
+        <EntryStickyBar
           isPaid={isPaid}
           sendingEntry={sendingEntry}
-          onSendEntry={handleSendEntry}
+          onSendEntry={handleShareLedgerLink} // Changed from handleSendEntry
           onRecordPayment={openPaymentFlow}
         />
       )}

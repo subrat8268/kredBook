@@ -53,16 +53,22 @@ export default function EntryCustomerCard({
             style={{
               ...typography.caption,
               marginBottom: spacing.xs,
-              color: previousBalance === 0 ? colors.textMuted : colors.textSecondary, // Demote if zero
+              color: previousBalance === 0 ? colors.textMuted : colors.textSecondary,
             }}
           >
             Previous Balance
           </Text>
-          <MoneyAmount
-            value={previousBalance}
-            color={previousBalance > 0 ? colors.danger : colors.textPrimary}
-            style={{ ...typography.cardTitle, fontWeight: "700" }}
-          />
+          {previousBalance === 0 ? (
+            <Text style={{ ...typography.cardTitle, fontWeight: "700", color: colors.textMuted }}>
+              ₹0 (Cleared)
+            </Text>
+          ) : (
+            <MoneyAmount
+              value={previousBalance}
+              color={previousBalance > 0 ? colors.danger : colors.textPrimary}
+              style={{ ...typography.cardTitle, fontWeight: "700" }}
+            />
+          )}
         </View>
       </View>
     </View>

@@ -1,5 +1,6 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
 import MoneyAmount from "@/src/components/ui/MoneyAmount";
+import StatusBadge from "@/src/components/layer2/StatusBadge";
 import { Text, View } from "react-native";
 import type { Order } from "@/src/types/entry";
 
@@ -215,7 +216,14 @@ export default function EntryItemsSummaryCard({
         }}
       >
         <Text style={{ ...typography.screenTitle }}>Grand Total</Text>
-        <MoneyAmount value={grandTotal} variant="title" />
+        <View style={{ alignItems: "flex-end" }}>
+          <MoneyAmount value={grandTotal} variant="title" />
+          <View style={{ marginTop: spacing.xs }}>
+            <StatusBadge
+              status={statusKey as "Paid" | "Pending" | "Overdue" | "Partially Paid"}
+            />
+          </View>
+        </View>
       </View>
     </View>
   );

@@ -4,34 +4,35 @@ import { Text, View } from "react-native";
 import StatusBadge from "@/src/components/layer2/StatusBadge";
 import MoneyAmount from "@/src/components/ui/MoneyAmount";
 import { formatDate } from "@/src/utils/helper";
-import type { Order } from "@/src/types/entry";
 
 type Props = {
-  order: Order;
+  balanceDue: number;
+  status: "Paid" | "Pending" | "Overdue" | "Partially Paid";
+  billNumber: string;
+  createdAt: string;
+  isOverdue: boolean;
 };
 
-export default function EntryDetailHero({ order }: Props) {
+export default function EntryHeroCard({
+  balanceDue,
+  status,
+  billNumber,
+  createdAt,
+  isOverdue,
+}: Props) {
   const { colors, gradients, typography } = useTheme();
 
-  const dueDateValue =
-    order && "due_date" in order && typeof order.due_date === "string"
-      ? order.due_date
-      : null;
-  const isOverdue =
-    !!order &&
-    order.status !== "Paid" &&
-    !!dueDateValue &&
-    new Date(dueDateValue) < new Date(new Date().setHours(0, 0, 0, 0));
-  const statusKey = isOverdue ? "Overdue" : (order?.status ?? "Pending");
-
   const getGradient = () => {
-    switch (statusKey) {
+    // Determine the actual status key based on isOverdue prop
+    const effectiveStatus = isOverdue ? "Overdue" : status;
+
+    switch (effectiveStatus) {
       case "Paid":
         return gradients.orderPaid;
       case "Partially Paid":
-        return gradients.orderPartial;
+        return gradients.orderPartial; // This is amber, need teal/info
       case "Pending":
-        return gradients.orderPending;
+        return gradients.orderPending; // This is amber as well
       case "Overdue":
         return gradients.orderOverdue;
       default:
@@ -60,7 +61,7 @@ export default function EntryDetailHero({ order }: Props) {
       />
       <View
         className="absolute -right-16 -top-16 w-48 h-48 rounded-full"
-        style={{ backgroundColor: colors.dashboard.heroOrb + "08" }} // Reduced opacity
+        style={{ backgroundColor: colors.dashboard.heroOrb + "08" }}
       />
       <Text
         style={[
@@ -68,30 +69,28 @@ export default function EntryDetailHero({ order }: Props) {
           {
             color: colors.dashboard.heroTextMuted,
             letterSpacing: 0.8,
-            marginBottom: 2, // Tightened spacing
+            marginBottom: 2,
           },
         ]}
       >
-        Balance due
+        BALANCE DUE
       </Text>
 
       <MoneyAmount
-        value={order.balance_due}
+        value={balanceDue}
         style={[
           typography.heroAmount,
           {
             color: colors.dashboard.heroText,
-            marginTop: 2, // Tightened spacing
-            marginBottom: 4, // Tightened spacing
+            marginTop: 2,
+            marginBottom: 4,
           },
         ]}
       />
 
       <View className="mt-2 flex-row items-center justify-between">
         <StatusBadge
-          status={
-            statusKey as "Paid" | "Pending" | "Overdue" | "Partially Paid"
-          }
+          status={status} // Use the original status prop for the badge
         />
         <Text
           className="text-overline"
@@ -101,7 +100,7 @@ export default function EntryDetailHero({ order }: Props) {
           }}
           numberOfLines={1}
         >
-          {formatDate(order.created_at)} · #{order.bill_number}
+          {formatDate(createdAt)} · #{billNumber}
         </Text>
       </View>
     </LinearGradient>

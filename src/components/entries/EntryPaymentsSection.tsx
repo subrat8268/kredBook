@@ -1,9 +1,36 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
-import Loader from "@/src/components/feedback/Loader";
 import MoneyAmount from "@/src/components/ui/MoneyAmount";
 import { formatDate } from "@/src/utils/helper";
 import { Text, View } from "react-native";
 import EmptyState from "@/src/components/feedback/EmptyState";
+
+// Internal component for Payment Row Skeleton
+function PaymentRowSkeleton() {
+  const { colors, radius, spacing } = useTheme();
+  return (
+    <View
+      style={{
+        backgroundColor: colors.surfaceAlt,
+        borderRadius: radius.lg,
+        padding: spacing.md,
+        borderWidth: 1,
+        borderColor: colors.border,
+        marginBottom: spacing.sm,
+      }}
+    >
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View>
+          <View style={{ width: 100, height: 16, backgroundColor: colors.borderLight, borderRadius: 4 }} />
+          <View style={{ width: 60, height: 12, backgroundColor: colors.borderLight, borderRadius: 4, marginTop: spacing.xs }} />
+        </View>
+        <View style={{ alignItems: "flex-end" }}>
+          <View style={{ width: 80, height: 18, backgroundColor: colors.borderLight, borderRadius: 4 }} />
+          <View style={{ width: 70, height: 12, backgroundColor: colors.borderLight, borderRadius: 4, marginTop: spacing.xs }} />
+        </View>
+      </View>
+    </View>
+  );
+}
 
 type PaymentRow = {
   payment: {
@@ -53,7 +80,11 @@ export default function EntryPaymentsSection({
       </View>
 
       {paymentsLoading ? (
-        <Loader />
+        <View>
+          <PaymentRowSkeleton />
+          <PaymentRowSkeleton />
+          <PaymentRowSkeleton />
+        </View>
       ) : paymentRows.length === 0 ? (
         <EmptyState
           title="No payments recorded yet"
