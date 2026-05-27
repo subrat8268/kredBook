@@ -77,6 +77,7 @@
 - **Customer Detail sticky collect bar** — `useSafeAreaInsets` must be wired so `paddingBottom` respects Android gesture nav area. This is the last open item in 4.1.5d before closeout.
 - **Global FAB removed from Customer Detail** — Detail screens use contextual actions only. FAB belongs on broad/global screens (Dashboard, Customer List, Entry List).
 - **Header icons on Customer Detail** — Share and PDF removed from header; they exist in Quick Actions only. Call and WhatsApp remain in header.
+- **Shared detail header migration** — `DetailHeader` now powers Entry Detail, Entry Edit, Customer Detail, and Profile Edit. Keep future detail screens on the same back/action chip pattern.
 
 ---
 

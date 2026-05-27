@@ -3,6 +3,7 @@ import Loader from "@/src/components/feedback/Loader";
 import { useToast } from "@/src/components/feedback/Toast";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
 import StatusBadge from "@/src/components/layer2/StatusBadge";
+import DetailHeader from "@/src/components/layer2/DetailHeader";
 import Avatar from "@/src/components/ui/Avatar";
 import Button from "@/src/components/ui/Button";
 import Card from "@/src/components/ui/Card";
@@ -11,7 +12,6 @@ import { orderKeys, useOrderDetail } from "@/src/hooks/useEntries";
 
 import { usePayments } from "@/src/hooks/usePayments";
 import { useAuthStore } from "@/src/store/authStore";
-import { supabase } from "@/src/services/supabase";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { generateBillPdf } from "@/src/utils/generateBillPdf";
 import { formatDate } from "@/src/utils/helper";
@@ -21,16 +21,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useTranslation } from "react-i18next";
-import { MessageCircle, Pencil, Phone, Receipt, Share2, Wallet } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { MessageCircle, Pencil, Phone, Receipt, Wallet } from "lucide-react-native";
+import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Alert,
-  ActivityIndicator,
-  Linking,
-  Share,
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -71,7 +67,6 @@ export default function OrderDetailScreen() {
 
   const paymentModalRef = useRef<any>(null);
   const [sendingEntry, setSendingEntry] = useState(false);
-  const [sharingLedgerLink, setSharingLedgerLink] = useState(false);
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
   const { show: showToast } = useToast();
 
@@ -137,37 +132,6 @@ export default function OrderDetailScreen() {
     if (customerPhone) Linking.openURL(`tel:${customerPhone}`);
   };
   
-  const handleWhatsApp = () => {
-    if (customerPhone) {
-      const message = encodeURIComponent(
-        `Hi ${customerName.split(" ")[0]}, this is a reminder about your outstanding entry #${order?.bill_number} of ${formatINR(order?.balance_due ?? 0)}. Please clear when convenient. - KredBook`
-      );
-      Linking.openURL(`whatsapp://send?phone=${customerPhone.replace(/\D/g, '')}&text=${message}`);
-    }
-  };
-
-  const handleShareLedgerLink = useCallback(async () => {
-    if (!order?.customer_id) return;
-
-    setSharingLedgerLink(true);
-    try {
-      const { data, error } = await supabase.rpc("upsert_access_token", {
-        p_party_id: order.customer_id,
-      });
-      if (error) throw error;
-
-      const token = typeof data === "string" ? data : (data as { token?: string } | null)?.token;
-      if (!token) throw new Error("Token generation failed");
-
-      const url = `https://kredbook.app/l/${token}`;
-      await Share.share({ message: `View your ledger: ${url}` });
-    } catch {
-      showToast({ message: "Could not create share link.", type: "error" });
-    } finally {
-      setSharingLedgerLink(false);
-    }
-  }, [order?.customer_id, showToast]);
-
   // ── Send Entry ──────────────────────────────────────────────────
   const handleSendEntry = useCallback(async () => {
     if (!order) return;
@@ -328,88 +292,36 @@ export default function OrderDetailScreen() {
     );
 
   const isPaid = order.status === "Paid";
+  const headerActions: { key: string; icon: ReactNode; onPress: () => void; accessibilityLabel?: string }[] = [];
+
+  if (!isPaid) {
+    headerActions.push({
+      key: "edit-entry",
+      icon: <Pencil size={20} color={colors.textSecondary} strokeWidth={2} />,
+      onPress: () => router.push(`/(main)/entries/${order.id}/edit` as never),
+      accessibilityLabel: "Edit entry",
+    });
+
+    if (customerPhone) {
+      headerActions.push({
+        key: "call-customer",
+        icon: <Phone size={20} color={colors.primary} strokeWidth={2} />,
+        onPress: handleCall,
+        accessibilityLabel: "Call customer",
+      });
+    }
+  }
 
   return (
     <SafeAreaView edges={["top", "bottom"]} className="flex-1 bg-background dark:bg-background-dark">
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* ── Custom header ─────────────────────────── */}
-      <View
-        style={{
-          paddingHorizontal: spacing.screenPadding,
-          paddingTop: spacing.sm,
-          paddingBottom: spacing.xs,
-          backgroundColor: colors.surface,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => router.back()}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Text style={{ fontSize: 18, color: colors.textPrimary }}>←</Text>
-        </TouchableOpacity>
-        <Text style={{ ...typography.cardTitle }} numberOfLines={1}>
-          Entry #{order.bill_number}
-        </Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          {!isPaid && (
-            <>
-              <TouchableOpacity
-                onPress={() => {
-                  router.push(`/(main)/entries/${order.id}/edit` as never);
-                }}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Pencil size={20} color={colors.textSecondary} strokeWidth={2} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleShareLedgerLink}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                disabled={sharingLedgerLink}
-              >
-                {sharingLedgerLink ? (
-                  <ActivityIndicator size="small" color={colors.textSecondary} />
-                ) : (
-                  <Share2 size={20} color={colors.textSecondary} strokeWidth={2} />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSendEntry}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <MessageCircle
-                  size={20}
-                  color={colors.textSecondary}
-                  strokeWidth={2}
-                />
-              </TouchableOpacity>
-            </>
-          )}
-
-          {/* Quick Remind buttons (show only when not paid and has phone) */}
-          {!isPaid && customerPhone && (
-            <>
-              <TouchableOpacity
-                onPress={handleCall}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Phone size={20} color={colors.primary} strokeWidth={2} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleWhatsApp}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <MessageCircle size={20} color={colors.success} strokeWidth={2} />
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
-      </View>
+      <DetailHeader
+        title={`Entry #${order.bill_number}`}
+        subtitle={formatDate(order.created_at)}
+        onBack={() => router.back()}
+        actions={headerActions}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

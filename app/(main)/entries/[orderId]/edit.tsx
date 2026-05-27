@@ -3,6 +3,7 @@ import { useToast } from "@/src/components/feedback/Toast";
 import BillFooter from "@/src/components/orders/BillFooter";
 import OrderSummary from "@/src/components/orders/OrderSummary";
 import OrderItemCard from "@/src/components/orders/OrderItemCard";
+import DetailHeader from "@/src/components/layer2/DetailHeader";
 import Input from "@/src/components/ui/Input";
 import { useOrderDetail, useUpdateOrder } from "@/src/hooks/useEntries";
 import { useAuthStore } from "@/src/store/authStore";
@@ -14,7 +15,6 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import {
   AlertCircle,
-  ArrowLeft,
   ChevronDown,
   ChevronUp,
   Pencil,
@@ -294,40 +294,15 @@ export default function EditOrderScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Header */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          backgroundColor: colors.surface,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border,
-        }}
-      >
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color={colors.textPrimary} />
-        </TouchableOpacity>
-        <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: "600",
-              color: colors.textPrimary,
-            }}
-          >
-            Edit Entry {order.bill_number}
-          </Text>
-          {(order.edit_count ?? 0) > 0 && (
-            <Text style={{ fontSize: 12, color: colors.textSecondary }}>
-              Edited {order.edit_count}{" "}
-              {order.edit_count === 1 ? "time" : "times"}
-            </Text>
-          )}
-        </View>
-      </View>
+      <DetailHeader
+        title={`Edit Entry ${order.bill_number}`}
+        subtitle={
+          (order.edit_count ?? 0) > 0
+            ? `Edited ${order.edit_count} ${order.edit_count === 1 ? "time" : "times"}`
+            : undefined
+        }
+        onBack={() => router.back()}
+      />
 
       {/* Warning Banner */}
       <View

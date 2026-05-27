@@ -3,7 +3,7 @@ import React, { memo, useRef } from "react";
 import { ActivityIndicator, Animated, Pressable, Text, View } from "react-native";
 
 type Props = {
-  variant?: "primary" | "secondary" | "ghost" | "danger";
+  variant?: keyof typeof variantStyles;
   size?: "sm" | "md" | "lg";
   loading?: boolean;
   disabled?: boolean;
@@ -28,6 +28,13 @@ const variantStyles = {
     text: "#FFFFFF",
     pressedBg: colors.primaryDark,
     shadow: true,
+  },
+  outline: {
+    bg: colors.surface,
+    text: colors.primary,
+    pressedBg: colors.primary,
+    border: colors.primary,
+    shadow: false,
   },
   secondary: {
     bg: colors.surface,
@@ -66,7 +73,7 @@ export default memo(function Button({
 }: Props) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const content = title ?? children ?? "";
-  const style = variantStyles[variant];
+  const style = variantStyles[variant] ?? variantStyles.primary;
   const sizeToken = sizeTokens[size];
 
   const handlePressIn = () => {
@@ -100,7 +107,7 @@ export default memo(function Button({
             borderRadius: radius.lg,
             backgroundColor: disabled ? colors.border : style.bg,
             borderWidth: style.bg ? 1 : 0,
-            borderColor: style.pressedBg,
+            borderColor: style.border ?? style.pressedBg,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",

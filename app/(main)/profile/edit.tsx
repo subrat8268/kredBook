@@ -12,12 +12,13 @@ import { uploadBusinessLogo } from "@/src/api/upload";
 import { useToast } from "@/src/components/feedback/Toast";
 import Button from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
+import DetailHeader from "@/src/components/layer2/DetailHeader";
 import { supabase } from "@/src/services/supabase";
 import { useAuthStore } from "@/src/store/authStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { pickImageFromLibrary } from "@/src/utils/imagePicker";
 import { Stack, useRouter } from "expo-router";
-import { ArrowLeft, Building2, Upload, Wallet } from "lucide-react-native";
+import { Building2, Upload, Wallet } from "lucide-react-native";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -151,37 +152,7 @@ export default function ProfileEditScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Header */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: spacing.md,
-          paddingVertical: spacing.sm,
-          backgroundColor: colors.surface,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border,
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={{ padding: spacing.xs }}
-        >
-          <ArrowLeft size={24} color={colors.textPrimary} />
-        </TouchableOpacity>
-        <Text
-          style={{
-            flex: 1,
-            marginLeft: spacing.sm,
-            fontSize: 18,
-            fontWeight: "600",
-            color: colors.textPrimary,
-          }}
-        >
-          Edit Profile
-        </Text>
-      </View>
+      <DetailHeader title="Edit Profile" onBack={() => router.back()} />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
