@@ -385,8 +385,8 @@ export const gradients = {
     end: "#D97706", // Amber-600
   },
   orderPending: {
-    start: "#9CA3AF", // Gray-400
-    end: "#6B7280", // Gray-500
+    start: "#FDBA74", // Orange-300, a softer golden orange
+    end: "#EA580C", // Orange-600, a deeper orange
   },
   orderOverdue: {
     start: "#EF4444", // Red-500
@@ -460,8 +460,8 @@ export const darkGradients: GradientTokens = {
     end: "#92400E",
   },
   orderPending: {
-    start: "#4B5563",
-    end: "#374151",
+    start: "#4A3411", // from darkColors.pending.bg, deep amber
+    end: "#9A5B02", // A slightly brighter, warmer dark amber
   },
   orderOverdue: {
     start: "#B91C1C",

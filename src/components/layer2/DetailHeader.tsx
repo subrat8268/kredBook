@@ -20,8 +20,6 @@ type Props = {
   actions?: HeaderAction[];
 };
 
-const ICON_BUTTON_SIZE = 42;
-
 export default memo(function DetailHeader({
   title,
   subtitle,

@@ -66,7 +66,8 @@ export default function TabLayout() {
     pathname === "/entries/create" ||
     pathname === "/(main)/entries/create" ||
     pathname.startsWith("/people/") ||
-    pathname.startsWith("/(main)/people/");
+    pathname.startsWith("/(main)/people/") ||
+    pathname.startsWith("/entries/");
 
   return (
     <View style={{ flex: 1 }}>

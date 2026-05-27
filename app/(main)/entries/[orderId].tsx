@@ -2,14 +2,13 @@ import EmptyState from "@/src/components/feedback/EmptyState";
 import Loader from "@/src/components/feedback/Loader";
 import { useToast } from "@/src/components/feedback/Toast";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
-import StatusBadge from "@/src/components/layer2/StatusBadge";
 import DetailHeader from "@/src/components/layer2/DetailHeader";
-import Avatar from "@/src/components/ui/Avatar";
-import Button from "@/src/components/ui/Button";
-import Card from "@/src/components/ui/Card";
-import MoneyAmount from "@/src/components/ui/MoneyAmount";
-import { orderKeys, useOrderDetail } from "@/src/hooks/useEntries";
-
+import EntryDetailHero from "@/src/components/entries/EntryDetailHero";
+import EntryQuickActions from "@/src/components/entries/EntryQuickActions";
+import EntryCustomerCard from "@/src/components/entries/EntryCustomerCard";
+import EntryItemsSummaryCard from "@/src/components/entries/EntryItemsSummaryCard";
+import EntryPaymentsSection from "@/src/components/entries/EntryPaymentsSection";
+import EntryStickyActionBar from "@/src/components/entries/EntryStickyActionBar";
 import { usePayments } from "@/src/hooks/usePayments";
 import { useAuthStore } from "@/src/store/authStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
@@ -21,18 +20,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useTranslation } from "react-i18next";
-import { MessageCircle, Pencil, Phone, Receipt, Wallet } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
-import {
-  Alert,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Alert, Linking, ScrollView } from "react-native";
+import { Phone } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { orderKeys, useOrderDetail } from "@/src/hooks/useEntries";
 
 export default function OrderDetailScreen() {
-  const { colors, radius, spacing, typography } = useTheme();
+  const { colors, spacing } = useTheme();
   const { i18n } = useTranslation();
   const shareLocale = useMemo(
     () => (i18n.language?.toLowerCase().startsWith("hi") ? "hi" : "en"),
@@ -44,14 +39,6 @@ export default function OrderDetailScreen() {
     NEFT: { bg: colors.overdue.bg, text: colors.warning },
     Draft: { bg: colors.pending.bg, text: colors.pending.text },
     Cheque: { bg: colors.successBg, text: colors.primaryDark },
-  };
-
-  const SHADOW = {
-    shadowColor: colors.textPrimary,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
   };
 
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
@@ -127,11 +114,23 @@ export default function OrderDetailScreen() {
     });
   }, [sortedPayments, grandTotal]);
 
-  // Quick reminder handlers
-  const handleCall = () => {
+  const handleCall = useCallback(() => {
     if (customerPhone) Linking.openURL(`tel:${customerPhone}`);
-  };
-  
+  }, [customerPhone]);
+
+  const headerActions = useMemo(() => {
+    const actions = [];
+    if (customerPhone) {
+      actions.push({
+        key: "call-customer",
+        icon: <Phone size={20} color={colors.primary} strokeWidth={2} />,
+        onPress: handleCall,
+        accessibilityLabel: "Call customer",
+      });
+    }
+    return actions;
+  }, [customerPhone, handleCall, colors.primary]);
+
   // ── Send Entry ──────────────────────────────────────────────────
   const handleSendEntry = useCallback(async () => {
     if (!order) return;
@@ -292,28 +291,12 @@ export default function OrderDetailScreen() {
     );
 
   const isPaid = order.status === "Paid";
-  const headerActions: { key: string; icon: ReactNode; onPress: () => void; accessibilityLabel?: string }[] = [];
-
-  if (!isPaid) {
-    headerActions.push({
-      key: "edit-entry",
-      icon: <Pencil size={20} color={colors.textSecondary} strokeWidth={2} />,
-      onPress: () => router.push(`/(main)/entries/${order.id}/edit` as never),
-      accessibilityLabel: "Edit entry",
-    });
-
-    if (customerPhone) {
-      headerActions.push({
-        key: "call-customer",
-        icon: <Phone size={20} color={colors.primary} strokeWidth={2} />,
-        onPress: handleCall,
-        accessibilityLabel: "Call customer",
-      });
-    }
-  }
 
   return (
-    <SafeAreaView edges={["top", "bottom"]} className="flex-1 bg-background dark:bg-background-dark">
+    <SafeAreaView
+      edges={["top", "bottom"]}
+      className="flex-1 bg-background dark:bg-background-dark"
+    >
       <Stack.Screen options={{ headerShown: false }} />
 
       <DetailHeader
@@ -325,486 +308,56 @@ export default function OrderDetailScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: 140 }}
+        contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: 100 }}
       >
-        <View
-          style={[
-            {
-              backgroundColor: colors.surface,
-              borderRadius: spacing.cardRadius,
-              marginHorizontal: spacing.screenPadding,
-              marginBottom: spacing.sm,
-              padding: spacing.lg,
-              borderWidth: 1,
-              borderColor: colors.border,
-            },
-            SHADOW,
-          ]}
-        >
-          <Text style={typography.caption}>Balance due</Text>
-          <MoneyAmount
-            value={order.balance_due}
-            variant="hero"
-            color={order.balance_due > 0 ? colors.danger : colors.textPrimary}
-            style={{ marginTop: spacing.xs }}
+        {order ? <EntryDetailHero order={order} /> : null}
+
+        {order ? (
+          <EntryQuickActions
+            orderId={order.id}
+            orderTotalAmount={order.total_amount}
+            orderCreatedAt={order.created_at}
+            orderDueDate={dueDateValue}
+            customerName={customerName}
+            customerPhone={customerPhone}
+            onEdit={() =>
+              router.push(`/(main)/entries/${order.id}/edit` as never)
+            }
+            isPaid={isPaid}
           />
-          <View style={{ flexDirection: "row", alignItems: "center", marginTop: spacing.sm, gap: spacing.sm }}>
-            <StatusBadge status={statusKey as "Paid" | "Pending" | "Overdue" | "Partially Paid"} />
-            <Text style={typography.caption}>
-              {formatDate(order.created_at)} · Entry #{order.bill_number}
-            </Text>
-          </View>
-        </View>
+        ) : null}
 
-        <View style={{ flexDirection: "row", gap: spacing.sm, marginHorizontal: spacing.screenPadding, marginBottom: spacing.sm }}>
-          <View style={{ flex: 1 }}>
-            <Card
-              title="Total"
-              value={formatINR(grandTotal)}
-              icon={<Receipt size={18} color={colors.textPrimary} strokeWidth={2} />}
-            />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Card
-              title="Paid"
-              value={formatINR(paidAmount)}
-              icon={<Wallet size={18} color={colors.success} strokeWidth={2} />}
-            />
-          </View>
-        </View>
-
-        {/* ───────────────────────────────────────── */}
-        {/* 2. Person Card */}
-        {/* ───────────────────────────────────────── */}
-        <View
-          style={[
-            {
-              backgroundColor: colors.surface,
-              borderRadius: spacing.cardRadius,
-              marginHorizontal: spacing.screenPadding,
-              marginBottom: spacing.sm,
-              padding: spacing.lg,
-            },
-            SHADOW,
-          ]}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View style={{ marginRight: spacing.md, flexShrink: 0 }}>
-              <Avatar name={customerName} size="md" />
-            </View>
-
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  ...typography.cardTitle,
-                  marginBottom: spacing.xs,
-                }}
-                numberOfLines={1}
-              >
-                {customerName}
-              </Text>
-              <Text style={typography.small}>
-                +91 {customerPhone}
-              </Text>
-            </View>
-
-            <View style={{ alignItems: "flex-end", marginLeft: 8 }}>
-              <Text
-                style={{
-                  ...typography.caption,
-                  marginBottom: spacing.xs,
-                }}
-              >
-                Previous Balance
-              </Text>
-              <MoneyAmount
-                value={order.previous_balance}
-                color={
-                  order.previous_balance > 0 ? colors.danger : colors.textPrimary
-                }
-                style={{ ...typography.cardTitle, fontWeight: "700" }}
-              />
-            </View>
-          </View>
-        </View>
-
-        {/* ───────────────────────────────────────── */}
-        {/* 2. Entry Items                                  */}
-        {/* ───────────────────────────────────────── */}
-        <View
-          style={[
-            {
-              backgroundColor: colors.surface,
-              borderTopLeftRadius: spacing.cardRadius,
-              borderTopRightRadius: spacing.cardRadius,
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-              marginHorizontal: spacing.screenPadding,
-            },
-            SHADOW,
-          ]}
-        >
-          <Text
-            style={{
-              ...typography.label,
-              color: colors.textSecondary,
-              padding: spacing.lg,
-              paddingBottom: 10,
-            }}
-          >
-            Items
-          </Text>
-
-          {order.items.map((item, idx) => (
-            <View key={item.id ?? String(idx)}>
-              {idx > 0 && (
-                <View
-                  style={{
-                    height: 1,
-                    backgroundColor: colors.border,
-                    marginHorizontal: spacing.lg,
-                  }}
-                />
-              )}
-              <View
-                style={{
-                  flexDirection: "row",
-                  paddingHorizontal: spacing.lg,
-                  paddingVertical: spacing.sm,
-                  alignItems: "center",
-                }}
-              >
-                {/* Item name */}
-                <Text
-                  style={{ flex: 1, fontSize: 15, color: colors.textPrimary }}
-                  numberOfLines={1}
-                >
-                  {item.product_name}
-                  {item.variant_name ? ` (${item.variant_name})` : ""}
-                </Text>
-                {/* qty × price */}
-                <Text
-                  style={{
-                    fontSize: 13,
-                    color: colors.textSecondary,
-                    marginRight: 16,
-                    flexShrink: 0,
-                  }}
-                >
-                  {item.quantity} × ₹{fmt(item.price)}
-                </Text>
-                {/* line total */}
-                <Text
-                  style={{
-                    fontSize: 15,
-                    fontWeight: "700",
-                    color: colors.textPrimary,
-                    minWidth: 64,
-                    textAlign: "right",
-                    flexShrink: 0,
-                  }}
-                >
-                  ₹{fmt(item.subtotal)}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {/* ───────────────────────────────────────── */}
-        {/* 3. Entry Summary (flush below items card)        */}
-        {/* ───────────────────────────────────────── */}
-        <View
-          style={[
-            {
-              backgroundColor: colors.surface,
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: 0,
-              borderBottomLeftRadius: spacing.cardRadius,
-              borderBottomRightRadius: spacing.cardRadius,
-              marginHorizontal: spacing.screenPadding,
-              marginBottom: spacing.sm,
-              paddingHorizontal: spacing.lg,
-              paddingTop: 4,
-              paddingBottom: spacing.lg,
-            },
-            SHADOW,
-          ]}
-        >
-          {/* Top divider separating items from summary */}
-          <View
-            style={{
-              height: 1,
-              backgroundColor: colors.border,
-              marginBottom: spacing.sm,
-            }}
+        {order ? (
+          <EntryCustomerCard
+            customerName={customerName}
+            customerPhone={customerPhone}
+            previousBalance={order.previous_balance}
           />
+        ) : null}
 
-          {order.note && order.note.trim() ? (
-            <View style={{ marginBottom: spacing.sm }}>
-              <Text style={{ ...typography.caption, color: colors.textSecondary }}>
-                Note
-              </Text>
-              <Text style={{ ...typography.body, color: colors.textPrimary, marginTop: spacing.xs }}>
-                {order.note}
-              </Text>
-            </View>
-          ) : null}
-
-          {/* Subtotal row */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingVertical: spacing.xs,
-            }}
-          >
-            <Text style={typography.subtitle}>
-              Subtotal
-            </Text>
-            <MoneyAmount
-              value={itemsSubtotal}
-              style={[typography.subtitle, { color: colors.textPrimary }]}
-            />
-          </View>
-
-          {/* GST row — only if tax_percent > 0 */}
-          {order.tax_percent > 0 && (
-             <View
-               style={{
-                 flexDirection: "row",
-                 justifyContent: "space-between",
-                 paddingVertical: spacing.xs,
-               }}
-             >
-               <Text style={typography.subtitle}>
-                 GST ({order.tax_percent}%)
-               </Text>
-               <MoneyAmount
-                 value={taxAmount}
-                 style={[typography.subtitle, { color: colors.textPrimary }]}
-               />
-             </View>
-           )}
-
-          {/* Loading Charge row — only if > 0 */}
-          {order.loading_charge > 0 && (
-             <View
-               style={{
-                 flexDirection: "row",
-                 justifyContent: "space-between",
-                 paddingVertical: spacing.xs,
-               }}
-             >
-               <Text style={typography.subtitle}>
-                 Loading Charge
-               </Text>
-               <MoneyAmount
-                 value={order.loading_charge}
-                 style={typography.subtitle}
-               />
-             </View>
-           )}
-
-          {/* Previous balance row — only if > 0 */}
-          {order.previous_balance > 0 && (
-             <View
-               style={{
-                 flexDirection: "row",
-                 justifyContent: "space-between",
-                 paddingVertical: spacing.xs,
-               }}
-             >
-               <Text style={[typography.subtitle, { color: colors.danger }]}>
-                 Previous Balance
-               </Text>
-               <MoneyAmount
-                 value={order.previous_balance}
-                 color={colors.danger}
-                 style={typography.subtitle}
-               />
-             </View>
-           )}
-
-          {/* Divider before Grand Total */}
-          <View
-            style={{
-              height: 1,
-              backgroundColor: colors.border,
-              marginVertical: spacing.sm,
-            }}
+        {order ? (
+          <EntryItemsSummaryCard
+            order={order}
+            itemsSubtotal={itemsSubtotal}
+            taxAmount={taxAmount}
+            grandTotal={grandTotal}
+            statusKey={statusKey}
+            fmt={fmt}
           />
+        ) : null}
 
-          {/* Grand Total + Status chip */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            }}
-          >
-            <Text style={{ ...typography.screenTitle }}>Grand Total</Text>
-            <View style={{ alignItems: "flex-end" }}>
-              <MoneyAmount value={grandTotal} variant="title" />
-              <View style={{ marginTop: spacing.xs }}>
-                <StatusBadge status={statusKey as "Paid" | "Pending" | "Overdue" | "Partially Paid"} />
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* ───────────────────────────────────────── */}
-        {/* 4. Payment History                              */}
-        {/* ───────────────────────────────────────── */}
-        <View
-          style={[
-            {
-              backgroundColor: colors.surface,
-              borderRadius: spacing.cardRadius,
-              marginHorizontal: spacing.screenPadding,
-              marginBottom: spacing.sm,
-              padding: spacing.lg,
-            },
-            SHADOW,
-          ]}
-        >
-          <View style={{ marginBottom: spacing.md }}>
-            <Text style={typography.sectionTitle}>Payments</Text>
-            <Text style={[typography.caption, { marginTop: spacing.xs }]}>Paid {fmt(paidAmount)} of {fmt(grandTotal)}</Text>
-          </View>
-
-          {paymentsLoading ? (
-            <Loader />
-          ) : paymentRows.length === 0 ? (
-            <Text
-              style={{
-                textAlign: "center",
-                color: colors.textSecondary,
-                fontSize: 14,
-                paddingVertical: 16,
-              }}
-            >
-              No payments recorded yet
-            </Text>
-          ) : (
-            paymentRows.map(({ payment, remaining }, idx) => {
-              const modeStyle =
-                PAYMENT_MODE_COLORS[payment.payment_mode] ??
-                PAYMENT_MODE_COLORS["Cash"];
-              return (
-                <View
-                  key={payment.id}
-                  style={{
-                    backgroundColor: colors.surfaceAlt,
-                    borderRadius: radius.lg,
-                    padding: spacing.md,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                    marginBottom: idx === paymentRows.length - 1 ? 0 : spacing.sm,
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "flex-start",
-                      justifyContent: "space-between",
-                    }}
-                    >
-                      <View>
-                        <Text style={typography.cardTitle}>
-                          {formatDate(payment.payment_date)}
-                        </Text>
-                        <View
-                          style={{
-                            backgroundColor: modeStyle.bg,
-                            borderRadius: radius.full,
-                            paddingHorizontal: spacing.chipPadding,
-                            paddingVertical: spacing.xs,
-                            alignSelf: "flex-start",
-                            marginTop: spacing.xs,
-                          }}
-                        >
-                          <Text
-                            style={{
-                              ...typography.caption,
-                              color: modeStyle.text,
-                              fontSize: 11,
-                              fontWeight: "600",
-                            }}
-                          >
-                          {payment.payment_mode}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={{ alignItems: "flex-end" }}>
-                      <MoneyAmount
-                        value={payment.amount}
-                        showPlusForPositive
-                        variant="title"
-                        color={colors.success}
-                        style={{ fontWeight: "800" }}
-                      />
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          marginTop: spacing.xs,
-                        }}
-                      >
-                        <Text style={typography.caption}>Due: </Text>
-                        <MoneyAmount value={remaining} variant="caption" color={remaining > 0 ? colors.danger : colors.success} />
-                      </View>
-                    </View>
-                  </View>
-                </View>
-              );
-            })
-          )}
-        </View>
+        {order ? (
+          <EntryPaymentsSection
+            paymentsLoading={paymentsLoading}
+            paymentRows={paymentRows}
+            fmt={fmt}
+            PAYMENT_MODE_COLORS={PAYMENT_MODE_COLORS}
+            grandTotal={grandTotal}
+            paidAmount={paidAmount}
+          />
+        ) : null}
       </ScrollView>
 
-      {/* ───────────────────────────────────────── */}
-      {/* 5. Fixed Action Bar                              */}
-      {/* ───────────────────────────────────────── */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: colors.surface,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
-          paddingHorizontal: spacing.lg,
-          paddingTop: spacing.sm,
-          paddingBottom: spacing.lg,
-          flexDirection: "row",
-          gap: spacing.sm,
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <Button
-            title={sendingEntry ? "Generating…" : "Send Entry"}
-            variant="outline"
-            onPress={handleSendEntry}
-            loading={sendingEntry}
-            icon={<MessageCircle size={18} color={colors.primary} strokeWidth={2} />}
-          />
-        </View>
-
-        {!isPaid && (
-          <View style={{ flex: 1 }}>
-            <Button
-              title="Record Payment"
-              onPress={() => openPaymentFlow()}
-              icon={<Wallet size={18} color={colors.surface} strokeWidth={2} />}
-            />
-          </View>
-        )}
-      </View>
-
-      {/* ── Record Payment Modal ──────────────────────────────── */}
       <RecordCustomerPaymentModal
         ref={paymentModalRef}
         onSuccess={handlePaymentSuccess}
@@ -816,6 +369,14 @@ export default function OrderDetailScreen() {
           quickPaymentAmount ? Number(quickPaymentAmount) : undefined
         }
       />
+      {order && (
+        <EntryStickyActionBar
+          isPaid={isPaid}
+          sendingEntry={sendingEntry}
+          onSendEntry={handleSendEntry}
+          onRecordPayment={openPaymentFlow}
+        />
+      )}
     </SafeAreaView>
   );
 }
