@@ -2,7 +2,7 @@ import { useTheme } from "@/src/utils/ThemeProvider";
 import MoneyAmount from "@/src/components/ui/MoneyAmount";
 import { formatDate } from "@/src/utils/helper";
 import { ActivityIndicator, Text, View } from "react-native";
-import EmptyState from "@/src/components/feedback/EmptyState";
+import { Wallet } from "lucide-react-native";
 
 type PaymentRow = {
   payment: {
@@ -26,119 +26,87 @@ type Props = {
 export default function EntryPaymentsSection({
   paymentsLoading,
   paymentRows,
-  fmt,
   PAYMENT_MODE_COLORS,
   grandTotal,
   paidAmount,
 }: Props) {
-  const { colors, radius, spacing, typography } = useTheme();
+  const { colors } = useTheme();
+  const progress = grandTotal > 0 ? (paidAmount / grandTotal) * 100 : 0;
 
   return (
-    <View
-      style={{
-        backgroundColor: colors.surface,
-        borderRadius: spacing.cardRadius,
-        marginHorizontal: spacing.screenPadding,
-        marginBottom: spacing.sm,
-        padding: spacing.lg,
-      }}
-      className="shadow-sm shadow-textPrimary-dark" // Subtle shadow
-    >
-      <View style={{ marginBottom: spacing.md }}>
-        <Text style={typography.sectionTitle}>Payments</Text>
-        <Text style={[typography.caption, { marginTop: spacing.xs, color: colors.textSecondary }]}>
-          Paid {fmt(paidAmount)} of {fmt(grandTotal)}
+    <View className="bg-surface rounded-2xl mx-4 mb-6 p-4 border border-border">
+      {/* Section Header */}
+      <View className="mb-3">
+        <Text className="text-textSecondary font-semibold text-[11px] tracking-[1.2px] uppercase">
+          Payments
+        </Text>
+        <Text className="text-[13px] text-textSecondary mt-1">
+          Paid <MoneyAmount value={paidAmount} /> of <MoneyAmount value={grandTotal} />
         </Text>
       </View>
 
+      {/* Progress Bar */}
+      <View className="h-1 rounded-full bg-border-soft w-full mb-4">
+        <View
+          style={{ width: `${progress}%` }}
+          className="h-1 rounded-full bg-primary"
+        />
+      </View>
+
+      {/* Content */}
       {paymentsLoading ? (
-        <View style={{ paddingVertical: spacing.xl, alignItems: "center", justifyContent: "center" }}>
+        <View className="py-10 items-center justify-center">
           <ActivityIndicator size="small" color={colors.primary} />
         </View>
       ) : paymentRows.length === 0 ? (
-        <EmptyState
-          title="No payments recorded yet"
-          description="Payments will appear here once recorded."
-        />
+        <View className="py-8 items-center justify-center">
+          <Wallet size={32} color={colors.border} strokeWidth={1.5} />
+          <Text className="text-textSecondary text-[14px] mt-2">
+            No payments recorded yet
+          </Text>
+        </View>
       ) : (
-        <>
-          {paymentRows.map(({ payment, remaining }, idx) => {
+        <View className="flex-col">
+          {paymentRows.map(({ payment }, idx) => {
             const modeStyle =
               PAYMENT_MODE_COLORS[payment.payment_mode] ?? PAYMENT_MODE_COLORS["Cash"];
             return (
               <View
                 key={payment.id}
-                style={{
-                  backgroundColor: colors.surfaceAlt,
-                  borderRadius: radius.lg,
-                  padding: spacing.md,
-                  borderWidth: 1,
-                  borderColor: colors.border,
-                  marginBottom: idx === paymentRows.length - 1 ? 0 : spacing.sm,
-                }}
+                className={`flex-row justify-between items-center py-3 ${
+                  idx === paymentRows.length - 1 ? "" : "border-b border-border-soft"
+                }`}
               >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "flex-start",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <View>
-                    <Text style={{ ...typography.cardTitle, color: colors.textPrimary }}>
-                      {formatDate(payment.payment_date)}
+                <View>
+                  <Text className="text-[14px] font-semibold text-textPrimary">
+                    {payment.payment_mode}
+                  </Text>
+                  <Text className="text-[13px] text-textSecondary mt-0.5">
+                    {formatDate(payment.payment_date, "dd MMM")}
+                  </Text>
+                </View>
+                <View className="flex-row items-center gap-2">
+                  <MoneyAmount
+                    value={payment.amount}
+                    showPlusForPositive
+                    className="text-[15px] font-bold text-success"
+                  />
+                  <View
+                    style={{ backgroundColor: modeStyle.bg, borderRadius: 99 }}
+                    className="px-2 py-0.5"
+                  >
+                    <Text
+                      style={{ color: modeStyle.text }}
+                      className="text-[11px] font-bold"
+                    >
+                      RECEIVED
                     </Text>
-                    <View
-                      style={{
-                        backgroundColor: modeStyle.bg,
-                        borderRadius: radius.full,
-                        paddingHorizontal: spacing.chipPadding,
-                        paddingVertical: spacing.xs,
-                        alignSelf: "flex-start",
-                        marginTop: spacing.xs,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          ...typography.caption,
-                          color: modeStyle.text,
-                          fontSize: 11,
-                          fontWeight: "600",
-                        }}
-                      >
-                        {payment.payment_mode}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={{ alignItems: "flex-end" }}>
-                    <MoneyAmount
-                      value={payment.amount}
-                      showPlusForPositive
-                      variant="title"
-                      color={colors.success}
-                      style={{ fontWeight: "800" }}
-                    />
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginTop: spacing.xs,
-                      }}
-                    >
-                      <Text style={{ ...typography.caption, color: colors.textSecondary }}>Due: </Text>
-                      <MoneyAmount
-                        value={remaining}
-                        variant="caption"
-                        color={remaining > 0 ? colors.danger : colors.success}
-                      />
-                    </View>
                   </View>
                 </View>
               </View>
             );
           })}
-        </>
+        </View>
       )}
     </View>
   );
