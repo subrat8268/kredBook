@@ -1,5 +1,4 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
-import Avatar from "@/src/components/ui/Avatar";
+import { getInitials } from "@/src/components/ui/Avatar";
 import { Pressable, Text, View } from "react-native";
 
 type Props = {
@@ -13,46 +12,59 @@ export default function EntryCustomerCard({
   customerPhone,
   onCustomerTap,
 }: Props) {
-  const { colors, spacing, typography } = useTheme();
+  const initials = getInitials(customerName);
 
   return (
     <Pressable
       onPress={onCustomerTap}
-      style={({ pressed }) => ({
-        backgroundColor: colors.surface,
-        borderRadius: spacing.cardRadius,
-        marginHorizontal: spacing.screenPadding,
-        marginBottom: spacing.sm,
-        padding: spacing.lg,
-        opacity: pressed ? 0.9 : 1,
-      })}
-      className="shadow-sm shadow-textPrimary-dark"
+      style={{
+        // Card shadow
+        shadowColor: "rgba(17,24,39,1)",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 3,
+        elevation: 2,
+      }}
+      className="bg-surface rounded-2xl mx-4 mb-6 px-4 py-4 border border-border active:bg-search"
     >
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <View style={{ marginRight: spacing.md, flexShrink: 0 }}>
-          <Avatar name={customerName} size="md" />
+      <View className="flex-row items-center">
+        {/* Avatar */}
+        <View
+          className="mr-3 shrink-0"
+          style={{
+            shadowColor: "rgba(17,24,39,1)",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+          }}
+        >
+          <View className="h-10 w-10 rounded-full bg-success-bg items-center justify-center">
+            <Text className="text-primary text-[15px] font-bold">
+              {initials}
+            </Text>
+          </View>
         </View>
 
-        <View style={{ flex: 1 }}>
+        {/* Name and Phone */}
+        <View className="flex-1">
           <Text
-            style={{
-              ...typography.cardTitle,
-              marginBottom: spacing.xs,
-              color: colors.textPrimary,
-            }}
+            className="text-base font-semibold text-textPrimary mb-2"
             numberOfLines={1}
           >
             {customerName}
           </Text>
-          <Text style={{ ...typography.small, color: colors.textSecondary }}>
+          <Text className="text-[13px] font-normal text-textSecondary">
             +91 {customerPhone}
           </Text>
         </View>
-      </View>
-      <View style={{ marginTop: spacing.md, alignItems: "flex-end" }}>
-        <Text style={{ ...typography.caption, color: colors.primary, fontWeight: "600" }}>
-          View Customer &rarr;
-        </Text>
+
+        {/* Action */}
+        <View>
+          <Text className="text-primary text-[13px] font-semibold">
+            View &rarr;
+          </Text>
+        </View>
       </View>
     </Pressable>
   );
