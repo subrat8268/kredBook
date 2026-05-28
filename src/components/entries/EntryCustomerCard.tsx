@@ -49,7 +49,7 @@ export default function EntryCustomerCard({
         {/* Name and Phone */}
         <View className="flex-1">
           <Text
-            className="text-base font-semibold text-textPrimary mb-2"
+            className="text-base font-semibold text-textPrimary"
             numberOfLines={1}
           >
             {customerName}
