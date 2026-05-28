@@ -1,6 +1,6 @@
 import QuickActionTile from "@/src/components/shared/QuickActionTile";
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { Bell, Download, Plus, Share2 } from "lucide-react-native";
+import { Download, Plus, Share2 } from "lucide-react-native";
 import { View } from "react-native";
 
 type Props = {
