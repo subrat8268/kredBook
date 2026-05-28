@@ -57,7 +57,6 @@ export default function OrderDetailScreen() {
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
   const { show: showToast } = useToast();
 
-  // Local formatter for places where the UI already includes the ₹ prefix.
   const fmt = useCallback(
     (value: number) =>
       formatINR(value, {
@@ -90,12 +89,10 @@ export default function OrderDetailScreen() {
   const taxAmount = order?.tax_percent
     ? Math.round(((itemsSubtotal * order.tax_percent) / 100) * 100) / 100
     : 0;
-  // Grand total = order total (subtotal+tax+loading) + previous balance
   const grandTotal =
     (order?.total_amount ?? 0) + (order?.previous_balance ?? 0);
   const paidAmount = Math.max(0, grandTotal - (order?.balance_due ?? 0));
 
-  // Payments sorted oldest → newest for running-balance calculation
   const sortedPayments = useMemo(
     () =>
       [...(payments ?? [])].sort(
@@ -194,7 +191,8 @@ export default function OrderDetailScreen() {
     }
   }, [order, customerName, profile, showToast, itemsSubtotal, taxAmount]);
 
-  const handleWhatsApp = useCallback(async () => {
+  // ── Remind via WhatsApp ─────────────────────────────────────────
+  const handleRemind = useCallback(async () => {
     if (!order) return;
     try {
       const cleanPhone = customerPhone.replace(/\D/g, "");
@@ -210,21 +208,29 @@ export default function OrderDetailScreen() {
       );
       const wa = `https://wa.me/91${cleanPhone}?text=${msg}`;
       await Linking.openURL(wa);
-      showToast({
-        message: "WhatsApp opened with Entry details",
-        type: "success",
-      });
-    } catch (error: any) {
-      showToast({
-        message: "Cannot open WhatsApp",
-        type: "error",
-      });
-      Alert.alert(
-        "Cannot open WhatsApp",
-        "Please install WhatsApp and try again.",
-      );
+    } catch {
+      Alert.alert("Cannot open WhatsApp", "Please install WhatsApp and try again.");
     }
-  }, [order, customerName, customerPhone, profile, showToast, shareLocale]);
+  }, [order, customerName, customerPhone, profile, shareLocale]);
+
+  // ── Delete entry ────────────────────────────────────────────────
+  const handleDelete = useCallback(() => {
+    Alert.alert(
+      "Delete Entry",
+      `Delete Entry #${order?.bill_number}? This cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            // TODO: call delete API, then invalidate + navigate back
+            showToast({ message: "Delete not yet implemented", type: "error" });
+          },
+        },
+      ],
+    );
+  }, [order?.bill_number, showToast]);
 
   // ── Payment success ─────────────────────────────────────────────
   const handlePaymentSuccess = useCallback(() => {
@@ -307,56 +313,44 @@ export default function OrderDetailScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: 100 }}
       >
-        {order ? (
-          <EntryHeroCard
-            balanceDue={order.balance_due}
-            status={order.status}
-            billNumber={order.bill_number}
-            createdAt={order.created_at}
-            isOverdue={isOverdue}
-          />
-        ) : null}
+        <EntryHeroCard
+          balanceDue={order.balance_due}
+          status={order.status}
+          billNumber={order.bill_number}
+          createdAt={order.created_at}
+          isOverdue={isOverdue}
+        />
 
-        {order ? (
-          <EntryQuickActions
-            onEdit={() =>
-              router.push(`/(main)/entries/${order.id}/edit` as never)
-            }
-            onShare={handleShareLedgerLink}
-            onWhatsApp={handleWhatsApp}
-            isPaid={isPaid}
-          />
-        ) : null}
+        <EntryQuickActions
+          onEdit={() => router.push(`/(main)/entries/${order.id}/edit` as never)}
+          onDelete={handleDelete}
+          onRemind={handleRemind}
+          isPaid={isPaid}
+        />
 
-        {order ? (
-          <EntryCustomerCard
-            customerName={customerName}
-            customerPhone={customerPhone}
-            onCustomerTap={() => router.push(`/(main)/people/${order.customer_id}` as never)}
-          />
-        ) : null}
+        <EntryCustomerCard
+          customerName={customerName}
+          customerPhone={customerPhone}
+          onCustomerTap={() => router.push(`/(main)/people/${order.customer_id}` as never)}
+        />
 
-        {order ? (
-          <EntryItemsSection
-            order={order}
-            itemsSubtotal={itemsSubtotal}
-            taxAmount={taxAmount}
-            grandTotal={grandTotal}
-            statusKey={statusKey}
-            fmt={fmt}
-          />
-        ) : null}
+        <EntryItemsSection
+          order={order}
+          itemsSubtotal={itemsSubtotal}
+          taxAmount={taxAmount}
+          grandTotal={grandTotal}
+          statusKey={statusKey}
+          fmt={fmt}
+        />
 
-        {order ? (
-          <EntryPaymentsSection
-            paymentsLoading={paymentsLoading}
-            paymentRows={paymentRows}
-            fmt={fmt}
-            PAYMENT_MODE_COLORS={PAYMENT_MODE_COLORS}
-            grandTotal={grandTotal}
-            paidAmount={paidAmount}
-          />
-        ) : null}
+        <EntryPaymentsSection
+          paymentsLoading={paymentsLoading}
+          paymentRows={paymentRows}
+          fmt={fmt}
+          PAYMENT_MODE_COLORS={PAYMENT_MODE_COLORS}
+          grandTotal={grandTotal}
+          paidAmount={paidAmount}
+        />
       </ScrollView>
 
       <RecordCustomerPaymentModal
@@ -370,14 +364,13 @@ export default function OrderDetailScreen() {
           quickPaymentAmount ? Number(quickPaymentAmount) : undefined
         }
       />
-      {order && (
-        <EntryStickyBar
-          isPaid={isPaid}
-          sendingEntry={sendingEntry}
-          onSendEntry={handleShareLedgerLink} // Changed from handleSendEntry
-          onRecordPayment={openPaymentFlow}
-        />
-      )}
+
+      <EntryStickyBar
+        isPaid={isPaid}
+        sendingEntry={sendingEntry}
+        onSendEntry={handleShareLedgerLink}
+        onRecordPayment={openPaymentFlow}
+      />
     </SafeAreaView>
   );
 }
