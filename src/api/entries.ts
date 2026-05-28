@@ -257,6 +257,25 @@ export async function recordPayment(
   return { status: res.status };
 }
 
+export async function deleteOrder(orderId: string, vendorId: string): Promise<void> {
+  await executeWithOfflineQueue(
+    async () => {
+      const { error } = await supabase
+        .from("orders")
+        .delete()
+        .eq("id", orderId)
+        .eq("vendor_id", vendorId);
+      if (error) throw toApiError(error);
+    },
+    {
+      entity: "order",
+      operation: "DELETE",
+      payload: { orderId, vendorId },
+    },
+  );
+}
+
+
 /**
  * Get next sequential bill number for a vendor
  */

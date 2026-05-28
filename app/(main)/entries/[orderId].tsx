@@ -223,14 +223,29 @@ export default function OrderDetailScreen() {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            // TODO: call delete API, then invalidate + navigate back
-            showToast({ message: "Delete not yet implemented", type: "error" });
+          onPress: async () => {
+            if (!orderId || !profile?.id || !order?.customer_id) {
+              showToast({ message: "Unable to delete entry. Missing data.", type: "error" });
+              return;
+            }
+            try {
+              // Call the delete API
+              await deleteOrder(orderId, profile.id);
+
+              // Invalidate queries and navigate back on success
+              queryClient.invalidateQueries({ queryKey: orderKeys.all(profile.id) });
+              queryClient.invalidateQueries({ queryKey: ["dashboard", profile.id] });
+              queryClient.invalidateQueries({ queryKey: ["customerDetail", order.customer_id] });
+              showToast({ message: `Entry #${order.bill_number} deleted`, type: "success" });
+              router.back();
+            } catch (error: any) {
+              showToast({ message: `Error deleting entry: ${error.message}`, type: "error" });
+            }
           },
         },
       ],
     );
-  }, [order?.bill_number, showToast]);
+  }, [order?.bill_number, orderId, profile?.id, order?.customer_id, showToast, queryClient, router, order]); // Added missing dependencies
 
   // ── Payment success ─────────────────────────────────────────────
   const handlePaymentSuccess = useCallback(() => {
