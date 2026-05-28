@@ -25,6 +25,7 @@ import { Phone } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { orderKeys, useOrderDetail } from "@/src/hooks/useEntries";
 import { formatINR } from "@/src/utils/format";
+import { deleteOrder } from "@/src/api/entries";
 
 export default function OrderDetailScreen() {
   const { colors, spacing } = useTheme();
@@ -209,7 +210,10 @@ export default function OrderDetailScreen() {
       const wa = `https://wa.me/91${cleanPhone}?text=${msg}`;
       await Linking.openURL(wa);
     } catch {
-      Alert.alert("Cannot open WhatsApp", "Please install WhatsApp and try again.");
+      Alert.alert(
+        "Cannot open WhatsApp",
+        "Please install WhatsApp and try again.",
+      );
     }
   }, [order, customerName, customerPhone, profile, shareLocale]);
 
@@ -225,7 +229,10 @@ export default function OrderDetailScreen() {
           style: "destructive",
           onPress: async () => {
             if (!orderId || !profile?.id || !order?.customer_id) {
-              showToast({ message: "Unable to delete entry. Missing data.", type: "error" });
+              showToast({
+                message: "Unable to delete entry. Missing data.",
+                type: "error",
+              });
               return;
             }
             try {
@@ -233,19 +240,40 @@ export default function OrderDetailScreen() {
               await deleteOrder(orderId, profile.id);
 
               // Invalidate queries and navigate back on success
-              queryClient.invalidateQueries({ queryKey: orderKeys.all(profile.id) });
-              queryClient.invalidateQueries({ queryKey: ["dashboard", profile.id] });
-              queryClient.invalidateQueries({ queryKey: ["customerDetail", order.customer_id] });
-              showToast({ message: `Entry #${order.bill_number} deleted`, type: "success" });
+              queryClient.invalidateQueries({
+                queryKey: orderKeys.all(profile.id),
+              });
+              queryClient.invalidateQueries({
+                queryKey: ["dashboard", profile.id],
+              });
+              queryClient.invalidateQueries({
+                queryKey: ["customerDetail", order.customer_id],
+              });
+              showToast({
+                message: `Entry #${order.bill_number} deleted`,
+                type: "success",
+              });
               router.back();
             } catch (error: any) {
-              showToast({ message: `Error deleting entry: ${error.message}`, type: "error" });
+              showToast({
+                message: `Error deleting entry: ${error.message}`,
+                type: "error",
+              });
             }
           },
         },
       ],
     );
-  }, [order?.bill_number, orderId, profile?.id, order?.customer_id, showToast, queryClient, router, order]); // Added missing dependencies
+  }, [
+    order?.bill_number,
+    orderId,
+    profile?.id,
+    order?.customer_id,
+    showToast,
+    queryClient,
+    router,
+    order,
+  ]); // Added missing dependencies
 
   // ── Payment success ─────────────────────────────────────────────
   const handlePaymentSuccess = useCallback(() => {
@@ -337,7 +365,9 @@ export default function OrderDetailScreen() {
         />
 
         <EntryQuickActions
-          onEdit={() => router.push(`/(main)/entries/${order.id}/edit` as never)}
+          onEdit={() =>
+            router.push(`/(main)/entries/${order.id}/edit` as never)
+          }
           onDelete={handleDelete}
           onRemind={handleRemind}
           isPaid={isPaid}
@@ -346,7 +376,9 @@ export default function OrderDetailScreen() {
         <EntryCustomerCard
           customerName={customerName}
           customerPhone={customerPhone}
-          onCustomerTap={() => router.push(`/(main)/people/${order.customer_id}` as never)}
+          onCustomerTap={() =>
+            router.push(`/(main)/people/${order.customer_id}` as never)
+          }
         />
 
         <EntryItemsSection

@@ -29,26 +29,25 @@ export default function QuickActionTile({
   style,
 }: QuickActionTileProps) {
   const { colors } = useTheme();
-  const iconBg = accent ? colors.primary + "18" : colors.textSecondary + "12";
   const labelColor = accent ? colors.textPrimary : colors.textSecondary;
 
   return (
     <Pressable
       disabled={disabled || loading}
       onPress={onPress}
-      className={`flex-1 items-center rounded-xl border px-2 py-4 mb-2 ${
+      className={`flex-1 items-center rounded-2xl px-2 py-3 mb-2 ${
         disabled || loading ? "opacity-50" : ""
       }`}
       style={[
         {
           backgroundColor: colors.surface,
           borderWidth: 1,
-          borderColor: colors.border + "60",
-          shadowColor: "#000",
+          borderColor: colors.border,
+          shadowColor: "rgba(17,24,39,1)",
           shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.03,
-          shadowRadius: 1,
-          elevation: 1,
+          shadowOpacity: 0.06,
+          shadowRadius: 3,
+          elevation: 2,
         },
         style,
       ]}
@@ -62,10 +61,10 @@ export default function QuickActionTile({
       <View
         className="items-center justify-center"
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: 22,
-          backgroundColor: iconBg,
+          width: 52,
+          height: 52,
+          borderRadius: 26,
+          backgroundColor: colors.surfaceAlt,
         }}
       >
         {loading ? (
@@ -77,7 +76,7 @@ export default function QuickActionTile({
       <Text
         className="mt-2 text-caption"
         numberOfLines={1}
-        style={{ color: labelColor, fontSize: 12, fontWeight: "500" }}
+        style={{ color: labelColor, fontSize: 12, fontWeight: "600" }}
       >
         {label}
       </Text>

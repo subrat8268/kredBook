@@ -19,19 +19,25 @@ export default function EntryQuickActions({
   const { colors } = useTheme();
 
   return (
-    <View className="mx-4 mt-3 mb-1 flex-row gap-2">
+    <View
+      className={`mx-4 mt-3 mb-1 flex-row gap-2 ${
+        isPaid ? "justify-center" : ""
+      }`}
+    >
       {/* 1 — Edit */}
       <QuickActionTile
         label="Edit"
-        icon={<Pencil size={20} color={colors.textSecondary} strokeWidth={2} />}
+        icon={<Pencil size={22} color={colors.textSecondary} strokeWidth={2} />}
         onPress={onEdit}
+        style={isPaid ? { maxWidth: 120 } : {}}
       />
 
       {/* 2 — Delete (danger) */}
       <QuickActionTile
         label="Delete"
-        icon={<Trash2 size={20} color={colors.danger} strokeWidth={2} />}
+        icon={<Trash2 size={22} color={colors.danger} strokeWidth={2} />}
         onPress={onDelete}
+        style={isPaid ? { maxWidth: 120 } : {}}
       />
 
       {/* 3 — Remind (only for unpaid entries) */}
@@ -40,12 +46,13 @@ export default function EntryQuickActions({
           label="Remind"
           icon={
             <MessageCircle
-              size={20}
+              size={22}
               color={colors.primary}
               strokeWidth={2}
             />
           }
           onPress={onRemind}
+          accent
         />
       ) : null}
     </View>
