@@ -142,6 +142,7 @@ export default function CustomerDetailScreen() {
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
   const [shareQueued, setShareQueued] = useState(false);
   const [isSharingLedgerLink, setIsSharingLedgerLink] = useState(false);
+  const [isSendingReminder, setIsSendingReminder] = useState(false);
 
   const hasPendingPayment =
     !!customer?.pendingOrderId && (customer.pendingOrderBalance ?? 0) > 0;
@@ -241,12 +242,13 @@ export default function CustomerDetailScreen() {
     }
   }, [shareQueued, customer, profile, handleShareLedger]);
 
-  const sendWhatsAppReminder = () => {
+  const sendWhatsAppReminder = useCallback(() => {
     if (!customer?.phone) {
       showToast({ message: "Customer phone number is missing", type: "error" });
       return;
     }
 
+    setIsSendingReminder(true);
     const biz = profile?.business_name || "our store";
     const msg = `Dear ${customer.name}, your outstanding balance with ${biz} is ${formatINR(customer.outstandingBalance)}. Please arrange payment. Thank you.`;
     const url = `https://wa.me/91${customer.phone}?text=${encodeURIComponent(msg)}`;
@@ -270,8 +272,9 @@ export default function CustomerDetailScreen() {
           type: "error",
           duration: 4000,
         });
-      });
-  };
+      })
+      .finally(() => setIsSendingReminder(false));
+  }, [customer, profile?.business_name, showToast, logReminderSent]);
 
   const callCustomer = () => {
     if (customer?.phone) {
@@ -377,6 +380,7 @@ export default function CustomerDetailScreen() {
             isSharingLedgerLink={isSharingLedgerLink}
             exporting={exporting}
             canDownload={customer.transactions.length > 0}
+            isSendingReminder={isSendingReminder}
             onAddEntry={() =>
               router.push({
                 pathname: "/(main)/entries/create",
@@ -385,6 +389,7 @@ export default function CustomerDetailScreen() {
             }
             onShare={handleShareLedger}
             onDownload={downloadStatement}
+            onReminder={sendWhatsAppReminder}
           />
 
           <CustomerTransactionTimeline
