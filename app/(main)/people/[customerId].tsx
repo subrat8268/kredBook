@@ -380,7 +380,6 @@ export default function CustomerDetailScreen() {
             isSharingLedgerLink={isSharingLedgerLink}
             exporting={exporting}
             canDownload={customer.transactions.length > 0}
-            isSendingReminder={isSendingReminder}
             onAddEntry={() =>
               router.push({
                 pathname: "/(main)/entries/create",
@@ -389,7 +388,6 @@ export default function CustomerDetailScreen() {
             }
             onShare={handleShareLedger}
             onDownload={downloadStatement}
-            onReminder={sendWhatsAppReminder}
           />
 
           <CustomerTransactionTimeline
