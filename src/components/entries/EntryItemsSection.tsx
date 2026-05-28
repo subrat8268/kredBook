@@ -1,4 +1,3 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
 import MoneyAmount from "@/src/components/ui/MoneyAmount";
 import StatusBadge from "@/src/components/layer2/StatusBadge";
 import { Text, View } from "react-native";
@@ -21,210 +20,100 @@ export default function EntryItemsSection({
   statusKey,
   fmt,
 }: Props) {
-  const { colors, spacing, typography } = useTheme();
-
-  const SHADOW = {
-    shadowColor: colors.textPrimary,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  };
-
   return (
-    <View
-      style={[
-        {
-          backgroundColor: colors.surface,
-          borderRadius: spacing.cardRadius,
-          marginHorizontal: spacing.screenPadding,
-          marginBottom: spacing.sm,
-          paddingHorizontal: spacing.lg,
-          paddingVertical: spacing.lg,
-        },
-        SHADOW,
-      ]}
-    >
-      {/* Items Header */}
-      <Text
-        style={{
-          ...typography.label,
-          color: colors.textSecondary,
-          paddingBottom: 10,
-        }}
-      >
+    <View className="bg-surface rounded-2xl mx-4 mb-6 p-4 border border-border">
+      {/* Section Header */}
+      <Text className="text-textSecondary font-semibold text-[11px] tracking-[1.2px] uppercase pb-2">
         Items
       </Text>
 
       {/* Items List */}
-      {order.items.map((item, idx) => (
-        <View key={item.id ?? String(idx)}>
-          {idx > 0 && (
-            <View
-              style={{
-                height: 1,
-                backgroundColor: colors.border,
-                marginVertical: spacing.sm,
-              }}
-            />
-          )}
-          <View
-            style={{
-              flexDirection: "row",
-              paddingVertical: spacing.xs,
-              alignItems: "center",
-            }}
-          >
-            {/* Item name */}
-            <Text
-              style={{ flex: 1, fontSize: 15, color: colors.textPrimary }}
-              numberOfLines={1}
-            >
+      <View className="flex-col gap-3">
+        {order.items.map((item) => (
+          <View key={item.id} className="flex-row items-center">
+            <Text className="flex-1 text-textPrimary text-[14px]" numberOfLines={1}>
               {item.product_name}
-              {item.variant_name ? ` (${item.variant_name})` : ""}
             </Text>
-            {/* qty × price */}
-            <Text
-              style={{
-                fontSize: 13,
-                color: colors.textSecondary,
-                marginRight: 16,
-                flexShrink: 0,
-              }}
-            >
-              {item.quantity} × ₹{fmt(item.price)}
+            <Text className="text-textSecondary text-[14px] mx-4">
+              {item.quantity} × {fmt(item.price)}
             </Text>
-            {/* line total */}
-            <Text
-              style={{
-                fontSize: 15,
-                fontWeight: "700",
-                color: colors.textPrimary,
-                minWidth: 64,
-                textAlign: "right",
-                flexShrink: 0,
-              }}
-            >
-              ₹{fmt(item.subtotal)}
-            </Text>
+            <MoneyAmount
+              value={item.subtotal}
+              className="text-textPrimary font-bold text-[14px] min-w-[64px] text-right"
+            />
           </View>
-        </View>
-      ))}
-
-      {/* Divider between Items and Summary */}
-      <View
-        style={{
-          height: 1,
-          backgroundColor: colors.border,
-          marginVertical: spacing.sm,
-        }}
-      />
-
-      {/* Note */}
-      {order.note && order.note.trim() ? (
-        <View style={{ marginBottom: spacing.sm }}>
-          <Text style={{ ...typography.caption, color: colors.textSecondary }}>
-            Note
-          </Text>
-          <Text style={{ ...typography.body, color: colors.textPrimary, marginTop: spacing.xs }}>
-            {order.note}
-          </Text>
-        </View>
-      ) : null}
-
-      {/* Subtotal row */}
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          paddingVertical: spacing.xs,
-        }}
-      >
-        <Text style={typography.subtitle}>Subtotal</Text>
-        <MoneyAmount
-          value={itemsSubtotal}
-          style={[typography.subtitle, { color: colors.textPrimary }]}
-        />
+        ))}
       </View>
 
-      {/* GST row — only if tax_percent > 0 */}
-      {order.tax_percent > 0 && (
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            paddingVertical: spacing.xs,
-          }}
-        >
-          <Text style={typography.subtitle}>GST ({order.tax_percent}%)</Text>
+      {/* Divider */}
+      <View className="h-px bg-border-soft my-3" />
+
+      {/* Summary Section */}
+      <View className="flex-col gap-1">
+        {/* Subtotal */}
+        <View className="flex-row justify-between items-center">
+          <Text className="text-textSecondary text-[14px] font-normal">Subtotal</Text>
           <MoneyAmount
-            value={taxAmount}
-            style={[typography.subtitle, { color: colors.textPrimary }]}
+            value={itemsSubtotal}
+            className="text-textSecondary text-[14px] font-normal"
           />
         </View>
-      )}
 
-      {/* Loading Charge row — only if > 0 */}
-      {order.loading_charge > 0 && (
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            paddingVertical: spacing.xs,
-          }}
-        >
-          <Text style={typography.subtitle}>Loading Charge</Text>
-          <MoneyAmount value={order.loading_charge} style={typography.subtitle} />
-        </View>
-      )}
-
-      {/* Previous balance row — only if > 0 */}
-      {order.previous_balance > 0 && (
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            paddingVertical: spacing.xs,
-          }}
-        >
-          <Text style={[typography.subtitle, { color: colors.danger }]}>
-            Previous Balance
-          </Text>
-          <MoneyAmount
-            value={order.previous_balance}
-            color={colors.danger}
-            style={typography.subtitle}
-          />
-        </View>
-      )}
-
-      {/* Divider before Grand Total */}
-      <View
-        style={{
-          height: 1,
-          backgroundColor: colors.border,
-          marginVertical: spacing.sm,
-        }}
-      />
-
-      {/* Grand Total */}
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-        }}
-      >
-        <Text style={{ ...typography.screenTitle }}>Grand Total</Text>
-        <View style={{ alignItems: "flex-end" }}>
-          <MoneyAmount value={grandTotal} variant="title" />
-          <View style={{ marginTop: spacing.xs }}>
-            <StatusBadge
-              status={statusKey as "Paid" | "Pending" | "Overdue" | "Partially Paid"}
+        {/* Tax */}
+        {order.tax_percent > 0 && (
+          <View className="flex-row justify-between items-center">
+            <Text className="text-textSecondary text-[14px] font-normal">
+              GST ({order.tax_percent}%)
+            </Text>
+            <MoneyAmount
+              value={taxAmount}
+              className="text-textSecondary text-[14px] font-normal"
             />
+          </View>
+        )}
+        
+        {/* Loading Charge */}
+        {order.loading_charge > 0 && (
+          <View className="flex-row justify-between items-center">
+            <Text className="text-textSecondary text-[14px] font-normal">
+              Loading Charge
+            </Text>
+            <MoneyAmount
+              value={order.loading_charge}
+              className="text-textSecondary text-[14px] font-normal"
+            />
+          </View>
+        )}
+
+        {/* Previous balance row */}
+        {order.previous_balance > 0 && (
+          <View className="flex-row justify-between items-center">
+            <Text className="text-danger-text text-[14px] font-normal">
+              Previous Balance
+            </Text>
+            <MoneyAmount
+              value={order.previous_balance}
+              className="text-danger-text text-[14px] font-normal"
+            />
+          </View>
+        )}
+
+        {/* Grand Total */}
+        <View className="h-px bg-border-soft my-2" />
+        <View className="flex-row justify-between items-center">
+          <Text className="text-textPrimary text-[15px] font-semibold">
+            Grand Total
+          </Text>
+          <View className="flex-row items-center gap-2">
+            <MoneyAmount
+              value={grandTotal}
+              className="text-textPrimary text-[17px] font-bold"
+            />
+            <StatusBadge status={statusKey} />
           </View>
         </View>
       </View>
     </View>
   );
 }
+
