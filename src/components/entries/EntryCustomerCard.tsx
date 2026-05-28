@@ -1,4 +1,5 @@
 import { getInitials } from "@/src/components/ui/Avatar";
+import { ChevronRightIcon } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 type Props = {
@@ -60,10 +61,12 @@ export default function EntryCustomerCard({
         </View>
 
         {/* Action */}
-        <View>
-          <Text className="text-primary text-[13px] font-semibold">
-            View &rarr;
+        <View className="flex-row items-center gap-1">
+          <Text className="text-primary text-[13px] font-semibold mb-1">
+            View Customer
           </Text>
+          {/* chevon icon */}
+          <ChevronRightIcon color="#202020" size={18} />
         </View>
       </View>
     </Pressable>
