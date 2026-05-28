@@ -12,11 +12,11 @@ type Props = {
 };
 
 const statusMap: Record<Status, { bg: string; text: string; label: string }> = {
-  Paid: { bg: colors.paid.bg, text: colors.paid.text, label: "PAID" },
-  Pending: { bg: colors.pending.bg, text: colors.pending.text, label: "PENDING" },
-  Overdue: { bg: colors.overdue.bg, text: colors.overdue.text, label: "OVERDUE" },
-  "Partially Paid": { bg: colors.partial.bg, text: colors.partial.text, label: "PARTIAL" },
-  Advance: { bg: colors.successLight, text: colors.success, label: "ADVANCE" },
+  Paid: { bg: colors.paid.bg, text: colors.paid.text, label: "Paid" },
+  Pending: { bg: colors.pending.bg, text: colors.pending.text, label: "Pending" },
+  Overdue: { bg: colors.overdue.bg, text: colors.overdue.text, label: "Overdue" },
+  "Partially Paid": { bg: colors.partial.bg, text: colors.partial.text, label: "Partial" },
+  Advance: { bg: colors.successLight, text: colors.success, label: "Advance" },
 };
 
 export default memo(function StatusBadge({ status, align = "right", size = "md", showDot = false }: Props) {
@@ -26,13 +26,14 @@ export default memo(function StatusBadge({ status, align = "right", size = "md",
 
   const badgeStyle: ViewStyle = {
     backgroundColor: selected.bg,
-    paddingVertical: isSm ? 2 : 4,
-    paddingHorizontal: isSm ? 6 : 10,
+    paddingVertical: isSm ? 3 : 3, // Changed to 3 for sm and md
+    paddingHorizontal: isSm ? 8 : 8, // Changed to 8 for sm and md
+    borderRadius: 9999, // full
   };
 
   const textStyle = {
-    fontSize: isSm ? 11 : 12,
-    fontWeight: "600" as const,
+    fontSize: 11, // Fixed to 11
+    fontWeight: "700" as const, // Fixed to 700
     letterSpacing: 0.5,
   };
 
@@ -46,7 +47,7 @@ export default memo(function StatusBadge({ status, align = "right", size = "md",
 
 const styles = StyleSheet.create({
   badge: {
-    borderRadius: 9999,
+    // borderRadius: 9999, // Moved to badgeStyle
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
@@ -63,6 +64,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   label: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Inter_700Bold", // Changed to 700Bold
   },
 });

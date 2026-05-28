@@ -77,7 +77,7 @@ export const colors = {
   },
   partial: {
     bg: "#DBEAFE", // Blue-100
-    text: "#1D4ED8", // Blue-700
+    text: "#2563EB", // Blue-600
   },
   pending: {
     bg: "#FEF3C7", // Amber-100
