@@ -39,22 +39,43 @@ The screen is structured to follow a business owner's thought process when revie
 
 ### Header Bar
 - **Purpose:** Clear identification, back navigation, and access to all administrative actions.
-- **Left:** ← back arrow
-- **Center:** Title `Entry #[bill_number]` — `Inter 17px/600`. Subtitle: entry creation date — `Inter 13px/400`, `#9ca3af`.
-- **Right:** ⋮ overflow icon — opens the Overflow Menu (P2).
+- **Left:** ← back arrow icon (`#111827`)
+- **Center:** Title `Entry #[bill_number]` — `Inter 17px/600 #111827`. Subtitle: entry creation date — `Inter 13px/400 #9ca3af`, below.
+- **Right:** ⋮ (three-dot) overflow icon — `24px`, `#111827`. Tap opens the **⋮ Overflow Menu (P2)** as a dropdown from top-right.
 - **No tab bar** on this screen. It is a detail screen, not a root screen.
 - **Decision:** Call button removed from header. All customer actions live on the Customer Card.
 
 ---
 
-### ⋮ Overflow Menu (P2)
-Opens as a bottom sheet or dropdown from the header ⋮ icon. Options:
-1. Share Invoice → native PDF share sheet
-2. View Customer → Customer Detail screen
-3. Print → native print dialog
-4. Mark as Paid → opens Record Payment sheet (P5) pre-filled with full balance amount
-5. Edit Entry → Edit Entry screen (P7A)
-6. Delete Entry → Delete confirm bottom sheet (P4)
+### ⋮ Overflow Menu (P2) — Three-Dot Header Tap
+
+> **Triggered by:** Tapping the ⋮ icon on the top-right of the Header Bar.
+
+**Visual Spec:**
+- Dropdown card appears below the ⋮ icon, aligned to the right edge of the screen.
+- `backgroundColor: #ffffff`, `borderRadius: 12px`, `shadow-lg`, `width: 180px`.
+- Background overlay: `rgba(0,0,0,0.20)` behind the dropdown, dims the screen.
+- Each menu item: `height: 44px`, `paddingHorizontal: 16px`, `Inter 14px/500`.
+- Icon: `20px` Lucide stroke, left-aligned, `8px` gap to label.
+- `1px #f3f4f6` divider between groups.
+
+**Menu Items (in order):**
+
+| # | Label | Icon | Color | Destination |
+|---|---|---|---|---|
+| 1 | Share Invoice | `share` icon | `#374151` | Native PDF share sheet |
+| 2 | View Customer | `user` icon | `#374151` | Customer Detail screen |
+| 3 | Print | `printer` icon | `#374151` | Native print dialog |
+| — | `1px divider` | — | — | — |
+| 4 | Edit Entry | `pencil` icon | `#374151` | Edit Entry screen (P7A) |
+| 5 | Mark as Paid | `check-circle` icon | `#16a34a` (green) | Record Payment sheet (P5) pre-filled with full balance |
+| — | `1px divider` | — | — | — |
+| 6 | Delete Entry | `trash-2` icon | `#ef4444` (red) | Delete confirm bottom sheet (P4) |
+
+**Behaviour:**
+- Tapping any item closes the menu and navigates/triggers the relevant action.
+- Tapping the overlay or pressing back closes the menu without any action.
+- **Architecture decision:** Delete Entry appears **only** in the overflow menu. It was removed from the inline text row below Items to prevent accidental taps.
 
 ---
 
@@ -80,10 +101,10 @@ Opens as a bottom sheet or dropdown from the header ⋮ icon. Options:
   - Past due: `"Overdue · X days"`
   - Paid: hidden
 - **Gradient by status:**
-  - Pending → Orange
-  - Partial → Blue
-  - Paid → Green
-  - Overdue → Red
+  - Pending → Orange (`#f97316` → `#ea580c`)
+  - Partial → Blue (`#3b82f6` → `#2563eb`)
+  - Paid → Green (`#16a34a` → `#15803d`)
+  - Overdue → Red (`#ef4444` → `#dc2626`)
 - **Decision:** Entry ID removed from hero. Already prominent in header.
 - **Decision:** Overdue threshold = 1 day past due date. Not a business setting in v1.
 
@@ -92,7 +113,7 @@ Opens as a bottom sheet or dropdown from the header ⋮ icon. Options:
 ### Payments Card
 - **Purpose:** Chronological payment history for the entry.
 - **Header:** `"PAYMENTS"` label + `"Paid ₹X of ₹Y"` sub-label.
-- **Progress Bar:** `4px` tall, `#e5e7eb` track, `#16a34a` fill.
+- **Progress Bar:** `4px` tall, `#e5e7eb` track, `#16a34a` fill. Add a `4px` green pip at the left edge even at 0% so it feels active, not like a loading skeleton.
 - **Payment Rows:** Vertical list, `1px #f3f4f6` divider. Method/date left, amount/chip right.
 - **Empty State:** `32px` wallet icon (`#d1d5db`) + `"No payments recorded yet"`.
 - **Decision:** Payment rows are not tappable in v1. No edit/delete on individual payments.
@@ -117,7 +138,7 @@ Opens as a bottom sheet or dropdown from the header ⋮ icon. Options:
 |---|---|---|
 | Pending | `Record Payment` (solid green, wallet icon) | `Remind` (outline) |
 | Partial | `Record Payment` (solid green, wallet icon) | `Remind` (outline) |
-| Overdue | `Record Payment` (solid green, wallet icon) | `Remind` (outline, urgent — red border) |
+| Overdue | `Record Payment` (solid green, wallet icon) | `Remind` (outline, urgent — red border + red dot on bell icon) |
 | Paid | `Share Receipt` (solid green, send icon) | — |
 
 - **Decision:** Remind → opens Remind bottom sheet (P3) with WhatsApp + SMS options.
@@ -131,7 +152,7 @@ Opens as a bottom sheet or dropdown from the header ⋮ icon. Options:
 |---|---|---|---|
 | P0 | Entry Detail — PENDING state | Entry list tap | ✅ **FINALIZED** |
 | P1 | Items card expanded | Items row tap | ✅ Approved |
-| P2 | ⋮ Overflow menu | ⋮ icon tap | ✅ Approved |
+| P2 | ⋮ Overflow menu | ⋮ header icon tap (three-dot) | ✅ Approved |
 | P3 | Remind bottom sheet | "Remind" CTA | ✅ Approved |
 | P4 | Delete confirm bottom sheet | "Delete Entry" in overflow | ✅ Approved |
 | P5 | Record Payment bottom sheet | "Record Payment" / "Mark as Paid" | ✅ Use built version |
@@ -190,9 +211,9 @@ Confirm save intent and offer PDF sharing in one step.
 | Customer Card | Normal | Normal | Normal | Normal |
 | Payments Card | Empty state | Has rows | All rows | Empty or has rows |
 | Items Card | Collapsed | Collapsed | Collapsed | Collapsed |
-| Overflow Row | — (removed) | — | — | — |
+| ⋮ Overflow Menu | Available (header icon) | Available | Available | Available |
 | Action Bar (Pri) | Record Payment | Record Payment | Share Receipt | Record Payment |
-| Action Bar (Sec) | Remind | Remind | — | Remind (red border) |
+| Action Bar (Sec) | Remind | Remind | — | Remind (red border + red dot) |
 
 ---
 
@@ -203,6 +224,7 @@ Confirm save intent and offer PDF sharing in one step.
 | Customer card below Quick Actions | Customer card at TOP | WHO before HOW MUCH |
 | QuickActionTile for Edit/Delete/Remind | ⋮ header overflow only | Cleaner scroll area; admin actions are rare |
 | Overflow Actions Row (Edit · Delete text row) | Removed entirely | ⋮ header is the single overflow entry point |
+| No overflow menu spec in doc | Full ⋮ Overflow Menu visual spec added (P2) | Three-dot tap was designed but never documented |
 | Items card above Payments | Items card below Payments, collapsed | Payment history is the primary need |
 | Two equal-weight CTAs | One dominant CTA + ghost secondary | Reduces cognitive load |
 | No due date on hero | Due date / overdue line on hero | Due date is critical context |
@@ -214,6 +236,7 @@ Confirm save intent and offer PDF sharing in one step.
 | Remind → direct WhatsApp | Remind → bottom sheet (P3) | More options, consistent pattern |
 | Mark as Paid → unknown | Opens P5 pre-filled with full amount | Consistent with payment flow |
 | Items card shows grand total | Items card shows **subtotal** | Grand total includes tax/charges; subtotal = what was sold |
+| Delete Entry inline (below Items) | Delete Entry in ⋮ overflow only | Prevents accidental delete; one clear entry point |
 
 ---
 
@@ -228,3 +251,5 @@ Confirm save intent and offer PDF sharing in one step.
 | Mark as Paid behavior? | ✅ Opens P5 pre-filled with full balance. |
 | Save button behavior on Edit Entry? | ✅ Opens P7B Save confirmation sheet. |
 | Overflow entry point — header only or also text row? | ✅ **Header ⋮ only.** Text row removed. |
+| Delete Entry placement — inline or overflow? | ✅ **Overflow only.** No inline delete row. |
+| ⋮ menu trigger — where documented? | ✅ Full spec added to Section 4 (Component Specs). |
