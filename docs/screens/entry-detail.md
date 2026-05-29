@@ -2,6 +2,7 @@
 
 > **Status:** Design-first. All screens must be approved in Stitch before coding begins.
 > **Last updated:** 2026-05-29
+> **Product Lead:** All open questions resolved as of 2026-05-29. No open items remain.
 
 ---
 
@@ -67,7 +68,9 @@ The screen is structured to follow a business owner's thought process when revie
 5. **Items Card** — DETAILS. Collapsed by default.
 6. **Action Bar** — Sticky bottom CTA.
 
-> **Decision (2026-05-29):** The Overflow Actions Row (Edit · Delete text row below Hero) has been removed. All administrative actions (Edit, Delete, Mark as Paid, Share Invoice, Print, View Customer) are accessed exclusively via the **⋮ header icon**.
+> **Decision:** The Overflow Actions Row (Edit · Delete text row below Hero) is removed. All administrative actions are accessed exclusively via the **⋮ header icon**.
+
+> **Decision:** No Entry Timeline section on this screen. The Payments Card already surfaces chronological payment history, which is the only timeline a business owner needs on a single entry view. Audit history (entry created, edited, reminder sent) is noise here — it belongs on a future Customer Activity screen, not Entry Detail. This decision is final for v1 and v2.
 
 ---
 
@@ -77,7 +80,7 @@ The screen is structured to follow a business owner's thought process when revie
 - **Purpose:** Clear identification, back navigation, and access to all administrative actions.
 - **Left:** ← back arrow icon (`#111827`)
 - **Center:** Title `Entry #[bill_number]` — `Inter 17px/600 #111827`. Subtitle: entry creation date — `Inter 13px/400 #9ca3af`, below.
-- **Right:** ⋮ (three-dot) overflow icon — `24px`, `#111827`. Tap opens the **⋮ Overflow Menu (P2)** as a dropdown from top-right.
+- **Right:** ⋮ (three-dot) overflow icon — `24px`, `#111827`. Tap opens the **⋮ Overflow Menu (P2)**.
 - **bg:** `#ffffff`, no shadow.
 - **Decision:** Call button removed from header. All customer actions live on the Customer Card.
 
@@ -90,7 +93,7 @@ The screen is structured to follow a business owner's thought process when revie
 **Visual Spec:**
 - Dropdown card appears below the ⋮ icon, aligned to the right edge of the screen.
 - `backgroundColor: #ffffff`, `borderRadius: 12px`, `shadow-lg`, `width: 180px`.
-- Background overlay: `rgba(0,0,0,0.20)` behind the dropdown, dims the screen.
+- Background overlay: `rgba(0,0,0,0.20)` behind the dropdown.
 - Each menu item: `height: 44px`, `paddingHorizontal: 16px`, `Inter 14px/500`.
 - Icon: `20px` Lucide stroke, left-aligned, `8px` gap to label.
 - `1px #f3f4f6` divider between groups.
@@ -104,182 +107,190 @@ The screen is structured to follow a business owner's thought process when revie
 | 3 | Print | `printer` | `#374151` | Native print dialog |
 | — | `1px divider` | — | — | — |
 | 4 | Edit Entry | `pencil` | `#374151` | Edit Entry screen (P7A) |
-| 5 | Mark as Paid | `check-circle` | `#16a34a` | Record Payment sheet (P5) pre-filled with full balance |
+| 5 | Mark as Paid | `check-circle` | `#16a34a` | Record Payment sheet (P5) pre-filled |
 | — | `1px divider` | — | — | — |
 | 6 | Delete Entry | `trash-2` | `#ef4444` | Delete confirm bottom sheet (P4) |
 
 **Behaviour:**
-- Tapping any item closes the menu and navigates/triggers the relevant action.
-- Tapping the overlay or pressing back closes the menu without any action.
-- **Architecture decision:** Delete Entry appears **only** in the overflow menu — not in any inline row.
+- Tapping any item closes the menu and triggers the relevant action.
+- Tapping overlay or pressing back closes the menu with no action.
+- **Mark as Paid is hidden on PAID entries** — no point showing it when balance is already ₹0.
+- **Delete Entry is always visible** regardless of status. Business owners may need to delete even paid entries (data correction).
 
 ---
 
 ### Customer Card
 - **Purpose:** Immediately identify the customer and provide quick communication actions.
 - **Layout:** Full-width card, `flex-row items-center`, `padding: 12px 16px`, `borderRadius: 16px`, `bg: #ffffff`, `border: 1px solid #e5e7eb`.
-- **Avatar (Left):** `44×44px` circle, `bg: #dcfce7`, initials `Inter 15px/700 color: #16a34a`. **Green avatar system — consistent across ALL screens including Edit Entry.**
-- **Info (Center):** Name `Inter 15px/600 #111827` above phone `Inter 13px/400 #9ca3af`. Strip existing country code before prepending +91 to prevent `+91 +91` duplication.
+- **Avatar (Left):** `44×44px` circle, `bg: #dcfce7`, initials `Inter 15px/700 color: #16a34a`. **Green avatar system — consistent across ALL screens.**
+- **Info (Center):** Name `Inter 15px/600 #111827` above phone `Inter 13px/400 #9ca3af`. Strip existing country code before prepending +91.
 - **Actions (Right):** Call icon + WhatsApp/chat icon, both `32×32px` circles, `bg: #dcfce7`, icon `#16a34a`, `8px` gap.
 - **Entire card is tappable** → navigates to Customer Detail screen.
+- **Decision — deleted customer edge case:** If a customer has been deleted from the contacts list but the entry still exists, show `\"[Deleted Customer]\"` in name, hide call/chat icons, disable card tap. Do not crash or show blank name.
 
 ---
 
 ### Hero Card
 - **Purpose:** Most critical financial number + status at a glance.
-- **Layout:** Full-width, `borderRadius: 20px`, no border, status-driven gradient background. Large semi-transparent circle watermark top-right `(white, 15% opacity)`.
+- **Layout:** Full-width, `borderRadius: 20px`, no border, status-driven gradient. Large semi-transparent circle watermark top-right `(white, 15% opacity)`.
 - **Row 1:** `BALANCE DUE` — `Inter 11px/600`, white, `letter-spacing: 1.4`.
 - **Row 2:** Amount — `Inter 40px/800`, white.
-- **Row 3 (space-between):** Left: status badge pill (`white bg, colored dot + text`). Right: due date line `Inter 13px/400 white 75% opacity`.
-  - Upcoming: `"Due [date]"`
-  - Past due: `"Overdue · X days"`
+- **Row 3 (space-between):** Left: status badge pill. Right: due date line `Inter 13px/400 white 75% opacity`.
+  - Upcoming: `\"Due [date]\"`
+  - Past due: `\"Overdue · X days\"`
   - Paid: **hidden**
-- **Gradient by status:** See token table.
+- **Gradient by status:** See token table above.
+- **Decision — zero balance on non-PAID entry:** If remaining balance somehow reaches ₹0 but status was not explicitly set to Paid, still show `₹0` in orange/blue (matching current status). Do not auto-flip to PAID state — only a recorded payment triggers a status change.
 
 ---
 
 ### Payments Card
 - **Purpose:** Chronological payment history for the entry.
-- **Header:** `"PAYMENTS"` — `Inter 11px/600 #9ca3af letter-spacing: 1.2`. Sub-label: `"Paid ₹X of ₹Y"` — `Inter 13px/400 #6b7280`.
-- **Progress Bar:** `4px` tall, full width, `#e5e7eb` track, `#16a34a` fill, `border-radius: full`. **Add a `4px` green pip at the left edge even at 0% fill** so it feels active, not like a loading skeleton.
-- **Payment Row:** Method name `Inter 14px/600 #111827` + date `Inter 13px/400 #9ca3af` (left). Amount `Inter 15px/600 #16a34a` + `Received` chip `(bg: #dcfce7, color: #16a34a, Inter 11px/600, paddingH 8px, paddingV 3px, borderRadius: full)` (right). `1px #f3f4f6` divider between rows.
-- **Empty State:** Centered, `24px` padding top/bottom. `32px` wallet icon (`#d1d5db`) + `"No payments recorded yet"` `Inter 14px/400 #9ca3af`.
-- **Decision:** Payment rows are not tappable in v1. No edit/delete on individual payments.
+- **Header:** `\"PAYMENTS\"` — `Inter 11px/600 #9ca3af letter-spacing: 1.2`. Sub-label: `\"Paid ₹X of ₹Y\"` — `Inter 13px/400 #6b7280`.
+- **Progress Bar:** `4px` tall, full width, `#e5e7eb` track, `#16a34a` fill, `border-radius: full`. **Always show a `4px` green pip at the left edge even at 0% fill.**
+- **Payment Row:** Method name `Inter 14px/600 #111827` + date `Inter 13px/400 #9ca3af` left. Amount `Inter 15px/600 #16a34a` + `Received` chip `(bg: #dcfce7, color: #16a34a, Inter 11px/600, paddingH 8px, paddingV 3px, borderRadius: full)` right. `1px #f3f4f6` divider between rows.
+- **Empty State:** Centered, `24px` padding. `32px` wallet icon (`#d1d5db`) + `\"No payments recorded yet\"` `Inter 14px/400 #9ca3af`.
+- **Decision:** Payment rows are **not tappable in v1**. No edit/delete on individual payments. Revisit in v2 if users request correction flow.
+- **Decision — max visible rows:** Show all payment rows. No pagination or "Show more" in v1. Entries rarely exceed 5–6 payments in practice.
 
 ---
 
 ### Items Card
 - **Purpose:** Itemized breakdown, accessible on demand.
-- **Default (Collapsed):** Single tappable `space-between` row. Left: `"N items · ₹[subtotal] total"` `Inter 14px/500 #374151`. Right: `chevron-down` `20px #9ca3af`. `padding: 14px 16px`.
-  - ⚠️ Amount shown is **items subtotal**, NOT grand total.
-- **Expanded (P1):** Chevron rotates to `chevron-up`. Below the header row, shows full item list:
+- **Default (Collapsed):** Single tappable `space-between` row. Left: `\"N items · ₹[subtotal] total\"` `Inter 14px/500 #374151`. Right: `chevron-down` `20px #9ca3af`. `padding: 14px 16px`.
+  - ⚠️ Amount shown is **items subtotal (pre-tax, pre-charges)**, NOT grand total.
+- **Expanded (P1):** Chevron rotates to `chevron-up`. Below header row:
   - **Item Row:** Name left `Inter 14px/500 #111827`. Qty×Rate center `Inter 13px/400 #9ca3af`. Amount right `Inter 14px/600 #111827`. `1px #f3f4f6` dividers.
-  - **Subtotal Row:** `"Subtotal"` muted left · `₹[subtotal]` muted right.
-  - `1px` thin divider.
-  - **Grand Total Row:** `"Grand Total"` `Inter 15px/600` left · `₹[total]` `Inter 16px/700 #111827` right. Status pill inline `(bg: #fef3c7, color: #d97706)` for Pending/Overdue.
+  - **Subtotal Row:** `\"Subtotal\"` muted left · `₹[subtotal]` muted right.
+  - `1px` divider.
+  - **Grand Total Row:** `\"Grand Total\"` `Inter 15px/600` left · `₹[total]` `Inter 16px/700 #111827` right.
 - **Exception:** Auto-expand if entry has only 1 line item.
-- **No icon** in the row — text-only, no blue circle icon.
+- **No icon** in the row — text-only.
 
 ---
 
 ### Action Bar (Sticky Bottom)
 - **Layout:** Fixed bottom. `bg: #ffffff`, `borderTop: 1px solid #f3f4f6`, `padding: 12px 16px`, safe area bottom.
-- **No tab bar** visible behind or below this bar.
+- **No tab bar** below.
 
 | Status | Primary CTA (60% width) | Secondary CTA (36% width) |
 |---|---|---|
-| Pending | `Record Payment` — solid green `#16a34a`, white `Inter 15px/600`, wallet icon, `borderRadius: full`, `height: 52px` | `Remind` — `bg: transparent`, `border: 1px solid #e5e7eb`, `color: #374151 Inter 14px/500`, bell icon, `height: 52px` |
+| Pending | `Record Payment` — solid `#16a34a`, white `Inter 15px/600`, wallet icon, `borderRadius: full`, `height: 52px` | `Remind` — outline `border: 1px #e5e7eb`, `color: #374151`, bell icon, `height: 52px` |
 | Partial | Same as Pending | Same as Pending |
-| Overdue | Same as Pending | `Remind` — `border: 1px solid #dc2626`, `color: #dc2626`, red bell icon, red dot badge on bell |
-| Paid | `Share Receipt` — full width `(16px margin each side)`, solid green, send/WhatsApp icon, white `Inter 15px/600`, `height: 52px` | — (no secondary) |
+| Overdue | Same as Pending | `Remind` — `border: 1px solid #dc2626`, `color: #dc2626`, red bell icon |
+| Paid | `Share Receipt` — **full width** `(16px margin each side)`, solid green, send icon, `height: 52px` | — (no secondary) |
 
-- **Decision:** Remind → opens Remind bottom sheet (P3) with WhatsApp + SMS options.
-- **Decision:** "Send Entry" CTA removed. Sharing is accessed via ⋮ overflow menu.
 - **Gap between primary and secondary:** `10px`.
+- **Decision:** Remind → opens bottom sheet (P3). Never goes directly to WhatsApp.
+- **Decision — disabled states:** Record Payment button is never disabled, even on a PAID entry. A user can always record an additional payment (overpayment correction). The status update logic lives in the backend, not the button.
 
 ---
 
 ## 6. PER-STATE FULL SPECS
 
-### P0 — PENDING State (🟠 Orange) — FINALIZED
+### P0 — PENDING State (🟠 Orange) — ✅ FINALIZED
 
-This is the **canonical base**. Every other state must match this layout exactly, with only the noted delta changes.
+This is the **canonical base**. Every other state matches this layout exactly with only the noted delta changes.
 
 | Component | Spec |
 |---|---|
 | Hero gradient | Orange: `#f97316` → `#ea580c` |
-| Status badge | Orange dot + `"Pending"` `Inter 12px/700 #f97316` |
-| Due date line | `"Due [date]"` white 75% opacity |
+| Status badge | Orange dot + `\"Pending\"` `Inter 12px/700 #f97316` |
+| Due date line | `\"Due [date]\"` white 75% opacity |
 | Hero amount | Full balance due (e.g. `₹12,555`) |
-| Payments card | **Empty state** — wallet icon + `"No payments recorded yet"` |
+| Payments card | **Empty state** — wallet icon + `\"No payments recorded yet\"` |
 | Progress bar | 0% fill. Green pip at left edge only. |
-| Items card | Collapsed. `"3 items · ₹12,555 total"` |
+| Items card | Collapsed. `\"3 items · ₹12,555 total\"` (subtotal) |
 | Action bar | `Record Payment` (primary) + `Remind` (secondary, neutral outline) |
 
 ---
 
-### P8 — OVERDUE State (🔴 Red)
+### P8 — OVERDUE State (🔴 Red) — ✅ APPROVED
 
 Identical to P0 in all layout, spacing, and component count. **Only these 4 things change:**
 
 | Component | PENDING (P0) | OVERDUE (P8) |
 |---|---|---|
 | Hero gradient | Orange | Red: `#ef4444` → `#dc2626` |
-| Status badge | Orange dot + `"Pending"` | Red dot + `"Overdue"` `Inter 12px/700 #ef4444` |
-| Due date line | `"Due Jun 15, 2026"` | `"Overdue · 12 days"` white 75% opacity |
+| Status badge | Orange dot + `\"Pending\"` | Red dot + `\"Overdue\"` `Inter 12px/700 #ef4444` |
+| Due date line | `\"Due Jun 15, 2026\"` | `\"Overdue · 12 days\"` white 75% opacity |
 | Remind button | Neutral gray outline | Red outline `#dc2626`, red text, red bell icon |
 
-> Overdue threshold = **1 day past due date**. Not a user-configurable setting in v1.
+> Overdue threshold = **1 day past due date**. Not user-configurable in v1.
+> **Decision — overdue with partial payments:** If a customer has made some payments but the entry is still past due, the state is **OVERDUE** (not PARTIAL). OVERDUE takes precedence over PARTIAL when due date has passed. Payments card shows the existing payment rows (not empty state).
 
 ---
 
-### P9 — PARTIAL State (🔵 Blue)
+### P9 — PARTIAL State (🔵 Blue) — ⏳ NEXT
 
 Identical to P0 in all layout, spacing, and component count. **Only these changes apply:**
 
 | Component | PARTIAL (P9) |
 |---|---|
 | Hero gradient | Blue: `#3b82f6` → `#2563eb` |
-| Status badge | Blue dot + `"Partial"` `Inter 12px/700 #2563eb` |
-| Due date line | `"Due [date]"` same style as Pending |
-| Hero amount | Remaining balance (e.g. `₹3,350`) |
-| Payments card | **Has rows** — no empty state. Shows all payments received so far. |
-| Progress bar | Proportional fill (e.g. 4% if `₹150` of `₹3,500` paid). |
-| Sub-label | `"Paid ₹150 of ₹3,500"` |
+| Status badge | Blue dot + `\"Partial\"` `Inter 12px/700 #2563eb` |
+| Due date line | `\"Due [date]\"` same style as Pending |
+| Hero amount | **Remaining balance** (e.g. `₹3,350` if `₹150` paid of `₹3,500`) |
+| Payments card | **Has rows** — no empty state. Shows all payments. |
+| Progress bar | Proportional fill. Sub-label: `\"Paid ₹150 of ₹3,500\"`. |
 | Action bar | `Record Payment` (primary) + `Remind` (secondary, neutral outline) |
 
 **Payment Row example:**
-- Left: `"Cash"` `Inter 14px/600 #111827` + `"May 19, 2026"` `Inter 13px/400 #9ca3af` below.
-- Right: `"₹100"` `Inter 15px/600 #16a34a` + `Received` chip below.
-- `1px #f3f4f6` divider between rows.
+- Left: `\"Cash\"` `Inter 14px/600 #111827` + `\"May 19, 2026\"` `Inter 13px/400 #9ca3af`.
+- Right: `\"₹100\"` `Inter 15px/600 #16a34a` + `Received` chip.
+
+> **Decision — PARTIAL state trigger:** Status changes to PARTIAL immediately after the first payment is recorded if the remaining balance > ₹0. No manual toggle needed.
 
 ---
 
-### P10 — PAID State (🟢 Green, no banner)
+### P10 — PAID State (🟢 Green, no banner) — ⏳ AFTER P9
 
 Identical to P0 in all layout, spacing, and component count. **Only these changes apply:**
 
 | Component | PAID (P10) |
 |---|---|
 | Hero gradient | Green: `#16a34a` → `#15803d` |
-| Status badge | Green dot + `"Paid"` `Inter 12px/700 #16a34a` |
-| Due date line | **Hidden** — paid entries have no due date shown |
+| Status badge | Green dot + `\"Paid\"` `Inter 12px/700 #16a34a` |
+| Due date line | **Hidden** |
 | Hero amount | `₹0` |
-| Payments card | **All rows** — progress bar 100% filled `#16a34a`. Sub-label: `"Paid ₹3,500 of ₹3,500"`. No empty state. |
-| Action bar | **Single full-width button:** `Share Receipt` — solid green, send icon, `height: 52px`, `16px` margin each side. No secondary button. |
+| Payments card | All rows + 100% progress bar. Sub-label: `\"Paid ₹3,500 of ₹3,500\"`. |
+| Action bar | **Single full-width** `Share Receipt` — solid green, send icon. No secondary. |
 
-> **P6 vs P10:** P6 = PAID state with a success banner at top (shown immediately after a payment is recorded, driven by `justPaid` param). P10 = same PAID state without the banner (reopened later). **No separate Stitch screen needed for P10** — implement as conditional banner in code.
+> **P6 vs P10:** P6 = PAID state + inline success banner (`justPaid=true`). P10 = same PAID state without banner (reopened later). **No separate Stitch screen for P10** — implement as conditional banner in code.
+
+> **Decision — overpayment:** If a payment is recorded that exceeds the outstanding balance, show `₹0` on the hero (not a negative). Show a `\"Overpaid by ₹X\"` note in the Payments card sub-label `Inter 12px #f97316`. Do not block the payment recording.
 
 ---
 
-### P6 — Post-Payment Success State
+### P6 — Post-Payment Success State — ✅ APPROVED
 
-**Triggered by:** Payment saved via Record Payment sheet (P5). `justPaid=true` param passed.
+**Triggered by:** Payment saved via P5. `justPaid=true` param passed.
 
-- **Base:** Same as PAID state (P10) — green hero, `₹0`, full payments list, `Share Receipt` CTA.
-- **Success Banner (top of scrollable content, below header):**
-  - `bg: #dcfce7`, `borderRadius: 12px`, `padding: 12px 16px`, `margin: 0 16px`.
+- **Base:** PAID state (P10) — green hero, `₹0`, full payments list, `Share Receipt` CTA.
+- **Success Banner:**
+  - Position: Top of scrollable content, below header, above Customer Card.
+  - `bg: #dcfce7`, `borderRadius: 12px`, `padding: 12px 16px`, `margin: 0 16px 0 16px`.
   - Left: `check-circle` icon `#16a34a` `20px`.
-  - Text: `"Payment recorded successfully"` `Inter 14px/600 #16a34a`.
-  - Banner is **conditional** — only shown when `justPaid === true`. Auto-dismiss after `3s` or on scroll.
-  - **Decision:** Toast was previous pattern; Banner (inline, top of content) is the new pattern for this screen. More visible, less intrusive than a center toast.
+  - Text: `\"Payment recorded successfully\"` `Inter 14px/600 #16a34a`.
+  - **Auto-dismiss:** 4 seconds. Also dismissed on any scroll.
+  - **Decision:** Toast was previous pattern. Inline banner is new standard for this screen — more visible, not blocked by keyboard or action bar.
 
 ---
 
 ## 7. LINKED SCREENS (Entry Detail Flow)
 
-| # | Screen | Triggered by | Stitch Status |
+| # | Screen | Triggered by | Status |
 |---|---|---|---|
 | P0 | Entry Detail — PENDING state | Entry list tap | ✅ **FINALIZED** |
 | P1 | Items card expanded | Items row tap | ✅ Approved |
 | P2 | ⋮ Overflow menu | ⋮ header icon tap | ✅ Approved |
-| P3 | Remind bottom sheet | `"Remind"` CTA | ✅ Approved |
-| P4 | Delete confirm bottom sheet | `"Delete Entry"` in overflow | ✅ Approved |
-| P5 | Record Payment bottom sheet | `"Record Payment"` / `"Mark as Paid"` | ✅ Use built version |
+| P3 | Remind bottom sheet | `\"Remind\"` CTA | ✅ Approved |
+| P4 | Delete confirm bottom sheet | `\"Delete Entry\"` in overflow | ✅ Approved |
+| P5 | Record Payment bottom sheet | `\"Record Payment\"` / `\"Mark as Paid\"` | ✅ Use built version |
 | P6 | Post-payment — PAID state + success banner | Payment saved (`justPaid=true`) | ✅ Approved |
-| P7A | Edit Entry form | `"Edit Entry"` in overflow | ✅ Approved (3 code notes — see §9) |
-| P7B | Save confirmation bottom sheet | `"Save"` on Edit Entry | ✅ Approved |
-| P8 | Entry Detail — OVERDUE state | State-driven | ✅ Approved |
+| P7A | Edit Entry form | `\"Edit Entry\"` in overflow | ✅ Approved |
+| P7B | Save confirmation bottom sheet | `\"Save\"` on Edit Entry | ✅ Approved |
+| P8 | Entry Detail — OVERDUE state | State-driven | ✅ **APPROVED** |
 | P9 | Entry Detail — PARTIAL state | State-driven | ⏳ Next |
 | P10 | Entry Detail — PAID state (no banner) | State-driven | ⏳ After P9 |
 
@@ -291,96 +302,86 @@ Identical to P0 in all layout, spacing, and component count. **Only these change
 
 **Triggered by:** `Remind` CTA in action bar.
 
-- **Overlay:** `rgba(0,0,0,0.40)` behind sheet.
-- **Sheet:** Slides up from bottom. `bg: #ffffff`, `borderRadius: 20px` top-only, `padding: 20px`.
+- **Overlay:** `rgba(0,0,0,0.40)`.
+- **Sheet:** Slides up. `bg: #ffffff`, `borderRadius: 20px` top-only, `padding: 20px`.
 - **Handle:** `32×4px` pill, `#d1d5db`, centered top.
-- **Title:** `"Remind [Customer Name]"` — `Inter 17px/600 #111827`.
-- **Subtitle:** `"Choose how to send the reminder"` — `Inter 14px/400 #6b7280`.
+- **Title:** `\"Remind [Customer Name]\"` — `Inter 17px/600 #111827`.
+- **Subtitle:** `\"Choose how to send the reminder\"` — `Inter 14px/400 #6b7280`.
 - **Option Cards (stacked, `12px` gap):**
-  - **Card 1 — WhatsApp (Primary):** `border: 1.5px solid #16a34a`, `bg: #f0fdf4`. Left: WhatsApp logo icon `32px` green circle bg. Center: `"Send via WhatsApp"` `Inter 14px/600 #111827` + `"Opens WhatsApp with pre-filled message"` `Inter 12px/400 #9ca3af`. Right: `chevron-right #9ca3af`. *(WhatsApp is the dominant option for Indian SMB — stronger visual weight intentional.)*
-  - **Card 2 — SMS (Secondary):** `border: 1px solid #e5e7eb`, `bg: #ffffff`. Left: `message-square` icon `32px` blue circle bg. Same center structure.
-- **Cancel:** Centered plain text `Inter 15px/500 #6b7280`. No button chrome.
-- **Known issue (Stitch only):** WhatsApp icon renders as generic chat bubble in Stitch prototype. Use real WhatsApp glyph/SVG in code.
+  - **WhatsApp (Primary):** `border: 1.5px solid #16a34a`, `bg: #f0fdf4`. Left: WhatsApp icon `32px` green bg. Center: `\"Send via WhatsApp\"` `Inter 14px/600` + `\"Opens WhatsApp with pre-filled message\"` `Inter 12px/400 #9ca3af`. Right: `chevron-right`.
+  - **SMS (Secondary):** `border: 1px solid #e5e7eb`, `bg: #ffffff`. Same structure. `message-square` icon `32px` blue bg.
+- **Cancel:** Centered plain text `Inter 15px/500 #6b7280`.
+- **Decision — pre-filled message content:** WhatsApp and SMS both pre-fill with: `\"Hi [Name], your payment of ₹[balance] for Invoice #[ID] is due. Please pay at your earliest convenience.\"` Message is not editable in v1.
+- **Known issue (Stitch only):** WhatsApp icon renders as generic chat bubble. Use real WhatsApp SVG in code.
 
 ---
 
 ### P4 — Delete Confirm Bottom Sheet
 
-**Triggered by:** `"Delete Entry"` in ⋮ overflow menu.
+**Triggered by:** `\"Delete Entry\"` in ⋮ overflow menu.
 
-- **Overlay:** `rgba(0,0,0,0.50)` behind modal.
+- **Overlay:** `rgba(0,0,0,0.50)`.
 - **Modal:** Centered card (not bottom sheet). `bg: #ffffff`, `borderRadius: 20px`, `padding: 24px`, `width: 320px`.
-- **Top icon:** `trash-2` icon `40px` inside `#fee2e2` circle.
-- **Title:** `"Delete this entry?"` — `Inter 17px/700 #111827`.
-- **Body:** `"Entry RMT-010 will be permanently deleted. This cannot be undone."` — `Inter 14px/400 #6b7280`, centered.
+- **Top icon:** `trash-2` `40px` inside `#fee2e2` circle.
+- **Title:** `\"Delete this entry?\"` — `Inter 17px/700 #111827`.
+- **Body:** `\"Entry [ID] will be permanently deleted. This cannot be undone.\"` — `Inter 14px/400 #6b7280`, centered.
 - **Buttons (stacked, `12px` gap):**
-  - Primary: `"Delete Entry"` — `bg: #ef4444`, white `Inter 15px/600`, `borderRadius: full`, `height: 48px`.
-  - Secondary: `"Cancel"` — `bg: transparent`, `color: #6b7280 Inter 15px/500`.
-- **Decision:** Native `Alert.alert` replaced by this custom modal. Matches design language.
+  - Primary: `\"Delete Entry\"` — `bg: #ef4444`, white `Inter 15px/600`, `borderRadius: full`, `height: 48px`.
+  - Secondary: `\"Cancel\"` — transparent, `#6b7280 Inter 15px/500`.
+- **Decision — delete with payments:** If the entry has recorded payments, show an additional warning line in amber: `\"⚠️ This entry has recorded payments. Deleting will remove all payment records too.\"` This replaces the generic body text.
 
 ---
 
 ### P5 — Record Payment Bottom Sheet
 
-**Triggered by:** `"Record Payment"` CTA or `"Mark as Paid"` in overflow.
+> **Use the built version** from `RecordCustomerPaymentModal`. Do not redesign.
 
-> Use the **built version** from `RecordCustomerPaymentModal`. Do not redesign.
-
-Spec for reference (matches built component):
 - **Overlay:** `rgba(0,0,0,0.40)`.
 - **Sheet:** `height: 70%`, `bg: #ffffff`, `borderRadius: 20px` top-only, `padding: 20px`.
 - **Handle** at top.
-- **Title:** `"Record Payment"` `Inter 17px/600`. **Sub:** `"Entry [ID] · Balance ₹[amount]"` `Inter 13px/400 #9ca3af`.
-- **Amount input:** Label `"Amount Received"` `Inter 12px/600 #6b7280`. Large `₹` prefix + number input `Inter 28px/700 #111827`. `bg: #f9fafb`, `border: 1px #e5e7eb`, `borderRadius: 12px`, `height: 64px`.
-- **Payment method chips:** `Cash` `UPI` `Cheque` `Bank Transfer`. Selected: `bg: #16a34a`, white text. Unselected: `bg: #f3f4f6`, `#374151`.
-- **Date row:** `"Date"` label + `"Today, [date]"` with calendar icon. `bg: #f9fafb`, `border: 1px #e5e7eb`, `borderRadius: 12px`.
-- **Note (optional):** Placeholder `"e.g. Advance payment"` `#d1d5db`.
-- **CTA:** `"Save Payment"` full-width solid green, `borderRadius: full`, `height: 52px`.
-- **When triggered by `"Mark as Paid"`:** Amount pre-filled with full outstanding balance. Cash pre-selected.
+- **Title:** `\"Record Payment\"`. Sub: `\"Entry [ID] · Balance ₹[amount]\"` `Inter 13px/400 #9ca3af`.
+- **Amount input:** `₹` prefix, `Inter 28px/700`, `bg: #f9fafb`, `height: 64px`.
+- **Payment method chips:** `Cash` `UPI` `Cheque` `Bank Transfer`. Selected: `bg: #16a34a` white. Unselected: `bg: #f3f4f6`.
+- **Date row:** `\"Today, [date]\"` with calendar icon.
+- **Note (optional):** `\"e.g. Advance payment\"` placeholder.
+- **CTA:** `\"Save Payment\"` full-width solid green.
+- **When triggered by `\"Mark as Paid\"`:** Amount pre-filled with full outstanding balance. Cash pre-selected.
 
 ---
 
-## 9. EDIT ENTRY SCREEN SPEC (P7A)
+## 9. EDIT ENTRY SCREEN SPEC (P7A) — ✅ APPROVED
 
 ### Purpose
-Allow the business owner to modify the details of an existing entry. Pre-filled with all current values. Customer is locked and cannot be changed.
+Modify the details of an existing entry. Pre-filled with all current values. Customer is locked.
 
 ### Layout
-- **No tab bar.** Detail screen only.
-- **Header:** `"Edit Entry [bill_number]"` `Inter 17px/600` + `"Edited N times"` `Inter 13px/400 #9ca3af` subtitle. Edit count is a trust/audit signal.
-- **Warning Banner:** Full-width amber banner, ⚠️ icon, left border accent `4px solid #f59e0b`, `bg: #fffbeb`. Text: `"Editing will update the person's ledger and payment history"` `Inter 14px #92400e`.
-- **Locked Person Row:** Label `"Person (cannot be changed)"` `Inter 12px #9ca3af` above. Avatar: **green system** (`bg: #dcfce7`, initials `color: #16a34a`). Lock icon right.
-- **Note Field:** `"+ Add note"` grouped inside or directly adjacent to Itemized Details section.
-- **Itemized Details:** Editable rate/quantity rows, red 🗑️ delete per row. Subtotal auto-calculated.
-- **Totals Section:** Subtotal → Loading Charge (editable) → GST % (editable) → Tax (calculated) → Grand Total. **Grand Total color: `#111827` (dark), NOT red.** Red = danger; Grand Total is not a danger signal.
-- **Balance Section:** Previous Balance → New Total → Total Outstanding `#ef4444` (red = debt signal). Subtle `#f9fafb` background.
-- **Save Button:** Full-width solid green `#16a34a`, **✓ checkmark icon** (not share icon), label `"Save"`, `borderRadius: 14px`.
-- **Save → opens P7B (Save Confirmation Sheet)**
+- **No tab bar.**
+- **Header:** `\"Edit Entry [bill_number]\"` + `\"Edited N times\"` subtitle.
+- **Warning Banner:** Amber, ⚠️ icon, left border `4px solid #f59e0b`, `bg: #fffbeb`. Text: `\"Editing will update the person's ledger and payment history\"`.
+- **Locked Person Row:** `\"Person (cannot be changed)\"` label. Green avatar system. Lock icon right.
+- **Note Field:** Inside / adjacent to Itemized Details section.
+- **Itemized Details:** Editable rows, red 🗑️ per row.
+- **Totals:** Subtotal → Loading Charge (editable) → GST % (editable) → Tax (calculated) → Grand Total `Inter 16px/700 #111827`.
+- **Balance:** Previous Balance → New Total → Total Outstanding `#ef4444`.
+- **Save Button:** Full-width solid green, ✓ checkmark icon, `\"Save\"`.
+- **Save → opens P7B.**
 
-### Known Code Notes (for OpenCode build sprint)
-1. **Item card background:** Use `bg: #ffffff`, `border: 1px #e5e7eb` — not grey bg.
-2. **Grand Total color:** Use `#111827` (dark), not `#ef4444`. Red reserved for Total Outstanding only.
-3. **Item Name pre-fill:** Product name must pre-fill from entry data. No blank `"Item Name"` placeholder at runtime.
+### Code Notes
+1. Item card: `bg: #ffffff`, `border: 1px #e5e7eb`.
+2. Grand Total color: `#111827`. NOT red.
+3. Item Name: must pre-fill from entry data at runtime.
 
 ---
 
-## 10. SAVE CONFIRMATION BOTTOM SHEET SPEC (P7B)
+## 10. SAVE CONFIRMATION BOTTOM SHEET SPEC (P7B) — ✅ APPROVED
 
-### Purpose
-Confirm save intent and offer PDF sharing in one step.
-
-### Layout
-- **Bottom sheet**, not alert dialog. Same pattern as P4.
-- **Overlay:** `rgba(0,0,0,0.45)` behind dimmed P7A screen.
-- **Handle:** `40×4px` pill, `#d1d5db`, centered top, `8px` margin.
-- **Title:** `"Save changes?"` — `Inter 18px/700 #111827`
-- **Subtitle:** `"This will update the person's ledger and payment history."` — `Inter 14px/400 #6b7280`
-- **`24px` gap**
-- **Button 1 (Primary):** Full-width solid green `#16a34a` — `"Save & Share PDF"`, share icon left, `height: 52px`, `borderRadius: 14px`.
-- **Button 2 (Secondary):** Full-width outline `border: 1.5px solid #16a34a`, green text — `"Save Only"`, ✓ icon left, `height: 52px`, `borderRadius: 14px`.
-- **`16px` gap**
-- **Cancel:** Centered plain text `"Cancel"` `Inter 14px #9ca3af`. No button chrome.
-- **No tab bar.** P7A screen is visible but dimmed behind.
+- **Bottom sheet.** Overlay `rgba(0,0,0,0.45)`.
+- **Handle:** `40×4px` pill, `#d1d5db`.
+- **Title:** `\"Save changes?\"` — `Inter 18px/700 #111827`.
+- **Subtitle:** `\"This will update the person's ledger and payment history.\"` — `Inter 14px/400 #6b7280`.
+- **Button 1:** Full-width solid green — `\"Save & Share PDF\"`, share icon, `height: 52px`.
+- **Button 2:** Full-width outline green — `\"Save Only\"`, ✓ icon, `height: 52px`.
+- **Cancel:** Centered plain text `\"Cancel\"` `#9ca3af`.
 
 ---
 
@@ -389,15 +390,16 @@ Confirm save intent and offer PDF sharing in one step.
 | Component | PENDING | PARTIAL | PAID | OVERDUE |
 |---|---|---|---|---|
 | Hero Gradient | Orange | Blue | Green | Red |
-| Hero Amount | Balance due | Balance due | `₹0` | Balance due |
-| Due Date Line | `"Due [date]"` | `"Due [date]"` | Hidden | `"Overdue · X days"` |
+| Hero Amount | Balance due | Remaining balance | `₹0` | Balance due |
+| Due Date Line | `\"Due [date]\"` | `\"Due [date]\"` | Hidden | `\"Overdue · X days\"` |
 | Customer Card | Normal | Normal | Normal | Normal |
-| Payments Card | Empty state | Has rows + progress | All rows + 100% bar | Empty or has rows |
-| Items Card | Collapsed | Collapsed | Collapsed | Collapsed |
-| ⋮ Overflow Menu | Available | Available | Available | Available |
-| Action Bar (Pri) | Record Payment | Record Payment | Share Receipt | Record Payment |
-| Action Bar (Sec) | Remind (neutral) | Remind (neutral) | — | Remind (red outline + red dot) |
+| Payments Card | Empty state | Has rows + progress | All rows + 100% | Empty or has rows |
+| Items Card | Collapsed (subtotal) | Collapsed (subtotal) | Collapsed (subtotal) | Collapsed (subtotal) |
+| ⋮ Overflow | Available | Available | Available (Mark as Paid hidden) | Available |
+| Action Bar (Pri) | Record Payment | Record Payment | Share Receipt (full width) | Record Payment |
+| Action Bar (Sec) | Remind (neutral) | Remind (neutral) | — | Remind (red outline) |
 | Success Banner | — | — | Only if `justPaid=true` | — |
+| State Priority | Default | Overridden by Overdue if past due | Terminal | Wins over Partial |
 
 ---
 
@@ -406,24 +408,25 @@ Confirm save intent and offer PDF sharing in one step.
 | Old | New | Reason |
 |---|---|---|
 | Customer card below Quick Actions | Customer card at TOP | WHO before HOW MUCH |
-| QuickActionTile for Edit/Delete/Remind | ⋮ header overflow only | Cleaner scroll area; admin actions are rare |
-| Overflow Actions Row (Edit · Delete text row) | Removed entirely | ⋮ header is the single overflow entry point |
-| ⋮ menu not documented | Full visual spec added to Section 5 | Three-dot tap was designed (P2) but never documented |
-| Items card above Payments | Items card below Payments, collapsed | Payment history is the primary need |
+| QuickActionTile for Edit/Delete/Remind | ⋮ header overflow only | Admin actions are rare |
+| Overflow Actions Row (text row below Hero) | Removed entirely | ⋮ is single overflow entry point |
+| Items card above Payments | Items card below Payments, collapsed | Payment status is primary need |
 | Two equal-weight CTAs | One dominant CTA + ghost secondary | Reduces cognitive load |
-| No due date on hero | Due date / overdue line on hero | Due date is critical context |
-| Entry ID on hero | Removed from hero (kept in header) | Removes redundancy |
-| Save modal as native Alert | Save confirmation as bottom sheet (P7B) | Matches design language |
-| Blue avatar on Edit Entry | Green avatar system | Consistency across all screens |
-| Share icon on Save button | Checkmark ✓ | Share icon implies sending, not saving |
-| Tab bar on Edit Entry | Removed | Detail screen, not root screen |
-| Remind → direct WhatsApp | Remind → bottom sheet (P3) | More options, consistent pattern |
-| Mark as Paid → unknown | Opens P5 pre-filled with full amount | Consistent with payment flow |
-| Items card shows grand total | Items card shows **subtotal** | Grand total includes tax/charges |
-| Delete Entry inline (below Items) | Delete Entry in ⋮ overflow only | Prevents accidental delete |
-| Payment success as toast | Inline success banner (top of content) | More visible; less intrusive |
-| Grand Total in red on Edit Entry | Grand Total in `#111827` dark | Red = danger signal; Grand Total is not danger |
-| No token reference in doc | Design token table added (Section 3) | Single source for all colour values |
+| No due date on hero | Due date / overdue line on hero | Critical context |
+| Entry ID on hero | Removed (kept in header) | Redundancy |
+| Save modal as native Alert | Bottom sheet P7B | Matches design language |
+| Blue avatar on Edit Entry | Green avatar system | Consistency |
+| Share icon on Save | Checkmark ✓ | Share implies sending, not saving |
+| Tab bar on Edit Entry | Removed | Detail screen, not root |
+| Remind → direct WhatsApp | Remind → bottom sheet P3 | Options + consistent pattern |
+| Mark as Paid → unknown | Opens P5 pre-filled | Consistent payment flow |
+| Items card shows grand total | Items card shows **subtotal** | Subtotal = what was sold; grand total includes tax |
+| Delete Entry inline | Delete Entry in ⋮ only | Prevents accidental delete |
+| Payment success as toast | Inline banner, top of content | More visible, not blocked by keyboard |
+| Grand Total red on Edit Entry | Grand Total `#111827` | Red reserved for debt signal only |
+| No token reference | Design token table in §3 | Single source of truth for colour |
+| No edge case handling | Deleted customer, zero balance, overpayment, delete-with-payments all documented | Prevents build-time surprises |
+| Entry Timeline section | **Not added, final decision** | Payments Card already surfaces chronological history; audit log = noise on entry detail |
 
 ---
 
@@ -432,13 +435,23 @@ Confirm save intent and offer PDF sharing in one step.
 | Question | Resolution |
 |---|---|
 | Items card collapsed by default? | ✅ Yes. Auto-expand if only 1 item. |
-| Remind → modal or direct WhatsApp? | ✅ Bottom sheet (P3) with WhatsApp + SMS. |
+| Remind → modal or direct WhatsApp? | ✅ Bottom sheet P3 with WhatsApp + SMS. |
 | Overdue threshold? | ✅ 1 day past due date. Not a setting in v1. |
-| Payment rows tappable? | ✅ Not tappable in v1. |
+| Payment rows tappable? | ✅ Not tappable in v1. Revisit v2. |
 | Mark as Paid behavior? | ✅ Opens P5 pre-filled with full balance. |
 | Save button behavior on Edit Entry? | ✅ Opens P7B Save confirmation sheet. |
-| Overflow entry point — header only or also text row? | ✅ Header ⋮ only. Text row removed. |
-| Delete Entry placement — inline or overflow? | ✅ Overflow only. No inline delete row. |
-| Payment success feedback — toast or banner? | ✅ Inline banner, top of content, conditional on `justPaid`. |
+| Overflow entry point? | ✅ Header ⋮ only. Text row removed. |
+| Delete Entry placement? | ✅ Overflow only. No inline delete row. |
+| Payment success feedback? | ✅ Inline banner, top of content, `justPaid` conditional, 4s auto-dismiss. |
 | P6 vs P10 — separate Stitch screen? | ✅ No. Same PAID screen, banner is conditional in code. |
-| Grand Total color on Edit Entry? | ✅ `#111827` dark. Red (`#ef4444`) reserved for Total Outstanding only. |
+| Grand Total color on Edit Entry? | ✅ `#111827`. Red reserved for Total Outstanding only. |
+| Entry Timeline on Entry Detail? | ✅ **No.** Not now, not in v2 for this screen. Customer Activity screen is the right home. |
+| OVERDUE + partial payments — which state wins? | ✅ OVERDUE wins. Past-due date overrides PARTIAL. |
+| PARTIAL trigger — automatic or manual? | ✅ Automatic. First recorded payment with balance > ₹0 = PARTIAL. |
+| Overpayment handling? | ✅ Show `₹0` hero, `\"Overpaid by ₹X\"` in Payments sub-label. Never block payment recording. |
+| Deleted customer on entry? | ✅ Show `\"[Deleted Customer]\"`, hide icons, disable card tap. |
+| Mark as Paid visibility on PAID entry? | ✅ Hidden in overflow menu when entry is already PAID. |
+| Remind pre-filled message content? | ✅ `\"Hi [Name], your payment of ₹[balance] for Invoice #[ID] is due. Please pay at your earliest convenience.\"` Not editable in v1. |
+| Record Payment button disabled on PAID? | ✅ Never disabled. Overpayment is valid (data correction use case). |
+| Max payment rows shown? | ✅ All rows shown. No pagination in v1. |
+| Delete with existing payments — extra warning? | ✅ Yes. Show amber warning line in P4 modal if entry has payments. |
