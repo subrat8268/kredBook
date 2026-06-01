@@ -20,8 +20,16 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useTranslation } from "react-i18next";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Alert, Linking, ScrollView, View } from "react-native";
-import { Pencil, Share, User, Printer, CheckCircle, Trash } from "lucide-react-native";
+import { Alert, Linking, ScrollView } from "react-native";
+import {
+  Pencil,
+  Share,
+  User,
+  Printer,
+  CheckCircle,
+  Trash,
+  Share2,
+} from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { orderKeys, useOrderDetail } from "@/src/hooks/useEntries";
 import { formatINR } from "@/src/utils/format";
@@ -248,14 +256,7 @@ export default function OrderDetailScreen() {
         },
       ],
     );
-  }, [
-    order,
-    orderId,
-    profile?.id,
-    showToast,
-    queryClient,
-    router,
-  ]);
+  }, [order, orderId, profile?.id, showToast, queryClient, router]);
 
   // ── Payment success ─────────────────────────────────────────────
   const handlePaymentSuccess = useCallback(() => {
@@ -286,27 +287,30 @@ export default function OrderDetailScreen() {
     showToast,
   ]);
 
-  const openPaymentFlow = useCallback((amountSeed?: number) => {
-    if (!order || order.balance_due <= 0) {
-      showToast({
-        message: "No outstanding balance for this person.",
-        type: "error",
-      });
-      return;
-    }
-    if (amountSeed && amountSeed > 0) {
-      router.push({
-        pathname: "/(main)/entries/create",
-        params: {
-          customer: JSON.stringify(order.customer),
-          amount: String(amountSeed),
-        },
-      });
-      return;
-    }
-    setQuickPaymentAmount("");
-    paymentModalRef.current?.present();
-  }, [order, router, showToast]);
+  const openPaymentFlow = useCallback(
+    (amountSeed?: number) => {
+      if (!order || order.balance_due <= 0) {
+        showToast({
+          message: "No outstanding balance for this person.",
+          type: "error",
+        });
+        return;
+      }
+      if (amountSeed && amountSeed > 0) {
+        router.push({
+          pathname: "/(main)/entries/create",
+          params: {
+            customer: JSON.stringify(order.customer),
+            amount: String(amountSeed),
+          },
+        });
+        return;
+      }
+      setQuickPaymentAmount("");
+      paymentModalRef.current?.present();
+    },
+    [order, router, showToast],
+  );
 
   const menuItems: MenuItem[] = useMemo(() => {
     if (!order) return [];
@@ -320,33 +324,30 @@ export default function OrderDetailScreen() {
       {
         key: "share-invoice",
         label: "Share Invoice",
-        icon: <Share />,
+        icon: <Share2 />,
         onPress: handleShareLedgerLink,
       },
       {
         key: "view-customer",
         label: "View Customer",
         icon: <User />,
-        onPress: () => router.push(`/(main)/people/${order.customer_id}` as never),
+        onPress: () =>
+          router.push(`/(main)/people/${order.customer_id}` as never),
       },
       {
         key: "print",
         label: "Print",
         icon: <Printer />,
         onPress: () => {
-          showToast({ message: "Print functionality coming soon!", type: "info" });
+          showToast({
+            message: "Print functionality coming soon!",
+            type: "info",
+          });
         },
       },
     ];
 
-    if (order.status !== 'Paid') {
-      items.push({
-        key: 'divider-paid',
-        label: '',
-        icon: <View />,
-        isDivider: true,
-        onPress: () => {},
-      });
+    if (order.status !== "Paid") {
       items.push({
         key: "mark-as-paid",
         label: "Mark as Paid",
@@ -356,13 +357,6 @@ export default function OrderDetailScreen() {
       });
     }
 
-    items.push({
-      key: 'divider-delete',
-      label: '',
-      icon: <View />,
-      isDivider: true,
-      onPress: () => {},
-    });
     items.push({
       key: "delete-entry",
       label: "Delete Entry",

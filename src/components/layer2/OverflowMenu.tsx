@@ -32,43 +32,23 @@ export default memo(function OverflowMenu({
   onClose,
   menuItems,
 }: OverflowMenuProps) {
-  const { colors, spacing, radius, typography } = useTheme();
+  const { spacing, typography } = useTheme();
 
   const renderItem = ({ item }: { item: MenuItem }) => {
-    if (item.isDivider) {
-      return (
-        <View
-          style={{
-            height: 1,
-            backgroundColor: "#f3f4f6", // colors.borderLight
-            marginHorizontal: spacing.xl,
-          }}
-        />
-      );
-    }
-
-    const itemColor = item.color || "#111827"; // colors.textPrimary
+    const itemColor = item.color || "#374151"; // colors.textPrimary
     const iconColor = item.color || "#374151"; // colors.textSecondary
 
     return (
       <Pressable
+        className="flex-row items-center gap-2 p-4"
         accessibilityRole="menuitem"
         onPress={() => {
           item.onPress();
           onClose();
         }}
-        style={({ pressed }) => [
-          styles.menuItem,
-          {
-            paddingVertical: 20,
-            paddingHorizontal: 20,
-            gap: 12,
-          },
-          pressed && { backgroundColor: colors.surfaceAlt },
-        ]}
       >
         {React.cloneElement(item.icon as React.ReactElement<any>, {
-          size: 20,
+          size: 16,
           color: iconColor,
           strokeWidth: 2,
         })}
@@ -77,7 +57,7 @@ export default memo(function OverflowMenu({
             typography.body,
             {
               color: itemColor,
-              fontWeight: "400",
+              fontWeight: "500",
               fontSize: 15,
             },
           ]}
@@ -118,9 +98,14 @@ export default memo(function OverflowMenu({
             renderItem={renderItem}
             keyExtractor={(item) => item.key}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingVertical: spacing.sm }}
+            contentContainerStyle={{ paddingVertical: 4 }}
             ItemSeparatorComponent={() => (
-              <View style={{ height: 1, backgroundColor: "transparent" }} />
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: "#f3f4f6",
+                }}
+              />
             )}
           />
         </Pressable>
@@ -136,12 +121,12 @@ const styles = StyleSheet.create({
   },
   menuCard: {
     position: "absolute",
-    width: 260,
+    width: 200,
     overflow: "hidden",
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    minHeight: 44, // Ensure touch target size
+    minHeight: 44,
   },
 });
