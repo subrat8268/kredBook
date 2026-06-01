@@ -369,6 +369,14 @@ Skeleton must mirror the exact layout of the real component — avatar circle, n
 
 ---
 
+### 7.11 Overflow Menu (`OverflowMenu`)
+
+**File:** `src/components/layer2/OverflowMenu.tsx`
+**Used by:** Entry Detail header (⋮), and any future detail screen requiring
+an overflow action menu.
+
+---
+
 ## 8. Icons & Iconography
 
 - **Library:** Lucide React Native — 1.5px stroke, consistent geometry
