@@ -283,7 +283,7 @@ Identical to P0 in all layout, spacing, and component count. **Only these change
 |---|---|---|---|
 | P0 | Entry Detail — PENDING state | Entry list tap | ✅ **FINALIZED** |
 | P1 | Items card expanded | Items row tap | ✅ Approved |
-| P2 | ⋮ Overflow menu | ⋮ header icon tap | ✅ Approved |
+| P2 | ⋮ Overflow menu | ⋮ header icon tap | 🔄 In Build — icon layout polish in progress |
 | P3 | Remind bottom sheet | `\"Remind\"` CTA | ✅ Approved |
 | P4 | Delete confirm bottom sheet | `\"Delete Entry\"` in overflow | ✅ Approved |
 | P5 | Record Payment bottom sheet | `\"Record Payment\"` / `\"Mark as Paid\"` | ✅ Use built version |

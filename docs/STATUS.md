@@ -30,19 +30,10 @@
 
 ## ⚡ Next Up (Priority Queue)
 
-> Updated 2026-05-26. 4.1.4 and 4.1.5 are in final polish. Core loop nearly complete.
-> The loop is: **Add Customer → Create Entry → View What They Owe → Record Payment → See It Reflected.**
-
-| Priority | Task | Why Now |
-|---|---|---|
-| 🔴 P0 — NOW | **4.1.5d.5** Customer Detail final screenshot verification + closeout | One blocker remaining: safe-area inset on sticky collect bar. Verify on gesture-nav Android, then close. |
-| 🔴 P0 | **4.2.3a** Entry Detail audit + extraction | Next screen in the money flow. Start immediately after 4.1.5 closes. |
-| 🟠 P1 | **4.2.4a** Edit Entry audit + extraction | Completes the entry code health pass. |
-| 🟠 P1 | **4.2.1a** Customer List audit + extraction | Gateway to Customer Detail. |
-| 🟠 P1 | **4.2.2a** Entry List audit + extraction | Gateway to Entry Detail. |
-| 🟡 P2 | **4.3.1a** Welcome screen audit + extraction | First impression. Important but not blocking daily use. |
-| 🟡 P2 | **4.4.1a** Profile audit + extraction | ⚠️ Partial work already shipped (see 4.4.0 below). Align + complete. |
-| 🔵 Pull Forward | **5.3** UPI collect link + QR | UPI ID already in Profile. This is the highest-value Phase 5 item. Consider pulling into 4.4. |
+> Updated 2026-06-01. 4.1.5 Customer Detail is pending final screenshot
+> verification only (4.1.5d.5). Entry Detail P0 component build is now
+> IN PROGRESS — header ✅ done, overflow menu 🔄 in polish.
+> Component order: Header → Customer Card → Hero → Payments → Items → Action Bar.
 
 ---
 
@@ -78,6 +69,15 @@
 - **Global FAB removed from Customer Detail** — Detail screens use contextual actions only. FAB belongs on broad/global screens (Dashboard, Customer List, Entry List).
 - **Header icons on Customer Detail** — Share and PDF removed from header; they exist in Quick Actions only. Call and WhatsApp remain in header.
 - **Shared detail header migration** — `DetailHeader` now powers Entry Detail, Entry Edit, Customer Detail, and Profile Edit. Keep future detail screens on the same back/action chip pattern.
+- **Entry Detail P0 component build IN PROGRESS** — building component-by-component.
+  Header ✅ locked. ⋮ Overflow Menu 🔄 in polish (View wrapper icon stacking bug).
+  Do not build Customer Card until overflow menu is locked.
+- **OverflowMenu component** — new shared component at
+  `src/components/layer2/OverflowMenu.tsx`. Used by Entry Detail header.
+  Icon prop must be a bare Lucide element — no View wrapper.
+- **DetailHeader shared component** — `src/components/layer2/DetailHeader.tsx`
+  now powers Entry Detail, Edit Entry, Customer Detail, Profile Edit.
+  Entry Detail uses: back + title + date + ⋮ overflow only. No call button in header.
 
 ---
 
@@ -278,11 +278,24 @@ Verification:
 > **Each screen follows the mandatory redesign routine: audit → redesign → screenshot polish.**
 > **Order: Entry Detail → Edit Entry → Customer List → Entry List**
 
+### Phase 4.2.3 — Entry Detail P0 Component Build (Component-by-Component)
+
+> Build order is fixed. Approve one component before moving to the next.
+> Each component is locked independently — no rollbacks once approved.
+
+| # | Component | Status | Notes | Commit |
+|---|---|---|---|---|
+| 4.2.3-H | Header — back, title, date, ⋮ overflow only | ✅ Done | Call button removed from header. Overflow icon is sole admin entry point. | [ddf9d9c](https://github.com/subrat8268/kredBook/commit/ddf9d9cc0cee06aef5cc4696b26ddb27b37fa7e2) |
+| 4.2.3-P2 | ⋮ Overflow Menu — 6 items, icon+label inline, dividers, backdrop | 🔄 In Polish | Icon+label stacking bug (View wrapper). Fix prompt issued. | [ddf9d9c](https://github.com/subrat8268/kredBook/commit/ddf9d9cc0cee06aef5cc4696b26ddb27b37fa7e2) |
+| 4.2.3-C | Customer Card — green avatar, name, phone, call+chat icons, tappable | ⏳ Next | After overflow menu is locked. |  |
+| 4.2.3-Hero | Hero Card — orange gradient, balance due, pending pill, due date | ⏳ Pending | After Customer Card. |  |
+| 4.2.3-Pay | Payments Card — progress track, empty state, payment rows | ⏳ Pending | After Hero. |  |
+| 4.2.3-Items | Items Card — collapsed subtotal, expand/collapse, item rows | ⏳ Pending | After Payments. |  |
+| 4.2.3-AB | Action Bar — sticky bottom, Remind secondary + Record Payment primary | ⏳ Pending | After Items. |  |
+| 4.2.3-States | PARTIAL (P9) + PAID (P10) + OVERDUE (P8) states | ⏳ Pending | After all P0 components locked. |  |
+
 | # | Task | Status | Priority | Command | Skills | Screen |
-|---|---|---|---|---|---|---|
-| 4.2.3a | Entry Detail audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/entries/[orderId].tsx` |
-| 4.2.3b | Entry Detail premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId].tsx` |
-| 4.2.3c | Entry Detail screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/entries/[orderId].tsx` |
+|---|---|---|---|---|---|---|---|
 | 4.2.4a | Edit Entry audit + extraction | ⏳ Not Started | P2 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/entries/[orderId]/edit.tsx` |
 | 4.2.4b | Edit Entry premium redesign | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId]/edit.tsx` |
 | 4.2.4c | Edit Entry screenshot polish + verification | ⏳ Not Started | P2 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/entries/[orderId]/edit.tsx` |
