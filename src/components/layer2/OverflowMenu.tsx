@@ -25,7 +25,7 @@ type OverflowMenuProps = {
   menuItems: MenuItem[];
 };
 
-const OVERLAY_COLOR = "rgba(0,0,0,0.3)";
+const OVERLAY_COLOR = "rgba(0,0,0,0.60)";
 
 export default memo(function OverflowMenu({
   visible,

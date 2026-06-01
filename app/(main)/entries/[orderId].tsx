@@ -408,6 +408,14 @@ export default function OrderDetailScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: 100 }}
       >
+        <EntryCustomerCard
+          customerName={customerName}
+          customerPhone={customerPhone}
+          onCustomerTap={() =>
+            router.push(`/(main)/people/${order.customer_id}` as never)
+          }
+        />
+
         <EntryHeroCard
           balanceDue={order.balance_due}
           status={order.status}
@@ -423,14 +431,6 @@ export default function OrderDetailScreen() {
           onDelete={handleDelete}
           onRemind={handleRemind}
           isPaid={isPaid}
-        />
-
-        <EntryCustomerCard
-          customerName={customerName}
-          customerPhone={customerPhone}
-          onCustomerTap={() =>
-            router.push(`/(main)/people/${order.customer_id}` as never)
-          }
         />
 
         <EntryItemsSection

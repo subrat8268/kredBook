@@ -23,7 +23,6 @@ export default function EntryHeroCard({
   const { colors, gradients, typography, spacing } = useTheme();
 
   const getGradient = () => {
-    // Determine the actual status key based on isOverdue prop
     const effectiveStatus = isOverdue ? "Overdue" : status;
 
     switch (effectiveStatus) {
