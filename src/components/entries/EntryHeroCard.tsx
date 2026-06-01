@@ -64,7 +64,10 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
     useCallback(() => {
       if (status === "Pending") {
         pulse.value = withRepeat(
-          withTiming(0.3, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.3, {
+            duration: 1500,
+            easing: Easing.inOut(Easing.ease),
+          }),
           -1,
           true,
         );
@@ -87,7 +90,9 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
         -1,
         true,
       );
-      return () => { blobScale.value = 1; };
+      return () => {
+        blobScale.value = 1;
+      };
     }, [blobScale]),
   );
   const blobStyle = useAnimatedStyle(() => ({
@@ -120,7 +125,7 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
             width: 160,
             height: 160,
             borderRadius: 80,
-            backgroundColor: "rgba(255,255,255,0.10)",
+            backgroundColor: "rgba(255,255,255,0.15)",
             pointerEvents: "none",
           },
         ]}
@@ -133,7 +138,7 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
 
         <Text
           style={{
-            fontFamily: "PlusJakartaSans_800ExtraBold",
+            // fontFamily: "PlusJakartaSans_800ExtraBold",
             lineHeight: 40,
           }}
           className="text-[36px] text-white pb-4"
