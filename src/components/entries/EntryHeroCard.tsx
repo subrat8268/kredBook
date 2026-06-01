@@ -138,10 +138,10 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
 
         <Text
           style={{
-            // fontFamily: "PlusJakartaSans_800ExtraBold",
+            fontFamily: "PlusJakartaSans_800ExtraBold",
             lineHeight: 40,
           }}
-          className="text-[36px] text-white pb-4"
+          className="text-[40px] text-white pb-4"
         >
           {formattedAmount}
         </Text>
@@ -151,7 +151,7 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
             borderTopWidth: 1,
             borderTopColor: "rgba(255,255,255,0.20)",
           }}
-          className="flex-row justify-between items-center pt-4"
+          className="flex-row justify-between border-t border-white/20 items-center pt-4"
         >
           <View className="flex-row items-center gap-[6px] bg-white/20 rounded-full px-3 py-1">
             <Animated.View

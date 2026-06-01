@@ -4,7 +4,6 @@ import { useToast } from "@/src/components/feedback/Toast";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
 import DetailHeader from "@/src/components/layer2/DetailHeader";
 import EntryHeroCard from "@/src/components/entries/EntryHeroCard";
-import EntryQuickActions from "@/src/components/entries/EntryQuickActions";
 import EntryCustomerCard from "@/src/components/entries/EntryCustomerCard";
 import EntryItemsSection from "@/src/components/entries/EntryItemsSection";
 import EntryPaymentsSection from "@/src/components/entries/EntryPaymentsSection";
@@ -420,15 +419,6 @@ export default function OrderDetailScreen() {
           amount={order.balance_due}
           status={statusKey === "Partially Paid" ? "Partial" : statusKey as "Pending" | "Partial" | "Paid" | "Overdue"}
           dueDate={dueDateValue}
-        />
-
-        <EntryQuickActions
-          onEdit={() =>
-            router.push(`/(main)/entries/${order.id}/edit` as never)
-          }
-          onDelete={handleDelete}
-          onRemind={handleRemind}
-          isPaid={isPaid}
         />
 
         <EntryItemsSection
