@@ -52,14 +52,14 @@ export default memo(function DetailHeader({
         {leadingSlot ? <View className="ml-0 mr-3">{leadingSlot}</View> : null}
 
         <View className="flex-1">
-          <Text
-            className="text-card-title text-textPrimary"
-            numberOfLines={1}
-          >
+          <Text className="text-card-title text-textPrimary" numberOfLines={1}>
             {title}
           </Text>
           {subtitle ? (
-            <Text className="text-caption text-textSecondary mt-1" numberOfLines={1}>
+            <Text
+              className="text-caption text-textSecondary mt-1"
+              numberOfLines={1}
+            >
               {subtitle}
             </Text>
           ) : null}
@@ -97,9 +97,13 @@ export default memo(function DetailHeader({
               accessibilityLabel="More options"
               onPress={() => setIsMenuVisible(true)}
               hitSlop={10}
-              className="w-[42px] h-[42px] rounded-full bg-icon items-center justify-center ml-3"
+              className="w-[42px] h-[42px] rounded-full items-center justify-center ml-3"
             >
-              <MoreVertical size={22} color={colors.textPrimary} strokeWidth={2.2} />
+              <MoreVertical
+                size={22}
+                color={colors.textPrimary}
+                strokeWidth={2.2}
+              />
             </Pressable>
             <OverflowMenu
               visible={isMenuVisible}
