@@ -1,20 +1,16 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import { Text, TextProps } from "react-native";
 
 type Variant = "hero" | "title" | "body" | "caption";
 
 export type MoneyAmountProps = {
   value: number;
-  /** Defaults to INR formatting with en-IN grouping */
   currencySymbol?: string;
-  /** Show '+' for positive values (useful for payments) */
   showPlusForPositive?: boolean;
-  /** Clamp decimals (default: 0) */
   maximumFractionDigits?: number;
   variant?: Variant;
-  /** Override text color if needed */
   color?: string;
 } & Omit<TextProps, "children">;
 
@@ -40,32 +36,47 @@ export default memo(function MoneyAmount({
   variant = "body",
   color,
   style,
+  className,
   ...props
 }: MoneyAmountProps) {
   const { colors, typography } = useTheme();
 
-  const textStyle =
-    variant === "hero"
-      ? typography.heroAmount
-      : variant === "title"
-        ? typography.cardTitle
-        : variant === "caption"
-          ? typography.caption
-          : typography.body;
+  const textStyle = useMemo(() => {
+    const base =
+      variant === "hero"
+        ? typography.heroAmount
+        : variant === "title"
+          ? typography.cardTitle
+          : variant === "caption"
+            ? typography.caption
+            : typography.body;
+    const { color: _c, ...rest } = base as { color?: string };
+    return rest;
+  }, [variant, typography]);
+
+  const hasColorOverride = color !== undefined;
+  const needsDefaultColor = !hasColorOverride && !className;
 
   return (
     <Text
+      className={className}
       {...props}
       style={[
         textStyle,
-        {
-          color:
-            color ?? (variant === "hero" ? colors.surface : colors.textPrimary),
-        },
+        hasColorOverride
+          ? { color }
+          : needsDefaultColor
+            ? { color: variant === "hero" ? colors.surface : colors.textPrimary }
+            : undefined,
         style,
-      ]}
+      ].filter(Boolean)}
     >
-      {fmtAmount(value, maximumFractionDigits, currencySymbol, !!showPlusForPositive)}
+      {fmtAmount(
+        value,
+        maximumFractionDigits,
+        currencySymbol,
+        !!showPlusForPositive,
+      )}
     </Text>
   );
 });

@@ -11,8 +11,16 @@ export function formatRupeeInput(value: string): string {
 }
 
 // src/utils/dateFormat.ts
-export function formatDate(dateStr: string | Date): string {
+export function formatDate(dateStr: string | Date, format?: string): string {
   const date = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
+  if (Number.isNaN(date.getTime())) return "";
+
+  if (format === "dd MMM") {
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "short",
+    }).format(date);
+  }
 
   return new Intl.DateTimeFormat("en-US", {
     month: "short", // Oct

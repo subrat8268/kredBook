@@ -1,23 +1,86 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { View } from "react-native";
-import Button from "@/src/components/ui/Button";
-import { Send, Wallet } from "lucide-react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { Bell, Send, Wallet } from "lucide-react-native";
 
 type Props = {
   isPaid: boolean;
+  isOverdue: boolean;
   sendingEntry: boolean;
   onSendEntry: () => void;
   onRecordPayment: () => void;
+  onRemind: () => void;
 };
+
+function PrimaryButton({
+  title,
+  icon,
+  loading,
+  onPress,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  loading?: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={loading}
+      className="flex-1 flex-row items-center justify-center rounded-full bg-[#16a34a]"
+      style={{ height: 52 }}
+    >
+      {loading ? (
+        <ActivityIndicator color="#ffffff" size="small" />
+      ) : (
+        <>
+          <View className="mr-2">{icon}</View>
+          <Text className="text-[15px] font-semibold text-white">{title}</Text>
+        </>
+      )}
+    </Pressable>
+  );
+}
+
+function SecondaryButton({
+  title,
+  icon,
+  overdue,
+  onPress,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  overdue?: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      className="flex-row items-center justify-center rounded-full"
+      style={{
+        height: 52,
+        borderWidth: 1,
+        borderColor: overdue ? "#dc2626" : "#e5e7eb",
+      }}
+    >
+      <View className="mr-2">{icon}</View>
+      <Text
+        className="text-[15px] font-semibold"
+        style={{ color: overdue ? "#dc2626" : "#374151" }}
+      >
+        {title}
+      </Text>
+    </Pressable>
+  );
+}
 
 export default function EntryStickyBar({
   isPaid,
+  isOverdue,
   sendingEntry,
   onSendEntry,
   onRecordPayment,
+  onRemind,
 }: Props) {
-  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
 
   return (
@@ -27,14 +90,12 @@ export default function EntryStickyBar({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: colors.surface,
+        backgroundColor: "#ffffff",
         borderTopWidth: 1,
-        borderTopColor: colors.borderLight,
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
-        paddingBottom: Math.max(insets.bottom, spacing.sm),
-        flexDirection: "row",
-        gap: spacing.sm,
+        borderTopColor: "#f3f4f6",
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: Math.max(insets.bottom, 12),
         elevation: 12,
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: -3 },
@@ -42,50 +103,37 @@ export default function EntryStickyBar({
         shadowRadius: 12,
       }}
     >
-      <View
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-          backgroundColor: colors.primary + "08",
-        }}
-      />
       {isPaid ? (
-        <View style={{ flex: 1, alignItems: "center" }}>
-          <View style={{ width: "80%" }}>
-            <Button
-              title={sendingEntry ? "Generating…" : "Send Receipt"}
-              variant="primary"
-              onPress={onSendEntry}
-              loading={sendingEntry}
-              icon={<Send size={18} color={colors.surface} strokeWidth={2} />}
-              fullWidth
+        <PrimaryButton
+          title={sendingEntry ? "Generating…" : "Share Receipt"}
+          icon={<Send size={18} color="#ffffff" strokeWidth={2} />}
+          loading={sendingEntry}
+          onPress={onSendEntry}
+        />
+      ) : (
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <View style={{ flex: 6 }}>
+            <PrimaryButton
+              title="Record Payment"
+              icon={<Wallet size={18} color="#ffffff" strokeWidth={2} />}
+              onPress={onRecordPayment}
+            />
+          </View>
+          <View style={{ flex: 4 }}>
+            <SecondaryButton
+              title="Remind"
+              overdue={isOverdue}
+              icon={
+                <Bell
+                  size={18}
+                  color={isOverdue ? "#dc2626" : "#374151"}
+                  strokeWidth={2}
+                />
+              }
+              onPress={onRemind}
             />
           </View>
         </View>
-      ) : (
-        <>
-          <View style={{ flex: 1 }}>
-            <Button
-              title="Record Payment"
-              variant="primary"
-              onPress={onRecordPayment}
-              icon={<Wallet size={18} color={colors.surface} strokeWidth={2} />}
-            />
-          </View>
-
-          <View style={{ flex: 1 }}>
-            <Button
-              title={sendingEntry ? "Generating…" : "Send Entry"}
-              variant="outline"
-              onPress={onSendEntry}
-              loading={sendingEntry}
-              icon={<Send size={18} color={colors.primary} strokeWidth={2} />}
-            />
-          </View>
-        </>
       )}
     </View>
   );

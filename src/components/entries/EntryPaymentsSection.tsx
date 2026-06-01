@@ -16,8 +16,6 @@ type PaymentRow = {
 type Props = {
   paymentsLoading: boolean;
   paymentRows: PaymentRow[];
-  fmt: (value: number) => string;
-  PAYMENT_MODE_COLORS: Record<string, { bg: string; text: string }>;
   grandTotal: number;
   paidAmount: number;
 };
@@ -46,16 +44,16 @@ export default function EntryPaymentsSection({
         <View className="pb-1">
           <Text
             style={{ letterSpacing: 0.6, lineHeight: 16 }}
-            className="text-[12px] font-bold text-[#404040] uppercase"
+            className="text-[12px] font-bold text-[#3E4A3D] uppercase"
           >
             PAYMENTS
           </Text>
         </View>
         <Text
           style={{ lineHeight: 20 }}
-          className="text-[12px] font-medium text-[#404040]"
+          className="text-[13px] font-medium text-[#3E4A3D]"
         >
-          Paid <MoneyAmount value={paidAmount} /> of{" "}
+          Paid <MoneyAmount value={paidAmount} className="ml-2" /> of
           <MoneyAmount value={grandTotal} />
         </Text>
       </View>

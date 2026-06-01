@@ -1,6 +1,7 @@
 import MoneyAmount from "@/src/components/ui/MoneyAmount";
-import StatusBadge from "@/src/components/layer2/StatusBadge";
-import { Text, View } from "react-native";
+import { ChevronDown, ChevronUp } from "lucide-react-native";
+import { useMemo, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import type { OrderDetail } from "@/src/api/entries";
 
 type Props = {
@@ -17,103 +18,121 @@ export default function EntryItemsSection({
   itemsSubtotal,
   taxAmount,
   grandTotal,
-  statusKey,
   fmt,
 }: Props) {
-  return (
-    <View className="bg-surface rounded-2xl mx-4 mb-6 p-4 border border-border">
-      {/* Section Header */}
-      <Text className="text-textSecondary font-semibold text-[11px] tracking-[1.2px] uppercase pb-2">
-        Items
-      </Text>
+  const autoExpand = order.items.length === 1;
+  const [expanded, setExpanded] = useState(autoExpand);
 
-      {/* Items List */}
-      <View className="flex-col gap-3">
-        {order.items.map((item) => (
-          <View key={item.id} className="flex-row items-center">
-            <Text className="flex-1 text-textPrimary text-[14px]" numberOfLines={1}>
+  const itemCount = order.items.length;
+  const collapsedLabel = `${itemCount} item${itemCount === 1 ? "" : "s"} · ₹${itemsSubtotal.toLocaleString("en-IN")} total`;
+
+  const itemRows = useMemo(
+    () =>
+      order.items.map((item) => (
+        <View key={item.id}>
+          <View className="flex-row items-center py-2">
+            <Text
+              numberOfLines={1}
+              className="flex-1 text-[14px] font-medium text-[#111827]"
+            >
               {item.product_name}
             </Text>
-            <Text className="text-textSecondary text-[14px] mx-4">
+            <Text className="mx-4 text-[13px] text-[#9ca3af]">
               {item.quantity} × {fmt(item.price)}
             </Text>
             <MoneyAmount
               value={item.subtotal}
-              className="text-textPrimary font-bold text-[14px] min-w-[64px] text-right"
+              className="min-w-[64px] text-right text-[14px] font-semibold text-[#111827]"
             />
           </View>
-        ))}
+          <View className="h-px bg-[#f3f4f6]" />
+        </View>
+      )),
+    [order.items, fmt],
+  );
+
+  return (
+    <View className="mx-4 mb-6 rounded-xl border border-[#e5e7eb] bg-white">
+      <View className="flex-row items-center justify-between px-4 py-[14px]">
+        <Text className="text-[14px] font-medium text-[#374151]">
+          {collapsedLabel}
+        </Text>
+        <Pressable
+          onPress={() => setExpanded((p) => !p)}
+          hitSlop={8}
+          disabled={autoExpand}
+        >
+          {autoExpand ? null : expanded ? (
+            <ChevronUp size={20} color="#9ca3af" strokeWidth={2} />
+          ) : (
+            <ChevronDown size={20} color="#9ca3af" strokeWidth={2} />
+          )}
+        </Pressable>
       </View>
 
-      {/* Divider */}
-      <View className="h-px bg-border-soft my-3" />
+      {expanded && (
+        <View className="px-4 pb-4">
+          {/* Item Rows */}
+          {itemRows}
 
-      {/* Summary Section */}
-      <View className="flex-col gap-1">
-        {/* Subtotal */}
-        <View className="flex-row justify-between items-center">
-          <Text className="text-textSecondary text-[14px] font-normal">Subtotal</Text>
-          <MoneyAmount
-            value={itemsSubtotal}
-            className="text-textSecondary text-[14px] font-normal"
-          />
-        </View>
-
-        {/* Tax */}
-        {order.tax_percent > 0 && (
-          <View className="flex-row justify-between items-center">
-            <Text className="text-textSecondary text-[14px] font-normal">
-              GST ({order.tax_percent}%)
+          {/* Subtotal */}
+          <View className="flex-row justify-between items-center pt-2">
+            <Text className="text-[13px] text-[#9ca3af]">Subtotal</Text>
+            <Text className="text-[13px] text-[#9ca3af]">
+              ₹{fmt(itemsSubtotal)}
             </Text>
-            <MoneyAmount
-              value={taxAmount}
-              className="text-textSecondary text-[14px] font-normal"
-            />
           </View>
-        )}
-        
-        {/* Loading Charge */}
-        {order.loading_charge > 0 && (
-          <View className="flex-row justify-between items-center">
-            <Text className="text-textSecondary text-[14px] font-normal">
-              Loading Charge
-            </Text>
-            <MoneyAmount
-              value={order.loading_charge}
-              className="text-textSecondary text-[14px] font-normal"
-            />
-          </View>
-        )}
 
-        {/* Previous balance row */}
-        {order.previous_balance > 0 && (
-          <View className="flex-row justify-between items-center">
-            <Text className="text-danger-text text-[14px] font-normal">
-              Previous Balance
-            </Text>
-            <MoneyAmount
-              value={order.previous_balance}
-              className="text-danger-text text-[14px] font-normal"
-            />
-          </View>
-        )}
+          {/* Tax */}
+          {order.tax_percent > 0 && (
+            <View className="flex-row justify-between items-center pt-1">
+              <Text className="text-[13px] text-[#9ca3af]">
+                GST ({order.tax_percent}%)
+              </Text>
+              <Text className="text-[13px] text-[#9ca3af]">
+                ₹{fmt(taxAmount)}
+              </Text>
+            </View>
+          )}
 
-        {/* Grand Total */}
-        <View className="h-px bg-border-soft my-2" />
-        <View className="flex-row justify-between items-center">
-          <Text className="text-textPrimary text-[15px] font-semibold">
-            Grand Total
-          </Text>
-          <View className="flex-row items-center gap-2">
-            <MoneyAmount
-              value={grandTotal}
-              className="text-textPrimary text-[17px] font-bold"
-            />
-            <StatusBadge status={statusKey} />
+          {/* Loading Charge */}
+          {order.loading_charge > 0 && (
+            <View className="flex-row justify-between items-center pt-1">
+              <Text className="text-[13px] text-[#9ca3af]">
+                Loading Charge
+              </Text>
+              <Text className="text-[13px] text-[#9ca3af]">
+                ₹{fmt(order.loading_charge)}
+              </Text>
+            </View>
+          )}
+
+          {/* Previous balance */}
+          {order.previous_balance > 0 && (
+            <View className="flex-row justify-between items-center pt-1">
+              <Text className="text-[13px] text-[#dc2626]">
+                Previous Balance
+              </Text>
+              <Text className="text-[13px] text-[#dc2626]">
+                ₹{fmt(order.previous_balance)}
+              </Text>
+            </View>
+          )}
+
+          {/* Divider */}
+          <View className="h-px bg-[#f3f4f6] my-2" />
+
+          {/* Grand Total */}
+          <View className="flex-row justify-between items-center">
+            <Text className="text-[15px] font-semibold text-[#111827]">
+              Grand Total
+            </Text>
+            <Text className="text-[16px] font-bold text-[#111827]">
+              ₹{fmt(grandTotal)}
+            </Text>
           </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }
-

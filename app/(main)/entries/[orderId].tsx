@@ -42,13 +42,6 @@ export default function OrderDetailScreen() {
     () => (i18n.language?.toLowerCase().startsWith("hi") ? "hi" : "en"),
     [i18n.language],
   );
-  const PAYMENT_MODE_COLORS: Record<string, { bg: string; text: string }> = {
-    Cash: { bg: colors.paid.bg, text: colors.paid.text },
-    UPI: { bg: colors.partial.bg, text: colors.partial.text },
-    NEFT: { bg: colors.overdue.bg, text: colors.warning },
-    Draft: { bg: colors.pending.bg, text: colors.pending.text },
-    Cheque: { bg: colors.successBg, text: colors.primaryDark },
-  };
 
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const router = useRouter();
@@ -428,8 +421,6 @@ export default function OrderDetailScreen() {
         <EntryPaymentsSection
           paymentsLoading={paymentsLoading}
           paymentRows={paymentRows}
-          fmt={fmt}
-          PAYMENT_MODE_COLORS={PAYMENT_MODE_COLORS}
           grandTotal={grandTotal}
           paidAmount={paidAmount}
         />
@@ -458,9 +449,11 @@ export default function OrderDetailScreen() {
 
       <EntryStickyBar
         isPaid={isPaid}
+        isOverdue={isOverdue}
         sendingEntry={sendingEntry}
         onSendEntry={handleShareLedgerLink}
         onRecordPayment={openPaymentFlow}
+        onRemind={handleRemind}
       />
     </SafeAreaView>
   );
