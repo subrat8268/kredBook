@@ -39,6 +39,7 @@ export interface Order {
   status: "Paid" | "Pending" | "Partially Paid";
   edited_at?: string | null;
   edit_count?: number | null;
+  due_date?: string | null;
   created_at: string;
   customer?: { id: string; name: string; phone: string } | null;
 }
@@ -144,7 +145,7 @@ export async function fetchOrderDetail(
     .from("orders")
     .select(
       `
-      id, vendor_id, customer_id, bill_number, total_amount, amount_paid, note,
+      id, vendor_id, customer_id, bill_number, total_amount, amount_paid, note, due_date,
       previous_balance, loading_charge, tax_percent, status, edited_at, edit_count, created_at,
        parties ( id, name, phone, address ),
       order_items ( id, product_id, variant_id, product_name, variant_name, price, quantity, created_at )

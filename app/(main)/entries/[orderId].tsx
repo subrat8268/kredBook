@@ -417,11 +417,9 @@ export default function OrderDetailScreen() {
         />
 
         <EntryHeroCard
-          balanceDue={order.balance_due}
-          status={order.status}
-          billNumber={order.bill_number}
-          createdAt={order.created_at}
-          isOverdue={isOverdue}
+          amount={order.balance_due}
+          status={statusKey === "Partially Paid" ? "Partial" : statusKey as "Pending" | "Partial" | "Paid" | "Overdue"}
+          dueDate={dueDateValue}
         />
 
         <EntryQuickActions
