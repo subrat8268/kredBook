@@ -1,6 +1,15 @@
 import { formatINR } from "@/src/utils/format";
 import { LinearGradient } from "expo-linear-gradient";
 import { Text, View } from "react-native";
+import { useCallback } from "react";
+import { useFocusEffect } from "expo-router";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 
 const GRADIENTS: Record<string, [string, string]> = {
   Pending: ["#f59e0b", "#ea580c"],
@@ -50,6 +59,41 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
     currencySymbol: "₹",
   });
 
+  const pulse = useSharedValue(1);
+  useFocusEffect(
+    useCallback(() => {
+      if (status === "Pending") {
+        pulse.value = withRepeat(
+          withTiming(0.3, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+          -1,
+          true,
+        );
+      } else {
+        pulse.value = 1;
+      }
+      return () => {
+        pulse.value = 1;
+      };
+    }, [status, pulse]),
+  );
+
+  const pillStyle = useAnimatedStyle(() => ({ opacity: pulse.value }));
+
+  const blobScale = useSharedValue(1);
+  useFocusEffect(
+    useCallback(() => {
+      blobScale.value = withRepeat(
+        withTiming(1.08, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true,
+      );
+      return () => { blobScale.value = 1; };
+    }, [blobScale]),
+  );
+  const blobStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: blobScale.value }],
+  }));
+
   return (
     <LinearGradient
       colors={gradientColors}
@@ -67,16 +111,19 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
       ]}
       className="mx-4 overflow-hidden px-6 py-6"
     >
-      <View
+      <Animated.View
         className="absolute -top-10"
-        style={{
-          right: -58,
-          width: 160,
-          height: 160,
-          borderRadius: 80,
-          backgroundColor: "rgba(255,255,255,0.10)",
-          pointerEvents: "none",
-        }}
+        style={[
+          blobStyle,
+          {
+            right: -58,
+            width: 160,
+            height: 160,
+            borderRadius: 80,
+            backgroundColor: "rgba(255,255,255,0.10)",
+            pointerEvents: "none",
+          },
+        ]}
       />
 
       <View className="flex-col gap-2 w-full">
@@ -102,7 +149,10 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
           className="flex-row justify-between items-center pt-4"
         >
           <View className="flex-row items-center gap-[6px] bg-white/20 rounded-full px-3 py-1">
-            <View className="w-2 h-2 rounded-full bg-white" />
+            <Animated.View
+              style={pillStyle}
+              className="w-2 h-2 rounded-full bg-white"
+            />
             <Text
               style={{ letterSpacing: 0.6, lineHeight: 16, width: 48 }}
               className="font-semibold text-[12px] text-white"
@@ -114,7 +164,7 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
           {status !== "Paid" && dueLabel && (
             <Text
               style={{ lineHeight: 20 }}
-              className="font-normal text-[14px] text-white/90"
+              className="font-medium text-[14px] text-white/90"
             >
               {dueLabel}
             </Text>
