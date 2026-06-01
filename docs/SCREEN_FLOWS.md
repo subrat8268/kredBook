@@ -392,14 +392,21 @@ Route convention summary:
 - `Button` — `@/src/components/ui/Button`
 - `Card` — `@/src/components/ui/Card`
 - `MoneyAmount` — `@/src/components/ui/MoneyAmount`
+- `OverflowMenu` — `@/src/components/layer2/OverflowMenu.tsx`
+- `DetailHeader` — `@/src/components/layer2/DetailHeader.tsx`
 
 ### Color Tokens
 - Direct token usage: `colors.paid.bg`, `colors.paid.text`, `colors.partial.bg`, `colors.partial.text`, `colors.overdue.bg`, `colors.warning`, `colors.pending.bg`, `colors.pending.text`, `colors.successBg`, `colors.primaryDark`, `colors.textPrimary`, `colors.textSecondary`, `colors.surface`, `colors.border`, `colors.danger`, `colors.success`, `colors.primary`, `colors.surfaceAlt`
 
 ### Buttons & Actions
 - Back icon — inline handler — returns to previous route
-- Edit icon — inline handler — opens Edit Entry
-- Share icon — `handleShareLedgerLink` — creates/updates ledger token and opens share sheet
+- ⋮ overflow icon — inline handler — opens OverflowMenu modal with 6 items:
+   Edit Entry → Edit Entry route,
+   Share Invoice → native share,
+   View Customer → Customer Detail,
+   Print → native print,
+   Mark as Paid → RecordCustomerPaymentModal pre-filled,
+   Delete Entry → delete confirm bottom sheet
 - Message icon / `Send Entry` button — `handleSendEntry` — shares entry PDF/text and falls back to WhatsApp
 - Phone icon — `handleCall` — opens dialer
 - WhatsApp remind button — `handleWhatsApp` — opens WhatsApp reminder
@@ -417,9 +424,16 @@ Route convention summary:
 - Component duplication: this screen imports `@/src/components/dashboard/StatusBadge`, while other list/detail screens use `@/src/components/layer2/StatusBadge`.
 - Route param inconsistency: serialized `customer` object is passed into Create Entry instead of just an ID.
 - Navigation edge handling is inconsistent: WhatsApp uses multiple URL styles and phone sanitization differs from Customer Detail.
+- OverflowMenu icon props must be bare Lucide elements — no View wrapper.
+  View wrappers collapse flexDirection:row and stack icon above label.
+  (Active bug being fixed in 4.2.3-P2 polish pass.)
+- Header call/WhatsApp/share icons removed from header in Phase 4.
+  All admin actions accessed exclusively via ⋮ overflow.
+  Customer communication actions (Call, WhatsApp) live on the Customer Card only.
 
 ### Phase 4 Target
-- `4.2.3` Entry Detail redesign
+- 4.2.3 Entry Detail redesign — 🔄 IN PROGRESS
+  Component build log: Header ✅ | OverflowMenu 🔄 polish | Customer Card ⏳ | Hero ⏳ | Payments ⏳ | Items ⏳ | Action Bar ⏳
 
 ## 7. `RecordPaymentModal` (shared component)
 
