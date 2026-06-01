@@ -50,9 +50,11 @@ export const colors = {
   background: "#F9FAFB", // gray-50
   surface: "#FFFFFF", // cards, modals, panels
   textPrimary: "#111827", // gray-900
+  textBody: "#374151", // gray-700 — body labels, menu items, overflow rows
   textSecondary: "#6B7280", // gray-500
   border: "#E5E7EB", // gray-200
   borderLight: "#F1F5F9", // Slate-100 — innercard borders, sub-box dividers
+  borderSubtle: "#F3F4F6", // gray-100 — hairline dividers inside menus, sheets, lists
 
   // ─ Semantic Blues (legacy info alias)
   primaryBlue: "#2563EB", // legacy brand/info alias
@@ -236,9 +238,11 @@ export const darkColors: ColorTokens = {
   background: "#08111F",
   surface: "#122036",
   textPrimary: "#F3F4F6",
+  textBody: "#D1D5DB", // gray-300 — body labels, menu items in dark mode
   textSecondary: "#B4C0D4",
   border: "#31415D",
   borderLight: "#24334D",
+  borderSubtle: "#1F2937", // gray-800 — hairline dividers in dark mode
   primaryBlue: "#3B82F6",
   primaryBlueBg: "#172554",
   successBg: "#0F2A1A",

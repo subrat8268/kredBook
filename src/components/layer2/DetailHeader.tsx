@@ -1,7 +1,8 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { ArrowLeft } from "lucide-react-native";
-import { memo, type ReactNode } from "react";
+import { ArrowLeft, MoreVertical } from "lucide-react-native";
+import { memo, type ReactNode, useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import OverflowMenu, { type MenuItem } from "./OverflowMenu"; // Import the new component
 
 type HeaderAction = {
   key: string;
@@ -18,6 +19,8 @@ type Props = {
   onBack: () => void;
   leadingSlot?: ReactNode;
   actions?: HeaderAction[];
+  overflow?: boolean;
+  menuItems?: MenuItem[]; // Add menuItems prop
 };
 
 export default memo(function DetailHeader({
@@ -26,65 +29,86 @@ export default memo(function DetailHeader({
   onBack,
   leadingSlot,
   actions = [],
+  overflow = false,
+  menuItems = [], // Initialize menuItems
 }: Props) {
   const { colors } = useTheme();
+  const [isMenuVisible, setIsMenuVisible] = useState(false); // State for menu visibility
 
   return (
-    <View className="flex-row items-center bg-surface border-b border-border px-4 py-3">
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Go back"
-        onPress={onBack}
-        hitSlop={10}
-        style={({ pressed }) => [pressed ? { opacity: 0.75 } : null]}
-        className="w-[42px] h-[42px] rounded-full items-center justify-center mr-2"
-      >
-        <ArrowLeft size={22} color={colors.textPrimary} strokeWidth={2.2} />
-      </Pressable>
-
-      {leadingSlot ? <View className="ml-0 mr-3">{leadingSlot}</View> : null}
-
-      <View className="flex-1 min-w-0 mr-2">
-        <Text
-          className="text-card-title text-textPrimary shrink"
-          numberOfLines={1}
+    <View className="bg-surface border-b border-border px-4 py-3">
+      <View className="flex-row items-center">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          onPress={onBack}
+          hitSlop={10}
+          style={({ pressed }) => [pressed ? { opacity: 0.75 } : null]}
+          className="mr-3"
         >
-          {title}
-        </Text>
-        {subtitle ? (
+          <ArrowLeft size={22} color={colors.textPrimary} strokeWidth={2.2} />
+        </Pressable>
+
+        {leadingSlot ? <View className="ml-0 mr-3">{leadingSlot}</View> : null}
+
+        <View className="flex-1">
           <Text
-            className="text-caption text-textSecondary/80 mt-0.5 shrink"
+            className="text-card-title text-textPrimary"
             numberOfLines={1}
           >
-            {subtitle}
+            {title}
           </Text>
+          {subtitle ? (
+            <Text className="text-caption text-textSecondary mt-1" numberOfLines={1}>
+              {subtitle}
+            </Text>
+          ) : null}
+        </View>
+
+        {actions.length > 0 ? (
+          <View className="flex-row items-center gap-2 ml-3">
+            {actions.map((action) => (
+              <Pressable
+                key={action.key}
+                accessibilityRole="button"
+                accessibilityLabel={action.accessibilityLabel}
+                onPress={action.onPress}
+                hitSlop={10}
+                disabled={action.disabled}
+                style={({ pressed }) => [
+                  action.disabled
+                    ? { opacity: 0.45 }
+                    : pressed
+                      ? { opacity: 0.75 }
+                      : null,
+                ]}
+                className="w-[42px] h-[42px] rounded-full bg-icon items-center justify-center"
+              >
+                {action.icon}
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
+
+        {overflow && menuItems.length > 0 ? ( // Only show overflow if overflow is true and there are menu items
+          <>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="More options"
+              onPress={() => setIsMenuVisible(true)}
+              hitSlop={10}
+              className="w-[42px] h-[42px] rounded-full bg-icon items-center justify-center ml-3"
+            >
+              <MoreVertical size={22} color={colors.textPrimary} strokeWidth={2.2} />
+            </Pressable>
+            <OverflowMenu
+              visible={isMenuVisible}
+              onClose={() => setIsMenuVisible(false)}
+              menuItems={menuItems}
+            />
+          </>
         ) : null}
       </View>
-
-      {actions.length ? (
-        <View className="flex-row items-center gap-2 ml-2">
-          {actions.map((action) => (
-            <Pressable
-              key={action.key}
-              accessibilityRole="button"
-              accessibilityLabel={action.accessibilityLabel}
-              onPress={action.onPress}
-              hitSlop={10}
-              disabled={action.disabled}
-              style={({ pressed }) => [
-                action.disabled
-                  ? { opacity: 0.45 }
-                  : pressed
-                    ? { opacity: 0.75 }
-                    : null,
-              ]}
-              className="w-[42px] h-[42px] rounded-full bg-icon items-center justify-center"
-            >
-              {action.icon}
-            </Pressable>
-          ))}
-        </View>
-      ) : null}
     </View>
   );
 });

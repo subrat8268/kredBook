@@ -1,5 +1,5 @@
 /**
- * Toast — lightweight success / error feedback bar.
+ * Toast — lightweight success / error / info feedback bar.
  *
  * Usage (imperative):
  *   const { show } = useToast();
@@ -8,20 +8,20 @@
  * Or mount <ToastContainer /> near your root and use the context.
  */
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { CheckCircle, XCircle } from "lucide-react-native";
+import { CheckCircle, XCircle, Info } from "lucide-react-native";
 import React, {
-    createContext,
-    useCallback,
-    useContext,
-    useMemo,
-    useRef,
-    useState,
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import { Animated, StyleSheet, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type ToastType = "success" | "error";
+type ToastType = "success" | "error" | "info";
 
 interface ToastOptions {
   message: string;
@@ -106,8 +106,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     [opacity, translateY, iconScale],
   );
 
-  const isSuccess = toast?.type !== "error";
-  const bg = isSuccess ? colors.primary : colors.danger;
+  const bg = toast?.type === "error"
+    ? colors.danger
+    : toast?.type === "info"
+      ? colors.primaryBlue
+      : colors.primary;
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -152,10 +156,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           pointerEvents="none"
         >
           <Animated.View style={{ transform: [{ scale: iconScale }] }}>
-            {isSuccess ? (
-              <CheckCircle size={18} color={colors.surface} strokeWidth={2.5} />
-            ) : (
+            {toast.type === "error" ? (
               <XCircle size={18} color={colors.surface} strokeWidth={2.5} />
+            ) : toast.type === "info" ? (
+              <Info size={18} color={colors.surface} strokeWidth={2.5} />
+            ) : (
+              <CheckCircle size={18} color={colors.surface} strokeWidth={2.5} />
             )}
           </Animated.View>
           <Text style={styles.message}>{toast.message}</Text>
@@ -164,4 +170,3 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     </ToastContext.Provider>
   );
 }
-

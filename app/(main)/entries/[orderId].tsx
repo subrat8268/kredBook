@@ -20,12 +20,13 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useTranslation } from "react-i18next";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Alert, Linking, ScrollView } from "react-native";
-import { Phone } from "lucide-react-native";
+import { Alert, Linking, ScrollView, View } from "react-native";
+import { Pencil, Share, User, Printer, CheckCircle, Trash } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { orderKeys, useOrderDetail } from "@/src/hooks/useEntries";
 import { formatINR } from "@/src/utils/format";
 import { deleteOrder } from "@/src/api/entries";
+import { MenuItem } from "@/src/components/layer2/OverflowMenu";
 
 export default function OrderDetailScreen() {
   const { colors, spacing } = useTheme();
@@ -111,23 +112,6 @@ export default function OrderDetailScreen() {
       return { payment: p, remaining: Math.max(0, running) };
     });
   }, [sortedPayments, grandTotal]);
-
-  const handleCall = useCallback(() => {
-    if (customerPhone) Linking.openURL(`tel:${customerPhone}`);
-  }, [customerPhone]);
-
-  const headerActions = useMemo(() => {
-    const actions = [];
-    if (customerPhone) {
-      actions.push({
-        key: "call-customer",
-        icon: <Phone size={20} color={colors.primary} strokeWidth={2} />,
-        onPress: handleCall,
-        accessibilityLabel: "Call customer",
-      });
-    }
-    return actions;
-  }, [customerPhone, handleCall, colors.primary]);
 
   // ── Send Entry ──────────────────────────────────────────────────
   const handleShareLedgerLink = useCallback(async () => {
@@ -265,15 +249,13 @@ export default function OrderDetailScreen() {
       ],
     );
   }, [
-    order?.bill_number,
+    order,
     orderId,
     profile?.id,
-    order?.customer_id,
     showToast,
     queryClient,
     router,
-    order,
-  ]); // Added missing dependencies
+  ]);
 
   // ── Payment success ─────────────────────────────────────────────
   const handlePaymentSuccess = useCallback(() => {
@@ -304,7 +286,7 @@ export default function OrderDetailScreen() {
     showToast,
   ]);
 
-  const openPaymentFlow = (amountSeed?: number) => {
+  const openPaymentFlow = useCallback((amountSeed?: number) => {
     if (!order || order.balance_due <= 0) {
       showToast({
         message: "No outstanding balance for this person.",
@@ -324,7 +306,82 @@ export default function OrderDetailScreen() {
     }
     setQuickPaymentAmount("");
     paymentModalRef.current?.present();
-  };
+  }, [order, router, showToast]);
+
+  const menuItems: MenuItem[] = useMemo(() => {
+    if (!order) return [];
+    const items: MenuItem[] = [
+      {
+        key: "edit-entry",
+        label: "Edit Entry",
+        icon: <Pencil />,
+        onPress: () => router.push(`/(main)/entries/${order.id}/edit` as never),
+      },
+      {
+        key: "share-invoice",
+        label: "Share Invoice",
+        icon: <Share />,
+        onPress: handleShareLedgerLink,
+      },
+      {
+        key: "view-customer",
+        label: "View Customer",
+        icon: <User />,
+        onPress: () => router.push(`/(main)/people/${order.customer_id}` as never),
+      },
+      {
+        key: "print",
+        label: "Print",
+        icon: <Printer />,
+        onPress: () => {
+          showToast({ message: "Print functionality coming soon!", type: "info" });
+        },
+      },
+    ];
+
+    if (order.status !== 'Paid') {
+      items.push({
+        key: 'divider-paid',
+        label: '',
+        icon: <View />,
+        isDivider: true,
+        onPress: () => {},
+      });
+      items.push({
+        key: "mark-as-paid",
+        label: "Mark as Paid",
+        icon: <CheckCircle />,
+        color: colors.successDark,
+        onPress: () => openPaymentFlow(),
+      });
+    }
+
+    items.push({
+      key: 'divider-delete',
+      label: '',
+      icon: <View />,
+      isDivider: true,
+      onPress: () => {},
+    });
+    items.push({
+      key: "delete-entry",
+      label: "Delete Entry",
+      icon: <Trash />,
+      color: colors.dangerStrong,
+      onPress: handleDelete,
+    });
+
+    return items;
+  }, [
+    order,
+    router,
+    handleShareLedgerLink,
+    handleDelete,
+    openPaymentFlow,
+    colors.successDark,
+    colors.dangerStrong,
+    showToast,
+  ]);
 
   // ── Loading / Error gates ─────────────────────────────────────────
   if (isLoading) return <Loader />;
@@ -349,7 +406,8 @@ export default function OrderDetailScreen() {
         title={`Entry #${order.bill_number}`}
         subtitle={formatDate(order.created_at)}
         onBack={() => router.back()}
-        actions={headerActions}
+        overflow={true}
+        menuItems={menuItems}
       />
 
       <ScrollView
