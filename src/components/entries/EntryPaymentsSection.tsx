@@ -39,19 +39,21 @@ export default function EntryPaymentsSection({
         shadowRadius: 12,
         elevation: 2,
       }}
-      className="mx-4 mb-4 rounded-xl bg-white p-4"
+      className="mx-4 mb-4 gap-4 rounded-xl bg-white p-5"
     >
       {/* Header */}
-      <View className="flex-col gap-0 mb-4">
-        <Text
-          style={{ letterSpacing: 0.6, lineHeight: 16 }}
-          className="font-semibold text-[12px] text-[#9ca3af] uppercase"
-        >
-          PAYMENTS
-        </Text>
+      <View className="flex-col">
+        <View className="pb-1">
+          <Text
+            style={{ letterSpacing: 0.6, lineHeight: 16 }}
+            className="text-[12px] font-bold text-[#404040] uppercase"
+          >
+            PAYMENTS
+          </Text>
+        </View>
         <Text
           style={{ lineHeight: 20 }}
-          className="text-[12px] text-[#6b7280]"
+          className="text-[12px] font-medium text-[#404040]"
         >
           Paid <MoneyAmount value={paidAmount} /> of{" "}
           <MoneyAmount value={grandTotal} />
@@ -59,14 +61,14 @@ export default function EntryPaymentsSection({
       </View>
 
       {/* Progress Bar */}
-      <View className="mb-4 h-2 w-full relative overflow-hidden rounded-full bg-[#e5e7eb]">
+      <View className="h-1.5 w-full relative overflow-hidden rounded-full bg-[#e0f2fe]">
         {progress === 0 && (
-          <View className="absolute left-0 top-0 h-2 w-1 rounded-full bg-[#16a34a]" />
+          <View className="absolute left-0 top-0 h-1.5 w-1 rounded-full bg-[#16a34a]" />
         )}
         {progress > 0 && (
           <View
             style={{ width: `${progress}%` }}
-            className="absolute left-0 top-0 h-2 rounded-full bg-[#16a34a]"
+            className="absolute left-0 top-0 h-1.5 rounded-full bg-[#16a34a]"
           />
         )}
       </View>
@@ -83,7 +85,7 @@ export default function EntryPaymentsSection({
           </View>
           <Text
             style={{ lineHeight: 20 }}
-            className="text-center text-[14px] text-[#404040]"
+            className="text-center text-[14px] font-medium text-[#404040]"
           >
             No payments recorded yet
           </Text>
