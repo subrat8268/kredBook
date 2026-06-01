@@ -114,7 +114,7 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
         },
         shadow,
       ]}
-      className="mx-4 overflow-hidden px-6 py-6"
+      className="mx-4 overflow-hidden px-6 py-6 mb-4"
     >
       <Animated.View
         className="absolute -top-10"

@@ -1,4 +1,3 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
 import MoneyAmount from "@/src/components/ui/MoneyAmount";
 import { formatDate } from "@/src/utils/helper";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -26,86 +25,104 @@ type Props = {
 export default function EntryPaymentsSection({
   paymentsLoading,
   paymentRows,
-  PAYMENT_MODE_COLORS,
   grandTotal,
   paidAmount,
 }: Props) {
-  const { colors } = useTheme();
   const progress = grandTotal > 0 ? (paidAmount / grandTotal) * 100 : 0;
 
   return (
-    <View className="bg-surface rounded-2xl mx-4 mb-6 p-4 border border-border">
-      {/* Section Header */}
-      <View className="mb-3">
-        <Text className="text-textSecondary font-semibold text-[11px] tracking-[1.2px] uppercase">
-          Payments
+    <View
+      style={{
+        shadowColor: "rgba(27,20,10,1)",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 12,
+        elevation: 2,
+      }}
+      className="mx-4 mb-4 rounded-xl bg-white p-4"
+    >
+      {/* Header */}
+      <View className="flex-col gap-0 mb-4">
+        <Text
+          style={{ letterSpacing: 0.6, lineHeight: 16 }}
+          className="font-semibold text-[12px] text-[#9ca3af] uppercase"
+        >
+          PAYMENTS
         </Text>
-        <Text className="text-[13px] text-textSecondary mt-1">
-          Paid <MoneyAmount value={paidAmount} /> of <MoneyAmount value={grandTotal} />
+        <Text
+          style={{ lineHeight: 20 }}
+          className="text-[12px] text-[#6b7280]"
+        >
+          Paid <MoneyAmount value={paidAmount} /> of{" "}
+          <MoneyAmount value={grandTotal} />
         </Text>
       </View>
 
       {/* Progress Bar */}
-      <View className="h-1 rounded-full bg-border-soft w-full mb-4">
-        <View
-          style={{ width: `${progress}%` }}
-          className="h-1 rounded-full bg-primary"
-        />
+      <View className="mb-4 h-2 w-full relative overflow-hidden rounded-full bg-[#e5e7eb]">
+        {progress === 0 && (
+          <View className="absolute left-0 top-0 h-2 w-1 rounded-full bg-[#16a34a]" />
+        )}
+        {progress > 0 && (
+          <View
+            style={{ width: `${progress}%` }}
+            className="absolute left-0 top-0 h-2 rounded-full bg-[#16a34a]"
+          />
+        )}
       </View>
 
       {/* Content */}
       {paymentsLoading ? (
-        <View className="py-10 items-center justify-center">
-          <ActivityIndicator size="small" color={colors.primary} />
+        <View className="items-center justify-center py-10">
+          <ActivityIndicator size="small" />
         </View>
       ) : paymentRows.length === 0 ? (
-        <View className="py-8 items-center justify-center">
-          <Wallet size={32} color={colors.border} strokeWidth={1.5} />
-          <Text className="text-textSecondary text-[14px] mt-2">
+        <View className="items-center gap-0 pb-6 pt-8">
+          <View className="mb-3 h-12 w-12 items-center justify-center rounded-full bg-[#e0f2fe]">
+            <Wallet size={20} color="#374151" strokeWidth={1.5} />
+          </View>
+          <Text
+            style={{ lineHeight: 20 }}
+            className="text-center text-[14px] text-[#404040]"
+          >
             No payments recorded yet
           </Text>
         </View>
       ) : (
         <View className="flex-col">
-          {paymentRows.map(({ payment }, idx) => {
-            const modeStyle =
-              PAYMENT_MODE_COLORS[payment.payment_mode] ?? PAYMENT_MODE_COLORS["Cash"];
-            return (
-              <View
-                key={payment.id}
-                className={`flex-row justify-between items-center py-3 ${
-                  idx === paymentRows.length - 1 ? "" : "border-b border-border-soft"
-                }`}
-              >
-                <View>
-                  <Text className="text-[14px] font-semibold text-textPrimary">
-                    {payment.payment_mode}
+          {paymentRows.map(({ payment }, idx) => (
+            <View
+              key={payment.id}
+              className={`flex-row items-center justify-between py-3 ${
+                idx === paymentRows.length - 1
+                  ? ""
+                  : "border-b border-[#f3f4f6]"
+              }`}
+            >
+              <View>
+                <Text className="text-[14px] font-semibold text-[#111827]">
+                  {payment.payment_mode}
+                </Text>
+                <Text className="mt-0.5 text-[13px] text-[#9ca3af]">
+                  {formatDate(payment.payment_date, "dd MMM")}
+                </Text>
+              </View>
+
+              <View className="flex-row items-center gap-2">
+                <MoneyAmount
+                  value={payment.amount}
+                  showPlusForPositive
+                  style={{ lineHeight: 20 }}
+                  className="text-[15px] font-bold text-[#16a34a]"
+                />
+                <View className="rounded-full bg-[#dcfce7] px-2 py-[3px]">
+                  <Text className="text-[11px] font-semibold text-[#16a34a]">
+                    Received
                   </Text>
-                  <Text className="text-[13px] text-textSecondary mt-0.5">
-                    {formatDate(payment.payment_date, "dd MMM")}
-                  </Text>
-                </View>
-                <View className="flex-row items-center gap-2">
-                  <MoneyAmount
-                    value={payment.amount}
-                    showPlusForPositive
-                    className="text-[15px] font-bold text-success"
-                  />
-                  <View
-                    style={{ backgroundColor: modeStyle.bg, borderRadius: 99 }}
-                    className="px-2 py-0.5"
-                  >
-                    <Text
-                      style={{ color: modeStyle.text }}
-                      className="text-[11px] font-bold"
-                    >
-                      RECEIVED
-                    </Text>
-                  </View>
                 </View>
               </View>
-            );
-          })}
+            </View>
+          ))}
         </View>
       )}
     </View>

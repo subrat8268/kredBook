@@ -417,17 +417,12 @@ export default function OrderDetailScreen() {
 
         <EntryHeroCard
           amount={order.balance_due}
-          status={statusKey === "Partially Paid" ? "Partial" : statusKey as "Pending" | "Partial" | "Paid" | "Overdue"}
+          status={
+            statusKey === "Partially Paid"
+              ? "Partial"
+              : (statusKey as "Pending" | "Partial" | "Paid" | "Overdue")
+          }
           dueDate={dueDateValue}
-        />
-
-        <EntryItemsSection
-          order={order}
-          itemsSubtotal={itemsSubtotal}
-          taxAmount={taxAmount}
-          grandTotal={grandTotal}
-          statusKey={statusKey}
-          fmt={fmt}
         />
 
         <EntryPaymentsSection
@@ -437,6 +432,15 @@ export default function OrderDetailScreen() {
           PAYMENT_MODE_COLORS={PAYMENT_MODE_COLORS}
           grandTotal={grandTotal}
           paidAmount={paidAmount}
+        />
+
+        <EntryItemsSection
+          order={order}
+          itemsSubtotal={itemsSubtotal}
+          taxAmount={taxAmount}
+          grandTotal={grandTotal}
+          statusKey={statusKey}
+          fmt={fmt}
         />
       </ScrollView>
 
