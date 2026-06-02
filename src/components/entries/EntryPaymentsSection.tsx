@@ -1,7 +1,34 @@
 import MoneyAmount from "@/src/components/ui/MoneyAmount";
 import { formatDate } from "@/src/utils/helper";
 import { ActivityIndicator, Text, View } from "react-native";
-import { Wallet } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect } from "react";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
+import {
+  Banknote,
+  Landmark,
+  QrCode,
+  ReceiptText,
+  Ellipsis,
+  Wallet,
+} from "lucide-react-native";
+
+const MODE_STYLE: Record<
+  string,
+  { circleBg: string; accent: string; icon: React.ElementType }
+> = {
+  Cash: { circleBg: "#DCFCE7", accent: "#16A34A", icon: Banknote },
+  UPI: { circleBg: "#EDE9FE", accent: "#7C3AED", icon: QrCode },
+  NEFT: { circleBg: "#DBEAFE", accent: "#2563EB", icon: Landmark },
+  Cheque: { circleBg: "#FEF3C7", accent: "#D97706", icon: ReceiptText },
+};
+
+const DEFAULT_MODE = { circleBg: "#F3F4F6", accent: "#6B7280", icon: Ellipsis };
 
 type PaymentRow = {
   payment: {
@@ -15,6 +42,7 @@ type PaymentRow = {
 
 type Props = {
   paymentsLoading: boolean;
+  paymentsError: boolean;
   paymentRows: PaymentRow[];
   grandTotal: number;
   paidAmount: number;
@@ -22,11 +50,25 @@ type Props = {
 
 export default function EntryPaymentsSection({
   paymentsLoading,
+  paymentsError,
   paymentRows,
   grandTotal,
   paidAmount,
 }: Props) {
   const progress = grandTotal > 0 ? (paidAmount / grandTotal) * 100 : 0;
+
+  const widthAnim = useSharedValue(0);
+
+  useEffect(() => {
+    widthAnim.value = withTiming(progress, {
+      duration: 1000,
+      easing: Easing.out(Easing.exp),
+    });
+  }, [progress]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    width: `${widthAnim.value}%`,
+  }));
 
   return (
     <View
@@ -53,26 +95,37 @@ export default function EntryPaymentsSection({
           style={{ lineHeight: 20 }}
           className="text-[13px] font-medium text-[#3E4A3D]"
         >
-          Paid <MoneyAmount value={paidAmount} className="ml-2" /> of
-          <MoneyAmount value={grandTotal} />
+          Paid <MoneyAmount value={paidAmount} variant="inherit" /> of{" "}
+          <MoneyAmount value={grandTotal} variant="inherit" />
         </Text>
       </View>
 
       {/* Progress Bar */}
-      <View className="h-1.5 w-full relative overflow-hidden rounded-full bg-[#e0f2fe]">
-        {progress === 0 && (
-          <View className="absolute left-0 top-0 h-1.5 w-1 rounded-full bg-[#16a34a]" />
-        )}
-        {progress > 0 && (
-          <View
-            style={{ width: `${progress}%` }}
-            className="absolute left-0 top-0 h-1.5 rounded-full bg-[#16a34a]"
+      <View className="h-2 w-full relative overflow-hidden rounded-full bg-[#f1f5f9] dark:bg-slate-800">
+        <Animated.View
+          style={[animatedStyle, { height: "100%" }]}
+          className="absolute left-0 top-0"
+        >
+          <LinearGradient
+            colors={["#22C55E", "#15803D"]} // Sleek forest-emerald green gradient
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{ width: "100%", height: "100%", borderRadius: 9999 }}
           />
-        )}
+        </Animated.View>
       </View>
 
       {/* Content */}
-      {paymentsLoading ? (
+      {paymentsError ? (
+        <View className="items-center justify-center pb-6 pt-8">
+          <Text
+            style={{ lineHeight: 20 }}
+            className="text-center text-[13px] text-[#9ca3af]"
+          >
+            Could not load payments
+          </Text>
+        </View>
+      ) : paymentsLoading ? (
         <View className="items-center justify-center py-10">
           <ActivityIndicator size="small" />
         </View>
@@ -90,39 +143,59 @@ export default function EntryPaymentsSection({
         </View>
       ) : (
         <View className="flex-col">
-          {paymentRows.map(({ payment }, idx) => (
-            <View
-              key={payment.id}
-              className={`flex-row items-center justify-between py-3 ${
-                idx === paymentRows.length - 1
-                  ? ""
-                  : "border-b border-[#f3f4f6]"
-              }`}
-            >
-              <View>
-                <Text className="text-[14px] font-semibold text-[#111827]">
-                  {payment.payment_mode}
-                </Text>
-                <Text className="mt-0.5 text-[13px] text-[#9ca3af]">
-                  {formatDate(payment.payment_date, "dd MMM")}
-                </Text>
-              </View>
+          {paymentRows.map(({ payment }, idx) => {
+            const paymentDate = new Date(payment.payment_date);
+            const today = new Date();
+            const isToday =
+              paymentDate.getDate() === today.getDate() &&
+              paymentDate.getMonth() === today.getMonth() &&
+              paymentDate.getFullYear() === today.getFullYear();
 
-              <View className="flex-row items-center gap-2">
+            const modeStyle = MODE_STYLE[payment.payment_mode] ?? DEFAULT_MODE;
+            const IconComp = modeStyle.icon;
+
+            return (
+              <View
+                key={payment.id}
+                className={`flex-row items-center justify-between py-4 ${
+                  idx === paymentRows.length - 1
+                    ? ""
+                    : "border-b border-[#f3f4f6]"
+                }`}
+              >
+                <View className="flex-row items-center gap-3">
+                  <View
+                    className="h-11 w-11 items-center justify-center rounded-full"
+                    style={{ backgroundColor: modeStyle.circleBg }}
+                  >
+                    <IconComp
+                      size={20}
+                      color={modeStyle.accent}
+                      strokeWidth={2}
+                    />
+                  </View>
+                  <View className="flex-col">
+                    <Text className="text-base font-medium text-[#121C2A]">
+                      {payment.payment_mode}
+                    </Text>
+                    <Text className="text-xs leading-5 font-medium text-[#6B7280]">
+                      {isToday
+                        ? "Today"
+                        : formatDate(payment.payment_date, "dd MMM")}
+                    </Text>
+                  </View>
+                </View>
+
                 <MoneyAmount
                   value={payment.amount}
                   showPlusForPositive
-                  style={{ lineHeight: 20 }}
-                  className="text-[15px] font-bold text-[#16a34a]"
+                  variant="inherit"
+                  className="text-lg font-semibold tracking-wide"
+                  color={modeStyle.accent}
                 />
-                <View className="rounded-full bg-[#dcfce7] px-2 py-[3px]">
-                  <Text className="text-[11px] font-semibold text-[#16a34a]">
-                    Received
-                  </Text>
-                </View>
               </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
       )}
     </View>

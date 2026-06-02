@@ -49,7 +49,7 @@ export default function OrderDetailScreen() {
   const queryClient = useQueryClient();
 
   const { data: order, isLoading, isError } = useOrderDetail(orderId);
-  const { payments, isLoading: paymentsLoading } = usePayments(
+  const { payments, isLoading: paymentsLoading, isError: paymentsError } = usePayments(
     orderId ?? "",
     profile?.id,
   );
@@ -106,12 +106,12 @@ export default function OrderDetailScreen() {
   );
 
   const paymentRows = useMemo(() => {
-    let running = grandTotal;
+    let running = order?.total_amount ?? 0;
     return sortedPayments.map((p) => {
       running -= p.amount;
       return { payment: p, remaining: Math.max(0, running) };
     });
-  }, [sortedPayments, grandTotal]);
+  }, [sortedPayments, order?.total_amount]);
 
   // ── Send Entry ──────────────────────────────────────────────────
   const handleShareLedgerLink = useCallback(async () => {
@@ -420,9 +420,10 @@ export default function OrderDetailScreen() {
 
         <EntryPaymentsSection
           paymentsLoading={paymentsLoading}
+          paymentsError={paymentsError}
           paymentRows={paymentRows}
-          grandTotal={grandTotal}
-          paidAmount={paidAmount}
+          grandTotal={order?.total_amount ?? 0}
+          paidAmount={order?.amount_paid ?? 0}
         />
 
         <EntryItemsSection

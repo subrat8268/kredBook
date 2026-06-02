@@ -112,17 +112,13 @@ export function useRecordPayment(orderId: string, vendorId?: string, customerId?
 
     onSuccess: () => {
       if (!vendorId) return;
-      // Invalidate to refetch fresh data from server
-      queryClient.invalidateQueries({ queryKey: orderKeys.all(vendorId) });
       queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId) });
       queryClient.invalidateQueries({ queryKey: ["payments", orderId] });
-      queryClient.invalidateQueries({ queryKey: ["customers", vendorId] });
       if (customerId) {
         queryClient.invalidateQueries({
           queryKey: ["customerDetail", customerId],
         });
       }
-      queryClient.invalidateQueries({ queryKey: ["dashboard", vendorId] });
     },
 
     onError: (err: ApiError, _variables, context: any) => {

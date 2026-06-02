@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
+import { CheckCircle2, Clock3 } from "lucide-react-native";
 
 const GRADIENTS: Record<string, [string, string]> = {
   Pending: ["#f59e0b", "#ea580c"],
@@ -62,22 +63,18 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
   const pulse = useSharedValue(1);
   useFocusEffect(
     useCallback(() => {
-      if (status === "Pending") {
-        pulse.value = withRepeat(
-          withTiming(0.3, {
-            duration: 1500,
-            easing: Easing.inOut(Easing.ease),
-          }),
-          -1,
-          true,
-        );
-      } else {
-        pulse.value = 1;
-      }
+      pulse.value = withRepeat(
+        withTiming(0.3, {
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        -1,
+        true,
+      );
       return () => {
         pulse.value = 1;
       };
-    }, [status, pulse]),
+    }, [pulse]),
   );
 
   const pillStyle = useAnimatedStyle(() => ({ opacity: pulse.value }));
@@ -154,12 +151,17 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
           className="flex-row justify-between border-t border-white/20 items-center pt-4"
         >
           <View className="flex-row items-center gap-[6px] bg-white/20 rounded-full px-3 py-1">
-            <Animated.View
-              style={pillStyle}
-              className="w-2 h-2 rounded-full bg-white"
-            />
+            <Animated.View style={pillStyle} className="flex-row items-center">
+              {status === "Paid" ? (
+                <CheckCircle2 size={13} color="#ffffff" strokeWidth={2.5} />
+              ) : status === "Overdue" ? (
+                <Clock3 size={13} color="#ffffff" strokeWidth={2.5} />
+              ) : (
+                <View className="w-2 h-2 rounded-full bg-white" />
+              )}
+            </Animated.View>
             <Text
-              style={{ letterSpacing: 0.6, lineHeight: 16, width: 48 }}
+              style={{ letterSpacing: 0.6, lineHeight: 16 }}
               className="font-semibold text-[12px] text-white"
             >
               {status}

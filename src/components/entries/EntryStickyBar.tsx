@@ -95,7 +95,7 @@ export default function EntryStickyBar({
         borderTopColor: "#f3f4f6",
         paddingHorizontal: 16,
         paddingTop: 12,
-        paddingBottom: Math.max(insets.bottom, 12),
+        paddingBottom: Math.max(Math.min(insets.bottom, 12), 4),
         elevation: 12,
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: -3 },

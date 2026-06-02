@@ -3,7 +3,7 @@ import { formatINR } from "@/src/utils/format";
 import React, { memo, useMemo } from "react";
 import { Text, TextProps } from "react-native";
 
-type Variant = "hero" | "title" | "body" | "caption";
+type Variant = "hero" | "title" | "body" | "caption" | "inherit";
 
 export type MoneyAmountProps = {
   value: number;
@@ -42,6 +42,7 @@ export default memo(function MoneyAmount({
   const { colors, typography } = useTheme();
 
   const textStyle = useMemo(() => {
+    if (variant === "inherit") return {};
     const base =
       variant === "hero"
         ? typography.heroAmount
@@ -55,7 +56,7 @@ export default memo(function MoneyAmount({
   }, [variant, typography]);
 
   const hasColorOverride = color !== undefined;
-  const needsDefaultColor = !hasColorOverride && !className;
+  const needsDefaultColor = variant !== "inherit" && !hasColorOverride && !className;
 
   return (
     <Text
