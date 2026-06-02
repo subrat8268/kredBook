@@ -17,6 +17,7 @@ import {
   AlertCircle,
   ChevronDown,
   ChevronUp,
+  Lock,
   Pencil,
 } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
@@ -341,51 +342,105 @@ export default function EditOrderScreen() {
           {/* Person Info (Read-only) */}
           <View
             style={{
-              backgroundColor: colors.surface,
+              alignSelf: "stretch",
               padding: 16,
-              marginBottom: 8,
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: "rgba(189, 202, 186, 0.30)",
+              flexDirection: "column",
+              gap: 8,
+              marginHorizontal: 16,
+              marginTop: 16,
+              marginBottom: 12,
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 2,
+              elevation: 2,
             }}
           >
-            <Text
-              style={{
-                fontSize: 12,
-                color: colors.textSecondary,
-                marginBottom: 8,
-              }}
-            >
-              Person (cannot be changed)
-            </Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
+            <View style={{ alignSelf: "stretch" }}>
+              <Text
                 style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  backgroundColor: avatarColor,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginRight: 12,
+                  fontSize: 14,
+                  fontWeight: "500",
+                  color: "#3E4A3D",
+                  lineHeight: 20,
                 }}
               >
-                <Text
-                  style={{ color: colors.surface, fontWeight: "700", fontSize: 14 }}
-                >
-                  {customerInitials}
-                </Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text
+                Person (cannot be changed)
+              </Text>
+            </View>
+            <View
+              style={{
+                alignSelf: "stretch",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                  flex: 1,
+                }}
+              >
+                <View
                   style={{
-                    fontSize: 16,
-                    fontWeight: "600",
-                    color: colors.textPrimary,
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: avatarColor || "#00873A",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
-                  {customerName}
-                </Text>
-                <Text style={{ fontSize: 13, color: colors.textSecondary }}>
-                  {order.customer?.phone || "No phone"}
-                </Text>
+                  <Text
+                    style={{
+                      color: "#F7FFF2",
+                      fontWeight: "700",
+                      fontSize: 14,
+                      lineHeight: 20,
+                    }}
+                  >
+                    {customerInitials}
+                  </Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: "#121C2A",
+                      lineHeight: 24,
+                    }}
+                  >
+                    {customerName}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "400",
+                      color: "#3E4A3D",
+                      lineHeight: 20,
+                    }}
+                  >
+                    {order.customer?.phone || "No phone"}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: 24,
+                  height: 24,
+                }}
+              >
+                <Lock size={16} color="#6E7B6C" />
               </View>
             </View>
           </View>
