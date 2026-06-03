@@ -2,8 +2,10 @@ import Loader from "@/src/components/feedback/Loader";
 import { useToast } from "@/src/components/feedback/Toast";
 import BillFooter from "@/src/components/orders/BillFooter";
 import OrderSummary from "@/src/components/orders/OrderSummary";
-import OrderItemCard from "@/src/components/orders/OrderItemCard";
 import DetailHeader from "@/src/components/layer2/DetailHeader";
+import EditWarningBanner from "@/src/components/entries/EditWarningBanner";
+import EditCustomerCard from "@/src/components/entries/EditCustomerCard";
+import EditItemizedSection from "@/src/components/entries/EditItemizedSection";
 import Input from "@/src/components/ui/Input";
 import { useOrderDetail, useUpdateOrder } from "@/src/hooks/useEntries";
 import { useAuthStore } from "@/src/store/authStore";
@@ -13,13 +15,7 @@ import { formatINR } from "@/src/utils/format";
 import { generateBillPdf } from "@/src/utils/generateBillPdf";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
-import {
-  AlertCircle,
-  ChevronDown,
-  ChevronUp,
-  Lock,
-  Pencil,
-} from "lucide-react-native";
+import { Lock } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -34,27 +30,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
-}
-
-function getAvatarColor(name: string, palette: readonly string[]): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return palette[Math.abs(hash) % palette.length] as string;
-}
-
 export default function EditOrderScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const avatarColors = useMemo(
-    () => [colors.danger, colors.warning, colors.primary, ...colors.avatarPalette],
-    [colors],
-  );
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const router = useRouter();
   const { profile, isFetchingProfile } = useAuthStore();
@@ -80,7 +58,6 @@ export default function EditOrderScreen() {
 
   // Quick entry mode (amount-first)
   const [quickAmount, setQuickAmount] = useState("");
-  const [itemsExpanded, setItemsExpanded] = useState(false);
   const [orderNote, setOrderNote] = useState("");
   const [orderNoteExpanded, setOrderNoteExpanded] = useState(false);
 
@@ -107,7 +84,6 @@ export default function EditOrderScreen() {
         quantity: Number(item.quantity),
       }));
       setItems(mapped);
-      setItemsExpanded(true);
       setQuickAmount("");
     } else {
       clearOrder();
@@ -288,8 +264,6 @@ export default function EditOrderScreen() {
   }
 
   const customerName = order.customer?.name || "Unknown Person";
-  const customerInitials = getInitials(customerName);
-  const avatarColor = getAvatarColor(customerName, avatarColors);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
@@ -305,30 +279,7 @@ export default function EditOrderScreen() {
         onBack={() => router.back()}
       />
 
-      {/* Warning Banner */}
-      <View
-        style={{
-          backgroundColor: colors.warningBg,
-          borderLeftWidth: 4,
-          borderLeftColor: colors.warning,
-          padding: 12,
-          marginBottom: 8,
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
-        <AlertCircle size={20} color={colors.warning} />
-        <Text
-          style={{
-            flex: 1,
-            marginLeft: 8,
-            fontSize: 13,
-            color: colors.textPrimary,
-          }}
-        >
-          Editing will update the person’s ledger and payment history
-        </Text>
-      </View>
+      <EditWarningBanner />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -339,111 +290,10 @@ export default function EditOrderScreen() {
           contentContainerStyle={{ paddingBottom: 120 }}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Person Info (Read-only) */}
-          <View
-            style={{
-              alignSelf: "stretch",
-              padding: 16,
-              backgroundColor: colors.surface,
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: "rgba(189, 202, 186, 0.30)",
-              flexDirection: "column",
-              gap: 8,
-              marginHorizontal: 16,
-              marginTop: 16,
-              marginBottom: 12,
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.05,
-              shadowRadius: 2,
-              elevation: 2,
-            }}
-          >
-            <View style={{ alignSelf: "stretch" }}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "500",
-                  color: "#3E4A3D",
-                  lineHeight: 20,
-                }}
-              >
-                Person (cannot be changed)
-              </Text>
-            </View>
-            <View
-              style={{
-                alignSelf: "stretch",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 12,
-                  flex: 1,
-                }}
-              >
-                <View
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
-                    backgroundColor: avatarColor || "#00873A",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#F7FFF2",
-                      fontWeight: "700",
-                      fontSize: 14,
-                      lineHeight: 20,
-                    }}
-                  >
-                    {customerInitials}
-                  </Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "600",
-                      color: "#121C2A",
-                      lineHeight: 24,
-                    }}
-                  >
-                    {customerName}
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: "400",
-                      color: "#3E4A3D",
-                      lineHeight: 20,
-                    }}
-                  >
-                    {order.customer?.phone || "No phone"}
-                  </Text>
-                </View>
-              </View>
-              <View
-                style={{
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: 24,
-                  height: 24,
-                }}
-              >
-                <Lock size={16} color="#6E7B6C" />
-              </View>
-            </View>
-          </View>
+          <EditCustomerCard
+            customerName={customerName}
+            customerPhone={order.customer?.phone}
+          />
 
           {/* Quick Amount Entry */}
           {items.length === 0 && (
@@ -541,83 +391,19 @@ export default function EditOrderScreen() {
             )}
           </View>
 
-          {/* Items Section */}
-          <View style={{ backgroundColor: colors.surface, marginBottom: 8 }}>
-            <TouchableOpacity
-              onPress={() => setItemsExpanded(!itemsExpanded)}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: 16,
-                borderBottomWidth: itemsExpanded ? 1 : 0,
-                borderBottomColor: colors.border,
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Pencil size={18} color={colors.primary} />
-                <Text
-                  style={{
-                    marginLeft: 8,
-                    fontSize: 15,
-                    fontWeight: "600",
-                    color: colors.textPrimary,
-                  }}
-                >
-                  Itemized Details {items.length > 0 && `(${items.length})`}
-                </Text>
-              </View>
-              {itemsExpanded ? (
-                <ChevronUp size={20} color={colors.textSecondary} />
-              ) : (
-                <ChevronDown size={20} color={colors.textSecondary} />
-              )}
-            </TouchableOpacity>
-
-            {itemsExpanded && (
-              <View style={{ padding: 16 }}>
-                {items.map((item, idx) => (
-                  <View key={item.id}>
-                    {idx > 0 && (
-                      <View
-                        style={{
-                          height: 1,
-                          backgroundColor: colors.border,
-                          marginVertical: 8,
-                        }}
-                      />
-                    )}
-                    <OrderItemCard
-                      id={item.id}
-                      name={item.product_name}
-                      variantName={item.variant_name ?? undefined}
-                      rate={item.price}
-                      quantity={item.quantity}
-                      onUpdateQuantity={(qty) =>
-                        updateItemQuantity(item.id, qty)
-                      }
-                      onUpdateRate={(rate) => updateItemRate(item.id, rate)}
-                      onRemove={() => removeItem(item.id)}
-                    />
-                  </View>
-                ))}
-
-                {/* Loading Charge & GST */}
-                <View style={{ marginTop: 16 }}>
-                  <OrderSummary
-                    itemsTotal={itemsTotal}
-                    loadingCharge={loadingCharge}
-                    taxPercent={taxPercent}
-                    taxAmount={taxAmount}
-                    previousBalance={order.previous_balance || 0}
-                    grandTotal={finalTotal + (order.previous_balance || 0)}
-                    onLoadingChargeChange={setLoadingCharge}
-                    onTaxChange={setGst}
-                  />
-                </View>
-              </View>
-            )}
-          </View>
+          <EditItemizedSection
+            items={items}
+            onUpdateQuantity={updateItemQuantity}
+            onUpdateRate={updateItemRate}
+            onRemove={removeItem}
+            onAddItem={() => {
+              Alert.alert(
+                "Add Item",
+                "Adding new items to an existing entry is not supported in edit mode."
+              );
+            }}
+            defaultExpanded={items.length > 0}
+          />
 
           {/* Entry Summary */}
           <View
