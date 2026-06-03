@@ -6,12 +6,12 @@ import DetailHeader from "@/src/components/layer2/DetailHeader";
 import EditWarningBanner from "@/src/components/entries/EditWarningBanner";
 import EditCustomerCard from "@/src/components/entries/EditCustomerCard";
 import EditItemizedSection from "@/src/components/entries/EditItemizedSection";
+import EntrySummaryCard from "@/src/components/entries/EntrySummaryCard";
 import Input from "@/src/components/ui/Input";
 import { useOrderDetail, useUpdateOrder } from "@/src/hooks/useEntries";
 import { useAuthStore } from "@/src/store/authStore";
 import { useOrderStore, DraftOrderItem } from "@/src/store/orderStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { formatINR } from "@/src/utils/format";
 import { generateBillPdf } from "@/src/utils/generateBillPdf";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
@@ -185,15 +185,17 @@ export default function EditOrderScreen() {
   };
 
   const performSave = async (shouldShare: boolean) => {
+    const currentOrder = order;
+    if (!currentOrder) return;
     setSubmitting(true);
     try {
       const updatedOrder = await updateMutation.mutateAsync({
-        orderId: order.id,
+        orderId: currentOrder.id,
         items: buildItemsPayload(),
         loadingCharge,
         taxPercent,
         quickAmount: Number(quickAmount || 0),
-        customerId: order.customer?.id ?? null,
+        customerId: currentOrder.customer?.id ?? null,
         note: orderNote.trim() ? orderNote.trim() : null,
       });
 
@@ -251,7 +253,10 @@ export default function EditOrderScreen() {
   const customerName = order.customer?.name || "Unknown Person";
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top", "left", "right"]}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      edges={["top", "left", "right"]}
+    >
       <Stack.Screen options={{ headerShown: false }} />
 
       <DetailHeader
@@ -413,36 +418,11 @@ export default function EditOrderScreen() {
           )}
 
           {/* Card 2: Total Outstanding Summary */}
-          <View className="bg-slate-300/30 mx-4 mb-3 rounded-xl border border-stone-300/20 p-4 gap-2">
-            <View className="flex-row justify-between items-center">
-              <Text className="text-neutral-700 text-sm font-normal font-inter">
-                Previous Balance
-              </Text>
-              <Text className="text-neutral-700 text-sm font-normal font-inter">
-                {formatINR(Number(order.previous_balance || 0))}
-              </Text>
-            </View>
-
-            <View className="flex-row justify-between items-center">
-              <Text className="text-gray-900 text-sm font-medium font-inter-medium">
-                New Total
-              </Text>
-              <Text className="text-gray-900 text-sm font-semibold font-inter-semibold">
-                {formatINR(finalTotal)}
-              </Text>
-            </View>
-
-            <View className="h-px bg-stone-300/50 my-1" />
-
-            <View className="flex-row justify-between items-center pt-1">
-              <Text className="text-gray-900 text-base font-bold">
-                Total Outstanding
-              </Text>
-              <Text className="text-red-700 text-base font-bold">
-                {formatINR(Number(order.previous_balance || 0) + finalTotal)}
-              </Text>
-            </View>
-          </View>
+          <EntrySummaryCard
+            previousBalance={Number(order.previous_balance || 0)}
+            newTotal={finalTotal}
+            className="mx-4 mb-3"
+          />
         </ScrollView>
 
         {/* Footer */}

@@ -1,6 +1,6 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
-import { Share2 } from "lucide-react-native";
+import { CheckIcon, Share2 } from "lucide-react-native";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -56,7 +56,13 @@ export default function BillFooter({
       }}
     >
       {offlineQueueCount > 0 ? (
-        <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 10 }}>
+        <Text
+          style={{
+            fontSize: 12,
+            color: colors.textSecondary,
+            marginBottom: 10,
+          }}
+        >
           Offline queue: {offlineQueueCount}
         </Text>
       ) : null}
@@ -73,7 +79,11 @@ export default function BillFooter({
             {totalLabel}
           </Text>
           <Text
-            style={{ fontSize: 18, fontWeight: "700", color: colors.textPrimary }}
+            style={{
+              fontSize: 18,
+              fontWeight: "700",
+              color: colors.textPrimary,
+            }}
           >
             {formatINR(totalAmount)}
           </Text>
@@ -128,21 +138,27 @@ export default function BillFooter({
             }}
             activeOpacity={0.75}
           >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+            >
               <Share2
                 size={16}
-                color={secondaryDisabled ? colors.textSecondary : colors.primary}
+                color={
+                  secondaryDisabled ? colors.textSecondary : colors.primary
+                }
               />
-            <Text
-              numberOfLines={1}
-              style={{
-                color: secondaryDisabled ? colors.textSecondary : colors.primary,
-                fontSize: 14,
-                fontWeight: "700",
-              }}
-            >
-              {secondaryLabel}
-            </Text>
+              <Text
+                numberOfLines={1}
+                style={{
+                  color: secondaryDisabled
+                    ? colors.textSecondary
+                    : colors.primary,
+                  fontSize: 14,
+                  fontWeight: "700",
+                }}
+              >
+                {secondaryLabel}
+              </Text>
             </View>
             {secondaryDisabled ? (
               <Text
@@ -177,7 +193,12 @@ export default function BillFooter({
           ) : (
             <>
               {showIcon ? (
-                <Share2 size={18} color={colors.surface} style={{ marginRight: 8 }} />
+                <CheckIcon
+                  size={18}
+                  color={colors.surface}
+                  style={{ marginRight: 8 }}
+                  strokeWidth={3}
+                />
               ) : null}
               <Text
                 style={{

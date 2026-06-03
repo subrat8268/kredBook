@@ -5,6 +5,7 @@ import SyncStatus from "@/src/components/feedback/SyncStatus";
 import { useToast } from "@/src/components/feedback/Toast";
 import BillFooter from "@/src/components/orders/BillFooter";
 import OrderSummary from "@/src/components/orders/OrderSummary";
+import EntrySummaryCard from "@/src/components/entries/EntrySummaryCard";
 import CustomerPickerSheet from "@/src/components/customer/CustomerPickerSheet";
 import Input from "@/src/components/ui/Input";
 import { Skeleton } from "@/src/components/ui/Skeleton";
@@ -1013,36 +1014,11 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
 
             {/* Card 2: Total Outstanding Summary (only for bills) */}
             {entryType === "bill" && (
-              <View className="mt-2 p-4 bg-slate-300/30 rounded-xl border border-stone-300/20 flex-col gap-2">
-                <View className="flex-row justify-between items-center">
-                  <Text className="text-neutral-700 text-sm font-normal font-inter">
-                    Previous Balance
-                  </Text>
-                  <Text className="text-neutral-700 text-sm font-normal font-inter">
-                    {formatINR(previousBalance)}
-                  </Text>
-                </View>
-
-                <View className="flex-row justify-between items-center">
-                  <Text className="text-gray-900 text-sm font-medium font-inter-medium">
-                    New Total
-                  </Text>
-                  <Text className="text-gray-900 text-sm font-semibold font-inter-semibold">
-                    {formatINR(finalTotal)}
-                  </Text>
-                </View>
-
-                <View className="h-px bg-stone-300/50 my-1" />
-
-                <View className="flex-row justify-between items-center pt-1">
-                  <Text className="text-gray-900 text-base font-bold font-inter-bold">
-                    Total Outstanding
-                  </Text>
-                  <Text className="text-red-700 text-base font-bold font-inter-bold">
-                    {formatINR(previousBalance + finalTotal)}
-                  </Text>
-                </View>
-              </View>
+              <EntrySummaryCard
+                previousBalance={previousBalance}
+                newTotal={finalTotal}
+                className="mt-2"
+              />
             )}
 
             {/* Payment Summary (only for payments) */}
