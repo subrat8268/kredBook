@@ -1,8 +1,6 @@
-import Input from "@/src/components/ui/Input";
-import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
-import { useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Text, TextInput, View } from "react-native";
 
 interface OrderSummaryProps {
   itemsTotal: number;
@@ -20,66 +18,24 @@ export default function OrderSummary({
   loadingCharge,
   taxPercent,
   taxAmount,
-  previousBalance,
   grandTotal,
   onLoadingChargeChange,
   onTaxChange,
 }: OrderSummaryProps) {
-  const { colors, spacing, typography } = useTheme();
   const [loadingInput, setLoadingInput] = useState(
-    loadingCharge > 0 ? loadingCharge.toString() : "",
+    loadingCharge > 0 ? loadingCharge.toString() : ""
   );
-  const [taxInput, setTaxInput] = useState(taxPercent > 0 ? taxPercent.toString() : "");
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        row: {
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: spacing.sm,
-        },
-        inputRow: {
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: spacing.sm,
-        },
-        label: {
-          ...typography.caption,
-          color: colors.textSecondary,
-        },
-        value: {
-          ...typography.caption,
-          color: colors.textSecondary,
-        },
-        smallInputContainer: {
-          minWidth: 100,
-          maxWidth: 120,
-          minHeight: 36,
-          paddingHorizontal: spacing.sm,
-        },
-        smallInputText: {
-          fontSize: 13,
-        },
-        divider: {
-          height: 1,
-          backgroundColor: colors.border,
-          marginVertical: spacing.sm,
-        },
-        totalLabel: {
-          ...typography.body,
-          fontWeight: "600",
-          color: colors.textPrimary,
-        },
-        totalValue: {
-          ...typography.body,
-          fontWeight: "600",
-          color: colors.danger,
-        },
-      }),
-    [colors, spacing, typography],
+  const [taxInput, setTaxInput] = useState(
+    taxPercent > 0 ? taxPercent.toString() : ""
   );
+
+  useEffect(() => {
+    setLoadingInput(loadingCharge > 0 ? loadingCharge.toString() : "");
+  }, [loadingCharge]);
+
+  useEffect(() => {
+    setTaxInput(taxPercent > 0 ? taxPercent.toString() : "");
+  }, [taxPercent]);
 
   const handleLoadingChange = (text: string) => {
     setLoadingInput(text);
@@ -94,59 +50,85 @@ export default function OrderSummary({
   };
 
   return (
-    <View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Subtotal</Text>
-        <Text style={styles.value}>{formatINR(itemsTotal)}</Text>
+    <View className="w-full flex-col gap-0">
+      {/* ROW 1 — Subtotal */}
+      <View className="flex-row justify-between items-center py-2">
+        <Text className="text-[#6b7280] text-[13px] font-normal font-inter">
+          Subtotal
+        </Text>
+        <Text className="text-[#6b7280] text-[13px] font-normal font-inter">
+          {formatINR(itemsTotal)}
+        </Text>
       </View>
 
-      <View style={styles.inputRow}>
-        <Text style={styles.label}>Loading Charge</Text>
-        <Input
-          placeholder="0"
-          value={loadingInput}
-          onChangeText={handleLoadingChange}
-          keyboardType="numeric"
-          textAlign="right"
-          containerStyle={styles.smallInputContainer}
-          inputStyle={styles.smallInputText}
-          variant="white"
-        />
-      </View>
-
-      <View style={styles.inputRow}>
-        <Text style={styles.label}>GST (%)</Text>
-        <Input
-          placeholder="0"
-          value={taxInput}
-          onChangeText={handleTaxChange}
-          keyboardType="numeric"
-          textAlign="right"
-          containerStyle={styles.smallInputContainer}
-          inputStyle={styles.smallInputText}
-          variant="white"
-        />
-      </View>
-
-      {taxAmount > 0 ? (
-        <View style={styles.row}>
-          <Text style={styles.label}>Tax</Text>
-          <Text style={styles.value}>{formatINR(taxAmount)}</Text>
+      {/* ROW 2 — Loading Charge */}
+      <View className="flex-row justify-between items-center py-2">
+        <Text className="text-[#6b7280] text-[13px] font-normal font-inter">
+          Loading Charge
+        </Text>
+        <View
+          className="bg-white border rounded-lg px-2.5 py-1.5 flex-row items-center min-w-[100px] h-9"
+          style={{ borderColor: "#e5e7eb" }}
+        >
+          <Text className="text-[#9ca3af] text-[13px] font-normal font-inter mr-1">
+            ₹
+          </Text>
+          <TextInput
+            value={loadingInput}
+            onChangeText={handleLoadingChange}
+            keyboardType="numeric"
+            placeholder="0"
+            placeholderTextColor="#9ca3af"
+            textAlign="right"
+            style={{ paddingVertical: 0 }}
+            className="flex-1 text-[#111827] text-[13px] font-normal font-inter h-full"
+          />
         </View>
-      ) : null}
+      </View>
 
-      {previousBalance > 0 ? (
-        <View style={styles.row}>
-          <Text style={styles.label}>Previous Balance</Text>
-          <Text style={styles.value}>{formatINR(previousBalance)}</Text>
+      {/* ROW 3 — GST */}
+      <View className="flex-row justify-between items-center py-2">
+        <Text className="text-[#6b7280] text-[13px] font-normal font-inter">
+          GST (%)
+        </Text>
+        <View className="flex-row items-center gap-2">
+          {taxAmount > 0 ? (
+            <Text className="text-[#6b7280] text-[13px] font-normal font-inter">
+              Tax {formatINR(taxAmount)}
+            </Text>
+          ) : null}
+          <View
+            className="bg-white border rounded-lg px-2.5 py-1.5 flex-row items-center min-w-[100px] h-9"
+            style={{ borderColor: "#e5e7eb" }}
+          >
+            <TextInput
+              value={taxInput}
+              onChangeText={handleTaxChange}
+              keyboardType="numeric"
+              placeholder="0"
+              placeholderTextColor="#9ca3af"
+              textAlign="right"
+              style={{ paddingVertical: 0 }}
+              className="flex-1 text-[#111827] text-[13px] font-normal font-inter h-full mr-1"
+            />
+            <Text className="text-[#9ca3af] text-[13px] font-normal font-inter">
+              %
+            </Text>
+          </View>
         </View>
-      ) : null}
+      </View>
 
-      <View style={styles.divider} />
+      {/* DIVIDER */}
+      <View className="h-px bg-[#e5e7eb] my-1" />
 
-      <View style={styles.row}>
-        <Text style={styles.totalLabel}>Grand Total</Text>
-        <Text style={styles.totalValue}>{formatINR(grandTotal)}</Text>
+      {/* ROW 4 — Grand Total */}
+      <View className="flex-row justify-between items-center py-2">
+        <Text className="text-[#111827] text-[16px] font-bold font-inter-bold">
+          Grand Total
+        </Text>
+        <Text className="text-[#ef4444] text-[16px] font-bold font-inter-bold">
+          {formatINR(grandTotal)}
+        </Text>
       </View>
     </View>
   );

@@ -2,6 +2,7 @@ import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
 import { Share2 } from "lucide-react-native";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface BillFooterProps {
   isLoading?: boolean;
@@ -35,6 +36,7 @@ export default function BillFooter({
   disabled = false,
 }: BillFooterProps) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const useSplitActions = Boolean(secondaryLabel);
 
   return (
@@ -42,9 +44,15 @@ export default function BillFooter({
       style={{
         backgroundColor: colors.surface,
         paddingHorizontal: 16,
-        paddingVertical: 16,
+        paddingTop: 12,
+        paddingBottom: Math.max(Math.min(insets.bottom, 12), 4),
         borderTopWidth: 1,
         borderTopColor: colors.border,
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 12,
       }}
     >
       {offlineQueueCount > 0 ? (
@@ -156,8 +164,8 @@ export default function BillFooter({
           disabled={disabled || isLoading}
           style={{
             backgroundColor: disabled ? colors.border : colors.primary,
-            paddingVertical: 14,
-            borderRadius: 8,
+            minHeight: 52,
+            borderRadius: 16,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
@@ -175,7 +183,7 @@ export default function BillFooter({
                 style={{
                   color: colors.surface,
                   fontSize: 16,
-                  fontWeight: "600",
+                  fontWeight: "700",
                 }}
               >
                 {shareLabel}

@@ -16,6 +16,7 @@ import { generateBillPdf } from "@/src/utils/generateBillPdf";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { Lock } from "lucide-react-native";
+import SaveEntryBottomSheet from "@/src/components/entries/SaveEntryBottomSheet";
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -62,6 +63,7 @@ export default function EditOrderScreen() {
   const [orderNoteExpanded, setOrderNoteExpanded] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
+  const [saveSheetVisible, setSaveSheetVisible] = useState(false);
 
   const updateMutation = useUpdateOrder(vendorId || "");
 
@@ -119,6 +121,104 @@ export default function EditOrderScreen() {
     [items, itemsTotal, taxAmount, loadingCharge, quickAmount],
   );
 
+  const buildItemsPayload = () =>
+    items.map((item) => ({
+      product_id: item.product_id,
+      product_name: item.product_name,
+      variant_id: item.variant_id ?? null,
+      variant_name: item.variant_name ?? null,
+      price: item.price,
+      quantity: item.quantity,
+    }));
+
+  const shareUpdatedBill = async (updatedOrder: any) => {
+    const canShare = await Sharing.isAvailableAsync();
+    if (!canShare) throw new Error("sharing-unavailable");
+
+    const pdfItems = (updatedOrder.items ?? []).map((item: any) => ({
+      name: item.product_name,
+      quantity: item.quantity,
+      rate: item.price,
+      amount: item.subtotal,
+    }));
+
+    const subtotal = (updatedOrder.items ?? []).reduce(
+      (sum: number, item: any) => sum + item.subtotal,
+      0,
+    );
+    const taxAmount = updatedOrder.tax_percent
+      ? Math.round(((subtotal * updatedOrder.tax_percent) / 100) * 100) / 100
+      : 0;
+
+    const pdfUri = await generateBillPdf(
+      pdfItems,
+      {
+        name: profile?.business_name ?? profile?.name ?? "",
+        address: profile?.business_address || undefined,
+        phone: profile?.phone ?? "",
+        gstin: profile?.gstin ?? "",
+      },
+      updatedOrder.total_amount,
+      updatedOrder.customer?.name ?? "Person",
+      {
+        invoiceNumber: updatedOrder.bill_number,
+        date: new Date(updatedOrder.created_at).toLocaleDateString("en-IN"),
+        subtotal,
+        taxAmount,
+        loadingCharge: updatedOrder.loading_charge ?? 0,
+        bankDetails:
+          profile?.bank_name && profile?.account_number && profile?.ifsc_code
+            ? {
+                bankName: profile.bank_name,
+                accountNo: profile.account_number,
+                ifsc: profile.ifsc_code,
+              }
+            : undefined,
+      },
+    );
+
+    await Sharing.shareAsync(pdfUri, {
+      mimeType: "application/pdf",
+      dialogTitle: `Entry ${updatedOrder.bill_number}`,
+      UTI: "com.adobe.pdf",
+    });
+  };
+
+  const performSave = async (shouldShare: boolean) => {
+    setSubmitting(true);
+    try {
+      const updatedOrder = await updateMutation.mutateAsync({
+        orderId: order.id,
+        items: buildItemsPayload(),
+        loadingCharge,
+        taxPercent,
+        quickAmount: Number(quickAmount || 0),
+        customerId: order.customer?.id ?? null,
+        note: orderNote.trim() ? orderNote.trim() : null,
+      });
+
+      if (shouldShare) {
+        try {
+          await shareUpdatedBill(updatedOrder);
+        } catch (shareError) {
+          console.error("Share failed:", shareError);
+          showToast({
+            message: "Updated entry saved. Sharing failed.",
+            type: "error",
+          });
+        }
+      }
+
+      showToast({ message: "Entry updated", type: "success" });
+      router.back();
+    } catch (error: any) {
+      console.error("Error updating order:", error);
+      Alert.alert("Error", error.message || "Failed to update entry");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!vendorId || !order) return;
 
@@ -141,122 +241,7 @@ export default function EditOrderScreen() {
       return;
     }
 
-    const buildItemsPayload = () =>
-      items.map((item) => ({
-        product_id: item.product_id,
-        product_name: item.product_name,
-        variant_id: item.variant_id ?? null,
-        variant_name: item.variant_name ?? null,
-        price: item.price,
-        quantity: item.quantity,
-      }));
-
-    const shareUpdatedBill = async (updatedOrder: any) => {
-      const canShare = await Sharing.isAvailableAsync();
-      if (!canShare) throw new Error("sharing-unavailable");
-
-      const pdfItems = (updatedOrder.items ?? []).map((item: any) => ({
-        name: item.product_name,
-        quantity: item.quantity,
-        rate: item.price,
-        amount: item.subtotal,
-      }));
-
-      const subtotal = (updatedOrder.items ?? []).reduce(
-        (sum: number, item: any) => sum + item.subtotal,
-        0,
-      );
-      const taxAmount = updatedOrder.tax_percent
-        ? Math.round(((subtotal * updatedOrder.tax_percent) / 100) * 100) / 100
-        : 0;
-
-      const pdfUri = await generateBillPdf(
-        pdfItems,
-        {
-          name: profile?.business_name ?? profile?.name ?? "",
-          address: profile?.business_address || undefined,
-          phone: profile?.phone ?? "",
-          gstin: profile?.gstin ?? "",
-        },
-        updatedOrder.total_amount,
-        updatedOrder.customer?.name ?? "Person",
-        {
-          invoiceNumber: updatedOrder.bill_number,
-          date: new Date(updatedOrder.created_at).toLocaleDateString("en-IN"),
-          subtotal,
-          taxAmount,
-          loadingCharge: updatedOrder.loading_charge ?? 0,
-          bankDetails:
-            profile?.bank_name && profile?.account_number && profile?.ifsc_code
-              ? {
-                  bankName: profile.bank_name,
-                  accountNo: profile.account_number,
-                  ifsc: profile.ifsc_code,
-                }
-              : undefined,
-        },
-      );
-
-      await Sharing.shareAsync(pdfUri, {
-        mimeType: "application/pdf",
-        dialogTitle: `Entry ${updatedOrder.bill_number}`,
-        UTI: "com.adobe.pdf",
-      });
-    };
-
-    const performSave = async (shouldShare: boolean) => {
-      setSubmitting(true);
-      try {
-        const updatedOrder = await updateMutation.mutateAsync({
-          orderId: order.id,
-          items: buildItemsPayload(),
-          loadingCharge,
-          taxPercent,
-          quickAmount: Number(quickAmount || 0),
-          customerId: order.customer?.id ?? null,
-          note: orderNote.trim() ? orderNote.trim() : null,
-        });
-
-        if (shouldShare) {
-          try {
-            await shareUpdatedBill(updatedOrder);
-          } catch (shareError) {
-            console.error("Share failed:", shareError);
-            showToast({
-              message: "Updated entry saved. Sharing failed.",
-              type: "error",
-            });
-          }
-        }
-
-        showToast({ message: "Entry updated", type: "success" });
-        router.back();
-      } catch (error: any) {
-        console.error("Error updating order:", error);
-        Alert.alert("Error", error.message || "Failed to update entry");
-      } finally {
-        setSubmitting(false);
-      }
-    };
-
-    // Warn about editing
-    Alert.alert(
-      "Edit Entry",
-      "Are you sure you want to edit this entry? Changes will be reflected in the person's ledger.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Save Only",
-          style: "default",
-          onPress: () => performSave(false),
-        },
-        {
-          text: "Save & Share PDF",
-          style: "default",
-          onPress: () => performSave(true),
-        },
-      ],
-    );
+    setSaveSheetVisible(true);
   };
 
   if (isFetchingProfile || orderLoading || !order) {
@@ -266,7 +251,7 @@ export default function EditOrderScreen() {
   const customerName = order.customer?.name || "Unknown Person";
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top", "left", "right"]}>
       <Stack.Screen options={{ headerShown: false }} />
 
       <DetailHeader
@@ -347,7 +332,13 @@ export default function EditOrderScreen() {
           >
             {!orderNoteExpanded && !orderNote.trim() ? (
               <TouchableOpacity onPress={() => setOrderNoteExpanded(true)}>
-                <Text style={{ fontSize: 13, color: colors.primary, fontWeight: "600" }}>
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: colors.primary,
+                    fontWeight: "600",
+                  }}
+                >
                   + Add note
                 </Text>
               </TouchableOpacity>
@@ -399,88 +390,55 @@ export default function EditOrderScreen() {
             onAddItem={() => {
               Alert.alert(
                 "Add Item",
-                "Adding new items to an existing entry is not supported in edit mode."
+                "Adding new items to an existing entry is not supported in edit mode.",
               );
             }}
             defaultExpanded={items.length > 0}
           />
 
-          {/* Entry Summary */}
-          <View
-            style={{
-              backgroundColor: colors.surface,
-              padding: 16,
-              marginBottom: 8,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 8,
-              }}
-            >
-              <Text style={{ fontSize: 13, color: colors.textSecondary }}>
+          {/* Card 1: Taxes & Grand Total (only for items) */}
+          {items.length > 0 && (
+            <View className="bg-white mx-4 mb-3 rounded-xl border border-stone-300/30 p-4 shadow-sm">
+              <OrderSummary
+                itemsTotal={itemsTotal}
+                loadingCharge={loadingCharge}
+                taxPercent={taxPercent}
+                taxAmount={taxAmount}
+                previousBalance={Number(order.previous_balance || 0)}
+                grandTotal={finalTotal}
+                onLoadingChargeChange={setLoadingCharge}
+                onTaxChange={setGst}
+              />
+            </View>
+          )}
+
+          {/* Card 2: Total Outstanding Summary */}
+          <View className="bg-slate-300/30 mx-4 mb-3 rounded-xl border border-stone-300/20 p-4 gap-2">
+            <View className="flex-row justify-between items-center">
+              <Text className="text-neutral-700 text-sm font-normal font-inter">
                 Previous Balance
               </Text>
-              <Text style={{ fontSize: 13, color: colors.textSecondary }}>
+              <Text className="text-neutral-700 text-sm font-normal font-inter">
                 {formatINR(Number(order.previous_balance || 0))}
               </Text>
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 8,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 15,
-                  fontWeight: "600",
-                  color: colors.textPrimary,
-                }}
-              >
+            <View className="flex-row justify-between items-center">
+              <Text className="text-gray-900 text-sm font-medium font-inter-medium">
                 New Total
               </Text>
-              <Text
-                style={{
-                  fontSize: 15,
-                  fontWeight: "600",
-                  color: colors.textPrimary,
-                }}
-              >
+              <Text className="text-gray-900 text-sm font-semibold font-inter-semibold">
                 {formatINR(finalTotal)}
               </Text>
             </View>
 
-            <View
-              style={{
-                borderTopWidth: 1,
-                borderTopColor: colors.border,
-                paddingTop: 8,
-                marginTop: 8,
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "700",
-                  color: colors.textPrimary,
-                }}
-              >
+            <View className="h-px bg-stone-300/50 my-1" />
+
+            <View className="flex-row justify-between items-center pt-1">
+              <Text className="text-gray-900 text-base font-bold">
                 Total Outstanding
               </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "700",
-                  color: colors.danger,
-                }}
-              >
+              <Text className="text-red-700 text-base font-bold">
                 {formatINR(Number(order.previous_balance || 0) + finalTotal)}
               </Text>
             </View>
@@ -495,6 +453,14 @@ export default function EditOrderScreen() {
           disabled={submitting || finalTotal <= 0}
         />
       </KeyboardAvoidingView>
+
+      <SaveEntryBottomSheet
+        visible={saveSheetVisible}
+        onClose={() => setSaveSheetVisible(false)}
+        billNumber={order?.bill_number}
+        onSaveOnly={() => performSave(false)}
+        onSaveAndShare={() => performSave(true)}
+      />
     </SafeAreaView>
   );
 }

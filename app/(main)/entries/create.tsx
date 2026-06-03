@@ -4,6 +4,7 @@ import Loader from "@/src/components/feedback/Loader";
 import SyncStatus from "@/src/components/feedback/SyncStatus";
 import { useToast } from "@/src/components/feedback/Toast";
 import BillFooter from "@/src/components/orders/BillFooter";
+import OrderSummary from "@/src/components/orders/OrderSummary";
 import CustomerPickerSheet from "@/src/components/customer/CustomerPickerSheet";
 import Input from "@/src/components/ui/Input";
 import { Skeleton } from "@/src/components/ui/Skeleton";
@@ -111,6 +112,8 @@ export default function CreateOrderScreen() {
   const [previousBalance, setPreviousBalance] = useState<number>(0);
   const [isFetchingBalance, setIsFetchingBalance] = useState(false);
   const [quickAmount, setQuickAmount] = useState<string>("");
+  const [loadingCharge, setLoadingCharge] = useState<number>(0);
+  const [taxPercent, setTaxPercent] = useState<number>(0);
   const [orderNote, setOrderNote] = useState<string>("");
   const [orderNoteExpanded, setOrderNoteExpanded] = useState(false);
   const [entryType, setEntryType] = useState<"bill" | "payment">("bill");
@@ -295,7 +298,21 @@ export default function CreateOrderScreen() {
 
   // Calculate effective total
   const entryAmount = computedEntryAmount;
-  const totalWithBalance = computedEntryAmount + previousBalance;
+  const taxAmount = useMemo(
+    () => (entryAmount * taxPercent) / 100,
+    [entryAmount, taxPercent],
+  );
+  const finalTotal = useMemo(
+    () =>
+      entryType === "bill" && entryMode === "bill"
+        ? entryAmount + taxAmount + loadingCharge
+        : entryAmount,
+    [entryType, entryMode, entryAmount, taxAmount, loadingCharge],
+  );
+  const totalWithBalance = useMemo(
+    () => finalTotal + previousBalance,
+    [finalTotal, previousBalance],
+  );
   const isPaymentOverBalance = entryType === "payment" && previousBalance > 0 && entryAmount > previousBalance;
   const isPaymentZeroBalance = entryType === "payment" && previousBalance <= 0;
   const disableSave =
@@ -379,14 +396,13 @@ export default function CreateOrderScreen() {
               },
             ];
 
-        // Offline queue adapter behavior is handled in data layer and out of scope here.
         const savedOrder = await createOrderMutation.mutateAsync({
           customerId: selectedCustomerId!,
           vendorId: vendorId!,
           items: orderItems,
           amountPaid: 0,
-          loadingCharge: 0,
-          taxPercent: 0,
+          loadingCharge: entryType === "bill" && entryMode === "bill" ? loadingCharge : 0,
+          taxPercent: entryType === "bill" && entryMode === "bill" ? taxPercent : 0,
           billNumberPrefix: profile?.bill_number_prefix || "INV",
           note: orderNote.trim() ? orderNote.trim() : null,
           dueDate:
@@ -538,9 +554,10 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
+      <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={["top", "left", "right"]}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
         >
           {/* Header */}
           <View className="border-b border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
@@ -978,33 +995,82 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               </ScrollView>
             </View>
 
-            {/* SUMMARY */}
-            <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
-              <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">
-                  {entryType === "payment" ? "Payment Amount" : entryMode === "bill" ? "Items Total" : "Entry Amount"}
-                </Text>
-                <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
-                  {formatINR(entryAmount, { maximumFractionDigits: 2 })}
-                </Text>
+            {/* Card 1: Taxes & Grand Total (only for itemized bills) */}
+            {entryType === "bill" && entryMode === "bill" && (
+              <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+                <OrderSummary
+                  itemsTotal={entryAmount}
+                  loadingCharge={loadingCharge}
+                  taxPercent={taxPercent}
+                  taxAmount={taxAmount}
+                  previousBalance={previousBalance}
+                  grandTotal={finalTotal}
+                  onLoadingChargeChange={setLoadingCharge}
+                  onTaxChange={setTaxPercent}
+                />
               </View>
+            )}
 
-              <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">Previous Balance</Text>
-                <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
-                  {formatINR(previousBalance, { maximumFractionDigits: 2 })}
-                </Text>
+            {/* Card 2: Total Outstanding Summary (only for bills) */}
+            {entryType === "bill" && (
+              <View className="mt-2 p-4 bg-slate-300/30 rounded-xl border border-stone-300/20 flex-col gap-2">
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-neutral-700 text-sm font-normal font-inter">
+                    Previous Balance
+                  </Text>
+                  <Text className="text-neutral-700 text-sm font-normal font-inter">
+                    {formatINR(previousBalance)}
+                  </Text>
+                </View>
+
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-gray-900 text-sm font-medium font-inter-medium">
+                    New Total
+                  </Text>
+                  <Text className="text-gray-900 text-sm font-semibold font-inter-semibold">
+                    {formatINR(finalTotal)}
+                  </Text>
+                </View>
+
+                <View className="h-px bg-stone-300/50 my-1" />
+
+                <View className="flex-row justify-between items-center pt-1">
+                  <Text className="text-gray-900 text-base font-bold font-inter-bold">
+                    Total Outstanding
+                  </Text>
+                  <Text className="text-red-700 text-base font-bold font-inter-bold">
+                    {formatINR(previousBalance + finalTotal)}
+                  </Text>
+                </View>
               </View>
+            )}
 
-              <View className="h-px my-2" style={{ backgroundColor: colors.border }} />
-            </View>
+            {/* Payment Summary (only for payments) */}
+            {entryType === "payment" && (
+              <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">
+                    Payment Amount
+                  </Text>
+                  <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
+                    {formatINR(entryAmount, { maximumFractionDigits: 2 })}
+                  </Text>
+                </View>
+
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">Previous Balance</Text>
+                  <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
+                    {formatINR(previousBalance, { maximumFractionDigits: 2 })}
+                  </Text>
+</View>
+              </View>
+            )}
               </Animated.View>
             ) : null}
           </ScrollView>
 
-          {/* Absolute Footer */}
-          {!showOnlyCustomerCard ? (
-          <View className="absolute w-full" style={{ bottom: footerBottomOffset }}>
+          {/* Footer */}
+          {!showOnlyCustomerCard && (
             <BillFooter
               isLoading={createOrderMutation.isPending}
               onPrimaryAction={handleSaveEntry}
@@ -1023,9 +1089,8 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               showIcon={entryType !== "payment"}
               offlineQueueCount={queueLength}
               disabled={disableSave}
-             />
-           </View>
-          ) : null}
+            />
+          )}
 
           <Modal
             visible={isAddItemModalOpen}
