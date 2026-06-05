@@ -418,6 +418,7 @@ export async function updateOrder(
   taxPercent: number,
   quickAmount: number,
   note?: string | null,
+  dueDate?: string | null,
 ): Promise<OrderDetail> {
   // Wrap mutation with offline queue fallback
   return executeWithOfflineQueue(
@@ -589,14 +590,21 @@ export async function updateOrder(
         }
       }
 
+      const updateData: any = {};
       if (note !== undefined) {
-        const normalizedNote = note?.trim() ? note.trim() : null;
-        const { error: noteErr } = await supabase
+        updateData.note = note?.trim() ? note.trim() : null;
+      }
+      if (dueDate !== undefined) {
+        updateData.due_date = dueDate;
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        const { error: updateErr } = await supabase
           .from("orders")
-          .update({ note: normalizedNote })
+          .update(updateData)
           .eq("id", orderId)
           .eq("vendor_id", vendorId);
-        if (noteErr) throw toApiError(noteErr);
+        if (updateErr) throw toApiError(updateErr);
       }
 
       const updated = await fetchOrderDetail(orderId);
@@ -613,6 +621,8 @@ export async function updateOrder(
         loadingCharge,
         taxPercent,
         quickAmount,
+        note,
+        dueDate,
       },
     },
   );

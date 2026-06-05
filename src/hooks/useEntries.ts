@@ -81,10 +81,11 @@ export function useUpdateOrder(vendorId: string) {
       quickAmount: number;
       note?: string | null;
       customerId?: string | null;
+      dueDate?: string | null;
     },
     { previousOrder?: OrderDetail | null }
   >({
-    mutationFn: ({ orderId, items, loadingCharge, taxPercent, quickAmount, note }) =>
+    mutationFn: ({ orderId, items, loadingCharge, taxPercent, quickAmount, note, dueDate }) =>
       updateOrder(
         orderId,
         vendorId,
@@ -93,6 +94,7 @@ export function useUpdateOrder(vendorId: string) {
         taxPercent,
         quickAmount,
         note,
+        dueDate,
       ),
     onMutate: async (variables) => {
       await queryClient.cancelQueries({
@@ -162,6 +164,7 @@ export function useUpdateOrder(vendorId: string) {
             balance_due: balanceDue,
             status,
             note: variables.note ?? old.note,
+            due_date: variables.dueDate ?? old.due_date,
             items: normalizedItems.map((item, idx) => ({
               id: old.items?.[idx]?.id ?? `temp-${idx}`,
               order_id: old.id,
