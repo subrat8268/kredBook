@@ -96,9 +96,9 @@ The screen is structured to follow a business owner's thought process when revie
 - Dropdown card appears below the ⋮ icon, aligned to the right edge of the screen.
 - `backgroundColor: #ffffff`, `borderRadius: 12px`, `shadow: 0 4px 16px rgba(0,0,0,0.08)`, `elevation: 5`, `width: 200px`.
 - `right: spacing.md`, `top: 56px` (pinned below header).
-- Background overlay: `rgba(0,0,0,0.30)` — full screen, tapping it closes the menu.
-- Each menu item: `minHeight: 44px`, `paddingVertical: 14px`, `paddingHorizontal: 20px`, `Inter 15px/500`.
-- Icon: `16px` bare Lucide stroke element (no wrapping View), `strokeWidth: 2`, `gap: 12px` to label.
+- Background overlay: `rgba(0,0,0,0.60)` — full screen, tapping it closes the menu.
+- Each menu item: `padding: 16px` (`p-4`), `Inter 15px/500`.
+- Icon: `16px` bare Lucide stroke element (no wrapping View), `strokeWidth: 2`, `gap-2` to label.
 - ⚠️ Icons must be **bare Lucide elements** — no `<View>` wrapper. A wrapper collapses `flexDirection: row` and stacks icon above label.
 - `1px #f3f4f6` divider between **every** item via `ItemSeparatorComponent` (intentional — not group-only).
 
@@ -124,10 +124,10 @@ The screen is structured to follow a business owner's thought process when revie
 
 ### Customer Card
 - **Purpose:** Immediately identify the customer and provide quick communication actions.
-- **Layout:** Full-width card, `flex-row items-center`, `padding: 12px 16px`, `borderRadius: 16px`, `bg: #ffffff`, `border: 1px solid #e5e7eb`.
-- **Avatar (Left):** `44×44px` circle, `bg: #dcfce7`, initials `Inter 15px/700 color: #16a34a`. Green avatar system — consistent across ALL screens.
-- **Info (Center):** Name `Inter 15px/600 #111827` above phone `Inter 13px/400 #9ca3af`. Strip existing country code before prepending +91.
-- **Actions (Right):** Call icon + WhatsApp/chat icon, both `32×32px` circles, `bg: #dcfce7`, icon `#16a34a`, `8px` gap.
+- **Layout:** Full-width card, `flex-row items-center`, `padding: 16px` (`p-4`), `borderRadius: 8px` (`rounded-lg`), `bg: #ffffff`, `border: 1px solid #e5e7eb`, standard shadow/elevation.
+- **Avatar (Left):** `40×40px` (`h-10 w-10`) circle, `bg: #00873a33` (semi-transparent green), initials `PlusJakartaSans_700Bold text-base text-center color: #006b2c`.
+- **Info (Center):** Name `font-semibold text-[#121c2a] text-base leading-[22.4px]` above phone `text-[#3e4a3d] text-xs leading-[16.8px] tracking-wide`. Prepend +91 and format as `+91 XXXXX XXXXX`.
+- **Actions (Right):** Call icon + Chat icon, both `40×40px` (`h-10 w-10`) circles, `bg: #dcfce7`, icon `#16a34a`, `8px` gap.
 - **Entire card is tappable** → navigates to Customer Detail screen.
 - **Deleted customer edge case:** Show `"[Deleted Customer]"` in name, hide call/chat icons, disable card tap.
 
@@ -136,10 +136,10 @@ The screen is structured to follow a business owner's thought process when revie
 ### Hero Card
 - **Purpose:** Most critical financial number + status at a glance.
 - **Layout:** Full-width, `borderRadius: 20px`, no border, status-driven gradient. Large semi-transparent circle watermark top-right `(white, 15% opacity)`.
-- **Row 1:** `BALANCE DUE` — `Inter 11px/600`, white, `letter-spacing: 1.4`.
-- **Row 2:** Amount — `Inter 40px/800`, white.
-- **Row 3 (space-between):** Left: status badge pill. Right: due date line `Inter 13px/400 white 75% opacity`.
-  - Upcoming: `"Due [date]"`
+- **Row 1:** `BALANCE DUE` — `font-semibold text-[12px] text-white/90 uppercase` (no custom letter-spacing).
+- **Row 2:** Amount — `Inter 40px/800` (or `PlusJakartaSans_800ExtraBold`), white.
+- **Row 3 (space-between):** Left: status badge pill. Right: due date line `Inter 14px/500` white 90% opacity.
+  - Upcoming: `"Due: [date]"` (e.g., `"Due: Jun 15, 2026"`)
   - Past due: `"Overdue · X days"`
   - Paid: **hidden**
 - **Gradient by status:** See token table above.
@@ -150,8 +150,8 @@ The screen is structured to follow a business owner's thought process when revie
 ### Payments Card
 - **Purpose:** Chronological payment history for the entry.
 - **Header:** `"PAYMENTS"` — `Inter 11px/600 #9ca3af letter-spacing: 1.2`. Sub-label: `"Paid ₹X of ₹Y"` — `Inter 13px/400 #6b7280`.
-- **Progress Bar:** `4px` tall, full width, `#e5e7eb` track, `#16a34a` fill, `border-radius: full`. Always show a `4px` green pip at the left edge even at 0% fill.
-- **Payment Row:** Method name `Inter 14px/600 #111827` + date `Inter 13px/400 #9ca3af` left. Amount `Inter 15px/600 #16a34a` + `Received` chip `(bg: #dcfce7, color: #16a34a, Inter 11px/600, paddingH 8px, paddingV 3px, borderRadius: full)` right. `1px #f3f4f6` divider between rows.
+- **Progress Bar:** `8px` (`h-2`) tall, full width, `#f1f5f9` track, `#16a34a` fill (`linear-gradient(#22C55E, #15803D)`), `border-radius: full`. (No absolute green pip at 0% fill).
+- **Payment Row:** Method name `font-semibold` + date `font-medium text-[#6B7280]` left. Amount `text-lg font-semibold` (`MoneyAmount` component) right. No `"Received"` chip in payment rows. `1px #f3f4f6` divider between rows.
 - **Empty State:** Centered, `24px` padding. `32px` wallet icon (`#d1d5db`) + `"No payments recorded yet"` `Inter 14px/400 #9ca3af`.
 - **Decision:** Payment rows are not tappable in v1. No edit/delete on individual payments. Revisit in v2.
 - **Decision:** Show all payment rows. No pagination in v1.
@@ -160,7 +160,7 @@ The screen is structured to follow a business owner's thought process when revie
 
 ### Items Card
 - **Purpose:** Itemized breakdown, accessible on demand.
-- **Default (Collapsed):** Single tappable `space-between` row. Left: `"N items · ₹[subtotal] total"` `Inter 14px/500 #374151`. Right: `chevron-down` `20px #9ca3af`. `padding: 14px 16px`.
+- **Default (Collapsed):** Left: Package icon (`bg-[#f3f4f6]`) + 2-line layout. Line 1: `"N item(s)"` `text-base font-semibold text-[#121c2a]`. Line 2: `"₹[subtotal] total"` `text-xs font-semibold text-[#3E4A3D]`. Right: `chevron-down`/`chevron-up` `20px #9ca3af`. Padding: `px-4 py-4`.
   - ⚠️ Amount shown is **items subtotal (pre-tax, pre-charges)**, NOT grand total.
 - **Expanded (P1):** Chevron rotates to `chevron-up`. Below header row:
   - **Item Row:** Name left `Inter 14px/500 #111827`. Qty×Rate center `Inter 13px/400 #9ca3af`. Amount right `Inter 14px/600 #111827`. `1px #f3f4f6` dividers.
@@ -173,7 +173,7 @@ The screen is structured to follow a business owner's thought process when revie
 ---
 
 ### Action Bar (Sticky Bottom)
-- **Layout:** Fixed bottom. `bg: #ffffff`, `borderTop: 1px solid #f3f4f6`, `padding: 12px 16px`, safe area bottom.
+- **Layout:** Fixed bottom. `bg: #ffffff`, `borderTop: 1px solid #f3f4f6`, `paddingHorizontal: 16px`, `paddingTop: 12px`, `paddingBottom: Math.max(Math.min(insets.bottom, 12), 4)` (capped inset to 12px).
 - **No tab bar** below.
 
 | Status | Primary CTA (60% width) | Secondary CTA (36% width) |
@@ -255,7 +255,7 @@ Identical to P0 in all layout, spacing, and component count. **Only these change
 | Payments card | All rows + 100% progress bar. Sub-label: `"Paid ₹3,500 of ₹3,500"`. |
 | Action bar | **Single full-width** `Share Receipt` — solid green, send icon. No secondary. |
 
-> P6 vs P10: P6 = PAID state + inline success banner (`justPaid=true`). P10 = same PAID state without banner (reopened later). **No separate screen for P10** — implement as conditional banner in code.
+> P6 vs P10: P6 = PAID state + full-screen success animation (`justPaid=true`). P10 = same PAID state without animation (reopened later).
 
 > **Overpayment:** Show `₹0` hero, `"Overpaid by ₹X"` in Payments sub-label `Inter 12px #f97316`. Never block payment recording.
 
@@ -266,12 +266,10 @@ Identical to P0 in all layout, spacing, and component count. **Only these change
 **Triggered by:** Payment saved via P5. `justPaid=true` param passed.
 
 - **Base:** PAID state (P10) — green hero, `₹0`, full payments list, `Share Receipt` CTA.
-- **Success Banner:**
-  - Position: Top of scrollable content, below header, above Customer Card.
-  - `bg: #dcfce7`, `borderRadius: 12px`, `padding: 12px 16px`, `margin: 0 16px`.
-  - Left: `check-circle` icon `#16a34a` `20px`.
-  - Text: `"Payment recorded successfully"` `Inter 14px/600 #16a34a`.
-  - **Auto-dismiss:** 4 seconds. Also dismissed on any scroll.
+- **Success Animation:** Fullscreen custom interactive payment success animation overlay (GPay/PhonePe aesthetic) that triggers immediately on payment record:
+  - **Visuals:** Pop-up green spring checkmark badge, pulsing concentric ripple rings, and beautiful INR payment amount + text.
+  - **Audio/Haptics:** Triggers native success haptics feed.
+  - **Auto-dismiss:** Stays visible for 2.5 seconds, then fades out and updates the main Entry screen with the latest state.
 
 ---
 
@@ -285,7 +283,7 @@ Identical to P0 in all layout, spacing, and component count. **Only these change
 | P3 | Remind bottom sheet | `"Remind"` CTA in Action Bar | ✅ **BUILT & LIVE** |
 | P4 | Delete confirm modal | `"Delete Entry"` in overflow | ✅ **BUILT & LIVE** |
 | P5 | Record Payment bottom sheet | `"Record Payment"` / `"Mark as Paid"` | ✅ **BUILT & LIVE** |
-| P6 | Post-payment — PAID state + success banner | Payment saved (`justPaid=true`) | ❌ **Not Started** (Toast used instead) |
+| P6 | Post-payment — Full-screen Success Animation | Payment saved (`justPaid=true`) | ✅ **BUILT & LIVE** |
 | P7A | Edit Entry form | `"Edit Entry"` in overflow | ✅ **BUILT & LIVE** |
 | P7B | Save confirmation bottom sheet | `"Save"` on Edit Entry | ✅ **BUILT & LIVE** |
 | P8 | Entry Detail — OVERDUE state | State-driven | ✅ **BUILT & LIVE** (style drifts) |
@@ -356,7 +354,7 @@ Modify the details of an existing entry. Pre-filled with all current values. Cus
 - **Locked Person Row:** `"Person (cannot be changed)"` label. Green avatar system. Lock icon right.
 - **Note Field:** Inside / adjacent to Itemized Details section.
 - **Itemized Details:** Editable rows, red 🗑️ per row.
-- **Totals:** Subtotal → Loading Charge (editable) → GST % (editable) → Tax (calculated) → Grand Total `Inter 16px/700 #111827`.
+- **Totals:** Subtotal → Loading Charge (editable) → GST % (editable) → Tax (calculated) → Grand Total `Inter 16px/700 #ef4444` (red).
 - **Balance:** Previous Balance → New Total → Total Outstanding `#ef4444`.
 - **Save Button:** Full-width solid green, ✓ checkmark icon, `"Save"`.
 - **Save → opens P7B.**
@@ -370,13 +368,12 @@ Modify the details of an existing entry. Pre-filled with all current values. Cus
 
 ## 10. SAVE CONFIRMATION BOTTOM SHEET SPEC (P7B) — ✅ APPROVED
 
-- **Bottom sheet.** Overlay `rgba(0,0,0,0.45)`.
-- **Handle:** `40×4px` pill, `#d1d5db`.
-- **Title:** `"Save changes?"` — `Inter 18px/700 #111827`.
-- **Subtitle:** `"This will update the person's ledger and payment history."` — `Inter 14px/400 #6b7280`.
-- **Button 1:** Full-width solid green — `"Save & Share PDF"`, share icon, `height: 52px`.
-- **Button 2:** Full-width outline green — `"Save Only"`, ✓ icon, `height: 52px`.
-- **Cancel:** Centered plain text `"Cancel"` `#9ca3af`.
+- **Bottom sheet.** P7B confirmation bottom sheet using `BaseBottomSheet` layout.
+- **Title:** `"Save Entry [billNumber]?"` — `text-gray-900 text-lg font-inter-bold leading-7 text-center`.
+- **Subtitle:** `"Financial ledger will be updated immediately."` — `text-neutral-700 text-base font-inter leading-6 text-center`.
+- **Button 1 (Primary):** Full-width solid green — `"Save & Share PDF"`, `Share2` icon, height 52px.
+- **Button 2 (Secondary):** Full-width outline green — `"Save Only"`, height 52px.
+- **Cancel:** Centered plain text `"Cancel"` `#737373` (`text-neutral-500`).
 
 ---
 
@@ -417,8 +414,8 @@ Modify the details of an existing entry. Pre-filled with all current values. Cus
 | Mark as Paid → unknown | Opens P5 pre-filled | Consistent payment flow |
 | Items card shows grand total | Items card shows **subtotal** | Subtotal = what was sold; grand total includes tax |
 | Delete Entry inline | Delete Entry in ⋮ only | Prevents accidental delete |
-| Payment success as toast | Inline banner, top of content | More visible, not blocked by keyboard |
-| Grand Total red on Edit Entry | Grand Total `#111827` | Red reserved for debt signal only |
+| Payment success as toast | Full-screen success animation | Premium full-screen feedback replacing 4s inline banner |
+| Grand Total red on Edit Entry | Grand Total #ef4444 | Retained red color as in current UI |
 | Overflow order: Share first | **Edit first** in overflow | Edit is most frequent admin action |
 | Overflow width 180px (doc) | **200px** (as-built) | Better label readability on device |
 | Overflow overlay `rgba(0,0,0,0.20)` | **`rgba(0,0,0,0.30)`** (as-built) | Sufficient dimming without blocking content |
@@ -440,9 +437,9 @@ Modify the details of an existing entry. Pre-filled with all current values. Cus
 | Save button behavior on Edit Entry? | ✅ Opens P7B Save confirmation sheet. |
 | Overflow entry point? | ✅ Header ⋮ only. Text row removed. |
 | Delete Entry placement? | ✅ Overflow only. No inline delete row. |
-| Payment success feedback? | ✅ Inline banner, top of content, `justPaid` conditional, 4s auto-dismiss. |
-| P6 vs P10 — separate Stitch screen? | ✅ No. Same PAID screen, banner is conditional in code. |
-| Grand Total color on Edit Entry? | ✅ `#111827`. Red reserved for Total Outstanding only. |
+| Payment success feedback? | ✅ Full-screen success animation overlay (2.5s auto-dismiss). |
+| P6 vs P10 — separate Stitch screen? | ✅ No. Same screen, animation is triggered conditionally by the `justPaid` state. |
+| Grand Total color on Edit Entry? | ✅ #ef4444. |
 | Entry Timeline on Entry Detail? | ✅ No. Not now, not in v2 for this screen. |
 | OVERDUE + partial payments — which state wins? | ✅ OVERDUE wins. Past-due date overrides PARTIAL. |
 | PARTIAL trigger — automatic or manual? | ✅ Automatic. First recorded payment with balance > ₹0 = PARTIAL. |

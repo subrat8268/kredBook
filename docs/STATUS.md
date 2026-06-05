@@ -69,9 +69,8 @@
 - **Global FAB removed from Customer Detail** — Detail screens use contextual actions only. FAB belongs on broad/global screens (Dashboard, Customer List, Entry List).
 - **Header icons on Customer Detail** — Share and PDF removed from header; they exist in Quick Actions only. Call and WhatsApp remain in header.
 - **Shared detail header migration** — `DetailHeader` now powers Entry Detail, Entry Edit, Customer Detail, and Profile Edit. Keep future detail screens on the same back/action chip pattern.
-- **Entry Detail P0 component build IN PROGRESS** — building component-by-component.
-  Header ✅ locked. ⋮ Overflow Menu 🔄 in polish (View wrapper icon stacking bug).
-  Do not build Customer Card until overflow menu is locked.
+- **Entry Detail P0 component build COMPLETE** — all P0 components are built, verified, and locked.
+- **P6 Success State**: The 4-second inline success banner has been completely removed. It is replaced permanently by the custom full-screen `PaymentSuccessAnimation` overlay that triggers immediately on payment record.
 - **OverflowMenu component** — new shared component at
   `src/components/layer2/OverflowMenu.tsx`. Used by Entry Detail header.
   Icon prop must be a bare Lucide element — no View wrapper.
