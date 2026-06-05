@@ -64,7 +64,7 @@ export default function OrderDetailScreen() {
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const [successAnimationVisible, setSuccessAnimationVisible] = useState(false);
   const [lastRecordedPaymentAmount, setLastRecordedPaymentAmount] = useState<number>(0);
-  const bannerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const bannerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { show: showToast } = useToast();
 
   useEffect(() => {

@@ -17,7 +17,7 @@ import {
   useState,
   ElementRef,
 } from "react";
-import { View, useWindowDimensions } from "react-native";
+import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "@/src/components/ui";
@@ -52,12 +52,13 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
   ) => {
     const { colors, spacing } = useTheme();
     const insets = useSafeAreaInsets();
-    const { height: viewportHeight } = useWindowDimensions();
     const { i18n } = useTranslation();
     const sheetRef = useRef<BottomSheetModal>(null);
     const [footerHeight, setFooterHeight] = useState(0);
 
     useImperativeHandle(ref, () => sheetRef.current as BottomSheetModal, []);
+
+    const snapPoints = useMemo(() => ["75%", "90%"], []);
 
     const vm = useRecordCustomerPaymentModal({
       orderId,
@@ -185,8 +186,8 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
       <BottomSheetModal
         ref={sheetRef}
         index={0}
-        enableDynamicSizing={true}
-        maxDynamicContentSize={viewportHeight * 0.9}
+        snapPoints={snapPoints}
+        enableDynamicSizing={false}
         enablePanDownToClose
         onDismiss={() => {
           reset();
