@@ -27,8 +27,7 @@ export default function EntryCustomerCard({
   onChatPress,
   isDeleted = false,
 }: Props) {
-  const displayName =
-    isDeleted && !customerName ? "[Deleted Customer]" : customerName;
+  const displayName = isDeleted ? "[Deleted Customer]" : customerName;
   const initials = getInitials(displayName);
 
   return (
