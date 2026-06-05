@@ -40,7 +40,7 @@ type Params = {
   balanceDue: number;
   initialAmount?: number;
   locale: string;
-  onSuccess: () => void;
+  onSuccess: (amountPaid?: number) => void;
 };
 
 export function useRecordCustomerPaymentModal({
@@ -171,7 +171,7 @@ export function useRecordCustomerPaymentModal({
       setLastRemainingBalance(remaining);
 
       if (!hasNotifiedSuccessRef.current) {
-        onSuccess();
+        onSuccess(payAmount);
         hasNotifiedSuccessRef.current = true;
       }
 

@@ -10,6 +10,7 @@ import EntryPaymentsSection from "@/src/components/entries/EntryPaymentsSection"
 import EntryStickyBar from "@/src/components/entries/EntryStickyBar";
 import DeleteEntryModal from "@/src/components/entries/DeleteEntryModal";
 import RemindCustomerModal from "@/src/components/entries/RemindCustomerModal";
+import PaymentSuccessAnimation from "@/src/components/feedback/PaymentSuccessAnimation";
 import { usePayments } from "@/src/hooks/usePayments";
 import { useAuthStore } from "@/src/store/authStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
@@ -61,6 +62,8 @@ export default function OrderDetailScreen() {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [remindModalVisible, setRemindModalVisible] = useState(false);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
+  const [successAnimationVisible, setSuccessAnimationVisible] = useState(false);
+  const [lastRecordedPaymentAmount, setLastRecordedPaymentAmount] = useState<number>(0);
   const bannerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { show: showToast } = useToast();
 
@@ -314,8 +317,15 @@ export default function OrderDetailScreen() {
   }, [order, orderId, profile?.id, showToast, queryClient, router]);
 
   // ── Payment success ─────────────────────────────────────────────
-  const handlePaymentSuccess = useCallback(() => {
+  const handlePaymentSuccess = useCallback((amountPaid?: number) => {
     paymentModalRef.current?.dismiss();
+    setLastRecordedPaymentAmount(amountPaid ?? 0);
+    setSuccessAnimationVisible(true);
+  }, []);
+
+  const handleAnimationEnd = useCallback(() => {
+    setSuccessAnimationVisible(false);
+
     if (profile?.id) {
       queryClient.invalidateQueries({ queryKey: orderKeys.all(profile.id) });
       queryClient.invalidateQueries({
@@ -329,7 +339,7 @@ export default function OrderDetailScreen() {
       }
       queryClient.invalidateQueries({ queryKey: ["dashboard", profile.id] });
     }
-    
+
     // Trigger the success banner
     setShowSuccessBanner(true);
     if (bannerTimeoutRef.current) {
@@ -553,6 +563,12 @@ export default function OrderDetailScreen() {
         onSendWhatsApp={sendWhatsAppReminder}
         onSendSMS={sendSMSReminder}
         customerName={customerName}
+      />
+
+      <PaymentSuccessAnimation
+        visible={successAnimationVisible}
+        amount={lastRecordedPaymentAmount}
+        onAnimationEnd={handleAnimationEnd}
       />
 
       <EntryStickyBar

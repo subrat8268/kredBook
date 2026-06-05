@@ -26,7 +26,7 @@ import RecordPaymentResult from "./record-payment/RecordPaymentResult";
 import { useRecordCustomerPaymentModal } from "./record-payment/useRecordCustomerPaymentModal";
 
 type Props = {
-  onSuccess: () => void;
+  onSuccess: (amountPaid?: number) => void;
   orderId: string;
   balanceDue: number;
   customerId: string;
