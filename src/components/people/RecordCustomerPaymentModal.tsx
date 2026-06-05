@@ -58,7 +58,7 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
 
     useImperativeHandle(ref, () => sheetRef.current as BottomSheetModal, []);
 
-    const snapPoints = useMemo(() => ["75%", "90%"], []);
+    const snapPoints = useMemo(() => ["82%"], []);
 
     const vm = useRecordCustomerPaymentModal({
       orderId,

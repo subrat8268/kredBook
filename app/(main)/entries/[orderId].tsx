@@ -22,7 +22,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Linking, ScrollView, Platform, View, Text } from "react-native";
+import { Alert, Linking, ScrollView, Platform } from "react-native";
 import {
   Pencil,
   User,
@@ -61,28 +61,16 @@ export default function OrderDetailScreen() {
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [remindModalVisible, setRemindModalVisible] = useState(false);
-  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const [successAnimationVisible, setSuccessAnimationVisible] = useState(false);
   const [lastRecordedPaymentAmount, setLastRecordedPaymentAmount] = useState<number>(0);
-  const bannerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { show: showToast } = useToast();
 
   useEffect(() => {
     if (justPaid === "true") {
-      setShowSuccessBanner(true);
-      if (bannerTimeoutRef.current) {
-        clearTimeout(bannerTimeoutRef.current);
-      }
-      bannerTimeoutRef.current = setTimeout(() => {
-        setShowSuccessBanner(false);
-      }, 4000);
+      setLastRecordedPaymentAmount(Number(order?.amount_paid || 0));
+      setSuccessAnimationVisible(true);
     }
-    return () => {
-      if (bannerTimeoutRef.current) {
-        clearTimeout(bannerTimeoutRef.current);
-      }
-    };
-  }, [justPaid]);
+  }, [justPaid, order?.amount_paid]);
 
   const fmt = useCallback(
     (value: number) =>
@@ -340,15 +328,6 @@ export default function OrderDetailScreen() {
       queryClient.invalidateQueries({ queryKey: ["dashboard", profile.id] });
     }
 
-    // Trigger the success banner
-    setShowSuccessBanner(true);
-    if (bannerTimeoutRef.current) {
-      clearTimeout(bannerTimeoutRef.current);
-    }
-    bannerTimeoutRef.current = setTimeout(() => {
-      setShowSuccessBanner(false);
-    }, 4000);
-
     showToast({
       message: `Payment recorded for ${customerName}`,
       type: "success",
@@ -482,21 +461,7 @@ export default function OrderDetailScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: 100 }}
-        onScrollBeginDrag={() => {
-          setShowSuccessBanner(false);
-          if (bannerTimeoutRef.current) {
-            clearTimeout(bannerTimeoutRef.current);
-          }
-        }}
       >
-        {showSuccessBanner && (
-          <View className="bg-green-100 dark:bg-green-950/30 rounded-xl p-4 mx-4 mb-4 flex-row items-center gap-3 border border-green-200 dark:border-green-900/40">
-            <CheckCircle size={20} color={colors.brand || "#16a34a"} />
-            <Text className="text-green-800 dark:text-green-200 text-sm font-semibold font-inter-semibold">
-              Payment recorded successfully
-            </Text>
-          </View>
-        )}
 
         <EntryCustomerCard
           customerName={customerName}
