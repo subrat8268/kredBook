@@ -78,6 +78,8 @@
 - **DetailHeader shared component** — `src/components/layer2/DetailHeader.tsx`
   now powers Entry Detail, Edit Entry, Customer Detail, Profile Edit.
   Entry Detail uses: back + title + date + ⋮ overflow only. No call button in header.
+- **EntrySummaryCard component** — new shared component at `src/components/entries/EntrySummaryCard.tsx`. Used by both Create Entry and Edit Entry screens to display outstanding balance summary.
+- **EntryQuickActions dead code** — `src/components/entries/EntryQuickActions.tsx` is completely unused. Edit/Delete live in overflow. Remind lives in Action Bar. Scheduled for deletion.
 
 ---
 
@@ -287,7 +289,7 @@ Verification:
 |---|---|---|---|---|
 | 4.2.3-H | Header — back, title, date, ⋮ overflow only | ✅ Done | Call button removed from header. Overflow icon is sole admin entry point. | [ddf9d9c](https://github.com/subrat8268/kredBook/commit/ddf9d9cc0cee06aef5cc4696b26ddb27b37fa7e2) |
 | 4.2.3-P2 | ⋮ Overflow Menu — 6 items, icon+label inline, dividers, backdrop | 🔄 In Polish | Icon+label stacking bug (View wrapper). Fix prompt issued. | [ddf9d9c](https://github.com/subrat8268/kredBook/commit/ddf9d9cc0cee06aef5cc4696b26ddb27b37fa7e2) |
-| 4.2.3-C | Customer Card — green avatar, name, phone, call+chat icons, tappable | ⏳ Next | After overflow menu is locked. |  |
+| 4.2.3-C | Customer Card — green avatar, name, phone, call+chat icons, tappable | ✅ Done | Wired click handlers for call and chat actions. |  |
 | 4.2.3-Hero | Hero Card — orange gradient, balance due, pending pill, due date | ⏳ Pending | After Customer Card. |  |
 | 4.2.3-Pay | Payments Card — progress track, empty state, payment rows | ⏳ Pending | After Hero. |  |
 | 4.2.3-Items | Items Card — collapsed subtotal, expand/collapse, item rows | ⏳ Pending | After Payments. |  |
@@ -296,8 +298,8 @@ Verification:
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|---|
-| 4.2.4a | Edit Entry audit + extraction | ⏳ Not Started | P2 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/entries/[orderId]/edit.tsx` |
-| 4.2.4b | Edit Entry premium redesign | ⏳ Not Started | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId]/edit.tsx` |
+| 4.2.4a | Edit Entry audit + extraction | ✅ Done | P2 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/entries/[orderId]/edit.tsx` | [41580ae](https://github.com/subrat8268/kredBook/commit/41580ae) |
+| 4.2.4b | Edit Entry premium redesign | ✅ Done | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId]/edit.tsx` | [41580ae](https://github.com/subrat8268/kredBook/commit/41580ae) |
 | 4.2.4c | Edit Entry screenshot polish + verification | ⏳ Not Started | P2 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/entries/[orderId]/edit.tsx` |
 | 4.2.1a | Customer List audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/people/index.tsx` |
 | 4.2.1b | Customer List premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/index.tsx` |

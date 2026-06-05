@@ -1,7 +1,7 @@
 # Entry Detail Screen — Design Spec
 
-> **Status:** Phase 4 — In Build.
-> **Last updated:** 2026-06-01
+> **Status:** Phase 4 — Audited & Polishing.
+> **Last updated:** 2026-06-05
 > **Product Lead:** All open questions resolved. No open items remain.
 
 ---
@@ -280,17 +280,17 @@ Identical to P0 in all layout, spacing, and component count. **Only these change
 | # | Screen | Triggered by | Status |
 |---|---|---|---|
 | P0 | Entry Detail — PENDING state | Entry list tap | ✅ **BUILT & LIVE** |
-| P1 | Items card expanded | Items row tap | ✅ Approved |
-| P2 | ⋮ Overflow menu | ⋮ header icon tap | ✅ **BUILT & LIVE** |
-| P3 | Remind bottom sheet | `"Remind"` CTA in Action Bar | ✅ Approved |
-| P4 | Delete confirm modal | `"Delete Entry"` in overflow | ✅ Approved |
-| P5 | Record Payment bottom sheet | `"Record Payment"` / `"Mark as Paid"` | ✅ Use built version |
-| P6 | Post-payment — PAID state + success banner | Payment saved (`justPaid=true`) | ✅ Approved |
-| P7A | Edit Entry form | `"Edit Entry"` in overflow | ✅ Approved |
-| P7B | Save confirmation bottom sheet | `"Save"` on Edit Entry | ✅ Approved |
-| P8 | Entry Detail — OVERDUE state | State-driven | ✅ **APPROVED** |
-| P9 | Entry Detail — PARTIAL state | State-driven | ⏳ Next |
-| P10 | Entry Detail — PAID state (no banner) | State-driven | ⏳ After P9 |
+| P1 | Items card expanded | Items row tap | ✅ **BUILT & LIVE** |
+| P2 | ⋮ Overflow menu | ⋮ header icon tap | 🔄 **In Polish** (Overlay/style drift) |
+| P3 | Remind bottom sheet | `"Remind"` CTA in Action Bar | ✅ **BUILT & LIVE** |
+| P4 | Delete confirm modal | `"Delete Entry"` in overflow | ✅ **BUILT & LIVE** |
+| P5 | Record Payment bottom sheet | `"Record Payment"` / `"Mark as Paid"` | ✅ **BUILT & LIVE** |
+| P6 | Post-payment — PAID state + success banner | Payment saved (`justPaid=true`) | ❌ **Not Started** (Toast used instead) |
+| P7A | Edit Entry form | `"Edit Entry"` in overflow | ✅ **BUILT & LIVE** |
+| P7B | Save confirmation bottom sheet | `"Save"` on Edit Entry | ✅ **BUILT & LIVE** |
+| P8 | Entry Detail — OVERDUE state | State-driven | ✅ **BUILT & LIVE** (style drifts) |
+| P9 | Entry Detail — PARTIAL state | State-driven | 🔄 **In Progress** (Basic built; progress bar/Received chip drifts) |
+| P10 | Entry Detail — PAID state (no banner) | State-driven | 🔄 **In Progress** (Basic built; overpayment drift) |
 
 ---
 
@@ -300,16 +300,15 @@ Identical to P0 in all layout, spacing, and component count. **Only these change
 
 **Triggered by:** `Remind` CTA in action bar.
 
-- **Overlay:** `rgba(0,0,0,0.40)`.
-- **Sheet:** Slides up. `bg: #ffffff`, `borderRadius: 20px` top-only, `padding: 20px`.
-- **Handle:** `32×4px` pill, `#d1d5db`, centered top.
-- **Title:** `"Remind [Customer Name]"` — `Inter 17px/600 #111827`.
-- **Subtitle:** `"Choose how to send the reminder"` — `Inter 14px/400 #6b7280`.
-- **Option Cards (stacked, `12px` gap):**
-  - **WhatsApp (Primary):** `border: 1.5px solid #16a34a`, `bg: #f0fdf4`. Left: WhatsApp icon `32px` green bg. Center: `"Send via WhatsApp"` `Inter 14px/600` + `"Opens WhatsApp with pre-filled message"` `Inter 12px/400 #9ca3af`. Right: `chevron-right`.
-  - **SMS (Secondary):** `border: 1px solid #e5e7eb`, `bg: #ffffff`. Same structure. `message-square` icon `32px` blue bg.
-- **Cancel:** Centered plain text `Inter 15px/500 #6b7280`.
-- **Pre-filled message:** `"Hi [Name], your payment of ₹[balance] for Invoice #[ID] is due. Please pay at your earliest convenience."` Not editable in v1.
+- **Overlay:** `rgba(0,0,0,0.50)`.
+- **Sheet:** Bottom-drawer style. `bg: #ffffff` (`bg-white`), `borderRadius: 20px` top-only, `width: 100%`.
+- **Handle:** `32×4px` pill, `#d1d5db` (`bg-gray-300`), centered top.
+- **Title:** `"Remind [Customer Name]"` — `Inter 16px/700 #111827`.
+- **Subtitle:** `"Select how to send the payment reminder"` — `Inter 14px/400 #6B7280`.
+- **Option Cards (stacked, `16px` gap):**
+  - **WhatsApp (Primary):** `bg-green-50`, border `border-green-200`. Left: `MessageSquare` green icon inside `bg-green-100` circle. Center: `"Send via WhatsApp"` + `"Opens pre-filled message"`. Right: `chevron-right`.
+  - **SMS (Secondary):** `bg-blue-50`, border `border-blue-200`. Left: `MessageSquare` blue icon inside `bg-blue-100` circle. Center: `"Send via SMS"` + `"Standard text message"`. Right: `chevron-right`.
+- **Cancel:** Centered text `"Cancel"` — `Inter 16px/500 #9ca3af`.
 
 ---
 
@@ -318,14 +317,13 @@ Identical to P0 in all layout, spacing, and component count. **Only these change
 **Triggered by:** `"Delete Entry"` in ⋮ overflow menu.
 
 - **Overlay:** `rgba(0,0,0,0.50)`.
-- **Modal:** Centered card (not bottom sheet). `bg: #ffffff`, `borderRadius: 20px`, `padding: 24px`, `width: 320px`.
-- **Top icon:** `trash-2` `40px` inside `#fee2e2` circle.
-- **Title:** `"Delete this entry?"` — `Inter 17px/700 #111827`.
-- **Body:** `"Entry [ID] will be permanently deleted. This cannot be undone."` — `Inter 14px/400 #6b7280`, centered.
-- **If entry has payments:** Replace body with amber warning: `"⚠️ This entry has recorded payments. Deleting will remove all payment records too."`
-- **Buttons (stacked, `12px` gap):**
-  - Primary: `"Delete Entry"` — `bg: #ef4444`, white `Inter 15px/600`, `borderRadius: full`, `height: 48px`.
-  - Secondary: `"Cancel"` — transparent, `#6b7280 Inter 15px/500`.
+- **Modal:** Centered card (not bottom sheet). `bg: #f8fafc` (`bg-slate-50`), `borderRadius: 20px`, `padding: 24px`, `width: 320px`.
+- **Top icon:** `trash` `24px` inside `bg-rose-200` circle.
+- **Title:** `"Delete Entry?"` — `Inter 18px/700 #111827`.
+- **Body:** `"Entry #[bill_number] and all its payment records will be permanently deleted."` — `Inter 14px/400 #475569`, centered.
+- **Buttons (stacked, `8px` gap):**
+  - Primary: `"Delete Permanently"` — `bg: #b91c1c` (`bg-red-700`), white `Inter 16px/600`, `borderRadius: full`, `height: 48px`.
+  - Secondary: `"Cancel"` — `bg: #e0f2fe` (`bg-sky-100`), `#111827 Inter 16px/500`, `borderRadius: full`, `height: 48px`.
 
 ---
 
@@ -460,3 +458,28 @@ Modify the details of an existing entry. Pre-filled with all current values. Cus
 | Overflow overlay opacity? | ✅ `rgba(0,0,0,0.30)` (as-built, intentional). |
 | Divider between all items or groups only? | ✅ Every item (as-built, intentional). |
 | `EntryQuickActions` fate? | ✅ Dead code — must not render. Edit/Delete → overflow. Remind → Action Bar. |
+
+---
+
+## 14. COMPONENT MAP
+
+| Component / Screen | Spec / Screen ID | File Path |
+|---|---|---|
+| Entry Detail (Container) | P0 / P8 / P9 / P10 | [app/(main)/entries/[orderId].tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/app/(main)/entries/[orderId].tsx) |
+| Edit Entry (Container) | P7A | [app/(main)/entries/[orderId]/edit.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/app/(main)/entries/[orderId]/edit.tsx) |
+| Detail Header | A1 | [src/components/layer2/DetailHeader.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/layer2/DetailHeader.tsx) |
+| Overflow Menu | A2 / P2 | [src/components/layer2/OverflowMenu.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/layer2/OverflowMenu.tsx) |
+| Customer Card | A3 | [src/components/entries/EntryCustomerCard.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/entries/EntryCustomerCard.tsx) |
+| Hero Card | A4 | [src/components/entries/EntryHeroCard.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/entries/EntryHeroCard.tsx) |
+| Payments Card | A5 | [src/components/entries/EntryPaymentsSection.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/entries/EntryPaymentsSection.tsx) |
+| Items Card | A6 / P1 | [src/components/entries/EntryItemsSection.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/entries/EntryItemsSection.tsx) |
+| Sticky Action Bar | A7 | [src/components/entries/EntryStickyBar.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/entries/EntryStickyBar.tsx) |
+| Save Entry Bottom Sheet | P7B | [src/components/entries/SaveEntryBottomSheet.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/entries/SaveEntryBottomSheet.tsx) |
+| Entry Summary Card | F1 | [src/components/entries/EntrySummaryCard.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/entries/EntrySummaryCard.tsx) |
+| Base Bottom Sheet | F3 | [src/components/layer2/BaseBottomSheet.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/layer2/BaseBottomSheet.tsx) |
+| EditWarningBanner | - | [src/components/entries/EditWarningBanner.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/entries/EditWarningBanner.tsx) |
+| EditCustomerCard | - | [src/components/entries/EditCustomerCard.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/entries/EditCustomerCard.tsx) |
+| EditItemizedSection | - | [src/components/entries/EditItemizedSection.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/entries/EditItemizedSection.tsx) |
+| OrderSummary | - | [src/components/orders/OrderSummary.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/orders/OrderSummary.tsx) |
+| OrderItemCard | - | [src/components/orders/OrderItemCard.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/orders/OrderItemCard.tsx) |
+| BillFooter | F6 | [src/components/orders/BillFooter.tsx](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/orders/BillFooter.tsx) |
