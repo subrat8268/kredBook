@@ -46,6 +46,7 @@ type Props = {
   paymentRows: PaymentRow[];
   grandTotal: number;
   paidAmount: number;
+  statusKey?: "pending" | "partial" | "paid" | "overdue";
 };
 
 export default function EntryPaymentsSection({
@@ -54,6 +55,7 @@ export default function EntryPaymentsSection({
   paymentRows,
   grandTotal,
   paidAmount,
+  statusKey,
 }: Props) {
   const progress = grandTotal > 0 ? (paidAmount / grandTotal) * 100 : 0;
 
@@ -64,7 +66,7 @@ export default function EntryPaymentsSection({
       duration: 1000,
       easing: Easing.out(Easing.exp),
     });
-  }, [progress]);
+  }, [progress, widthAnim]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     width: `${widthAnim.value}%`,

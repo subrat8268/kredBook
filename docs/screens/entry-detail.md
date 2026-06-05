@@ -390,7 +390,7 @@ Modify the details of an existing entry. Pre-filled with all current values. Cus
 | ⋮ Overflow | Full 6 items | Full 6 items | 5 items (Mark as Paid hidden) | Full 6 items |
 | Action Bar (Pri) | Record Payment | Record Payment | Share Receipt (full width) | Record Payment |
 | Action Bar (Sec) | Remind (neutral) | Remind (neutral) | — | Remind (red outline) |
-| Success Banner | — | — | Only if `justPaid=true` | — |
+| Success Animation | — | — | Only if `justPaid=true` | — |
 | State Priority | Default | Overridden by Overdue if past due | Terminal | Wins over Partial |
 
 ---

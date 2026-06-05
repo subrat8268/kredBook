@@ -1,4 +1,3 @@
-import MoneyAmount from "@/src/components/ui/MoneyAmount";
 import { ChevronDown, ChevronUp, Package } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -26,13 +25,13 @@ export default function EntryItemsSection({
   itemsSubtotal,
   taxAmount,
   grandTotal,
+  statusKey,
   fmt,
 }: Props) {
   const autoExpand = order.items.length === 1;
   const [expanded, setExpanded] = useState(autoExpand);
 
   const itemCount = order.items.length;
-  const collapsedLabel = `${itemCount} item${itemCount === 1 ? "" : "s"} · ₹${itemsSubtotal.toLocaleString("en-IN")} total`;
 
   const itemRows = useMemo(
     () =>
@@ -158,18 +157,18 @@ export default function EntryItemsSection({
               <View
                 style={{
                   backgroundColor:
-                    STATUS_BADGE_STYLE[order.status]?.bg ?? "#F3F4F6",
+                    STATUS_BADGE_STYLE[statusKey]?.bg ?? "#F3F4F6",
                 }}
                 className="rounded-full px-2 py-0.5"
               >
                 <Text
                   style={{
-                    color: STATUS_BADGE_STYLE[order.status]?.text ?? "#6B7280",
+                    color: STATUS_BADGE_STYLE[statusKey]?.text ?? "#6B7280",
                     fontSize: 10,
                   }}
                   className="font-bold uppercase tracking-wider text-[10px]"
                 >
-                  {order.status}
+                  {statusKey}
                 </Text>
               </View>
             </View>

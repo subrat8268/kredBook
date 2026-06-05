@@ -1,7 +1,7 @@
 import { formatINR } from "@/src/utils/format";
 import { LinearGradient } from "expo-linear-gradient";
 import { Text, View } from "react-native";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useFocusEffect } from "expo-router";
 import Animated, {
   useAnimatedStyle,
@@ -13,17 +13,17 @@ import Animated, {
 import { CheckCircle2, Clock3 } from "lucide-react-native";
 
 const GRADIENTS: Record<string, [string, string]> = {
-  Pending: ["#f59e0b", "#ea580c"],
-  Partial: ["#3b82f6", "#2563eb"],
-  Paid: ["#16a34a", "#15803d"],
-  Overdue: ["#ef4444", "#dc2626"],
+  pending: ["#f59e0b", "#ea580c"],
+  partial: ["#3b82f6", "#2563eb"],
+  paid: ["#16a34a", "#15803d"],
+  overdue: ["#ef4444", "#dc2626"],
 };
 
 const SHADOWS: Record<string, { shadowColor: string }> = {
-  Pending: { shadowColor: "#ea580c" },
-  Partial: { shadowColor: "#2563eb" },
-  Paid: { shadowColor: "#15803d" },
-  Overdue: { shadowColor: "#dc2626" },
+  pending: { shadowColor: "#ea580c" },
+  partial: { shadowColor: "#2563eb" },
+  paid: { shadowColor: "#15803d" },
+  overdue: { shadowColor: "#dc2626" },
 };
 
 function getDueDateLabel(dueDate?: string | null): string | null {
@@ -46,13 +46,13 @@ function getDueDateLabel(dueDate?: string | null): string | null {
 
 type Props = {
   amount: number;
-  status: "Pending" | "Partial" | "Paid" | "Overdue";
+  statusKey: "pending" | "partial" | "paid" | "overdue";
   dueDate?: string | null;
 };
 
-export default function EntryHeroCard({ amount, status, dueDate }: Props) {
-  const gradientColors = GRADIENTS[status] || GRADIENTS.Pending;
-  const shadow = SHADOWS[status] || SHADOWS.Pending;
+export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
+  const gradientColors = GRADIENTS[statusKey] || GRADIENTS.pending;
+  const shadow = SHADOWS[statusKey] || SHADOWS.pending;
   const dueLabel = getDueDateLabel(dueDate);
   const formattedAmount = formatINR(amount, {
     minimumFractionDigits: 0,
@@ -96,6 +96,11 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
     transform: [{ scale: blobScale.value }],
   }));
 
+  const displayStatus = useMemo(() => {
+    if (statusKey === "partial") return "Partial";
+    return statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
+  }, [statusKey]);
+
   return (
     <LinearGradient
       colors={gradientColors}
@@ -129,7 +134,10 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
       />
 
       <View className="flex-col gap-2 w-full">
-        <Text className="font-semibold text-[12px] text-white/90 uppercase">
+        <Text
+          style={{ letterSpacing: 1.4 }}
+          className="font-semibold text-[12px] text-white/90 uppercase"
+        >
           BALANCE DUE
         </Text>
 
@@ -152,9 +160,9 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
         >
           <View className="flex-row items-center gap-[6px] bg-white/20 rounded-full px-3 py-1">
             <Animated.View style={pillStyle} className="flex-row items-center">
-              {status === "Paid" ? (
+              {statusKey === "paid" ? (
                 <CheckCircle2 size={13} color="#ffffff" strokeWidth={2.5} />
-              ) : status === "Overdue" ? (
+              ) : statusKey === "overdue" ? (
                 <Clock3 size={13} color="#ffffff" strokeWidth={2.5} />
               ) : (
                 <View className="w-2 h-2 rounded-full bg-white" />
@@ -164,11 +172,11 @@ export default function EntryHeroCard({ amount, status, dueDate }: Props) {
               style={{ letterSpacing: 0.6, lineHeight: 16 }}
               className="font-semibold text-[12px] text-white"
             >
-              {status}
+              {displayStatus}
             </Text>
           </View>
 
-          {status !== "Paid" && dueLabel && (
+          {statusKey !== "paid" && dueLabel && (
             <Text
               style={{ lineHeight: 20 }}
               className="font-medium text-[14px] text-white/90"

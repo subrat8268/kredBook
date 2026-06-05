@@ -11,18 +11,12 @@ import EntryStickyBar from "@/src/components/entries/EntryStickyBar";
 import DeleteEntryModal from "@/src/components/entries/DeleteEntryModal";
 import RemindCustomerModal from "@/src/components/entries/RemindCustomerModal";
 import PaymentSuccessAnimation from "@/src/components/feedback/PaymentSuccessAnimation";
-import { usePayments } from "@/src/hooks/usePayments";
-import { useAuthStore } from "@/src/store/authStore";
+import { useEntryDetail } from "@/src/hooks/entries";
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { generateBillPdf } from "@/src/utils/generateBillPdf";
 import { formatDate } from "@/src/utils/helper";
-import { buildEntryShareMessage } from "@/src/utils/shareTemplates";
-import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import * as Sharing from "expo-sharing";
-import { useTranslation } from "react-i18next";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Linking, ScrollView, Platform } from "react-native";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { ScrollView } from "react-native";
 import {
   Pencil,
   User,
@@ -32,45 +26,59 @@ import {
   Share2,
 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { orderKeys, useOrderDetail } from "@/src/hooks/useEntries";
 import { formatINR } from "@/src/utils/format";
-import { deleteOrder } from "@/src/api/entries";
 import { MenuItem } from "@/src/components/layer2/OverflowMenu";
 
 export default function OrderDetailScreen() {
   const { colors, spacing } = useTheme();
-  const { i18n } = useTranslation();
-  const shareLocale = useMemo(
-    () => (i18n.language?.toLowerCase().startsWith("hi") ? "hi" : "en"),
-    [i18n.language],
-  );
-
   const { orderId, justPaid } = useLocalSearchParams<{ orderId: string; justPaid?: string }>();
   const router = useRouter();
-  const { profile } = useAuthStore();
-  const queryClient = useQueryClient();
-
-  const { data: order, isLoading, isError } = useOrderDetail(orderId);
-  const { payments, isLoading: paymentsLoading, isError: paymentsError } = usePayments(
-    orderId ?? "",
-    profile?.id,
-  );
-
   const paymentModalRef = useRef<any>(null);
-  const [sendingEntry, setSendingEntry] = useState(false);
-  const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [remindModalVisible, setRemindModalVisible] = useState(false);
-  const [successAnimationVisible, setSuccessAnimationVisible] = useState(false);
-  const [lastRecordedPaymentAmount, setLastRecordedPaymentAmount] = useState<number>(0);
   const { show: showToast } = useToast();
 
+  const {
+    order,
+    paymentRows,
+    itemsSubtotal,
+    taxAmount,
+    statusKey,
+    balanceDue,
+    totalPaid,
+    grandTotal,
+    isDeleted,
+    customerName,
+    customerPhone,
+    onCall,
+    onWhatsApp,
+    onEdit,
+    onDelete,
+    onRemind,
+    onRecordPayment,
+    handleShareLedgerLink,
+    sendWhatsAppReminder,
+    sendSMSReminder,
+    handleConfirmDelete,
+    handlePaymentSuccess,
+    handleAnimationEnd,
+    showDeleteModal,
+    setShowDeleteModal,
+    showRemindModal,
+    setShowRemindModal,
+    showSuccessAnim,
+    setShowSuccessAnim,
+    lastRecordedPaymentAmount,
+    setLastRecordedPaymentAmount,
+    isLoading,
+    isError,
+    sendingEntry,
+  } = useEntryDetail(orderId);
+
   useEffect(() => {
-    if (justPaid === "true") {
-      setLastRecordedPaymentAmount(Number(order?.amount_paid || 0));
-      setSuccessAnimationVisible(true);
+    if (justPaid === "true" && order) {
+      setLastRecordedPaymentAmount(Number(order.amount_paid || 0));
+      setShowSuccessAnim(true);
     }
-  }, [justPaid, order?.amount_paid]);
+  }, [justPaid, order, setLastRecordedPaymentAmount, setShowSuccessAnim]);
 
   const fmt = useCallback(
     (value: number) =>
@@ -82,290 +90,6 @@ export default function OrderDetailScreen() {
     [],
   );
 
-  // ── Derived values ───────────────────────────────────────────────
-  const customerName = order?.customer?.name ?? "Unknown Person";
-  const customerPhone = order?.customer?.phone ?? "";
-
-  const dueDateValue =
-    order && "due_date" in order && typeof order.due_date === "string"
-      ? order.due_date
-      : null;
-  const isOverdue =
-    !!order &&
-    order.status !== "Paid" &&
-    !!dueDateValue &&
-    new Date(dueDateValue) < new Date(new Date().setHours(0, 0, 0, 0));
-  const statusKey = isOverdue ? "Overdue" : (order?.status ?? "Pending");
-
-  const itemsSubtotal = useMemo(
-    () => order?.items?.reduce((s, i) => s + i.subtotal, 0) ?? 0,
-    [order?.items],
-  );
-  const taxAmount = order?.tax_percent
-    ? Math.round(((itemsSubtotal * order.tax_percent) / 100) * 100) / 100
-    : 0;
-  const grandTotal =
-    (order?.total_amount ?? 0) + (order?.previous_balance ?? 0);
-
-  const sortedPayments = useMemo(
-    () =>
-      [...(payments ?? [])].sort(
-        (a, b) =>
-          new Date(a.payment_date).getTime() -
-          new Date(b.payment_date).getTime(),
-      ),
-    [payments],
-  );
-
-  const paymentRows = useMemo(() => {
-    let running = order?.total_amount ?? 0;
-    return sortedPayments.map((p) => {
-      running -= p.amount;
-      return { payment: p, remaining: Math.max(0, running) };
-    });
-  }, [sortedPayments, order?.total_amount]);
-
-  // ── Send Entry ──────────────────────────────────────────────────
-  const handleShareLedgerLink = useCallback(async () => {
-    if (!order) return;
-    setSendingEntry(true);
-    try {
-      const pdfUri = await generateBillPdf(
-        order.items.map((i) => ({
-          name: i.product_name,
-          quantity: i.quantity,
-          rate: i.price,
-          price: i.price,
-          amount: i.subtotal,
-          variantName: i.variant_name,
-        })),
-        {
-          name: profile?.business_name ?? profile?.name ?? "",
-          address: profile?.business_address || undefined,
-          phone: profile?.phone ?? "",
-          gstin: profile?.gstin ?? "",
-        },
-        order.total_amount,
-        customerName,
-        {
-          invoiceNumber: order.bill_number,
-          date: formatDate(order.created_at),
-          subtotal: itemsSubtotal,
-          taxAmount,
-          loadingCharge: order.loading_charge ?? 0,
-          bankDetails:
-            profile?.bank_name && profile?.account_number && profile?.ifsc_code
-              ? {
-                  bankName: profile.bank_name,
-                  accountNo: profile.account_number,
-                  ifsc: profile.ifsc_code,
-                }
-              : undefined,
-        },
-      );
-
-      const canShare = await Sharing.isAvailableAsync();
-      if (canShare) {
-        await Sharing.shareAsync(pdfUri, {
-          mimeType: "application/pdf",
-          dialogTitle: `Entry ${order.bill_number}`,
-          UTI: "com.adobe.pdf",
-        });
-        showToast({
-          message: `Entry ${order.bill_number} shared`,
-          type: "success",
-        });
-      } else {
-        throw new Error("sharing-unavailable");
-      }
-    } catch (_error: any) {
-      showToast({
-        message: `Error sharing PDF: ${_error?.message || "Unknown error"}`,
-        type: "error",
-      });
-    } finally {
-      setSendingEntry(false);
-    }
-  }, [order, customerName, profile, showToast, itemsSubtotal, taxAmount]);
-
-  // ── Remind Option Triggers ──────────────────────────────────────
-  const handleRemind = useCallback(() => {
-    setRemindModalVisible(true);
-  }, []);
-
-  const sendWhatsAppReminder = useCallback(async () => {
-    if (!order) return;
-    try {
-      const cleanPhone = customerPhone.replace(/\D/g, "");
-      const msg = encodeURIComponent(
-        buildEntryShareMessage({
-          locale: shareLocale,
-          customerName,
-          amount: order.total_amount,
-          entryDate: order.created_at,
-          dueDate: (order as any).due_date ?? null,
-          businessName: profile?.business_name || profile?.name || "KredBook",
-        }),
-      );
-      const wa = `https://wa.me/91${cleanPhone}?text=${msg}`;
-      await Linking.openURL(wa);
-    } catch {
-      Alert.alert(
-        "Cannot open WhatsApp",
-        "Please install WhatsApp and try again.",
-      );
-    }
-  }, [order, customerName, customerPhone, profile, shareLocale]);
-
-  const sendSMSReminder = useCallback(async () => {
-    if (!order) return;
-    try {
-      const cleanPhone = customerPhone.replace(/\D/g, "");
-      const messageText = buildEntryShareMessage({
-        locale: shareLocale,
-        customerName,
-        amount: order.total_amount,
-        entryDate: order.created_at,
-        dueDate: (order as any).due_date ?? null,
-        businessName: profile?.business_name || profile?.name || "KredBook",
-      });
-      const msg = encodeURIComponent(messageText);
-      const smsUrl = Platform.OS === "ios"
-        ? `sms:+91${cleanPhone}&body=${msg}`
-        : `sms:+91${cleanPhone}?body=${msg}`;
-      await Linking.openURL(smsUrl);
-    } catch {
-      Alert.alert(
-        "Cannot open SMS",
-        "Unable to launch native SMS application.",
-      );
-    }
-  }, [order, customerName, customerPhone, profile, shareLocale]);
-
-  const handleCallCustomer = useCallback(() => {
-    if (customerPhone) {
-      Linking.openURL(`tel:${customerPhone.replace(/\D/g, "")}`);
-    }
-  }, [customerPhone]);
-
-  const handleChatCustomer = useCallback(async () => {
-    if (customerPhone) {
-      try {
-        const cleanPhone = customerPhone.replace(/\D/g, "");
-        const waUrl = `https://wa.me/91${cleanPhone}`;
-        await Linking.openURL(waUrl);
-      } catch {
-        Alert.alert(
-          "Cannot open WhatsApp",
-          "Please install WhatsApp and try again.",
-        );
-      }
-    }
-  }, [customerPhone]);
-
-  // ── Delete entry ────────────────────────────────────────────────
-  const handleDelete = useCallback(() => {
-    setDeleteModalVisible(true);
-  }, []);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!orderId || !profile?.id || !order?.customer_id) {
-      showToast({
-        message: "Unable to delete entry. Missing data.",
-        type: "error",
-      });
-      return;
-    }
-    try {
-      setDeleteModalVisible(false);
-      // Call the delete API
-      await deleteOrder(orderId, profile.id);
-
-      // Invalidate queries and navigate back on success
-      queryClient.invalidateQueries({
-        queryKey: orderKeys.all(profile.id),
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["dashboard", profile.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["customerDetail", order.customer_id],
-      });
-      showToast({
-        message: `Entry #${order.bill_number} deleted`,
-        type: "success",
-      });
-      router.back();
-    } catch (error: any) {
-      showToast({
-        message: `Error deleting entry: ${error.message}`,
-        type: "error",
-      });
-    }
-  }, [order, orderId, profile?.id, showToast, queryClient, router]);
-
-  // ── Payment success ─────────────────────────────────────────────
-  const handlePaymentSuccess = useCallback((amountPaid?: number) => {
-    paymentModalRef.current?.dismiss();
-    setLastRecordedPaymentAmount(amountPaid ?? 0);
-    setSuccessAnimationVisible(true);
-  }, []);
-
-  const handleAnimationEnd = useCallback(() => {
-    setSuccessAnimationVisible(false);
-
-    if (profile?.id) {
-      queryClient.invalidateQueries({ queryKey: orderKeys.all(profile.id) });
-      queryClient.invalidateQueries({
-        queryKey: orderKeys.detail(orderId ?? ""),
-      });
-      queryClient.invalidateQueries({ queryKey: ["payments", orderId] });
-      if (order?.customer_id) {
-        queryClient.invalidateQueries({
-          queryKey: ["customerDetail", order.customer_id],
-        });
-      }
-      queryClient.invalidateQueries({ queryKey: ["dashboard", profile.id] });
-    }
-
-    showToast({
-      message: `Payment recorded for ${customerName}`,
-      type: "success",
-    });
-  }, [
-    orderId,
-    order?.customer_id,
-    profile?.id,
-    queryClient,
-    customerName,
-    showToast,
-  ]);
-
-  const openPaymentFlow = useCallback(
-    (amountSeed?: number) => {
-      if (!order || order.balance_due <= 0) {
-        showToast({
-          message: "No outstanding balance for this person.",
-          type: "error",
-        });
-        return;
-      }
-      if (amountSeed && amountSeed > 0) {
-        router.push({
-          pathname: "/(main)/entries/create",
-          params: {
-            customer: JSON.stringify(order.customer),
-            amount: String(amountSeed),
-          },
-        });
-        return;
-      }
-      setQuickPaymentAmount("");
-      paymentModalRef.current?.present();
-    },
-    [order, router, showToast],
-  );
-
   const menuItems: MenuItem[] = useMemo(() => {
     if (!order) return [];
     const items: MenuItem[] = [
@@ -373,7 +97,7 @@ export default function OrderDetailScreen() {
         key: "edit-entry",
         label: "Edit Entry",
         icon: <Pencil />,
-        onPress: () => router.push(`/(main)/entries/${order.id}/edit` as never),
+        onPress: onEdit,
       },
       {
         key: "share-invoice",
@@ -401,13 +125,13 @@ export default function OrderDetailScreen() {
       },
     ];
 
-    if (order.status !== "Paid") {
+    if (statusKey !== "paid") {
       items.push({
         key: "mark-as-paid",
         label: "Mark as Paid",
         icon: <CheckCircle />,
         color: colors.successDark,
-        onPress: () => openPaymentFlow(),
+        onPress: () => onRecordPayment(paymentModalRef),
       });
     }
 
@@ -416,7 +140,7 @@ export default function OrderDetailScreen() {
       label: "Delete Entry",
       icon: <Trash />,
       color: colors.dangerStrong,
-      onPress: handleDelete,
+      onPress: onDelete,
     });
 
     return items;
@@ -424,14 +148,15 @@ export default function OrderDetailScreen() {
     order,
     router,
     handleShareLedgerLink,
-    handleDelete,
-    openPaymentFlow,
+    onDelete,
+    onRecordPayment,
+    onEdit,
+    statusKey,
     colors.successDark,
     colors.dangerStrong,
     showToast,
   ]);
 
-  // ── Loading / Error gates ─────────────────────────────────────────
   if (isLoading) return <Loader />;
   if (isError || !order)
     return (
@@ -441,7 +166,8 @@ export default function OrderDetailScreen() {
       />
     );
 
-  const isPaid = order.status === "Paid";
+  const isPaid = statusKey === "paid";
+  const isOverdue = statusKey === "overdue";
 
   return (
     <SafeAreaView
@@ -462,35 +188,31 @@ export default function OrderDetailScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: 100 }}
       >
-
         <EntryCustomerCard
           customerName={customerName}
           customerPhone={customerPhone}
-          isDeleted={!order?.customer}
+          isDeleted={isDeleted}
           onCustomerTap={() =>
             order?.customer_id &&
             router.push(`/(main)/people/${order.customer_id}` as never)
           }
-          onCallPress={handleCallCustomer}
-          onChatPress={handleChatCustomer}
+          onCallPress={onCall}
+          onChatPress={onWhatsApp}
         />
 
         <EntryHeroCard
-          amount={order.balance_due}
-          status={
-            statusKey === "Partially Paid"
-              ? "Partial"
-              : (statusKey as "Pending" | "Partial" | "Paid" | "Overdue")
-          }
-          dueDate={dueDateValue}
+          amount={balanceDue}
+          statusKey={statusKey}
+          dueDate={order.due_date}
         />
 
         <EntryPaymentsSection
-          paymentsLoading={paymentsLoading}
-          paymentsError={paymentsError}
+          paymentsLoading={isLoading}
+          paymentsError={isError}
           paymentRows={paymentRows}
           grandTotal={order?.total_amount ?? 0}
-          paidAmount={order?.amount_paid ?? 0}
+          paidAmount={totalPaid}
+          statusKey={statusKey}
         />
 
         <EntryItemsSection
@@ -498,7 +220,7 @@ export default function OrderDetailScreen() {
           itemsSubtotal={itemsSubtotal}
           taxAmount={taxAmount}
           grandTotal={grandTotal}
-          statusKey={statusKey}
+          statusKey={statusKey === "partial" ? "Partially Paid" : statusKey === "paid" ? "Paid" : statusKey === "overdue" ? "Overdue" : "Pending"}
           fmt={fmt}
         />
       </ScrollView>
@@ -507,31 +229,29 @@ export default function OrderDetailScreen() {
         ref={paymentModalRef}
         onSuccess={handlePaymentSuccess}
         orderId={orderId ?? ""}
-        balanceDue={order.balance_due}
+        balanceDue={balanceDue}
         customerId={order.customer_id}
         customerName={customerName}
-        initialAmount={
-          quickPaymentAmount ? Number(quickPaymentAmount) : undefined
-        }
+        initialAmount={undefined}
       />
 
       <DeleteEntryModal
-        visible={deleteModalVisible}
-        onClose={() => setDeleteModalVisible(false)}
+        visible={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
         onConfirm={handleConfirmDelete}
         billNumber={order?.bill_number ?? ""}
       />
 
       <RemindCustomerModal
-        visible={remindModalVisible}
-        onClose={() => setRemindModalVisible(false)}
+        visible={showRemindModal}
+        onClose={() => setShowRemindModal(false)}
         onSendWhatsApp={sendWhatsAppReminder}
         onSendSMS={sendSMSReminder}
         customerName={customerName}
       />
 
       <PaymentSuccessAnimation
-        visible={successAnimationVisible}
+        visible={showSuccessAnim}
         amount={lastRecordedPaymentAmount}
         onAnimationEnd={handleAnimationEnd}
       />
@@ -541,8 +261,8 @@ export default function OrderDetailScreen() {
         isOverdue={isOverdue}
         sendingEntry={sendingEntry}
         onSendEntry={handleShareLedgerLink}
-        onRecordPayment={openPaymentFlow}
-        onRemind={handleRemind}
+        onRecordPayment={() => onRecordPayment(paymentModalRef)}
+        onRemind={onRemind}
       />
     </SafeAreaView>
   );
