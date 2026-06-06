@@ -1,7 +1,6 @@
 import MoneyAmount from "@/src/components/ui/MoneyAmount";
 import { formatDate } from "@/src/utils/helper";
 import { ActivityIndicator, Text, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect } from "react";
 import Animated, {
   useAnimatedStyle,
@@ -17,18 +16,7 @@ import {
   Ellipsis,
   Wallet,
 } from "lucide-react-native";
-
-const MODE_STYLE: Record<
-  string,
-  { circleBg: string; accent: string; icon: React.ElementType }
-> = {
-  Cash: { circleBg: "#DCFCE7", accent: "#16A34A", icon: Banknote },
-  UPI: { circleBg: "#EDE9FE", accent: "#7C3AED", icon: QrCode },
-  NEFT: { circleBg: "#DBEAFE", accent: "#2563EB", icon: Landmark },
-  Cheque: { circleBg: "#FEF3C7", accent: "#D97706", icon: ReceiptText },
-};
-
-const DEFAULT_MODE = { circleBg: "#F3F4F6", accent: "#6B7280", icon: Ellipsis };
+import { useTheme } from "@/src/theme/useTheme";
 
 type PaymentRow = {
   payment: {
@@ -47,6 +35,7 @@ type Props = {
   grandTotal: number;
   paidAmount: number;
   statusKey?: "pending" | "partial" | "paid" | "overdue";
+  isOverpaid?: boolean;
 };
 
 export default function EntryPaymentsSection({
@@ -56,7 +45,24 @@ export default function EntryPaymentsSection({
   grandTotal,
   paidAmount,
   statusKey,
+  isOverpaid: isOverpaidProp,
 }: Props) {
+  const t = useTheme();
+
+  const MODE_STYLE: Record<
+    string,
+    { circleBg: string; accent: string; icon: React.ElementType }
+  > = {
+    Cash: { circleBg: t.colors.paidSurface, accent: t.colors.paid, icon: Banknote },
+    UPI: { circleBg: t.colors.advanceSurface, accent: t.colors.advance, icon: QrCode },
+    NEFT: { circleBg: t.colors.partialSurface, accent: t.colors.partial, icon: Landmark },
+    Cheque: { circleBg: t.colors.pendingSurface, accent: t.colors.pending, icon: ReceiptText },
+  };
+
+  const DEFAULT_MODE = { circleBg: t.colors.borderSubtle, accent: t.colors.muted, icon: Ellipsis };
+
+  const isOverpaid = isOverpaidProp ?? (paidAmount > grandTotal);
+  const overpaidAmount = Math.max(0, paidAmount - grandTotal);
   const progress = grandTotal > 0 ? (paidAmount / grandTotal) * 100 : 0;
 
   const widthAnim = useSharedValue(0);
@@ -80,65 +86,110 @@ export default function EntryPaymentsSection({
         shadowOpacity: 0.04,
         shadowRadius: 12,
         elevation: 2,
+        backgroundColor: t.colors.surface,
+        borderRadius: t.radius.lg,
       }}
-      className="mx-4 mb-4 gap-4 rounded-xl bg-white p-5"
+      className="mx-4 mb-4 gap-4 p-5"
     >
       {/* Header */}
       <View className="flex-col">
         <View className="pb-1">
           <Text
-            style={{ letterSpacing: 0.6, lineHeight: 16 }}
-            className="text-[12px] font-bold text-[#3E4A3D] uppercase"
+            style={{ letterSpacing: t.letterSpacing.micro, color: t.colors.muted }}
+            className="text-[12px] font-bold uppercase"
           >
             PAYMENTS
           </Text>
         </View>
         <Text
-          style={{ lineHeight: 20 }}
-          className="text-[13px] font-medium text-[#3E4A3D]"
+          style={[
+            t.typeStyles.caption,
+            { color: isOverpaid ? t.colors.advance : t.colors.muted, lineHeight: 20 },
+          ]}
         >
-          Paid <MoneyAmount value={paidAmount} variant="inherit" /> of{" "}
-          <MoneyAmount value={grandTotal} variant="inherit" />
+          {isOverpaid ? (
+            <>
+              Overpaid by <MoneyAmount value={overpaidAmount} variant="inherit" />
+            </>
+          ) : (
+            <>
+              Paid <MoneyAmount value={paidAmount} variant="inherit" /> of{" "}
+              <MoneyAmount value={grandTotal} variant="inherit" />
+            </>
+          )}
         </Text>
       </View>
 
       {/* Progress Bar */}
-      <View className="h-2 w-full relative overflow-hidden rounded-full bg-[#f1f5f9] dark:bg-slate-800">
-        <Animated.View
-          style={[animatedStyle, { height: "100%" }]}
-          className="absolute left-0 top-0"
-        >
-          <LinearGradient
-            colors={["#22C55E", "#15803D"]} // Sleek forest-emerald green gradient
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{ width: "100%", height: "100%", borderRadius: 9999 }}
+      <View
+        style={{
+          height: 4,
+          backgroundColor: t.colors.borderDefault,
+          borderRadius: t.radius.full,
+          position: "relative",
+          overflow: "hidden",
+        }}
+        className="w-full"
+      >
+        {progress === 0 ? (
+          <View
+            style={{
+              width: 4,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: t.colors.primary,
+              position: "absolute",
+              left: 0,
+              top: 0,
+            }}
           />
-        </Animated.View>
+        ) : (
+          <Animated.View
+            style={[
+              animatedStyle,
+              {
+                height: "100%",
+                backgroundColor: t.colors.primary,
+                borderRadius: t.radius.full,
+                position: "absolute",
+                left: 0,
+                top: 0,
+              },
+            ]}
+          />
+        )}
       </View>
 
       {/* Content */}
       {paymentsError ? (
         <View className="items-center justify-center pb-6 pt-8">
           <Text
-            style={{ lineHeight: 20 }}
-            className="text-center text-[13px] text-[#9ca3af]"
+            style={[t.typeStyles.caption, { color: t.colors.faint, textAlign: "center" }]}
           >
             Could not load payments
           </Text>
         </View>
       ) : paymentsLoading ? (
         <View className="items-center justify-center py-10">
-          <ActivityIndicator size="small" />
+          <ActivityIndicator size="small" color={t.colors.primary} />
         </View>
       ) : paymentRows.length === 0 ? (
-        <View className="items-center gap-0 pb-6 pt-8">
-          <View className="mb-3 h-12 w-12 items-center justify-center rounded-full bg-[#e0f2fe]">
-            <Wallet size={20} color="#374151" strokeWidth={1.5} />
+        <View style={{ alignItems: "center", gap: 0, paddingTop: 24, paddingBottom: 24 }}>
+          <View
+            style={{
+              marginBottom: 12,
+              height: 48,
+              width: 48,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: t.radius.full,
+              backgroundColor: t.colors.borderSubtle,
+            }}
+          >
+            <Wallet size={20} color={t.colors.faint} strokeWidth={1.5} />
           </View>
           <Text
-            style={{ lineHeight: 20 }}
-            className="text-center text-[14px] font-medium text-[#404040]"
+            style={[t.typeStyles.caption, { color: t.colors.faint, textAlign: "center" }]}
           >
             No payments recorded yet
           </Text>
@@ -159,11 +210,12 @@ export default function EntryPaymentsSection({
             return (
               <View
                 key={payment.id}
-                className={`flex-row items-center justify-between py-4 ${
+                style={
                   idx === paymentRows.length - 1
-                    ? ""
-                    : "border-b border-[#f3f4f6]"
-                }`}
+                    ? undefined
+                    : { borderBottomWidth: 1, borderBottomColor: t.colors.borderSubtle }
+                }
+                className="flex-row items-center justify-between py-4"
               >
                 <View className="flex-row items-center gap-3">
                   <View
@@ -177,10 +229,16 @@ export default function EntryPaymentsSection({
                     />
                   </View>
                   <View className="flex-col">
-                    <Text className="text-base font-medium text-[#121C2A]">
+                    <Text
+                      style={{ color: t.colors.ink }}
+                      className="text-base font-medium"
+                    >
                       {payment.payment_mode}
                     </Text>
-                    <Text className="text-xs leading-5 font-medium text-[#6B7280]">
+                    <Text
+                      style={{ color: t.colors.muted }}
+                      className="text-xs leading-5 font-medium"
+                    >
                       {isToday
                         ? "Today"
                         : formatDate(payment.payment_date, "dd MMM")}
@@ -188,13 +246,27 @@ export default function EntryPaymentsSection({
                   </View>
                 </View>
 
-                <MoneyAmount
-                  value={payment.amount}
-                  showPlusForPositive
-                  variant="inherit"
-                  className="text-lg font-semibold tracking-wide"
-                  color={modeStyle.accent}
-                />
+                <View className="flex-row items-center gap-2">
+                  <MoneyAmount
+                    value={payment.amount}
+                    showPlusForPositive
+                    variant="inherit"
+                    style={{ fontSize: 18, fontFamily: t.fontFamily.bodyBold }}
+                    color={modeStyle.accent}
+                  />
+                  <View
+                    style={{
+                      backgroundColor: t.colors.primaryBorderFill,
+                      paddingHorizontal: t.components.badge.paddingH,
+                      paddingVertical: t.components.badge.paddingV,
+                      borderRadius: t.radius.full,
+                    }}
+                  >
+                    <Text style={[t.typeStyles.micro, { color: t.colors.primary }]}>
+                      Received
+                    </Text>
+                  </View>
+                </View>
               </View>
             );
           })}

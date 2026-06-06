@@ -107,8 +107,8 @@ export default function useEntryDetail(orderId?: string) {
 
   const phoneFormatted = useMemo(() => {
     if (!customerPhone) return null;
-    const cleaned = customerPhone.replace(/\D/g, "");
-    return cleaned ? `+91 ${cleaned}` : null;
+    const digits = customerPhone.replace(/\D/g, "").replace(/^91/, "");
+    return digits ? `+91 ${digits}` : null;
   }, [customerPhone]);
 
   // Handlers
@@ -149,7 +149,7 @@ export default function useEntryDetail(orderId?: string) {
   }, []);
 
   const onRecordPayment = useCallback(
-    (modalRef: any, amountSeed?: number) => {
+    (modalRef: any) => {
       if (!order || order.balance_due <= 0) {
         showToast({
           message: "No outstanding balance for this person.",
@@ -157,19 +157,9 @@ export default function useEntryDetail(orderId?: string) {
         });
         return;
       }
-      if (amountSeed && amountSeed > 0) {
-        router.push({
-          pathname: "/(main)/entries/create",
-          params: {
-            customer: JSON.stringify(order.customer),
-            amount: String(amountSeed),
-          },
-        });
-        return;
-      }
       modalRef?.current?.present();
     },
-    [order, router, showToast],
+    [order, showToast],
   );
 
   const handleShareLedgerLink = useCallback(async () => {

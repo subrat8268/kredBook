@@ -1,7 +1,7 @@
 import { formatINR } from "@/src/utils/format";
 import { LinearGradient } from "expo-linear-gradient";
 import { Text, View } from "react-native";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import Animated, {
   useAnimatedStyle,
@@ -11,20 +11,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { CheckCircle2, Clock3 } from "lucide-react-native";
-
-const GRADIENTS: Record<string, [string, string]> = {
-  pending: ["#f59e0b", "#ea580c"],
-  partial: ["#3b82f6", "#2563eb"],
-  paid: ["#16a34a", "#15803d"],
-  overdue: ["#ef4444", "#dc2626"],
-};
-
-const SHADOWS: Record<string, { shadowColor: string }> = {
-  pending: { shadowColor: "#ea580c" },
-  partial: { shadowColor: "#2563eb" },
-  paid: { shadowColor: "#15803d" },
-  overdue: { shadowColor: "#dc2626" },
-};
+import { useTheme } from "@/src/theme/useTheme";
 
 function getDueDateLabel(dueDate?: string | null): string | null {
   if (!dueDate) return null;
@@ -41,7 +28,7 @@ function getDueDateLabel(dueDate?: string | null): string | null {
     day: "numeric",
     year: "numeric",
   });
-  return `Due: ${formatted}`;
+  return `Due ${formatted}`;
 }
 
 type Props = {
@@ -51,6 +38,22 @@ type Props = {
 };
 
 export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
+  const t = useTheme();
+
+  const GRADIENTS: Record<string, [string, string]> = {
+    pending: [t.colors.pending, t.colors.pendingText],
+    partial: [t.colors.partial, t.colors.partialText],
+    paid: [t.colors.paid, t.colors.primaryActive],
+    overdue: [t.colors.overdue, t.colors.overdueText],
+  };
+
+  const SHADOWS: Record<string, { shadowColor: string }> = {
+    pending: { shadowColor: t.colors.pendingText },
+    partial: { shadowColor: t.colors.partialText },
+    paid: { shadowColor: t.colors.primaryActive },
+    overdue: { shadowColor: t.colors.overdueText },
+  };
+
   const gradientColors = GRADIENTS[statusKey] || GRADIENTS.pending;
   const shadow = SHADOWS[statusKey] || SHADOWS.pending;
   const dueLabel = getDueDateLabel(dueDate);
@@ -96,10 +99,10 @@ export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
     transform: [{ scale: blobScale.value }],
   }));
 
-  const displayStatus = useMemo(() => {
+  const displayStatus = useCallback(() => {
     if (statusKey === "partial") return "Partial";
     return statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
-  }, [statusKey]);
+  }, [statusKey])();
 
   return (
     <LinearGradient
@@ -135,18 +138,19 @@ export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
 
       <View className="flex-col gap-2 w-full">
         <Text
-          style={{ letterSpacing: 1.4 }}
-          className="font-semibold text-[12px] text-white/90 uppercase"
+          style={{ letterSpacing: t.letterSpacing.label, color: t.colors.onPrimary }}
+          className="font-semibold text-[12px] uppercase"
         >
           BALANCE DUE
         </Text>
 
         <Text
           style={{
-            fontFamily: "PlusJakartaSans_800ExtraBold",
+            fontFamily: t.fontFamily.displayExtraBold,
             lineHeight: 40,
+            color: t.colors.onPrimary,
           }}
-          className="text-[40px] text-white pb-4"
+          className="text-[40px] pb-4"
         >
           {formattedAmount}
         </Text>
@@ -156,21 +160,27 @@ export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
             borderTopWidth: 1,
             borderTopColor: "rgba(255,255,255,0.20)",
           }}
-          className="flex-row justify-between border-t border-white/20 items-center pt-4"
+          className="flex-row justify-between items-center pt-4"
         >
-          <View className="flex-row items-center gap-[6px] bg-white/20 rounded-full px-3 py-1">
+          <View
+            style={{ backgroundColor: "rgba(255,255,255,0.20)" }}
+            className="flex-row items-center gap-[6px] rounded-full px-3 py-1"
+          >
             <Animated.View style={pillStyle} className="flex-row items-center">
               {statusKey === "paid" ? (
-                <CheckCircle2 size={13} color="#ffffff" strokeWidth={2.5} />
+                <CheckCircle2 size={13} color={t.colors.onPrimary} strokeWidth={2.5} />
               ) : statusKey === "overdue" ? (
-                <Clock3 size={13} color="#ffffff" strokeWidth={2.5} />
+                <Clock3 size={13} color={t.colors.onPrimary} strokeWidth={2.5} />
               ) : (
-                <View className="w-2 h-2 rounded-full bg-white" />
+                <View
+                  style={{ backgroundColor: t.colors.onPrimary }}
+                  className="w-2 h-2 rounded-full"
+                />
               )}
             </Animated.View>
             <Text
-              style={{ letterSpacing: 0.6, lineHeight: 16 }}
-              className="font-semibold text-[12px] text-white"
+              style={{ letterSpacing: 0.6, lineHeight: 16, color: t.colors.onPrimary }}
+              className="font-semibold text-[12px]"
             >
               {displayStatus}
             </Text>
@@ -178,8 +188,8 @@ export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
 
           {statusKey !== "paid" && dueLabel && (
             <Text
-              style={{ lineHeight: 20 }}
-              className="font-medium text-[14px] text-white/90"
+              style={{ lineHeight: 20, color: t.colors.onPrimary, opacity: 0.9 }}
+              className="font-medium text-[14px]"
             >
               {dueLabel}
             </Text>

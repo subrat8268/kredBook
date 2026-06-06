@@ -71,6 +71,7 @@ export default function OrderDetailScreen() {
     isLoading,
     isError,
     sendingEntry,
+    isOverpaid,
   } = useEntryDetail(orderId);
 
   useEffect(() => {
@@ -213,6 +214,7 @@ export default function OrderDetailScreen() {
           grandTotal={order?.total_amount ?? 0}
           paidAmount={totalPaid}
           statusKey={statusKey}
+          isOverpaid={isOverpaid}
         />
 
         <EntryItemsSection

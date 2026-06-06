@@ -60,6 +60,11 @@ const lightColors = {
   advanceBorder:     '#ddd6fe',
   advanceText:       '#5b21b6',
 
+  partial:           '#3b82f6',
+  partialSurface:    '#eff6ff',
+  partialBorder:     '#bfdbfe',
+  partialText:       '#1d4ed8',
+
   // Border & Divider
   borderSubtle:      '#f3f4f6',
   borderDefault:     '#e5e7eb',
@@ -115,6 +120,11 @@ const darkColors = {
   advanceSurface:    '#13061f',
   advanceBorder:     '#4c1d95',
   advanceText:       '#c4b5fd',
+
+  partial:           '#60a5fa',
+  partialSurface:    '#1e3a8a',
+  partialBorder:     '#2563eb',
+  partialText:       '#93c5fd',
 
   // Border & Divider
   borderSubtle:      '#1f2023',
@@ -255,6 +265,7 @@ export const letterSpacing = {
   captionLoose:    0.1,
   micro:           0.5,
   buttonSm:        0.1,
+  label:           1.4,
 } as const;
 
 export const typeStyles = {
