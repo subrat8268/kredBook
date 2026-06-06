@@ -92,6 +92,8 @@ export default memo(function OverflowMenu({
       visible={visible}
       onRequestClose={onClose}
     >
+      {/* surfaceOverlay uses style prop — rgba() values cannot be used as CSS variables
+       * in NativeWind v4 reliably. This is the ONE allowed exception per design system rules. */}
       <Pressable
         style={[styles.overlay, { backgroundColor: t.colors.surfaceOverlay }]}
         onPress={onClose}
@@ -105,7 +107,7 @@ export default memo(function OverflowMenu({
             shadowRadius: 6,
             elevation: 5,
           }}
-          className="w-48 absolute right-4 top-[56px] bg-white dark:bg-[#18191c] border border-gray-100 dark:border-[#2a2d31] rounded-xl py-1 overflow-hidden"
+          className="w-48 absolute right-4 top-[56px] bg-surface border border-border-default rounded-xl py-1 overflow-hidden"
         >
           <FlatList
             data={menuItems}

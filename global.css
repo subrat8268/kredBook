@@ -1,3 +1,125 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary */
+    --color-primary:             #16a34a;
+    --color-primary-hover:       #15803d;
+    --color-primary-active:      #166534;
+    --color-primary-surface:     #f0fdf4;
+    --color-primary-border:      #bbf7d0;
+    --color-primary-border-fill: #dcfce7;
+
+    /* Canvas & Surfaces */
+    --color-canvas:              #fafaf7;
+    --color-surface:             #ffffff;
+    --color-surface-raised:      #f4f4f0;
+    --color-surface-muted:       #eeede8;
+
+    /* Text */
+    --color-ink:                 #111827;
+    --color-body-text:           #374151;
+    --color-muted:               #6b7280;
+    --color-faint:               #9ca3af;
+    --color-on-primary:          #ffffff;
+
+    /* Semantic — Financial */
+    --color-paid:                #16a34a;
+    --color-paid-surface:        #f0fdf4;
+    --color-paid-border:         #bbf7d0;
+    --color-paid-text:           #166534;
+
+    --color-pending:             #d97706;
+    --color-pending-surface:     #fffbeb;
+    --color-pending-border:      #fde68a;
+    --color-pending-text:        #92400e;
+
+    --color-overdue:             #dc2626;
+    --color-overdue-surface:     #fef2f2;
+    --color-overdue-border:      #fecaca;
+    --color-overdue-text:        #991b1b;
+
+    --color-advance:             #7c3aed;
+    --color-advance-surface:     #f5f3ff;
+    --color-advance-border:      #ddd6fe;
+    --color-advance-text:        #5b21b6;
+
+    --color-partial:             #3b82f6;
+    --color-partial-surface:     #eff6ff;
+    --color-partial-border:      #bfdbfe;
+    --color-partial-text:        #1d4ed8;
+
+    /* Borders */
+    --color-border-subtle:       #f3f4f6;
+    --color-border-default:      #e5e7eb;
+    --color-border-strong:       #d1d5db;
+    --color-border-focus:        #16a34a;
+
+    /* Error */
+    --color-error:               #dc2626;
+    --color-error-surface:       #fef2f2;
+    --color-error-border:        #fecaca;
+  }
+
+  .dark {
+    /* Primary */
+    --color-primary:             #4ade80;
+    --color-primary-hover:       #22c55e;
+    --color-primary-active:      #16a34a;
+    --color-primary-surface:     #052e16;
+    --color-primary-border:      #14532d;
+    --color-primary-border-fill: #166534;
+
+    /* Canvas & Surfaces */
+    --color-canvas:              #0f1012;
+    --color-surface:             #18191c;
+    --color-surface-raised:      #222427;
+    --color-surface-muted:       #2a2d31;
+
+    /* Text */
+    --color-ink:                 #f3f4f6;
+    --color-body-text:           #d1d5db;
+    --color-muted:               #9ca3af;
+    --color-faint:               #6b7280;
+    --color-on-primary:          #052e16;
+
+    /* Semantic — Financial */
+    --color-paid:                #4ade80;
+    --color-paid-surface:        #052e16;
+    --color-paid-border:         #14532d;
+    --color-paid-text:           #86efac;
+
+    --color-pending:             #fbbf24;
+    --color-pending-surface:     #1c1400;
+    --color-pending-border:      #78350f;
+    --color-pending-text:        #fde68a;
+
+    --color-overdue:             #f87171;
+    --color-overdue-surface:     #1f0707;
+    --color-overdue-border:      #7f1d1d;
+    --color-overdue-text:        #fca5a5;
+
+    --color-advance:             #a78bfa;
+    --color-advance-surface:     #13061f;
+    --color-advance-border:      #4c1d95;
+    --color-advance-text:        #c4b5fd;
+
+    --color-partial:             #60a5fa;
+    --color-partial-surface:     #0c1a2e;
+    --color-partial-border:      #1e3a5f;
+    --color-partial-text:        #93c5fd;
+
+    /* Borders */
+    --color-border-subtle:       #1f2023;
+    --color-border-default:      #2a2d31;
+    --color-border-strong:       #374151;
+    --color-border-focus:        #4ade80;
+
+    /* Error */
+    --color-error:               #f87171;
+    --color-error-surface:       #1f0707;
+    --color-error-border:        #7f1d1d;
+  }
+}

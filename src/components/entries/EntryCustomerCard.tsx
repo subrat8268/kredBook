@@ -37,20 +37,17 @@ export default function EntryCustomerCard({
         },
         pressed && !isDeleted && { backgroundColor: t.colors.borderSubtle },
       ]}
-      className="self-stretch flex-row justify-between items-center p-4 mx-4 mb-4 border border-[#e5e7eb] rounded-xl"
+      className="self-stretch flex-row justify-between items-center p-4 mx-4 mb-4 border border-border-default rounded-xl"
     >
       <View className="flex-row justify-start items-center gap-3">
         <View
-          className="w-10 h-10 rounded-full flex justify-center items-center"
-          style={{
-            backgroundColor: t.colors.primaryActive + "33",
-          }}
+          className="w-11 h-11 rounded-full flex justify-center items-center bg-primary-fill"
         >
           <Text
             className="text-center justify-center text-base font-bold"
             style={{
-              fontFamily: t.fontFamily.display, // Plus Jakarta Sans Bold
-              color: t.colors.primaryActive, // green-800
+              fontFamily: t.fontFamily.display, // Plus Jakarta Sans Bold — fontFamily not supported as CSS var in RN
+              color: t.colors.primaryActive,
               lineHeight: 24,
             }}
           >
@@ -101,7 +98,7 @@ export default function EntryCustomerCard({
             onPress={onCallPress}
             hitSlop={8}
             accessibilityRole="button"
-            className="w-10 h-10 rounded-full flex justify-center items-center bg-[#dcfce7] dark:bg-[#166534]"
+            className="w-10 h-10 rounded-full flex justify-center items-center bg-primary-fill"
             style={({ pressed }) => ({
               opacity: pressed ? 0.7 : 1,
             })}
@@ -112,7 +109,7 @@ export default function EntryCustomerCard({
             onPress={onChatPress}
             hitSlop={8}
             accessibilityRole="button"
-            className="w-10 h-10 rounded-full flex justify-center items-center bg-[#dcfce7] dark:bg-[#166534]"
+            className="w-10 h-10 rounded-full flex justify-center items-center bg-primary-fill"
             style={({ pressed }) => ({
               opacity: pressed ? 0.7 : 1,
             })}

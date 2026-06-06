@@ -108,6 +108,80 @@ module.exports = {
         // ── Specialized single-use surfaces ────
         "net-position": theme.gradients.netPosition,
         "net-position-dark": theme.darkGradients.netPosition,
+
+        // ─────────────────────────────────────────────────────────────────
+        // CSS VARIABLE TOKENS — automatic dark mode via .dark class switch
+        // ⚠️ DO NOT add raw hex colors to components. Use these tokens only.
+        // For new tokens, add to: theme.ts → global.css → tailwind.config.js (in that order)
+        // ─────────────────────────────────────────────────────────────────
+        //
+        // Usage (no dark: prefix needed — .dark class switches all vars):
+        //   Background:   bg-surface        bg-canvas         bg-primary-surface
+        //   Text:         text-ink          text-muted         text-faint
+        //   Border:       border-border-default  border-border-subtle
+        //   Status bg:    bg-paid-surface   bg-pending-surface bg-overdue-surface
+        //   Status text:  text-paid-text    text-pending-text  text-overdue-text
+        //   Primary:      bg-primary        text-primary       border-primary-border
+        //
+        // Only use style prop for:
+        //   - shadowColor / elevation (Android)
+        //   - Animated/dynamic values (progress bar width etc.)
+        //   - surfaceOverlay rgba (OverflowMenu ONLY — rgba not supported in CSS vars)
+        //   - fontFamily (not supported as CSS var in RN)
+        // ─────────────────────────────────────────────────────────────────
+
+        // Primary
+        "primary-hover":    "var(--color-primary-hover)",
+        "primary-active":   "var(--color-primary-active)",
+        "primary-surface":  "var(--color-primary-surface)",
+        "primary-border":   "var(--color-primary-border)",
+        "primary-fill":     "var(--color-primary-border-fill)",
+
+        // Surfaces
+        canvas:             "var(--color-canvas)",
+        "surface-raised":   "var(--color-surface-raised)",
+        "surface-muted":    "var(--color-surface-muted)",
+
+        // Text
+        ink:                "var(--color-ink)",
+        "body-text":        "var(--color-body-text)",
+        muted:              "var(--color-muted)",
+        faint:              "var(--color-faint)",
+        "on-primary":       "var(--color-on-primary)",
+
+        // Financial semantic
+        "paid-surface":     "var(--color-paid-surface)",
+        "paid-border":      "var(--color-paid-border)",
+        "paid-token-text":  "var(--color-paid-text)",
+
+        "pending-surface":  "var(--color-pending-surface)",
+        "pending-border":   "var(--color-pending-border)",
+        "pending-token-text": "var(--color-pending-text)",
+
+        "overdue-surface":  "var(--color-overdue-surface)",
+        "overdue-border":   "var(--color-overdue-border)",
+        "overdue-token-text": "var(--color-overdue-text)",
+
+        advance:            "var(--color-advance)",
+        "advance-surface":  "var(--color-advance-surface)",
+        "advance-border":   "var(--color-advance-border)",
+        "advance-text":     "var(--color-advance-text)",
+
+        partial:            "var(--color-partial)",
+        "partial-surface":  "var(--color-partial-surface)",
+        "partial-border":   "var(--color-partial-border)",
+        "partial-text":     "var(--color-partial-text)",
+
+        // Borders (CSS var tokens — separate from legacy 'border'/'border-soft')
+        "border-subtle":    "var(--color-border-subtle)",
+        "border-default":   "var(--color-border-default)",
+        "border-strong":    "var(--color-border-strong)",
+        "border-focus":     "var(--color-border-focus)",
+
+        // Error
+        error:              "var(--color-error)",
+        "error-surface":    "var(--color-error-surface)",
+        "error-border":     "var(--color-error-border)",
       },
       borderColor: {
         light: theme.colors.border,
