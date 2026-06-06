@@ -47,7 +47,6 @@ export default function OrderDetailScreen() {
     grandTotal,
     isDeleted,
     customerName,
-    customerPhone,
     onCall,
     onWhatsApp,
     onEdit,
@@ -72,6 +71,7 @@ export default function OrderDetailScreen() {
     isError,
     sendingEntry,
     isOverpaid,
+    phoneFormatted,
   } = useEntryDetail(orderId);
 
   useEffect(() => {
@@ -191,7 +191,7 @@ export default function OrderDetailScreen() {
       >
         <EntryCustomerCard
           customerName={customerName}
-          customerPhone={customerPhone}
+          customerPhone={phoneFormatted}
           isDeleted={isDeleted}
           onCustomerTap={() =>
             order?.customer_id &&

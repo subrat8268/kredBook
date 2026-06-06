@@ -1,18 +1,11 @@
 import { getInitials } from "@/src/components/ui/Avatar";
 import { MessageCircle, Phone } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
-
-function formatPhone(phone: string): string {
-  const cleaned = phone.replace(/^(\+91|91)/, "").trim();
-  if (cleaned.length === 10) {
-    return `+91 ${cleaned.slice(0, 5)} ${cleaned.slice(5)}`;
-  }
-  return `+91 ${cleaned}`;
-}
+import { useTheme } from "@/src/theme/useTheme";
 
 type Props = {
   customerName: string;
-  customerPhone: string;
+  customerPhone: string | null;
   onCustomerTap?: () => void;
   onCallPress?: () => void;
   onChatPress?: () => void;
@@ -27,6 +20,7 @@ export default function EntryCustomerCard({
   onChatPress,
   isDeleted = false,
 }: Props) {
+  const t = useTheme();
   const displayName = isDeleted ? "[Deleted Customer]" : customerName;
   const initials = getInitials(displayName);
 
@@ -36,57 +30,94 @@ export default function EntryCustomerCard({
       style={({ pressed }) => [
         {
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: 1 },
+          shadowOffset: { width: 0, height: 10 },
           shadowOpacity: 0.06,
           shadowRadius: 3,
           elevation: 2,
         },
-        pressed && !isDeleted && { backgroundColor: "#f9fafb" },
+        pressed && !isDeleted && { backgroundColor: t.colors.borderSubtle },
       ]}
-      className="flex-row items-center justify-between bg-white rounded-lg mx-4 p-4 mb-4 border border-[#e5e7eb]"
+      className="self-stretch flex-row justify-between items-center p-4 mx-4 mb-4 border border-[#e5e7eb] rounded-xl"
     >
-      <View className="flex-row items-center gap-3">
-        <View className="h-10 w-10 rounded-full bg-[#00873a33] items-center justify-center">
+      <View className="flex-row justify-start items-center gap-3">
+        <View
+          className="w-10 h-10 rounded-full flex justify-center items-center"
+          style={{
+            backgroundColor: t.colors.primaryActive + "33",
+          }}
+        >
           <Text
-            style={{ fontFamily: "PlusJakartaSans_700Bold" }}
-            className="font-bold text-[#006b2c] text-base text-center leading-[22.4px]"
+            className="text-center justify-center text-base font-bold"
+            style={{
+              fontFamily: t.fontFamily.display, // Plus Jakarta Sans Bold
+              color: t.colors.primaryActive, // green-800
+              lineHeight: 24,
+            }}
           >
             {initials}
           </Text>
         </View>
 
-        <View className="flex-col items-start">
-          <Text
-            className={`font-semibold text-[#121c2a] text-base leading-[22.4px] ${isDeleted ? "text-[#9ca3af]" : ""}`}
-            numberOfLines={1}
-          >
-            {displayName}
-          </Text>
-          <Text className="text-[#3e4a3d] text-xs leading-[16.8px] tracking-wide">
-            {formatPhone(customerPhone)}
-          </Text>
+        <View className="flex-col justify-start items-start">
+          <View className="self-stretch flex-col justify-start items-start">
+            <Text
+              style={
+                isDeleted
+                  ? [t.typeStyles.caption, { color: t.colors.faint }]
+                  : {
+                      fontFamily: t.fontFamily.bodySemiBold,
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: t.colors.ink,
+                      lineHeight: 24,
+                    }
+              }
+              numberOfLines={1}
+              className="justify-center text-base font-semibold"
+            >
+              {displayName}
+            </Text>
+          </View>
+          {customerPhone ? (
+            <View className="self-stretch pb-[0.80px] flex-col justify-start items-start">
+              <Text
+                className="justify-center text-xs font-normal tracking-wide"
+                style={{
+                  fontFamily: t.fontFamily.body,
+                  color: t.colors.muted,
+                  lineHeight: 16,
+                }}
+              >
+                {customerPhone}
+              </Text>
+            </View>
+          ) : null}
         </View>
       </View>
 
       {!isDeleted && (
-        <View className="flex-row items-center gap-2">
+        <View className="pr-2 flex-row items-center gap-2">
           <Pressable
             onPress={onCallPress}
             hitSlop={8}
             accessibilityRole="button"
-            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-            className="h-10 w-10 rounded-full bg-[#dcfce7] items-center justify-center"
+            className="w-10 h-10 rounded-full flex justify-center items-center bg-[#dcfce7] dark:bg-[#166534]"
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.7 : 1,
+            })}
           >
-            <Phone size={16} color="#16a34a" />
+            <Phone size={16} color={t.colors.primaryActive} />
           </Pressable>
           <Pressable
             onPress={onChatPress}
             hitSlop={8}
             accessibilityRole="button"
-            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-            className="h-10 w-10 rounded-full bg-[#dcfce7] items-center justify-center"
+            className="w-10 h-10 rounded-full flex justify-center items-center bg-[#dcfce7] dark:bg-[#166534]"
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.7 : 1,
+            })}
           >
-            <MessageCircle size={16} color="#16a34a" />
+            <MessageCircle size={16} color={t.colors.primaryActive} />
           </Pressable>
         </View>
       )}

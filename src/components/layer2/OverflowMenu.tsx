@@ -1,4 +1,4 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
+import { useTheme } from "@/src/theme/useTheme";
 import React, { memo } from "react";
 import {
   Modal,
@@ -25,46 +25,63 @@ type OverflowMenuProps = {
   menuItems: MenuItem[];
 };
 
-const OVERLAY_COLOR = "rgba(0,0,0,0.60)";
-
 export default memo(function OverflowMenu({
   visible,
   onClose,
   menuItems,
 }: OverflowMenuProps) {
-  const { spacing, typography } = useTheme();
+  const t = useTheme();
 
   const renderItem = ({ item }: { item: MenuItem }) => {
-    const itemColor = item.color || "#374151"; // colors.textPrimary
-    const iconColor = item.color || "#374151"; // colors.textSecondary
+    let itemColor: string = t.colors.body;
+    if (item.key === "mark-as-paid") {
+      itemColor = t.colors.paid;
+    } else if (item.key === "delete-entry") {
+      itemColor = t.colors.error;
+    } else if (item.color) {
+      itemColor = item.color;
+    }
+
+    const showPreDivider =
+      item.key === "mark-as-paid" || item.key === "delete-entry";
 
     return (
-      <Pressable
-        className="flex-row items-center gap-2 p-4"
-        accessibilityRole="menuitem"
-        onPress={() => {
-          item.onPress();
-          onClose();
-        }}
-      >
-        {React.cloneElement(item.icon as React.ReactElement<any>, {
-          size: 16,
-          color: iconColor,
-          strokeWidth: 2,
-        })}
-        <Text
-          style={[
-            typography.body,
-            {
-              color: itemColor,
-              fontWeight: "500",
-              fontSize: 15,
-            },
-          ]}
+      <View className="w-full">
+        {showPreDivider && (
+          <View
+            style={{ backgroundColor: t.colors.borderSubtle }}
+            className="self-stretch h-px"
+          />
+        )}
+        <Pressable
+          style={({ pressed }) =>
+            pressed && { backgroundColor: t.colors.borderSubtle }
+          }
+          className="self-stretch flex-row items-center gap-2 h-12 px-4"
+          accessibilityRole="menuitem"
+          onPress={() => {
+            item.onPress();
+            onClose();
+          }}
         >
-          {item.label}
-        </Text>
-      </Pressable>
+          <View className="w-5 items-center justify-center">
+            {React.cloneElement(item.icon as React.ReactElement<any>, {
+              size: 16,
+              color: itemColor,
+              strokeWidth: 2,
+            })}
+          </View>
+          <Text
+            style={{
+              fontFamily: t.fontFamily.bodyMedium,
+              color: itemColor,
+            }}
+            className="justify-center text-base font-medium leading-5"
+          >
+            {item.label}
+          </Text>
+        </Pressable>
+      </View>
     );
   };
 
@@ -75,38 +92,26 @@ export default memo(function OverflowMenu({
       visible={visible}
       onRequestClose={onClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
+      <Pressable
+        style={[styles.overlay, { backgroundColor: t.colors.surfaceOverlay }]}
+        onPress={onClose}
+      >
         <Pressable
           onPress={(e) => e.stopPropagation()}
-          style={[
-            styles.menuCard,
-            {
-              backgroundColor: "#ffffff", // colors.surface
-              borderRadius: 12,
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.08,
-              shadowRadius: 16,
-              elevation: 5,
-              right: spacing.md,
-              top: 56,
-            },
-          ]}
+          style={{
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            elevation: 5,
+          }}
+          className="w-48 absolute right-4 top-[56px] bg-white dark:bg-[#18191c] border border-gray-100 dark:border-[#2a2d31] rounded-xl py-1 overflow-hidden"
         >
           <FlatList
             data={menuItems}
             renderItem={renderItem}
             keyExtractor={(item) => item.key}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingVertical: 4 }}
-            ItemSeparatorComponent={() => (
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: "#f3f4f6",
-                }}
-              />
-            )}
           />
         </Pressable>
       </Pressable>
@@ -117,16 +122,5 @@ export default memo(function OverflowMenu({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: OVERLAY_COLOR,
-  },
-  menuCard: {
-    position: "absolute",
-    width: 200,
-    overflow: "hidden",
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    minHeight: 44,
   },
 });
