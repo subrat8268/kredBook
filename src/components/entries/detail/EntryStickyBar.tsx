@@ -1,6 +1,7 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { Bell, Send, Wallet } from "lucide-react-native";
+import { useTheme } from "@/src/theme/useTheme";
 
 type Props = {
   isPaid: boolean;
@@ -16,25 +17,50 @@ function PrimaryButton({
   icon,
   loading,
   onPress,
+  isFlex = true,
 }: {
   title: string;
   icon: React.ReactNode;
   loading?: boolean;
   onPress: () => void;
+  isFlex?: boolean;
 }) {
+  const t = useTheme();
   return (
     <Pressable
       onPress={onPress}
       disabled={loading}
-      className="flex-1 flex-row items-center justify-center rounded-full bg-[#16a34a]"
-      style={{ height: 52 }}
+      style={{
+        flex: isFlex ? 1 : undefined,
+        height: 48,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 9999,
+        backgroundColor: t.colors.primary,
+        // Match reference shadow [0px_4px_12px_0px_rgba(22,163,74,0.30)]
+        shadowColor: t.colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.30,
+        shadowRadius: 12,
+        elevation: 4,
+      }}
     >
       {loading ? (
-        <ActivityIndicator color="#ffffff" size="small" />
+        <ActivityIndicator color={t.colors.onPrimary} size="small" />
       ) : (
         <>
-          <View className="mr-2">{icon}</View>
-          <Text className="text-[15px] font-semibold text-white">{title}</Text>
+          <View style={{ marginRight: 8 }}>{icon}</View>
+          <Text
+            style={{
+              fontSize: 15,
+              fontWeight: "600",
+              color: t.colors.onPrimary,
+              fontFamily: t.fontFamily.bodySemiBold,
+            }}
+          >
+            {title}
+          </Text>
         </>
       )}
     </Pressable>
@@ -52,20 +78,36 @@ function SecondaryButton({
   overdue?: boolean;
   onPress: () => void;
 }) {
+  const t = useTheme();
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center justify-center rounded-full"
       style={{
-        height: 52,
+        width: 128,
+        height: 48,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 9999,
         borderWidth: 1,
-        borderColor: overdue ? "#dc2626" : "#e5e7eb",
+        borderColor: overdue ? t.colors.overdueBorder : t.colors.borderDefault,
+        backgroundColor: t.colors.surface,
+        // Match reference shadow [0px_1px_2px_0px_rgba(0,0,0,0.05)]
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
       }}
     >
-      <View className="mr-2">{icon}</View>
+      <View style={{ marginRight: 8 }}>{icon}</View>
       <Text
-        className="text-[15px] font-semibold"
-        style={{ color: overdue ? "#dc2626" : "#374151" }}
+        style={{
+          fontSize: 15,
+          fontWeight: "600",
+          color: overdue ? t.colors.overdue : t.colors.body,
+          fontFamily: t.fontFamily.bodySemiBold,
+        }}
       >
         {title}
       </Text>
@@ -82,6 +124,16 @@ export default function EntryStickyBar({
   onRemind,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const t = useTheme();
+
+  // Sticky bar container shadow
+  const shadowProps = {
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 8,
+  };
 
   return (
     <View
@@ -90,50 +142,47 @@ export default function EntryStickyBar({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: "#ffffff",
+        backgroundColor: t.colors.surface,
         borderTopWidth: 1,
-        borderTopColor: "#f3f4f6",
+        borderTopColor: t.colors.borderSubtle,
         paddingHorizontal: 16,
         paddingTop: 12,
         paddingBottom: Math.max(Math.min(insets.bottom, 12), 4),
-        elevation: 12,
-        shadowColor: "#000000",
-        shadowOffset: { width: 0, height: -3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
+        flexDirection: "row",
+        gap: 12,
+        alignItems: "center",
+        ...shadowProps,
       }}
     >
       {isPaid ? (
         <PrimaryButton
           title={sendingEntry ? "Generating…" : "Share Receipt"}
-          icon={<Send size={18} color="#ffffff" strokeWidth={2} />}
+          icon={<Send size={18} color={t.colors.onPrimary} strokeWidth={2} />}
           loading={sendingEntry}
           onPress={onSendEntry}
+          isFlex={true}
         />
       ) : (
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          <View style={{ flex: 6 }}>
-            <PrimaryButton
-              title="Record Payment"
-              icon={<Wallet size={18} color="#ffffff" strokeWidth={2} />}
-              onPress={onRecordPayment}
-            />
-          </View>
-          <View style={{ flex: 4 }}>
-            <SecondaryButton
-              title="Remind"
-              overdue={isOverdue}
-              icon={
-                <Bell
-                  size={18}
-                  color={isOverdue ? "#dc2626" : "#374151"}
-                  strokeWidth={2}
-                />
-              }
-              onPress={onRemind}
-            />
-          </View>
-        </View>
+        <>
+          <SecondaryButton
+            title="Remind"
+            overdue={isOverdue}
+            icon={
+              <Bell
+                size={18}
+                color={isOverdue ? t.colors.overdue : t.colors.body}
+                strokeWidth={2}
+              />
+            }
+            onPress={onRemind}
+          />
+          <PrimaryButton
+            title="Record Payment"
+            icon={<Wallet size={18} color={t.colors.onPrimary} strokeWidth={2} />}
+            onPress={onRecordPayment}
+            isFlex={true}
+          />
+        </>
       )}
     </View>
   );

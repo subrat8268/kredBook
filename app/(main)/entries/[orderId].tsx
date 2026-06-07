@@ -14,7 +14,7 @@ import {
 } from "@/src/components/entries";
 import PaymentSuccessAnimation from "@/src/components/feedback/PaymentSuccessAnimation";
 import { useEntryDetail } from "@/src/hooks/entries";
-import { useTheme } from "@/src/utils/ThemeProvider";
+import { useTheme } from "@/src/theme/useTheme";
 import { formatDate } from "@/src/utils/helper";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -32,7 +32,8 @@ import { formatINR } from "@/src/utils/format";
 import { MenuItem } from "@/src/components/layer2/OverflowMenu";
 
 export default function OrderDetailScreen() {
-  const { colors, spacing } = useTheme();
+  const t = useTheme();
+  const { colors, spacing } = t;
   const { orderId, justPaid } = useLocalSearchParams<{ orderId: string; justPaid?: string }>();
   const router = useRouter();
   const paymentModalRef = useRef<any>(null);
@@ -133,7 +134,7 @@ export default function OrderDetailScreen() {
         key: "mark-as-paid",
         label: "Mark as Paid",
         icon: <CheckCircle />,
-        color: colors.successDark,
+        color: colors.paid,
         onPress: () => onRecordPayment(paymentModalRef),
       });
     }
@@ -142,7 +143,7 @@ export default function OrderDetailScreen() {
       key: "delete-entry",
       label: "Delete Entry",
       icon: <Trash />,
-      color: colors.dangerStrong,
+      color: colors.overdue,
       onPress: onDelete,
     });
 
@@ -155,8 +156,8 @@ export default function OrderDetailScreen() {
     onRecordPayment,
     onEdit,
     statusKey,
-    colors.successDark,
-    colors.dangerStrong,
+    colors.paid,
+    colors.overdue,
     showToast,
   ]);
 
@@ -175,7 +176,7 @@ export default function OrderDetailScreen() {
   return (
     <SafeAreaView
       edges={["top", "bottom"]}
-      className="flex-1 bg-background dark:bg-background-dark"
+      style={{ flex: 1, backgroundColor: t.colors.canvas }}
     >
       <Stack.Screen options={{ headerShown: false }} />
 
@@ -189,7 +190,7 @@ export default function OrderDetailScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingTop: spacing[3], paddingBottom: 100 }}
       >
         <EntryCustomerCard
           customerName={customerName}
