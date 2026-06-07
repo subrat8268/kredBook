@@ -150,6 +150,10 @@ module.exports = {
         "on-primary":       "var(--color-on-primary)",
 
         // Financial semantic
+        paid:               "var(--color-paid)",
+        pending:            "var(--color-pending)",
+        overdue:            "var(--color-overdue)",
+
         "paid-surface":     "var(--color-paid-surface)",
         "paid-border":      "var(--color-paid-border)",
         "paid-token-text":  "var(--color-paid-text)",
