@@ -27,23 +27,20 @@ export default function EntryCustomerCard({
   return (
     <View
       style={{
-        backgroundColor: t.colors.surface,
-        borderRadius: t.radius.lg,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.08,
         shadowRadius: 8,
         elevation: 3,
       }}
-      className="mx-4 mb-4"
+      className="mx-4 mb-4 rounded-xl bg-surface"
     >
       <Pressable
         onPress={isDeleted ? undefined : onCustomerTap}
         style={({ pressed }) => [
-          { borderRadius: t.radius.lg },
           pressed && !isDeleted && { backgroundColor: t.colors.borderSubtle },
         ]}
-        className="self-stretch flex-row justify-between items-center p-4 border border-border-default rounded-xl"
+        className="self-stretch flex-row justify-between items-center p-4"
       >
         <View className="flex-row justify-start items-center gap-3">
           <View className="w-11 h-11 rounded-full flex justify-center items-center bg-primary-fill">

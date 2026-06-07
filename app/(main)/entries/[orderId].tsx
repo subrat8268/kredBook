@@ -250,6 +250,8 @@ export default function OrderDetailScreen() {
         onSendWhatsApp={sendWhatsAppReminder}
         onSendSMS={sendSMSReminder}
         customerName={customerName}
+        amount={balanceDue}
+        billNumber={order?.bill_number ?? ""}
       />
 
       <PaymentSuccessAnimation

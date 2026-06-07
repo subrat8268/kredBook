@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, View } from "react-native";
 import { formatINR } from "@/src/utils/format";
+import { useTheme } from "@/src/theme/useTheme";
 
 interface EntrySummaryCardProps {
   previousBalance: number;
@@ -13,37 +14,56 @@ export default function EntrySummaryCard({
   newTotal,
   className = "",
 }: EntrySummaryCardProps) {
+  const t = useTheme();
   const totalOutstanding = previousBalance + newTotal;
 
   return (
     <View
-      className={`bg-slate-300/30 rounded-xl border border-stone-300/20 p-4 gap-2 ${className}`}
+      className={`bg-surface rounded-2xl border border-border-default p-4 gap-2 ${className}`}
     >
       <View className="flex-row justify-between items-center">
-        <Text className="text-neutral-700 text-sm font-normal font-inter">
+        <Text
+          style={{ fontFamily: t.fontFamily.body }}
+          className="text-muted text-sm font-normal"
+        >
           Previous Balance
         </Text>
-        <Text className="text-neutral-700 text-sm font-normal font-inter">
+        <Text
+          style={{ fontFamily: t.fontFamily.body }}
+          className="text-ink text-sm font-normal"
+        >
           {formatINR(previousBalance)}
         </Text>
       </View>
 
       <View className="flex-row justify-between items-center">
-        <Text className="text-gray-900 text-sm font-medium font-inter-medium">
+        <Text
+          style={{ fontFamily: t.fontFamily.bodyMedium }}
+          className="text-muted text-sm font-medium"
+        >
           New Total
         </Text>
-        <Text className="text-gray-900 text-sm font-semibold font-inter-semibold">
+        <Text
+          style={{ fontFamily: t.fontFamily.bodySemiBold }}
+          className="text-ink text-sm font-semibold"
+        >
           {formatINR(newTotal)}
         </Text>
       </View>
 
-      <View className="h-px bg-stone-300/50 my-1" />
+      <View className="h-px bg-border-subtle my-1" />
 
       <View className="flex-row justify-between items-center pt-1">
-        <Text className="text-gray-900 text-base font-bold font-inter-bold">
+        <Text
+          style={{ fontFamily: t.fontFamily.bodyBold }}
+          className="text-muted text-base font-bold"
+        >
           Total Outstanding
         </Text>
-        <Text className="text-red-700 text-base font-bold font-inter-bold">
+        <Text
+          style={{ fontFamily: t.fontFamily.bodyBold }}
+          className="text-overdue text-base font-bold"
+        >
           {formatINR(totalOutstanding)}
         </Text>
       </View>

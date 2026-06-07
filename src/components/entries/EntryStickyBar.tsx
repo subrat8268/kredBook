@@ -1,6 +1,7 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { Bell, Send, Wallet } from "lucide-react-native";
+import { useTheme } from "@/src/theme/useTheme";
 
 type Props = {
   isPaid: boolean;
@@ -15,26 +16,37 @@ function PrimaryButton({
   title,
   icon,
   loading,
+  disabled,
   onPress,
 }: {
   title: string;
   icon: React.ReactNode;
   loading?: boolean;
+  disabled?: boolean;
   onPress: () => void;
 }) {
+  const t = useTheme();
   return (
     <Pressable
       onPress={onPress}
-      disabled={loading}
-      className="flex-1 flex-row items-center justify-center rounded-full bg-[#16a34a]"
-      style={{ height: 52 }}
+      disabled={disabled || loading}
+      className={`flex-1 flex-row items-center justify-center rounded-xl h-12 active:opacity-90 ${
+        disabled ? "bg-paid-surface opacity-60" : "bg-primary"
+      }`}
     >
       {loading ? (
-        <ActivityIndicator color="#ffffff" size="small" />
+        <ActivityIndicator color={disabled ? t.colors.paidText : t.colors.onPrimary} size="small" />
       ) : (
         <>
           <View className="mr-2">{icon}</View>
-          <Text className="text-[15px] font-semibold text-white">{title}</Text>
+          <Text
+            style={{ fontFamily: t.fontFamily.bodySemiBold }}
+            className={`text-[15px] font-semibold ${
+              disabled ? "text-paid-text" : "text-on-primary"
+            }`}
+          >
+            {title}
+          </Text>
         </>
       )}
     </Pressable>
@@ -52,20 +64,21 @@ function SecondaryButton({
   overdue?: boolean;
   onPress: () => void;
 }) {
+  const t = useTheme();
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center justify-center rounded-full"
-      style={{
-        height: 52,
-        borderWidth: 1,
-        borderColor: overdue ? "#dc2626" : "#e5e7eb",
-      }}
+      className={`flex-row items-center justify-center rounded-xl h-12 bg-surface border active:opacity-90 ${
+        overdue ? "border-overdue" : "border-border-default"
+      }`}
     >
       <View className="mr-2">{icon}</View>
       <Text
+        style={{
+          fontFamily: t.fontFamily.bodyMedium,
+          color: overdue ? t.colors.overdueText : t.colors.ink,
+        }}
         className="text-[15px] font-semibold"
-        style={{ color: overdue ? "#dc2626" : "#374151" }}
       >
         {title}
       </Text>
@@ -81,6 +94,7 @@ export default function EntryStickyBar({
   onRecordPayment,
   onRemind,
 }: Props) {
+  const t = useTheme();
   const insets = useSafeAreaInsets();
 
   return (
@@ -90,23 +104,22 @@ export default function EntryStickyBar({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: "#ffffff",
         borderTopWidth: 1,
-        borderTopColor: "#f3f4f6",
         paddingHorizontal: 16,
         paddingTop: 12,
-        paddingBottom: Math.max(Math.min(insets.bottom, 12), 4),
+        paddingBottom: Math.max(insets.bottom, 4),
         elevation: 12,
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: -3 },
         shadowOpacity: 0.1,
         shadowRadius: 12,
       }}
+      className="bg-surface border-t border-border-subtle"
     >
       {isPaid ? (
         <PrimaryButton
           title={sendingEntry ? "Generating…" : "Share Receipt"}
-          icon={<Send size={18} color="#ffffff" strokeWidth={2} />}
+          icon={<Send size={18} color={t.colors.onPrimary} strokeWidth={2} />}
           loading={sendingEntry}
           onPress={onSendEntry}
         />
@@ -115,7 +128,7 @@ export default function EntryStickyBar({
           <View style={{ flex: 6 }}>
             <PrimaryButton
               title="Record Payment"
-              icon={<Wallet size={18} color="#ffffff" strokeWidth={2} />}
+              icon={<Wallet size={18} color={t.colors.onPrimary} strokeWidth={2} />}
               onPress={onRecordPayment}
             />
           </View>
@@ -126,7 +139,7 @@ export default function EntryStickyBar({
               icon={
                 <Bell
                   size={18}
-                  color={isOverdue ? "#dc2626" : "#374151"}
+                  color={isOverdue ? t.colors.overdueText : t.colors.ink}
                   strokeWidth={2}
                 />
               }

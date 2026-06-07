@@ -1,7 +1,8 @@
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import { Share2 } from "lucide-react-native";
+import { Text, Pressable, View } from "react-native";
+import { Share2, Check } from "lucide-react-native";
 import BaseBottomSheet from "@/src/components/layer2/BaseBottomSheet";
+import { useTheme } from "@/src/theme/useTheme";
 
 interface SaveEntryBottomSheetProps {
   visible: boolean;
@@ -18,6 +19,8 @@ export default function SaveEntryBottomSheet({
   onSaveOnly,
   onSaveAndShare,
 }: SaveEntryBottomSheetProps) {
+  const t = useTheme();
+
   return (
     <BaseBottomSheet
       visible={visible}
@@ -25,58 +28,71 @@ export default function SaveEntryBottomSheet({
       withScroll={false}
       enableDynamicSizing={true}
     >
-      <View className="items-center px-4 pt-4 pb-6 w-full">
+      <View className="items-center px-4 pt-4 pb-6 w-full bg-surface">
         {/* Title & Subtitle */}
         <View className="w-full items-center mb-8 gap-2">
-          <Text className="text-gray-900 text-lg font-inter-bold leading-7 text-center">
-            Save Entry {billNumber}?
+          <Text
+            style={{ fontFamily: t.fontFamily.display }}
+            className="text-ink text-lg font-bold leading-7 text-center"
+          >
+            Save changes?
           </Text>
-          <Text className="text-neutral-700 text-base font-inter leading-6 text-center">
-            Financial ledger will be updated immediately.
+          <Text
+            style={{ fontFamily: t.fontFamily.body }}
+            className="text-muted text-sm leading-5 text-center"
+          >
+            {"This will update the person's ledger and payment history."}
           </Text>
         </View>
 
         {/* Buttons */}
         <View className="w-full gap-4">
           {/* Save & Share PDF Button */}
-          <TouchableOpacity
+          <Pressable
             onPress={() => {
               onClose();
               onSaveAndShare();
             }}
-            className="w-full py-3.5 bg-green-800 rounded-full flex-row justify-center items-center gap-2"
-            activeOpacity={0.75}
+            className="w-full h-12 bg-primary rounded-xl flex-row justify-center items-center gap-2 active:opacity-90"
           >
-            <Share2 size={18} color="#ffffff" strokeWidth={2} />
-            <Text className="text-white text-base font-inter-semibold leading-6 tracking-wide text-center">
+            <Share2 size={18} color={t.colors.onPrimary} strokeWidth={2} />
+            <Text
+              style={{ fontFamily: t.fontFamily.bodySemiBold }}
+              className="text-on-primary text-base font-semibold leading-6 tracking-wide text-center"
+            >
               Save & Share PDF
             </Text>
-          </TouchableOpacity>
+          </Pressable>
 
           {/* Save Only Button */}
-          <TouchableOpacity
+          <Pressable
             onPress={() => {
               onClose();
               onSaveOnly();
             }}
-            className="w-full py-3.5 rounded-full border border-green-800 flex-row justify-center items-center"
-            activeOpacity={0.75}
+            className="w-full h-12 bg-surface border border-primary-border rounded-xl flex-row justify-center items-center gap-2 active:opacity-90"
           >
-            <Text className="text-green-800 text-base font-inter-semibold leading-6 tracking-wide text-center">
+            <Check size={18} color={t.colors.primary} strokeWidth={2} />
+            <Text
+              style={{ fontFamily: t.fontFamily.bodySemiBold }}
+              className="text-primary text-base font-semibold leading-6 tracking-wide text-center"
+            >
               Save Only
             </Text>
-          </TouchableOpacity>
+          </Pressable>
 
           {/* Cancel Button */}
-          <TouchableOpacity
+          <Pressable
             onPress={onClose}
-            className="w-full py-3 items-center justify-center mt-2"
-            activeOpacity={0.75}
+            className="w-full py-3 items-center justify-center mt-2 active:opacity-75"
           >
-            <Text className="text-neutral-500 text-base font-inter leading-6 text-center">
+            <Text
+              style={{ fontFamily: t.fontFamily.body }}
+              className="text-faint text-base leading-6 text-center"
+            >
               Cancel
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </BaseBottomSheet>

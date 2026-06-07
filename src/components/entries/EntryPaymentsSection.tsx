@@ -53,15 +53,35 @@ export default function EntryPaymentsSection({
     string,
     { circleBg: string; accent: string; icon: React.ElementType }
   > = {
-    Cash: { circleBg: t.colors.paidSurface, accent: t.colors.paid, icon: Banknote },
-    UPI: { circleBg: t.colors.advanceSurface, accent: t.colors.advance, icon: QrCode },
-    NEFT: { circleBg: t.colors.partialSurface, accent: t.colors.partial, icon: Landmark },
-    Cheque: { circleBg: t.colors.pendingSurface, accent: t.colors.pending, icon: ReceiptText },
+    Cash: {
+      circleBg: t.colors.paidSurface,
+      accent: t.colors.paid,
+      icon: Banknote,
+    },
+    UPI: {
+      circleBg: t.colors.advanceSurface,
+      accent: t.colors.advance,
+      icon: QrCode,
+    },
+    NEFT: {
+      circleBg: t.colors.partialSurface,
+      accent: t.colors.partial,
+      icon: Landmark,
+    },
+    Cheque: {
+      circleBg: t.colors.pendingSurface,
+      accent: t.colors.pending,
+      icon: ReceiptText,
+    },
   };
 
-  const DEFAULT_MODE = { circleBg: t.colors.borderSubtle, accent: t.colors.muted, icon: Ellipsis };
+  const DEFAULT_MODE = {
+    circleBg: t.colors.borderSubtle,
+    accent: t.colors.muted,
+    icon: Ellipsis,
+  };
 
-  const isOverpaid = isOverpaidProp ?? (paidAmount > grandTotal);
+  const isOverpaid = isOverpaidProp ?? paidAmount > grandTotal;
   const overpaidAmount = Math.max(0, paidAmount - grandTotal);
   const progress = grandTotal > 0 ? (paidAmount / grandTotal) * 100 : 0;
 
@@ -95,7 +115,10 @@ export default function EntryPaymentsSection({
       <View className="flex-col">
         <View className="pb-1">
           <Text
-            style={{ letterSpacing: t.letterSpacing.micro, color: t.colors.muted }}
+            style={{
+              letterSpacing: t.letterSpacing.micro,
+              color: t.colors.muted,
+            }}
             className="text-[12px] font-bold uppercase"
           >
             PAYMENTS
@@ -104,12 +127,16 @@ export default function EntryPaymentsSection({
         <Text
           style={[
             t.typeStyles.caption,
-            { color: isOverpaid ? t.colors.advance : t.colors.muted, lineHeight: 20 },
+            {
+              color: isOverpaid ? t.colors.advance : t.colors.muted,
+              lineHeight: 20,
+            },
           ]}
         >
           {isOverpaid ? (
             <>
-              Overpaid by <MoneyAmount value={overpaidAmount} variant="inherit" />
+              Overpaid by{" "}
+              <MoneyAmount value={overpaidAmount} variant="inherit" />
             </>
           ) : (
             <>
@@ -164,7 +191,10 @@ export default function EntryPaymentsSection({
       {paymentsError ? (
         <View className="items-center justify-center pb-6 pt-8">
           <Text
-            style={[t.typeStyles.caption, { color: t.colors.faint, textAlign: "center" }]}
+            style={[
+              t.typeStyles.caption,
+              { color: t.colors.faint, textAlign: "center" },
+            ]}
           >
             Could not load payments
           </Text>
@@ -174,7 +204,14 @@ export default function EntryPaymentsSection({
           <ActivityIndicator size="small" color={t.colors.primary} />
         </View>
       ) : paymentRows.length === 0 ? (
-        <View style={{ alignItems: "center", gap: 0, paddingTop: 24, paddingBottom: 24 }}>
+        <View
+          style={{
+            alignItems: "center",
+            gap: 0,
+            paddingTop: 24,
+            paddingBottom: 24,
+          }}
+        >
           <View
             style={{
               marginBottom: 12,
@@ -189,7 +226,10 @@ export default function EntryPaymentsSection({
             <Wallet size={20} color={t.colors.faint} strokeWidth={1.5} />
           </View>
           <Text
-            style={[t.typeStyles.caption, { color: t.colors.faint, textAlign: "center" }]}
+            style={[
+              t.typeStyles.caption,
+              { color: t.colors.faint, textAlign: "center" },
+            ]}
           >
             No payments recorded yet
           </Text>
@@ -213,7 +253,10 @@ export default function EntryPaymentsSection({
                 style={
                   idx === paymentRows.length - 1
                     ? undefined
-                    : { borderBottomWidth: 1, borderBottomColor: t.colors.borderSubtle }
+                    : {
+                        borderBottomWidth: 1,
+                        borderBottomColor: t.colors.borderSubtle,
+                      }
                 }
                 className="flex-row items-center justify-between py-4"
               >
@@ -247,13 +290,6 @@ export default function EntryPaymentsSection({
                 </View>
 
                 <View className="flex-row items-center gap-2">
-                  <MoneyAmount
-                    value={payment.amount}
-                    showPlusForPositive
-                    variant="inherit"
-                    style={{ fontSize: 18, fontFamily: t.fontFamily.bodyBold }}
-                    color={modeStyle.accent}
-                  />
                   <View
                     style={{
                       backgroundColor: t.colors.primaryBorderFill,
@@ -262,10 +298,19 @@ export default function EntryPaymentsSection({
                       borderRadius: t.radius.full,
                     }}
                   >
-                    <Text style={[t.typeStyles.micro, { color: t.colors.primary }]}>
+                    <Text
+                      style={[t.typeStyles.micro, { color: t.colors.primary }]}
+                    >
                       Received
                     </Text>
                   </View>
+                  <MoneyAmount
+                    value={payment.amount}
+                    showPlusForPositive
+                    variant="inherit"
+                    style={{ fontSize: 18, fontFamily: t.fontFamily.bodyBold }}
+                    color={modeStyle.accent}
+                  />
                 </View>
               </View>
             );
