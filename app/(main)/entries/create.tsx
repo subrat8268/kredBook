@@ -5,7 +5,7 @@ import SyncStatus from "@/src/components/feedback/SyncStatus";
 import { useToast } from "@/src/components/feedback/Toast";
 import BillFooter from "@/src/components/orders/BillFooter";
 import OrderSummary from "@/src/components/orders/OrderSummary";
-import EntrySummaryCard from "@/src/components/entries/EntrySummaryCard";
+import { EntrySummaryCard } from "@/src/components/entries";
 import CustomerPickerSheet from "@/src/components/customer/CustomerPickerSheet";
 import Input from "@/src/components/ui/Input";
 import { Skeleton } from "@/src/components/ui/Skeleton";

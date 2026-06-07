@@ -3,13 +3,15 @@ import Loader from "@/src/components/feedback/Loader";
 import { useToast } from "@/src/components/feedback/Toast";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
 import DetailHeader from "@/src/components/layer2/DetailHeader";
-import EntryHeroCard from "@/src/components/entries/EntryHeroCard";
-import EntryCustomerCard from "@/src/components/entries/EntryCustomerCard";
-import EntryItemsSection from "@/src/components/entries/EntryItemsSection";
-import EntryPaymentsSection from "@/src/components/entries/EntryPaymentsSection";
-import EntryStickyBar from "@/src/components/entries/EntryStickyBar";
-import DeleteEntryModal from "@/src/components/entries/DeleteEntryModal";
-import RemindCustomerSheet from "@/src/components/entries/RemindCustomerSheet";
+import {
+  EntryHeroCard,
+  EntryCustomerCard,
+  EntryItemsSection,
+  EntryPaymentsSection,
+  EntryStickyBar,
+  DeleteEntryModal,
+  RemindCustomerSheet,
+} from "@/src/components/entries";
 import PaymentSuccessAnimation from "@/src/components/feedback/PaymentSuccessAnimation";
 import { useEntryDetail } from "@/src/hooks/entries";
 import { useTheme } from "@/src/utils/ThemeProvider";
