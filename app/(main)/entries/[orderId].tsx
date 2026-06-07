@@ -9,7 +9,7 @@ import EntryItemsSection from "@/src/components/entries/EntryItemsSection";
 import EntryPaymentsSection from "@/src/components/entries/EntryPaymentsSection";
 import EntryStickyBar from "@/src/components/entries/EntryStickyBar";
 import DeleteEntryModal from "@/src/components/entries/DeleteEntryModal";
-import RemindCustomerModal from "@/src/components/entries/RemindCustomerModal";
+import RemindCustomerSheet from "@/src/components/entries/RemindCustomerSheet";
 import PaymentSuccessAnimation from "@/src/components/feedback/PaymentSuccessAnimation";
 import { useEntryDetail } from "@/src/hooks/entries";
 import { useTheme } from "@/src/utils/ThemeProvider";
@@ -244,7 +244,7 @@ export default function OrderDetailScreen() {
         billNumber={order?.bill_number ?? ""}
       />
 
-      <RemindCustomerModal
+      <RemindCustomerSheet
         visible={showRemindModal}
         onClose={() => setShowRemindModal(false)}
         onSendWhatsApp={sendWhatsAppReminder}

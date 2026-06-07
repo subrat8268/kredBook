@@ -63,9 +63,9 @@ export default memo(function DeleteEntryModal({
           <View className="self-stretch flex flex-col gap-2">
             {/* Delete button */}
             <Pressable
-              style={({ pressed }) => ({
-                backgroundColor: pressed ? t.colors.overdueText : t.colors.overdue,
-              })}
+              style={{
+                backgroundColor: t.colors.overdue,
+              }}
               className="self-stretch h-12 rounded-xl justify-center items-center active:opacity-90"
               onPress={onConfirm}
             >

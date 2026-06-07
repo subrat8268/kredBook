@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, Pressable, View } from "react-native";
-import { Share2, Check } from "lucide-react-native";
+import { Share2 } from "lucide-react-native";
 import BaseBottomSheet from "@/src/components/layer2/BaseBottomSheet";
 import { useTheme } from "@/src/theme/useTheme";
 
@@ -28,37 +28,38 @@ export default function SaveEntryBottomSheet({
       withScroll={false}
       enableDynamicSizing={true}
     >
-      <View className="items-center px-4 pt-4 pb-6 w-full bg-surface">
+      <View className="px-4 pt-5 w-full bg-surface flex-col gap-8">
         {/* Title & Subtitle */}
-        <View className="w-full items-center mb-8 gap-2">
+        <View className="w-full flex-col justify-start items-center gap-1">
           <Text
             style={{ fontFamily: t.fontFamily.display }}
             className="text-ink text-lg font-bold leading-7 text-center"
           >
-            Save changes?
+            {`Save Entry ${billNumber}?`}
           </Text>
           <Text
             style={{ fontFamily: t.fontFamily.body }}
-            className="text-muted text-sm leading-5 text-center"
+            className="text-muted text-base font-normal leading-6 text-center"
           >
-            {"This will update the person's ledger and payment history."}
+            Financial ledger will be updated immediately.
           </Text>
         </View>
 
         {/* Buttons */}
-        <View className="w-full gap-4">
+        <View className="w-full flex-col gap-4">
           {/* Save & Share PDF Button */}
           <Pressable
             onPress={() => {
               onClose();
               onSaveAndShare();
             }}
-            className="w-full h-12 bg-primary rounded-xl flex-row justify-center items-center gap-2 active:opacity-90"
+            style={{ backgroundColor: t.colors.primaryActive }}
+            className="w-full h-[52px] rounded-full flex-row justify-center items-center gap-2 active:opacity-90"
           >
-            <Share2 size={18} color={t.colors.onPrimary} strokeWidth={2} />
+            <Share2 size={18} color="#ffffff" strokeWidth={2} />
             <Text
               style={{ fontFamily: t.fontFamily.bodySemiBold }}
-              className="text-on-primary text-base font-semibold leading-6 tracking-wide text-center"
+              className="text-white text-base font-semibold leading-6 tracking-wide text-center"
             >
               Save & Share PDF
             </Text>
@@ -70,12 +71,15 @@ export default function SaveEntryBottomSheet({
               onClose();
               onSaveOnly();
             }}
-            className="w-full h-12 bg-surface border border-primary-border rounded-xl flex-row justify-center items-center gap-2 active:opacity-90"
+            style={{ borderColor: t.colors.primaryActive, borderWidth: 1 }}
+            className="w-full h-[52px] bg-surface rounded-full flex-row justify-center items-center active:opacity-90"
           >
-            <Check size={18} color={t.colors.primary} strokeWidth={2} />
             <Text
-              style={{ fontFamily: t.fontFamily.bodySemiBold }}
-              className="text-primary text-base font-semibold leading-6 tracking-wide text-center"
+              style={{
+                fontFamily: t.fontFamily.bodySemiBold,
+                color: t.colors.primaryActive,
+              }}
+              className="text-base font-semibold leading-6 tracking-wide text-center"
             >
               Save Only
             </Text>
@@ -84,12 +88,9 @@ export default function SaveEntryBottomSheet({
           {/* Cancel Button */}
           <Pressable
             onPress={onClose}
-            className="w-full py-3 items-center justify-center mt-2 active:opacity-75"
+            className="w-full items-center justify-center mt-2 active:opacity-75"
           >
-            <Text
-              style={{ fontFamily: t.fontFamily.body }}
-              className="text-faint text-base leading-6 text-center"
-            >
+            <Text className="text-muted font-semibold text-base leading-6 text-center">
               Cancel
             </Text>
           </Pressable>
