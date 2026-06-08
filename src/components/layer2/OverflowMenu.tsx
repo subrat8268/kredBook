@@ -106,8 +106,11 @@ export default memo(function OverflowMenu({
             shadowOpacity: 0.1,
             shadowRadius: 6,
             elevation: 5,
+            backgroundColor: t.colors.surface,
+            borderColor: t.colors.borderDefault,
+            borderWidth: 1,
           }}
-          className="w-48 absolute right-4 top-[56px] bg-surface border border-border-default rounded-xl py-1 overflow-hidden"
+          className="w-48 absolute right-4 top-[56px] rounded-xl py-1 overflow-hidden"
         >
           <FlatList
             data={menuItems}

@@ -44,7 +44,10 @@ export default function EntryCustomerCard({
         className="self-stretch flex-row justify-between items-center p-4"
       >
         <View className="flex-row justify-start items-center gap-3">
-          <View className="w-11 h-11 rounded-full flex justify-center items-center bg-primary-fill">
+          <View
+            style={{ backgroundColor: t.colors.primaryBorderFill }}
+            className="w-11 h-11 rounded-full flex justify-center items-center"
+          >
             <Text
               className="text-center justify-center text-base font-bold"
               style={{
@@ -62,7 +65,7 @@ export default function EntryCustomerCard({
               <Text
                 style={
                   isDeleted
-                    ? [t.typeStyles.caption, { color: t.colors.faint }]
+                     ? [t.typeStyles.caption, { color: t.colors.faint }]
                     : {
                         fontFamily: t.fontFamily.bodySemiBold,
                         fontSize: 16,
@@ -100,9 +103,10 @@ export default function EntryCustomerCard({
               onPress={onCallPress}
               hitSlop={8}
               accessibilityRole="button"
-              className="w-10 h-10 rounded-full flex justify-center items-center bg-primary-fill"
+              className="w-10 h-10 rounded-full flex justify-center items-center"
               style={({ pressed }) => ({
                 opacity: pressed ? 0.7 : 1,
+                backgroundColor: t.colors.primaryBorderFill,
               })}
             >
               <Phone size={16} color={t.colors.primaryActive} />
@@ -111,9 +115,10 @@ export default function EntryCustomerCard({
               onPress={onChatPress}
               hitSlop={8}
               accessibilityRole="button"
-              className="w-10 h-10 rounded-full flex justify-center items-center bg-primary-fill"
+              className="w-10 h-10 rounded-full flex justify-center items-center"
               style={({ pressed }) => ({
                 opacity: pressed ? 0.7 : 1,
+                backgroundColor: t.colors.primaryBorderFill,
               })}
             >
               <MessageCircle size={16} color={t.colors.primaryActive} />

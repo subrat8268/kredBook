@@ -138,7 +138,7 @@ const darkColors = {
   errorBorder:       '#7f1d1d',
 } as const;
 
-export type ColorTokens = typeof lightColors;
+export type ColorTokens = Record<keyof typeof lightColors, string>;
 
 // ─── Spacing (4px base) ───────────────────────────────────────────────────────
 

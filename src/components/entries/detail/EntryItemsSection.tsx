@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp, Package } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import type { OrderDetail } from "@/src/api/entries";
+import { useTheme } from "@/src/theme/useTheme";
 
 type Props = {
   order: OrderDetail;
@@ -12,14 +13,6 @@ type Props = {
   fmt: (value: number) => string;
 };
 
-const STATUS_BADGE_STYLE: Record<string, { bg: string; text: string }> = {
-  Pending: { bg: "#FEF3C7", text: "#D97706" },
-  Paid: { bg: "#DCFCE7", text: "#16A34A" },
-  "Partially Paid": { bg: "#DBEAFE", text: "#2563EB" },
-  Partial: { bg: "#DBEAFE", text: "#2563EB" },
-  Overdue: { bg: "#FEE2E2", text: "#DC2626" },
-};
-
 export default function EntryItemsSection({
   order,
   itemsSubtotal,
@@ -28,10 +21,22 @@ export default function EntryItemsSection({
   statusKey,
   fmt,
 }: Props) {
+  const t = useTheme();
   const autoExpand = order.items.length === 1;
   const [expanded, setExpanded] = useState(autoExpand);
 
   const itemCount = order.items.length;
+
+  const statusStyle = useMemo(() => {
+    const badgeStyles: Record<string, { bg: string; text: string }> = {
+      Pending: { bg: t.colors.pendingSurface, text: t.colors.pendingText },
+      Paid: { bg: t.colors.paidSurface, text: t.colors.paidText },
+      "Partially Paid": { bg: t.colors.partialSurface, text: t.colors.partialText },
+      Partial: { bg: t.colors.partialSurface, text: t.colors.partialText },
+      Overdue: { bg: t.colors.overdueSurface, text: t.colors.overdueText },
+    };
+    return badgeStyles[statusKey] || { bg: t.colors.borderSubtle, text: t.colors.muted };
+  }, [t.colors, statusKey]);
 
   const itemRows = useMemo(
     () =>
@@ -41,43 +46,54 @@ export default function EntryItemsSection({
             <View className="flex-col gap-1 flex-1 pr-4">
               <Text
                 numberOfLines={1}
-                className="text-[15px] font-semibold text-[#121c2a]"
+                style={{ color: t.colors.ink }}
+                className="text-[15px] font-semibold"
               >
                 {item.product_name}
               </Text>
-              <Text className="text-[13px] font-medium text-[#6B7280]">
+              <Text style={{ color: t.colors.muted }} className="text-[13px] font-medium">
                 {item.quantity} × ₹{fmt(item.price)}
               </Text>
             </View>
-            <Text className="text-[16px] font-bold text-[#121c2a]">
+            <Text style={{ color: t.colors.ink }} className="text-[16px] font-bold">
               ₹{fmt(item.subtotal)}
             </Text>
           </View>
-          <View className="h-px bg-[#f3f4f6]" />
+          <View style={{ height: 1, backgroundColor: t.colors.borderSubtle }} />
         </View>
       )),
-    [order.items, fmt],
+    [order.items, fmt, t.colors, t.fontFamily],
   );
 
   return (
-    <View className="mx-4 mb-6 rounded-xl border border-[#e5e7eb] bg-white">
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        borderWidth: 1,
+        borderColor: t.colors.borderDefault,
+      }}
+      className="mx-4 mb-6 rounded-xl"
+    >
       <Pressable
         onPress={autoExpand ? undefined : () => setExpanded((p) => !p)}
         style={({ pressed }) => [
-          pressed && !autoExpand && { backgroundColor: "#f9fafb" },
+          pressed && !autoExpand && { backgroundColor: t.colors.borderSubtle },
           { borderTopLeftRadius: 12, borderTopRightRadius: 12 },
         ]}
         className="flex-row items-center justify-between px-4 py-4"
       >
         <View className="flex-row items-center gap-3">
-          <View className="h-11 w-11 items-center justify-center rounded-xl bg-[#f3f4f6]">
-            <Package size={20} color="#374151" strokeWidth={2} />
+          <View
+            style={{ backgroundColor: t.colors.surfaceRaised }}
+            className="h-11 w-11 items-center justify-center rounded-xl"
+          >
+            <Package size={20} color={t.colors.body} strokeWidth={2} />
           </View>
           <View className="flex-col">
-            <Text className="text-base font-semibold text-[#121c2a]">
+            <Text style={{ color: t.colors.ink }} className="text-base font-semibold">
               {itemCount} item{itemCount === 1 ? "" : "s"}
             </Text>
-            <Text className="text-xs font-semibold text-[#3E4A3D] mt-0.5">
+            <Text style={{ color: t.colors.muted }} className="text-xs font-semibold mt-0.5">
               ₹{itemsSubtotal.toLocaleString("en-IN")} total
             </Text>
           </View>
@@ -86,9 +102,9 @@ export default function EntryItemsSection({
         {!autoExpand && (
           <View>
             {expanded ? (
-              <ChevronUp size={20} color="#9ca3af" strokeWidth={2} />
+              <ChevronUp size={20} color={t.colors.muted} strokeWidth={2} />
             ) : (
-              <ChevronDown size={20} color="#9ca3af" strokeWidth={2} />
+              <ChevronDown size={20} color={t.colors.muted} strokeWidth={2} />
             )}
           </View>
         )}
@@ -101,10 +117,10 @@ export default function EntryItemsSection({
 
           {/* Subtotal */}
           <View className="flex-row justify-between items-center pt-3 pb-1">
-            <Text className="text-[14px] font-medium text-[#6B7280]">
+            <Text style={{ color: t.colors.muted }} className="text-[14px] font-medium">
               Subtotal
             </Text>
-            <Text className="text-[14px] font-semibold text-[#121c2a]">
+            <Text style={{ color: t.colors.ink }} className="text-[14px] font-semibold">
               ₹{fmt(itemsSubtotal)}
             </Text>
           </View>
@@ -112,10 +128,10 @@ export default function EntryItemsSection({
           {/* Tax */}
           {order.tax_percent > 0 && (
             <View className="flex-row justify-between items-center py-1">
-              <Text className="text-[14px] font-medium text-[#6B7280]">
+              <Text style={{ color: t.colors.muted }} className="text-[14px] font-medium">
                 GST ({order.tax_percent}%)
               </Text>
-              <Text className="text-[14px] font-semibold text-[#121c2a]">
+              <Text style={{ color: t.colors.ink }} className="text-[14px] font-semibold">
                 ₹{fmt(taxAmount)}
               </Text>
             </View>
@@ -124,10 +140,10 @@ export default function EntryItemsSection({
           {/* Loading Charge */}
           {order.loading_charge > 0 && (
             <View className="flex-row justify-between items-center py-1">
-              <Text className="text-[14px] font-medium text-[#6B7280]">
+              <Text style={{ color: t.colors.muted }} className="text-[14px] font-medium">
                 Loading Charge
               </Text>
-              <Text className="text-[14px] font-semibold text-[#121c2a]">
+              <Text style={{ color: t.colors.ink }} className="text-[14px] font-semibold">
                 ₹{fmt(order.loading_charge)}
               </Text>
             </View>
@@ -136,34 +152,33 @@ export default function EntryItemsSection({
           {/* Previous balance */}
           {order.previous_balance > 0 && (
             <View className="flex-row justify-between items-center py-1">
-              <Text className="text-[14px] font-medium text-[#dc2626]">
+              <Text style={{ color: t.colors.overdue }} className="text-[14px] font-medium">
                 Previous Balance
               </Text>
-              <Text className="text-[14px] font-semibold text-[#dc2626]">
+              <Text style={{ color: t.colors.overdue }} className="text-[14px] font-semibold">
                 ₹{fmt(order.previous_balance)}
               </Text>
             </View>
           )}
 
           {/* Divider */}
-          <View className="h-px bg-[#f3f4f6] my-3" />
+          <View style={{ height: 1, backgroundColor: t.colors.borderSubtle }} className="my-3" />
 
           {/* Grand Total */}
           <View className="flex-row justify-between items-center py-1">
             <View className="flex-row items-center gap-2">
-              <Text className="text-[16px] font-bold text-[#121c2a]">
+              <Text style={{ color: t.colors.ink }} className="text-[16px] font-bold">
                 Grand Total
               </Text>
               <View
                 style={{
-                  backgroundColor:
-                    STATUS_BADGE_STYLE[statusKey]?.bg ?? "#F3F4F6",
+                  backgroundColor: statusStyle.bg,
                 }}
                 className="rounded-full px-2 py-0.5"
               >
                 <Text
                   style={{
-                    color: STATUS_BADGE_STYLE[statusKey]?.text ?? "#6B7280",
+                    color: statusStyle.text,
                     fontSize: 10,
                   }}
                   className="font-bold uppercase tracking-wider text-[10px]"
@@ -172,7 +187,7 @@ export default function EntryItemsSection({
                 </Text>
               </View>
             </View>
-            <Text className="text-[17px] font-bold text-[#121c2a]">
+            <Text style={{ color: t.colors.ink }} className="text-[17px] font-bold">
               ₹{fmt(grandTotal)}
             </Text>
           </View>
