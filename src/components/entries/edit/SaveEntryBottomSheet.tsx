@@ -27,8 +27,13 @@ export default function SaveEntryBottomSheet({
       onClose={onClose}
       withScroll={false}
       enableDynamicSizing={true}
+      backgroundStyle={{ backgroundColor: t.colors.surface }}
+      handleIndicatorStyle={{ backgroundColor: t.colors.borderSubtle }}
     >
-      <View style={{ backgroundColor: t.colors.surface }} className="px-4 pt-5 w-full flex-col gap-8">
+      <View
+        style={{ backgroundColor: t.colors.surface }}
+        className="px-4 pt-2 w-full flex-col gap-8"
+      >
         {/* Title & Subtitle */}
         <View className="w-full flex-col justify-start items-center gap-1">
           <Text
@@ -58,7 +63,10 @@ export default function SaveEntryBottomSheet({
           >
             <Share2 size={18} color="#ffffff" strokeWidth={2} />
             <Text
-              style={{ fontFamily: t.fontFamily.bodySemiBold, color: "#ffffff" }}
+              style={{
+                fontFamily: t.fontFamily.bodySemiBold,
+                color: "#ffffff",
+              }}
               className="text-base font-semibold leading-6 tracking-wide text-center"
             >
               Save & Share PDF
@@ -95,7 +103,10 @@ export default function SaveEntryBottomSheet({
             className="w-full items-center justify-center mt-2 active:opacity-75"
           >
             <Text
-              style={{ color: t.colors.muted, fontFamily: t.fontFamily.bodySemiBold }}
+              style={{
+                color: t.colors.muted,
+                fontFamily: t.fontFamily.bodySemiBold,
+              }}
               className="font-semibold text-base leading-6 text-center"
             >
               Cancel
