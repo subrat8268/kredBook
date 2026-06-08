@@ -42,17 +42,8 @@ export default memo(function OverflowMenu({
       itemColor = item.color;
     }
 
-    const showPreDivider =
-      item.key === "mark-as-paid" || item.key === "delete-entry";
-
     return (
       <View className="w-full">
-        {showPreDivider && (
-          <View
-            style={{ backgroundColor: t.colors.borderSubtle }}
-            className="self-stretch h-px"
-          />
-        )}
         <Pressable
           style={({ pressed }) =>
             pressed && { backgroundColor: t.colors.borderSubtle }
@@ -92,8 +83,6 @@ export default memo(function OverflowMenu({
       visible={visible}
       onRequestClose={onClose}
     >
-      {/* surfaceOverlay uses style prop — rgba() values cannot be used as CSS variables
-       * in NativeWind v4 reliably. This is the ONE allowed exception per design system rules. */}
       <Pressable
         style={[styles.overlay, { backgroundColor: t.colors.surfaceOverlay }]}
         onPress={onClose}
@@ -103,20 +92,26 @@ export default memo(function OverflowMenu({
           style={{
             shadowColor: "#000000",
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.1,
+            shadowOpacity: 0.4,
             shadowRadius: 6,
-            elevation: 5,
+            elevation: 10,
             backgroundColor: t.colors.surface,
             borderColor: t.colors.borderDefault,
             borderWidth: 1,
           }}
-          className="w-48 absolute right-4 top-[56px] rounded-xl py-1 overflow-hidden"
+          className="w-52 absolute right-4 top-[56px] rounded-xl py-1 overflow-hidden"
         >
           <FlatList
             data={menuItems}
             renderItem={renderItem}
             keyExtractor={(item) => item.key}
             showsVerticalScrollIndicator={false}
+            ItemSeparatorComponent={() => (
+              <View
+                style={{ backgroundColor: t.colors.borderSubtle, height: 1 }}
+                className="self-stretch"
+              />
+            )}
           />
         </Pressable>
       </Pressable>
