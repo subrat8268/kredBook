@@ -34,18 +34,18 @@ export default memo(function RemindCustomerSheet({
       withScroll={false}
       enableDynamicSizing={true}
     >
-      <View className="px-4 pt-5 w-full bg-surface flex-col gap-8">
+      <View style={{ backgroundColor: t.colors.surface }} className="px-4 pt-5 w-full flex-col gap-8">
         {/* Title & Subtitle */}
         <View className="w-full flex-col justify-start items-center gap-1">
           <Text
-            style={{ fontFamily: t.fontFamily.display }}
-            className="text-ink text-lg font-bold leading-7 text-center"
+            style={{ fontFamily: t.fontFamily.display, color: t.colors.ink }}
+            className="text-lg font-bold leading-7 text-center"
           >
             {`Remind ${customerName}`}
           </Text>
           <Text
-            style={{ fontFamily: t.fontFamily.body }}
-            className="text-muted text-base font-normal leading-6 text-center"
+            style={{ fontFamily: t.fontFamily.body, color: t.colors.muted }}
+            className="text-base font-normal leading-6 text-center"
           >
             Select how to send the payment reminder
           </Text>
@@ -81,16 +81,16 @@ export default memo(function RemindCustomerSheet({
             <View className="flex-1">
               <View className="self-stretch">
                 <Text
-                  style={{ fontFamily: t.fontFamily.bodySemiBold }}
-                  className="text-ink text-sm font-semibold leading-5 text-left"
+                  style={{ fontFamily: t.fontFamily.bodySemiBold, color: t.colors.ink }}
+                  className="text-sm font-semibold leading-5 text-left"
                 >
                   Send via WhatsApp
                 </Text>
               </View>
               <View className="self-stretch mt-0.5">
                 <Text
-                  style={{ fontFamily: t.fontFamily.body }}
-                  className="text-faint text-xs font-normal leading-4 text-left"
+                  style={{ fontFamily: t.fontFamily.body, color: t.colors.faint }}
+                  className="text-xs font-normal leading-4 text-left"
                 >
                   Opens pre-filled message
                 </Text>
@@ -129,16 +129,16 @@ export default memo(function RemindCustomerSheet({
             <View className="flex-1">
               <View className="self-stretch">
                 <Text
-                  style={{ fontFamily: t.fontFamily.bodySemiBold }}
-                  className="text-ink text-sm font-semibold leading-5 text-left"
+                  style={{ fontFamily: t.fontFamily.bodySemiBold, color: t.colors.ink }}
+                  className="text-sm font-semibold leading-5 text-left"
                 >
                   Send via SMS
                 </Text>
               </View>
               <View className="self-stretch mt-0.5">
                 <Text
-                  style={{ fontFamily: t.fontFamily.body }}
-                  className="text-faint text-xs font-normal leading-4 text-left"
+                  style={{ fontFamily: t.fontFamily.body, color: t.colors.faint }}
+                  className="text-xs font-normal leading-4 text-left"
                 >
                   Standard text message
                 </Text>
@@ -155,8 +155,8 @@ export default memo(function RemindCustomerSheet({
             className="w-full items-center justify-center mt-2  active:opacity-75"
           >
             <Text
-              style={{ fontFamily: t.fontFamily.bodyMedium }}
-              className="text-faint text-base font-medium leading-6 text-center"
+              style={{ fontFamily: t.fontFamily.bodyMedium, color: t.colors.muted }}
+              className="text-base font-medium leading-6 text-center"
             >
               Cancel
             </Text>

@@ -31,19 +31,30 @@ export default memo(function DeleteEntryModal({
         onPress={onClose}
       >
         <Pressable
-          className="w-80 p-6 bg-surface rounded-2xl items-center shadow-2xl"
+          style={{
+            backgroundColor: t.colors.surface,
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 16,
+            elevation: 10,
+          }}
+          className="w-80 p-6 rounded-2xl items-center"
           onPress={(e) => e.stopPropagation()}
         >
           {/* Trash Icon */}
-          <View className="w-14 h-14 bg-overdue-surface rounded-full justify-center items-center mb-4">
+          <View
+            style={{ backgroundColor: t.colors.overdueSurface }}
+            className="w-14 h-14 rounded-full justify-center items-center mb-4"
+          >
             <Trash size={24} color={t.colors.overdueText} strokeWidth={2.5} />
           </View>
 
           {/* Title */}
           <View className="mb-2">
             <Text
-              style={{ fontFamily: t.fontFamily.display }}
-              className="text-ink text-lg font-bold text-center leading-6"
+              style={{ fontFamily: t.fontFamily.display, color: t.colors.ink }}
+              className="text-lg font-bold text-center leading-6"
             >
               Delete Entry?
             </Text>
@@ -52,8 +63,8 @@ export default memo(function DeleteEntryModal({
           {/* Subtitle / Description */}
           <View className="mb-6 px-1">
             <Text
-              style={{ fontFamily: t.fontFamily.body }}
-              className="text-muted text-sm font-normal text-center leading-5"
+              style={{ fontFamily: t.fontFamily.body, color: t.colors.muted }}
+              className="text-sm font-normal text-center leading-5"
             >
               Entry #{billNumber} and all its payment{"\n"}records will be permanently deleted.
             </Text>
@@ -70,8 +81,8 @@ export default memo(function DeleteEntryModal({
               onPress={onConfirm}
             >
               <Text
-                style={{ fontFamily: t.fontFamily.bodySemiBold }}
-                className="text-white text-base font-semibold leading-6"
+                style={{ fontFamily: t.fontFamily.bodySemiBold, color: "#ffffff" }}
+                className="text-base font-semibold leading-6"
               >
                 Delete Permanently
               </Text>
@@ -79,12 +90,15 @@ export default memo(function DeleteEntryModal({
 
             {/* Cancel button */}
             <Pressable
-              className="self-stretch h-12 bg-surface-raised rounded-xl justify-center items-center active:opacity-90"
+              style={{
+                backgroundColor: t.colors.surfaceRaised,
+              }}
+              className="self-stretch h-12 rounded-xl justify-center items-center active:opacity-90"
               onPress={onClose}
             >
               <Text
-                style={{ fontFamily: t.fontFamily.bodyMedium }}
-                className="text-ink text-base font-medium leading-6"
+                style={{ fontFamily: t.fontFamily.bodyMedium, color: t.colors.ink }}
+                className="text-base font-medium leading-6"
               >
                 Cancel
               </Text>
