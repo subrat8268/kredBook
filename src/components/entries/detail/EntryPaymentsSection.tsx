@@ -289,29 +289,13 @@ export default function EntryPaymentsSection({
                   </View>
                 </View>
 
-                <View className="flex-row items-center gap-2">
-                  <View
-                    style={{
-                      backgroundColor: t.colors.primaryBorderFill,
-                      paddingHorizontal: t.components.badge.paddingH,
-                      paddingVertical: t.components.badge.paddingV,
-                      borderRadius: t.radius.full,
-                    }}
-                  >
-                    <Text
-                      style={[t.typeStyles.micro, { color: t.colors.primary }]}
-                    >
-                      Received
-                    </Text>
-                  </View>
-                  <MoneyAmount
-                    value={payment.amount}
-                    showPlusForPositive
-                    variant="inherit"
-                    style={{ fontSize: 18, fontFamily: t.fontFamily.bodyBold }}
-                    color={modeStyle.accent}
-                  />
-                </View>
+                <MoneyAmount
+                  value={payment.amount}
+                  showPlusForPositive
+                  variant="inherit"
+                  style={{ fontSize: 18, fontFamily: t.fontFamily.bodyBold }}
+                  color={modeStyle.accent}
+                />
               </View>
             );
           })}

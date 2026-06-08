@@ -21,7 +21,7 @@ function getDueDateLabel(dueDate?: string | null): string | null {
   due.setHours(0, 0, 0, 0);
   const diffDays = Math.ceil((today.getTime() - due.getTime()) / 86400000);
   if (diffDays > 0) {
-    return `Overdue · ${diffDays} day${diffDays === 1 ? "" : "s"}`;
+    return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
   }
   const formatted = due.toLocaleDateString("en-US", {
     month: "short",
@@ -58,8 +58,8 @@ export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
   const shadow = SHADOWS[statusKey] || SHADOWS.pending;
   const dueLabel = getDueDateLabel(dueDate);
   const formattedAmount = formatINR(amount, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
     currencySymbol: "₹",
   });
 
@@ -67,7 +67,7 @@ export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
   useFocusEffect(
     useCallback(() => {
       pulse.value = withRepeat(
-        withTiming(0.3, {
+        withTiming(0.6, {
           duration: 1500,
           easing: Easing.inOut(Easing.ease),
         }),
@@ -108,7 +108,7 @@ export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
     <LinearGradient
       colors={gradientColors}
       start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}
+      end={{ x: 1, y: 0 }}
       style={[
         {
           borderRadius: 20,

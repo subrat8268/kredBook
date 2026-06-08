@@ -17,6 +17,7 @@ import {
 } from "../api/entries";
 import { ApiError } from "../lib/supabaseQuery";
 import { useDebounce } from "./useDebounce";
+import { deriveOrderStatus } from "../utils/helper";
 
 export const orderKeys = {
   all: (vendorId: string) => ["orders", vendorId] as const,
@@ -149,12 +150,7 @@ export function useUpdateOrder(vendorId: string) {
           if (!old) return old;
           const amountPaid = Number(old.amount_paid || 0);
           const balanceDue = totalAmount - amountPaid;
-          const status =
-            balanceDue <= 0
-              ? "Paid"
-              : amountPaid > 0
-                ? "Partially Paid"
-                : "Pending";
+          const status = deriveOrderStatus(totalAmount, amountPaid);
 
           return {
             ...old,
@@ -277,12 +273,7 @@ export function useCreateOrder(vendorId: string) {
       const totalAmount =
         itemsSubtotal + (variables.loadingCharge || 0) + taxAmount;
       const balanceDue = totalAmount - variables.amountPaid;
-      const status: "Paid" | "Partially Paid" | "Pending" =
-        balanceDue === 0
-          ? "Paid"
-          : variables.amountPaid > 0
-            ? "Partially Paid"
-            : "Pending";
+      const status = deriveOrderStatus(totalAmount, variables.amountPaid);
 
       // Create optimistic order
       const optimisticOrder: OrderDetail = {

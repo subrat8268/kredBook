@@ -47,3 +47,21 @@ export function formatRelativeActivity(iso?: string | null): string {
 /** Returns the number of whole days elapsed since the given ISO date string. */
 export const daysSince = (date: string): number =>
   Math.floor((Date.now() - new Date(date).getTime()) / 86_400_000);
+
+/**
+ * Derives the display/database status of an order given the total amount and the amount paid.
+ */
+export function deriveOrderStatus(
+  totalAmount: number,
+  amountPaid: number,
+): "Paid" | "Partially Paid" | "Pending" {
+  const balanceDue = totalAmount - amountPaid;
+  if (balanceDue <= 0) {
+    return "Paid";
+  }
+  if (amountPaid > 0) {
+    return "Partially Paid";
+  }
+  return "Pending";
+}
+

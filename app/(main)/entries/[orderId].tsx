@@ -31,6 +31,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { formatINR } from "@/src/utils/format";
 import { MenuItem } from "@/src/components/layer2/OverflowMenu";
 
+const STATUS_DISPLAY_MAP: Record<"pending" | "partial" | "paid" | "overdue", "Paid" | "Pending" | "Overdue" | "Partially Paid"> = {
+  pending: "Pending",
+  partial: "Partially Paid",
+  paid: "Paid",
+  overdue: "Overdue",
+};
+
 export default function OrderDetailScreen() {
   const t = useTheme();
   const { colors, spacing } = t;
@@ -214,7 +221,7 @@ export default function OrderDetailScreen() {
           paymentsLoading={isLoading}
           paymentsError={isError}
           paymentRows={paymentRows}
-          grandTotal={order?.total_amount ?? 0}
+          grandTotal={grandTotal}
           paidAmount={totalPaid}
           statusKey={statusKey}
           isOverpaid={isOverpaid}
@@ -225,7 +232,7 @@ export default function OrderDetailScreen() {
           itemsSubtotal={itemsSubtotal}
           taxAmount={taxAmount}
           grandTotal={grandTotal}
-          statusKey={statusKey === "partial" ? "Partially Paid" : statusKey === "paid" ? "Paid" : statusKey === "overdue" ? "Overdue" : "Pending"}
+          statusKey={STATUS_DISPLAY_MAP[statusKey]}
           fmt={fmt}
         />
       </ScrollView>
@@ -237,7 +244,7 @@ export default function OrderDetailScreen() {
         balanceDue={balanceDue}
         customerId={order.customer_id}
         customerName={customerName}
-        initialAmount={undefined}
+        initialAmount={balanceDue}
       />
 
       <DeleteEntryModal

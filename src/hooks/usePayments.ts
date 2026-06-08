@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { useOrderStore } from "../store/orderStore";
 import { orderKeys } from "./useEntries";
+import { deriveOrderStatus } from "../utils/helper";
 
 // markFull is resolved by the caller before invoking the mutation;
 // the backend always receives the pre-computed amount so markFull is omitted.
@@ -62,12 +63,7 @@ export function useRecordPayment(orderId: string, vendorId?: string, customerId?
         if (!old) return old;
         const newAmountPaid = (old.amount_paid || 0) + amount;
         const newBalanceDue = (old.total_amount || 0) - newAmountPaid;
-        const newStatus =
-          newBalanceDue <= 0
-            ? "Paid"
-            : newBalanceDue < old.total_amount
-              ? "Partially Paid"
-              : "Pending";
+        const newStatus = deriveOrderStatus(old.total_amount || 0, newAmountPaid);
 
         return {
           ...old,
@@ -155,7 +151,6 @@ export function useRecordPayment(orderId: string, vendorId?: string, customerId?
     isRecording: mutation.isPending,
   };
 }
-
 /** Compound hook: payment history query + record-payment mutation. */
 export function usePayments(
   orderId: string,

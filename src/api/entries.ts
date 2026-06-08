@@ -1,5 +1,6 @@
 import { toApiError } from "../lib/supabaseQuery";
 import { supabase, executeWithOfflineQueue, executeWithOfflineQueueResult } from "../services/supabase";
+import { deriveOrderStatus } from "../utils/helper";
 
 export interface OrderItem {
   id: string;
@@ -468,12 +469,7 @@ export async function updateOrder(
         throw new Error("Total amount cannot be less than amount already paid");
       }
       const balanceDue = totalAmount - amountPaid;
-      const status =
-        balanceDue <= 0
-          ? "Paid"
-          : amountPaid > 0
-          ? "Partially Paid"
-          : "Pending";
+      const status = deriveOrderStatus(totalAmount, amountPaid);
 
 
       const isMissingRpc = (error: any) => {
