@@ -41,7 +41,7 @@ function PrimaryButton({
         // Match reference shadow [0px_4px_12px_0px_rgba(22,163,74,0.30)]
         shadowColor: t.colors.primary,
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.30,
+        shadowOpacity: 0.3,
         shadowRadius: 12,
         elevation: 4,
       }}
@@ -178,7 +178,9 @@ export default function EntryStickyBar({
           />
           <PrimaryButton
             title="Record Payment"
-            icon={<Wallet size={18} color={t.colors.onPrimary} strokeWidth={2} />}
+            icon={
+              <Wallet size={18} color={t.colors.onPrimary} strokeWidth={2} />
+            }
             onPress={onRecordPayment}
             isFlex={true}
           />

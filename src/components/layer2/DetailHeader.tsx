@@ -1,4 +1,4 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
+import { useTheme } from "@/src/theme/useTheme";
 import { ArrowLeft, MoreVertical } from "lucide-react-native";
 import { memo, type ReactNode, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -32,11 +32,20 @@ export default memo(function DetailHeader({
   overflow = false,
   menuItems = [], // Initialize menuItems
 }: Props) {
-  const { colors } = useTheme();
+  const t = useTheme();
   const [isMenuVisible, setIsMenuVisible] = useState(false); // State for menu visibility
 
   return (
-    <View className="bg-surface border-b border-border px-4 py-3">
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        borderBottomWidth: 1,
+        borderBottomColor: t.colors.borderSubtle,
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: 12,
+      }}
+    >
       <View className="flex-row items-center">
         <Pressable
           accessibilityRole="button"
@@ -46,18 +55,33 @@ export default memo(function DetailHeader({
           style={({ pressed }) => [pressed ? { opacity: 0.75 } : null]}
           className="mr-3"
         >
-          <ArrowLeft size={22} color={colors.textPrimary} strokeWidth={2.2} />
+          <ArrowLeft size={22} color={t.colors.ink} strokeWidth={2.2} />
         </Pressable>
 
         {leadingSlot ? <View className="ml-0 mr-3">{leadingSlot}</View> : null}
 
         <View className="flex-1">
-          <Text className="text-card-title text-textPrimary" numberOfLines={1}>
+          <Text
+            style={{
+              fontFamily: t.fontFamily.displaySemiBold,
+              fontSize: 17,
+              fontWeight: "600",
+              color: t.colors.ink,
+              lineHeight: 22,
+            }}
+            numberOfLines={1}
+          >
             {title}
           </Text>
           {subtitle ? (
             <Text
-              className="text-caption text-textSecondary mt-1"
+              style={{
+                fontFamily: t.fontFamily.body,
+                fontSize: 13,
+                color: t.colors.muted,
+                lineHeight: 18,
+                marginTop: 2,
+              }}
               numberOfLines={1}
             >
               {subtitle}
@@ -81,8 +105,15 @@ export default memo(function DetailHeader({
                     : pressed
                       ? { opacity: 0.75 }
                       : null,
+                  {
+                    width: 42,
+                    height: 42,
+                    borderRadius: 21,
+                    backgroundColor: t.colors.surfaceRaised,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  },
                 ]}
-                className="w-[42px] h-[42px] rounded-full bg-icon items-center justify-center"
               >
                 {action.icon}
               </Pressable>
@@ -101,7 +132,7 @@ export default memo(function DetailHeader({
             >
               <MoreVertical
                 size={22}
-                color={colors.textPrimary}
+                color={t.colors.ink}
                 strokeWidth={2.2}
               />
             </Pressable>
@@ -116,3 +147,4 @@ export default memo(function DetailHeader({
     </View>
   );
 });
+

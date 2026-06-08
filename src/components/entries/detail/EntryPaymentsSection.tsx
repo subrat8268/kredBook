@@ -101,7 +101,7 @@ export default function EntryPaymentsSection({
   return (
     <View
       style={{
-        shadowColor: "rgba(27,20,10,1)",
+        shadowColor: "#000000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.04,
         shadowRadius: 12,

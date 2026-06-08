@@ -137,8 +137,9 @@ export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
       />
 
       <View className="flex-col gap-2 w-full">
+        {/* Always white — gradient card bg is always colored */}
         <Text
-          style={{ letterSpacing: t.letterSpacing.label, color: t.colors.onPrimary }}
+          style={{ letterSpacing: t.letterSpacing.label, color: "#ffffff" }}
           className="font-semibold text-[12px] uppercase"
         >
           BALANCE DUE
@@ -148,7 +149,7 @@ export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
           style={{
             fontFamily: t.fontFamily.displayExtraBold,
             lineHeight: 40,
-            color: t.colors.onPrimary,
+            color: "#ffffff",
           }}
           className="text-[40px] pb-4"
         >
@@ -168,18 +169,18 @@ export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
           >
             <Animated.View style={pillStyle} className="flex-row items-center">
               {statusKey === "paid" ? (
-                <CheckCircle2 size={13} color={t.colors.onPrimary} strokeWidth={2.5} />
+                <CheckCircle2 size={13} color={"#ffffff"} strokeWidth={2.5} />
               ) : statusKey === "overdue" ? (
-                <Clock3 size={13} color={t.colors.onPrimary} strokeWidth={2.5} />
+                <Clock3 size={13} color={"#ffffff"} strokeWidth={2.5} />
               ) : (
                 <View
-                  style={{ backgroundColor: t.colors.onPrimary }}
+                  style={{ backgroundColor: "rgba(255,255,255,0.9)" }}
                   className="w-2 h-2 rounded-full"
                 />
               )}
             </Animated.View>
             <Text
-              style={{ letterSpacing: 0.6, lineHeight: 16, color: t.colors.onPrimary }}
+              style={{ letterSpacing: 0.6, lineHeight: 16, color: "#ffffff" }}
               className="font-semibold text-[12px]"
             >
               {displayStatus}
@@ -188,7 +189,7 @@ export default function EntryHeroCard({ amount, statusKey, dueDate }: Props) {
 
           {statusKey !== "paid" && dueLabel && (
             <Text
-              style={{ lineHeight: 20, color: t.colors.onPrimary, opacity: 0.9 }}
+              style={{ lineHeight: 20, color: "#ffffff", opacity: 0.9 }}
               className="font-medium text-[14px]"
             >
               {dueLabel}

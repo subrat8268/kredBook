@@ -32,8 +32,9 @@ export default function EntryCustomerCard({
         shadowOpacity: 0.08,
         shadowRadius: 8,
         elevation: 3,
+        backgroundColor: t.colors.surface,
       }}
-      className="mx-4 mb-4 rounded-xl bg-surface"
+      className="mx-4 mb-4 rounded-xl"
     >
       <Pressable
         onPress={isDeleted ? undefined : onCustomerTap}
