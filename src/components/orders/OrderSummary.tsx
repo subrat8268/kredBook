@@ -1,6 +1,7 @@
 import { formatINR } from "@/src/utils/format";
 import React, { useEffect, useState } from "react";
 import { Text, TextInput, View } from "react-native";
+import { useTheme } from "@/src/theme/useTheme";
 
 interface OrderSummaryProps {
   itemsTotal: number;
@@ -22,6 +23,8 @@ export default function OrderSummary({
   onLoadingChargeChange,
   onTaxChange,
 }: OrderSummaryProps) {
+  const t = useTheme();
+
   const [loadingInput, setLoadingInput] = useState(
     loadingCharge > 0 ? loadingCharge.toString() : ""
   );
@@ -53,24 +56,24 @@ export default function OrderSummary({
     <View className="w-full flex-col gap-0">
       {/* ROW 1 — Subtotal */}
       <View className="flex-row justify-between items-center py-2">
-        <Text className="text-[#6b7280] text-[13px] font-normal font-inter">
+        <Text style={{ color: t.colors.muted, fontFamily: t.fontFamily.body }} className="text-[13px] font-normal">
           Subtotal
         </Text>
-        <Text className="text-[#6b7280] text-[13px] font-normal font-inter">
+        <Text style={{ color: t.colors.muted, fontFamily: t.fontFamily.body }} className="text-[13px] font-normal">
           {formatINR(itemsTotal)}
         </Text>
       </View>
 
       {/* ROW 2 — Loading Charge */}
       <View className="flex-row justify-between items-center py-2">
-        <Text className="text-[#6b7280] text-[13px] font-normal font-inter">
+        <Text style={{ color: t.colors.muted, fontFamily: t.fontFamily.body }} className="text-[13px] font-normal">
           Loading Charge
         </Text>
         <View
-          className="bg-white border rounded-lg px-2.5 py-1.5 flex-row items-center min-w-[100px] h-9"
-          style={{ borderColor: "#e5e7eb" }}
+          style={{ borderColor: t.colors.borderDefault, backgroundColor: t.colors.surface }}
+          className="border rounded-lg px-2.5 py-1.5 flex-row items-center min-w-[100px] h-9"
         >
-          <Text className="text-[#9ca3af] text-[13px] font-normal font-inter mr-1">
+          <Text style={{ color: t.colors.faint, fontFamily: t.fontFamily.body }} className="text-[13px] font-normal mr-1">
             ₹
           </Text>
           <TextInput
@@ -78,40 +81,40 @@ export default function OrderSummary({
             onChangeText={handleLoadingChange}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={t.colors.faint}
             textAlign="right"
-            style={{ paddingVertical: 0 }}
-            className="flex-1 text-[#111827] text-[13px] font-normal font-inter h-full"
+            style={{ paddingVertical: 0, color: t.colors.ink, fontFamily: t.fontFamily.body }}
+            className="flex-1 text-[13px] font-normal h-full"
           />
         </View>
       </View>
 
       {/* ROW 3 — GST */}
       <View className="flex-row justify-between items-center py-2">
-        <Text className="text-[#6b7280] text-[13px] font-normal font-inter">
+        <Text style={{ color: t.colors.muted, fontFamily: t.fontFamily.body }} className="text-[13px] font-normal">
           GST (%)
         </Text>
         <View className="flex-row items-center gap-2">
           {taxAmount > 0 ? (
-            <Text className="text-[#6b7280] text-[13px] font-normal font-inter">
+            <Text style={{ color: t.colors.muted, fontFamily: t.fontFamily.body }} className="text-[13px] font-normal">
               Tax {formatINR(taxAmount)}
             </Text>
           ) : null}
           <View
-            className="bg-white border rounded-lg px-2.5 py-1.5 flex-row items-center min-w-[100px] h-9"
-            style={{ borderColor: "#e5e7eb" }}
+            style={{ borderColor: t.colors.borderDefault, backgroundColor: t.colors.surface }}
+            className="border rounded-lg px-2.5 py-1.5 flex-row items-center min-w-[100px] h-9"
           >
             <TextInput
               value={taxInput}
               onChangeText={handleTaxChange}
               keyboardType="numeric"
               placeholder="0"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={t.colors.faint}
               textAlign="right"
-              style={{ paddingVertical: 0 }}
-              className="flex-1 text-[#111827] text-[13px] font-normal font-inter h-full mr-1"
+              style={{ paddingVertical: 0, color: t.colors.ink, fontFamily: t.fontFamily.body }}
+              className="flex-1 text-[13px] font-normal h-full mr-1"
             />
-            <Text className="text-[#9ca3af] text-[13px] font-normal font-inter">
+            <Text style={{ color: t.colors.faint, fontFamily: t.fontFamily.body }} className="text-[13px] font-normal">
               %
             </Text>
           </View>
@@ -119,14 +122,14 @@ export default function OrderSummary({
       </View>
 
       {/* DIVIDER */}
-      <View className="h-px bg-[#e5e7eb] my-1" />
+      <View style={{ height: 1, backgroundColor: t.colors.borderSubtle }} className="my-1" />
 
       {/* ROW 4 — Grand Total */}
       <View className="flex-row justify-between items-center py-2">
-        <Text className="text-[#111827] text-[16px] font-bold font-inter-bold">
+        <Text style={{ color: t.colors.ink, fontFamily: t.fontFamily.bodyBold }} className="text-[16px] font-bold">
           Grand Total
         </Text>
-        <Text className="text-[#ef4444] text-[16px] font-bold font-inter-bold">
+        <Text style={{ color: t.colors.overdue, fontFamily: t.fontFamily.bodyBold }} className="text-[16px] font-bold">
           {formatINR(grandTotal)}
         </Text>
       </View>

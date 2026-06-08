@@ -28,18 +28,18 @@ export default function SaveEntryBottomSheet({
       withScroll={false}
       enableDynamicSizing={true}
     >
-      <View className="px-4 pt-5 w-full bg-surface flex-col gap-8">
+      <View style={{ backgroundColor: t.colors.surface }} className="px-4 pt-5 w-full flex-col gap-8">
         {/* Title & Subtitle */}
         <View className="w-full flex-col justify-start items-center gap-1">
           <Text
-            style={{ fontFamily: t.fontFamily.display }}
-            className="text-ink text-lg font-bold leading-7 text-center"
+            style={{ fontFamily: t.fontFamily.display, color: t.colors.ink }}
+            className="text-lg font-bold leading-7 text-center"
           >
             {`Save Entry ${billNumber}?`}
           </Text>
           <Text
-            style={{ fontFamily: t.fontFamily.body }}
-            className="text-muted text-base font-normal leading-6 text-center"
+            style={{ fontFamily: t.fontFamily.body, color: t.colors.muted }}
+            className="text-base font-normal leading-6 text-center"
           >
             Financial ledger will be updated immediately.
           </Text>
@@ -58,8 +58,8 @@ export default function SaveEntryBottomSheet({
           >
             <Share2 size={18} color="#ffffff" strokeWidth={2} />
             <Text
-              style={{ fontFamily: t.fontFamily.bodySemiBold }}
-              className="text-white text-base font-semibold leading-6 tracking-wide text-center"
+              style={{ fontFamily: t.fontFamily.bodySemiBold, color: "#ffffff" }}
+              className="text-base font-semibold leading-6 tracking-wide text-center"
             >
               Save & Share PDF
             </Text>
@@ -71,8 +71,12 @@ export default function SaveEntryBottomSheet({
               onClose();
               onSaveOnly();
             }}
-            style={{ borderColor: t.colors.primaryActive, borderWidth: 1 }}
-            className="w-full h-[52px] bg-surface rounded-full flex-row justify-center items-center active:opacity-90"
+            style={{
+              borderColor: t.colors.primaryActive,
+              borderWidth: 1,
+              backgroundColor: t.colors.surface,
+            }}
+            className="w-full h-[52px] rounded-full flex-row justify-center items-center active:opacity-90"
           >
             <Text
               style={{
@@ -90,7 +94,10 @@ export default function SaveEntryBottomSheet({
             onPress={onClose}
             className="w-full items-center justify-center mt-2 active:opacity-75"
           >
-            <Text className="text-muted font-semibold text-base leading-6 text-center">
+            <Text
+              style={{ color: t.colors.muted, fontFamily: t.fontFamily.bodySemiBold }}
+              className="font-semibold text-base leading-6 text-center"
+            >
               Cancel
             </Text>
           </Pressable>

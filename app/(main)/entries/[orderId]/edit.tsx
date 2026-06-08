@@ -14,7 +14,7 @@ import Input from "@/src/components/ui/Input";
 import { useOrderDetail, useUpdateOrder } from "@/src/hooks/useEntries";
 import { useAuthStore } from "@/src/store/authStore";
 import { useOrderStore, DraftOrderItem } from "@/src/store/orderStore";
-import { useTheme } from "@/src/utils/ThemeProvider";
+import { useTheme } from "@/src/theme/useTheme";
 import { generateBillPdf } from "@/src/utils/generateBillPdf";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
@@ -37,7 +37,7 @@ import { useNetworkSync } from "@/src/hooks/useNetworkSync";
 import { DatePickerSheet } from "@/src/components/ui/DateRangePicker";
 import { format } from "date-fns";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { handleNumpadInput } from "@/src/utils/numpad";
+import { handleNumpadInput, NumpadKey } from "@/src/utils/numpad";
 import * as Haptics from "expo-haptics";
 import { formatINR } from "@/src/utils/format";
 
@@ -85,7 +85,15 @@ function determinePreset(
 }
 
 export default function EditOrderScreen() {
-  const { colors } = useTheme();
+  const t = useTheme();
+  const colors = useMemo(() => ({
+    ...t.colors,
+    background: t.colors.canvas,
+    textPrimary: t.colors.ink,
+    textSecondary: t.colors.muted,
+    textBody: t.colors.body,
+    border: t.colors.borderDefault,
+  }), [t.colors]);
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const router = useRouter();
@@ -608,7 +616,14 @@ export default function EditOrderScreen() {
 
           {/* Card 1: Taxes & Grand Total (only for items) */}
           {items.length > 0 && (
-            <View className="bg-white mx-4 mb-3 rounded-xl border border-stone-300/30 p-4 shadow-sm">
+            <View
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                borderWidth: 1,
+              }}
+              className="mx-4 mb-3 rounded-xl p-4 shadow-sm"
+            >
               <OrderSummary
                 itemsTotal={itemsTotal}
                 loadingCharge={loadingCharge}
@@ -623,7 +638,14 @@ export default function EditOrderScreen() {
           )}
 
           {/* Due Date Preset Selector */}
-          <View className="bg-white mx-4 mb-3 rounded-xl border border-stone-300/30 p-4 shadow-sm">
+          <View
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              borderWidth: 1,
+            }}
+            className="mx-4 mb-3 rounded-xl p-4 shadow-sm"
+          >
             <Text
               style={{
                 fontSize: 12,
@@ -744,9 +766,19 @@ export default function EditOrderScreen() {
         animationType="fade"
         onRequestClose={() => setIsAddItemModalOpen(false)}
       >
-        <View className="flex-1 items-center justify-end bg-black/40 px-4 pb-6">
-          <View className="w-full rounded-2xl border border-stone-300/30 bg-white p-4">
-            <Text className="text-lg font-bold text-gray-900 mb-3">
+        <View style={{ backgroundColor: t.colors.surfaceOverlay }} className="flex-1 items-center justify-end px-4 pb-6">
+          <View
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              borderWidth: 1,
+            }}
+            className="w-full rounded-2xl p-4"
+          >
+            <Text
+              style={{ color: colors.textPrimary }}
+              className="text-lg font-bold mb-3"
+            >
               Add Item
             </Text>
             <View className="mt-1">
@@ -767,10 +799,15 @@ export default function EditOrderScreen() {
                       <TouchableOpacity
                         key={name}
                         onPress={() => setItemName(name)}
-                        className="rounded-full border border-stone-300/50 px-3 py-1 bg-stone-50"
+                        style={{
+                          borderColor: colors.border,
+                          backgroundColor: colors.surfaceRaised,
+                          borderWidth: 1,
+                        }}
+                        className="rounded-full px-3 py-1"
                         activeOpacity={0.75}
                       >
-                        <Text className="text-xs text-neutral-700">{name}</Text>
+                        <Text style={{ color: colors.textBody }} className="text-xs">{name}</Text>
                       </TouchableOpacity>
                     ))}
                 </View>
@@ -778,10 +815,11 @@ export default function EditOrderScreen() {
             </View>
 
             <View className="mt-4">
-              <Text className="font-semibold text-gray-900 mb-2">Quantity</Text>
-              <View className="rounded-xl border border-stone-300 bg-white px-4 py-3">
+              <Text style={{ color: colors.textPrimary }} className="font-semibold mb-2">Quantity</Text>
+              <View style={{ borderColor: colors.border, backgroundColor: colors.surfaceRaised, borderWidth: 1 }} className="rounded-xl px-4 py-3">
                 <TextInput
-                  className="text-[20px] font-bold text-gray-900 text-center"
+                  style={{ color: colors.textPrimary }}
+                  className="text-[20px] font-bold text-center"
                   value={itemQtyInput}
                   onChangeText={(text) => {
                     const cleaned = text.replace(/[^0-9.]/g, "");
@@ -797,8 +835,8 @@ export default function EditOrderScreen() {
             </View>
 
             <View className="mt-4">
-              <Text className="mb-2 font-semibold text-gray-900">Rate</Text>
-              <Text className="mb-2 text-2xl font-extrabold text-[#00873a]">
+              <Text style={{ color: colors.textPrimary }} className="mb-2 font-semibold">Rate</Text>
+              <Text style={{ color: colors.primary }} className="mb-2 text-2xl font-extrabold">
                 {formatINR(parseFloat(itemRateInput || "0"))}
               </Text>
               <View style={{ gap: 8 }}>
@@ -807,12 +845,14 @@ export default function EditOrderScreen() {
                     {row.split(",").map((key) => (
                       <TouchableOpacity
                         key={key}
-                        className="flex-1 items-center justify-center border border-stone-300"
                         style={{
                           borderRadius: 14,
                           height: 60,
-                          backgroundColor: "#fcfdfc",
+                          backgroundColor: colors.surfaceRaised,
+                          borderColor: colors.border,
+                          borderWidth: 1,
                         }}
+                        className="flex-1 items-center justify-center"
                         activeOpacity={0.75}
                         onPress={() => {
                           if (key === "⌫") {
@@ -825,7 +865,7 @@ export default function EditOrderScreen() {
                             return;
                           }
                           setItemRateInput((prev) =>
-                            handleNumpadInput(prev, key),
+                            handleNumpadInput(prev, key as NumpadKey),
                           );
                           Haptics.impactAsync(
                             Haptics.ImpactFeedbackStyle.Light,
@@ -841,7 +881,7 @@ export default function EditOrderScreen() {
                         }}
                         delayLongPress={500}
                       >
-                        <Text className="text-[20px] font-bold text-gray-800">
+                        <Text style={{ color: colors.textPrimary }} className="text-[20px] font-bold">
                           {key}
                         </Text>
                       </TouchableOpacity>
@@ -851,7 +891,7 @@ export default function EditOrderScreen() {
               </View>
             </View>
 
-            <Text className="mt-3 text-right font-semibold text-gray-900">
+            <Text style={{ color: colors.textPrimary }} className="mt-3 text-right font-semibold">
               Total:{" "}
               {formatINR(
                 (parseFloat(itemRateInput) || 0) *
@@ -861,7 +901,8 @@ export default function EditOrderScreen() {
 
             <TouchableOpacity
               onPress={addLineItem}
-              className="mt-4 rounded-xl bg-green-800 py-3.5"
+              style={{ backgroundColor: colors.primaryActive }}
+              className="mt-4 rounded-xl py-3.5"
               activeOpacity={0.75}
             >
               <Text className="text-center font-bold text-white text-base">
@@ -879,7 +920,7 @@ export default function EditOrderScreen() {
               className="mt-2 py-2"
               activeOpacity={0.75}
             >
-              <Text className="text-center font-semibold text-neutral-500">
+              <Text style={{ color: colors.textSecondary }} className="text-center font-semibold">
                 Cancel
               </Text>
             </TouchableOpacity>
@@ -910,7 +951,7 @@ export default function EditOrderScreen() {
   );
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+const createStyles = (colors: any) =>
   StyleSheet.create({
     quickAmountInputContainer: {
       borderWidth: 0,
