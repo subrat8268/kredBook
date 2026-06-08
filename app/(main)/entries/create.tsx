@@ -1239,20 +1239,18 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             />
           ) : null}
 
-          {isCustomDuePickerOpen && (
-            <DatePickerSheet
-              title="Select Due Date"
-              value={customDueDate ? new Date(`${customDueDate}T00:00:00`) : new Date()}
-              visible={isCustomDuePickerOpen}
-              onConfirm={(date) => {
-                setCustomDueDate(format(date, "yyyy-MM-dd"));
-                setDuePreset("custom");
-                setIsCustomDateActive(true);
-                setIsCustomDuePickerOpen(false);
-              }}
-onClose={() => setIsCustomDuePickerOpen(false)}
-            />
-          )}
+          <DatePickerSheet
+            title="Select Due Date"
+            value={customDueDate ? new Date(`${customDueDate}T00:00:00`) : new Date()}
+            visible={isCustomDuePickerOpen}
+            onConfirm={(date) => {
+              setCustomDueDate(format(date, "yyyy-MM-dd"));
+              setDuePreset("custom");
+              setIsCustomDateActive(true);
+              setIsCustomDuePickerOpen(false);
+            }}
+            onClose={() => setIsCustomDuePickerOpen(false)}
+          />
         </KeyboardAvoidingView>
       </SafeAreaView>
     </>

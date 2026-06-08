@@ -105,14 +105,22 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(
       [colors, insets.bottom, spacing],
     );
 
+    const isOpenRef = useRef(false);
+
     useImperativeHandle(ref, () => modalRef.current as BottomSheetModal, []);
 
     useEffect(() => {
       if (visible === undefined) return;
       if (visible) {
-        modalRef.current?.present();
+        if (!isOpenRef.current) {
+          isOpenRef.current = true;
+          modalRef.current?.present();
+        }
       } else {
-        modalRef.current?.dismiss();
+        if (isOpenRef.current) {
+          isOpenRef.current = false;
+          modalRef.current?.dismiss();
+        }
       }
     }, [visible]);
 
@@ -151,8 +159,12 @@ const BaseBottomSheet = forwardRef<BottomSheetModal, Props>(
         maxDynamicContentSize={maxDynamicContentSize}
         enablePanDownToClose={enablePanDownToClose}
         backdropComponent={renderBackdrop}
-        onDismiss={onClose}
+        onDismiss={() => {
+          isOpenRef.current = false;
+          onClose();
+        }}
         onChange={(index) => {
+          isOpenRef.current = index !== -1;
           if (index === -1) onClose();
         }}
         footerComponent={footer}

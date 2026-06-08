@@ -929,24 +929,22 @@ export default function EditOrderScreen() {
       </Modal>
 
       {/* Custom Due Date Picker Sheet */}
-      {isCustomDuePickerOpen && (
-        <DatePickerSheet
-          title="Select Due Date"
-          value={
-            customDueDate
-              ? new Date(createdAtCompat(customDueDate))
-              : new Date()
-          }
-          visible={isCustomDuePickerOpen}
-          onConfirm={(date) => {
-            setCustomDueDate(format(date, "yyyy-MM-dd"));
-            setDuePreset("custom");
-            setIsCustomDateActive(true);
-            setIsCustomDuePickerOpen(false);
-          }}
-          onClose={() => setIsCustomDuePickerOpen(false)}
-        />
-      )}
+      <DatePickerSheet
+        title="Select Due Date"
+        value={
+          customDueDate
+            ? new Date(createdAtCompat(customDueDate))
+            : new Date()
+        }
+        visible={isCustomDuePickerOpen}
+        onConfirm={(date) => {
+          setCustomDueDate(format(date, "yyyy-MM-dd"));
+          setDuePreset("custom");
+          setIsCustomDateActive(true);
+          setIsCustomDuePickerOpen(false);
+        }}
+        onClose={() => setIsCustomDuePickerOpen(false)}
+      />
     </SafeAreaView>
   );
 }
