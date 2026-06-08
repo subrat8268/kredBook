@@ -1,7 +1,7 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
-import { BottomSheetView } from "@gorhom/bottom-sheet";
-import { memo, useCallback, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useTheme } from "@/src/theme/useTheme";
+import { BottomSheetView, BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { memo, useCallback, useMemo, useState, useEffect, useRef } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import BaseBottomSheet from "../layer2/BaseBottomSheet";
 
 interface DateRange {
@@ -16,7 +16,7 @@ interface Props {
   onClose: () => void;
 }
 
-const YEARS = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
+const YEARS = Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i);
 const MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
@@ -54,13 +54,39 @@ const PickerColumn = memo(function PickerColumn({
   onChange,
   itemH,
 }: PickerColumnProps) {
-  const { colors } = useTheme();
+  const t = useTheme();
+  const scrollRef = useRef<any>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollRef.current?.scrollTo({ y: selected * itemH, animated: false });
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [selected, itemH]);
+
   return (
-    <View style={{ height: itemH * 3, overflow: "hidden" }}>
-      <ScrollView
+    <View style={{ height: itemH * 3, overflow: "hidden", position: "relative" }}>
+      {/* Selection zone indicator */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          top: itemH,
+          left: 0,
+          right: 0,
+          height: itemH,
+          borderTopWidth: 1.5,
+          borderBottomWidth: 1.5,
+          borderColor: t.colors.borderDefault,
+          backgroundColor: t.colors.surfaceRaised,
+          opacity: 0.6,
+          borderRadius: 8,
+        }}
+      />
+      <BottomSheetScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         snapToInterval={itemH}
-        decelerationRate="fast"
         contentContainerStyle={{ paddingVertical: itemH }}
         onMomentumScrollEnd={(e) => {
           const idx = Math.round(e.nativeEvent.contentOffset.y / itemH);
@@ -78,8 +104,9 @@ const PickerColumn = memo(function PickerColumn({
               <Text
                 style={{
                   fontSize: 16,
+                  fontFamily: isSelected ? t.fontFamily.bodyBold : t.fontFamily.body,
                   fontWeight: isSelected ? "700" : "400",
-                  color: isSelected ? colors.textPrimary : colors.textSecondary,
+                  color: isSelected ? t.colors.ink : t.colors.muted,
                 }}
               >
                 {typeof item === "string" ? item : String(item).padStart(2, "0")}
@@ -87,7 +114,7 @@ const PickerColumn = memo(function PickerColumn({
             </Pressable>
           );
         })}
-      </ScrollView>
+      </BottomSheetScrollView>
     </View>
   );
 });
@@ -101,13 +128,26 @@ interface DatePickerSheetProps {
 }
 
 function DatePickerSheet({ title, value, visible, onConfirm, onClose }: DatePickerSheetProps) {
-  const { colors, spacing, typography } = useTheme();
+  const t = useTheme();
 
+  const initialYearIndex = YEARS.indexOf(value.getFullYear());
+  const defaultYearIndex = YEARS.indexOf(new Date().getFullYear());
   const [day, setDay] = useState(value.getDate() - 1);
   const [month, setMonth] = useState(value.getMonth());
-  const [year, setYear] = useState(YEARS.indexOf(value.getFullYear()));
+  const [year, setYear] = useState(initialYearIndex >= 0 ? initialYearIndex : (defaultYearIndex >= 0 ? defaultYearIndex : 0));
   const itemH = 40;
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  useEffect(() => {
+    if (visible) {
+      const d = value.getDate() - 1;
+      const m = value.getMonth();
+      const y = YEARS.indexOf(value.getFullYear());
+      setDay(d >= 0 ? d : 0);
+      setMonth(m >= 0 ? m : 0);
+      setYear(y >= 0 ? y : (defaultYearIndex >= 0 ? defaultYearIndex : 0));
+    }
+  }, [visible, value, defaultYearIndex]);
 
   const handleConfirm = useCallback(() => {
     const y = YEARS[year] ?? new Date().getFullYear();
@@ -121,47 +161,48 @@ function DatePickerSheet({ title, value, visible, onConfirm, onClose }: DatePick
       visible={visible}
       onClose={onClose}
       title={title}
-      snapPoints={["72%"]}
+      snapPoints={["60%"]}
+      withScroll={false}
     >
       <BottomSheetView
         style={{
           flex: 1,
-          paddingHorizontal: spacing.screenPadding,
-          paddingBottom: spacing.md,
+          paddingHorizontal: t.layout.screenPaddingH,
+          paddingBottom: t.spacing[5],
         }}
       >
         <View
           style={{
             flexDirection: "row",
             gap: 8,
-            marginBottom: spacing.lg,
-            minHeight: itemH * 3 + 40,
+            marginBottom: t.spacing[4],
+            minHeight: itemH * 3 + 20,
           }}
         >
           <View style={{ flex: 1 }}>
-            <Text style={{ ...typography.caption, color: colors.textSecondary, marginBottom: 6, textAlign: "center" }}>Day</Text>
+            <Text style={{ ...t.typeStyles.caption, color: t.colors.muted, marginBottom: 8, textAlign: "center" }}>Day</Text>
             <PickerColumn items={days} selected={day} onChange={setDay} itemH={itemH} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ ...typography.caption, color: colors.textSecondary, marginBottom: 6, textAlign: "center" }}>Month</Text>
+            <Text style={{ ...t.typeStyles.caption, color: t.colors.muted, marginBottom: 8, textAlign: "center" }}>Month</Text>
             <PickerColumn items={MONTHS} selected={month} onChange={setMonth} itemH={itemH} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ ...typography.caption, color: colors.textSecondary, marginBottom: 6, textAlign: "center" }}>Year</Text>
+            <Text style={{ ...t.typeStyles.caption, color: t.colors.muted, marginBottom: 8, textAlign: "center" }}>Year</Text>
             <PickerColumn items={YEARS} selected={year} onChange={setYear} itemH={itemH} />
           </View>
         </View>
         <Pressable
           style={{
             marginTop: "auto",
-            backgroundColor: colors.primary,
-            borderRadius: 12,
+            backgroundColor: t.colors.primary,
+            borderRadius: t.radius.lg,
             paddingVertical: 14,
             alignItems: "center",
           }}
           onPress={handleConfirm}
         >
-          <Text style={{ color: colors.surface, fontWeight: "700", fontSize: 15 }}>Confirm</Text>
+          <Text style={{ color: t.colors.onPrimary, fontWeight: "700", fontSize: 15, fontFamily: t.fontFamily.bodySemiBold }}>Confirm</Text>
         </Pressable>
       </BottomSheetView>
     </BaseBottomSheet>
@@ -169,7 +210,7 @@ function DatePickerSheet({ title, value, visible, onConfirm, onClose }: DatePick
 }
 
 const DateRangePicker = memo(function DateRangePicker({ visible, value, onChange, onClose }: Props) {
-  const { colors, spacing, typography } = useTheme();
+  const t = useTheme();
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
 
@@ -181,50 +222,52 @@ const DateRangePicker = memo(function DateRangePicker({ visible, value, onChange
       StyleSheet.create({
         row: {
           flexDirection: "row",
-          gap: spacing.sm,
-          marginBottom: spacing.md,
+          gap: t.spacing[3],
+          marginBottom: t.spacing[4],
         },
         field: {
           flex: 1,
         },
         label: {
-          ...typography.caption,
-          color: colors.textSecondary,
-          marginBottom: spacing.xs,
+          ...t.typeStyles.caption,
+          color: t.colors.muted,
+          marginBottom: t.spacing[1],
         },
         pill: {
           flexDirection: "row",
           alignItems: "center",
           borderWidth: 1,
-          borderColor: colors.border,
-          borderRadius: 12,
-          paddingHorizontal: spacing.md,
+          borderColor: t.colors.borderDefault,
+          borderRadius: t.radius.lg,
+          paddingHorizontal: t.spacing[4],
           paddingVertical: 12,
-          backgroundColor: colors.background,
+          backgroundColor: t.colors.surface,
         },
         pillText: {
           flex: 1,
-          ...typography.body,
-          color: colors.textPrimary,
+          ...t.typeStyles.body,
+          color: t.colors.ink,
         },
         placeholder: {
-          ...typography.body,
-          color: colors.textSecondary,
+          ...t.typeStyles.body,
+          color: t.colors.muted,
         },
         clearBtn: {
-          marginLeft: spacing.xs,
+          marginLeft: t.spacing[2],
+          paddingVertical: 8,
         },
         clearText: {
-          color: colors.danger,
-          fontSize: 12,
+          color: t.colors.error,
+          fontSize: 14,
           fontWeight: "600",
+          fontFamily: t.fontFamily.bodySemiBold,
         },
       }),
-    [colors, spacing, typography],
+    [t],
   );
 
   return (
-    <BaseBottomSheet visible={visible} onClose={onClose} title="Select Date Range" snapPoints={["40%"]} withScroll={false}>
+    <BaseBottomSheet visible={visible} onClose={onClose} title="Select Date Range" snapPoints={["35%"]} withScroll={false}>
       <View style={styles.row}>
         <View style={styles.field}>
           <Text style={styles.label}>From</Text>
