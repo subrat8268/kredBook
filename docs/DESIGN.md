@@ -540,3 +540,56 @@ an overflow action menu.
 | Designed empty states with action | Show plain "No data" without explanation |
 | Tabular number columns | Left-align amounts in a list |
 | Lucide stroke icons throughout | Mix filled and stroke icon styles |
+
+---
+
+## 13. Code-Side Conventions
+
+> These rules apply to all React Native components in KredBook.
+> They are binding — not suggestions.
+
+### 13.1 Token Usage Rules
+
+- **`useTheme()` only** — call `const t = useTheme()` at the top of every
+  component that uses colour. Reference `t.colors.*`. No exceptions.
+- **No hardcoded hex in components** — if a colour isn't in `t.colors.*`,
+  add it to `theme.ts` first, then use the token.
+- **No Tailwind colour classes for semantic values** — Tailwind handles
+  spacing, layout, radius only. Semantic colours go through `t.colors.*`.
+- **`formatINR(amount)` for every currency display** — never build `₹`
+  strings manually.
+- **`Input variant="neutral"`** for all form inputs inside bottom sheets
+  and edit screens — never `variant="white"` (breaks dark mode).
+
+### 13.2 Component File Location Contract
+
+| Component type | Path |
+|---|---|
+| Shared UI primitives | `src/components/ui/` |
+| Shared layer-2 patterns | `src/components/layer2/` |
+| Entry detail subcomponents | `src/components/entries/detail/` |
+| Edit entry subcomponents | `src/components/entries/edit/` |
+| Customer detail subcomponents | `src/components/people/customer-detail/` |
+| Dashboard subcomponents | `src/features/dashboard/components/` |
+| Screen routes | `app/(main)/` |
+
+### 13.3 Dark Mode Checklist (per component)
+
+Before marking any component done:
+- [ ] All backgrounds use `t.colors.*` — no hardcoded `#ffffff` or `#f3f4f6`
+- [ ] All text uses `t.colors.ink`, `t.colors.muted`, or semantic equivalent
+- [ ] All borders use `t.colors.borderDefault` or `t.colors.borderSubtle`
+- [ ] `Input` uses `variant="neutral"`
+- [ ] Status badges use `StatusBadge` component — not inline styles
+- [ ] Gradient cards use `t.colors` status values — not hardcoded hex
+
+### 13.4 New Screen Doc Contract
+
+Every screen that reaches ✅ Done must have a `docs/screens/[name].md`
+before the STATUS.md row is closed. Minimum sections required:
+1. Screen purpose + user mental model
+2. Platform & canvas spec (tokens, not hex)
+3. Component list with file paths
+4. Per-state specs
+5. Action bar / CTA spec
+6. Navigation contract (navigates to/from)

@@ -1,7 +1,8 @@
 # Entry Detail Screen — Design Spec
 
-> **Status:** ✅ Locked — Audited & Finalized
+> **Status:** ✅ Locked — All states built, audited, and verified.
 > **Last updated:** 2026-06-09
+> **Doc version:** 2.0
 > **Phase:** 3 — Polish & Features (as of STATUS.md)
 > **Product Lead:** All open questions resolved. No open items remain.
 
@@ -736,3 +737,34 @@ src/components/entries/
 | Divider between all items or groups? | ✅ Every item via `ItemSeparatorComponent`. |
 | Date picker approach? | ✅ Custom grid calendar (no scroll-wheel) inside `BottomSheetModal`. |
 | `EntryQuickActions` fate? | ✅ Dead code. Must not render. Edit/Delete → overflow. Remind → Action Bar. |
+
+---
+
+## 15. NAVIGATION CONTRACT
+
+### Navigates FROM (entry points into this screen)
+
+| Source screen | Trigger | Params received |
+|---|---|---|
+| Entry List (`entries/index.tsx`) | Tap any entry row | `orderId`, `customerId` |
+| Customer Detail (`people/[customerId].tsx`) | Tap entry in timeline | `orderId`, `customerId` |
+| Dashboard activity feed | Tap overdue entry | `orderId`, `customerId` |
+| Record Payment success | Auto-redirect after payment | `orderId`, `customerId` |
+
+### Navigates TO (exits from this screen)
+
+| Destination | Trigger | Params passed |
+|---|---|---|
+| Edit Entry (`entries/[orderId]/edit.tsx`) | Overflow → Edit Entry | `orderId` |
+| Customer Detail (`people/[customerId].tsx`) | Tap Customer Card | `customerId` |
+| Record Payment sheet (P5) | Action Bar → Record Payment | `orderId`, `balance`, `customerId` |
+| Record Payment sheet (P5) | Overflow → Mark as Paid | `orderId`, `balance`, `customerId`, `prefillFull: true` |
+| Remind sheet (P3) | Action Bar → Remind | `orderId`, `customerId` |
+| Delete modal (P4) | Overflow → Delete Entry | `orderId` |
+| Native share sheet | Overflow → Share Invoice | PDF blob |
+| Native print dialog | Overflow → Print | PDF blob |
+
+### Back navigation
+- Back arrow → `router.back()`.
+- If navigating here post-create, pop to Entry List — not to Create Entry.
+- Android hardware back = same as back arrow.
