@@ -39,6 +39,7 @@ The screen visual hierarchy follows a natural logical cascade representing how a
 - **Cards:** `bg: t.colors.surface`, `border: 1px solid t.colors.borderDefault`, `borderRadius: 16px`, horizontal margin `16px`, gap `16px`
 - **No global tab bar** on this screen.
 - **Safe area:** `SafeAreaView` from `react-native-safe-area-context` targeting `["top", "left", "right"]`.
+- Edit Entry is the styling reference for this screen
 
 ### Design Token Reference
 
@@ -219,7 +220,7 @@ Absolute-positioned fixed bar. Renders **only** when `pendingOrderBalance > 0`.
 
 ---
 
-## 9. WHAT CHANGED AND WHY
+## 9. WHAT CHANGED AND WHY (Decision Log)
 
 | Old | New | Reason |
 |---|---|---|
@@ -229,3 +230,4 @@ Absolute-positioned fixed bar. Renders **only** when `pendingOrderBalance > 0`.
 | Client-side balance calculation | `sync_party_customer_balance` Postgres trigger | Single source of truth, no client drift |
 | `useSafeAreaInsets` not wired in sticky bar | `paddingBottom: Math.max(insets.bottom, 12)` | Android gesture nav area no longer clips bar |
 | Global FAB on detail screen | Removed — Add Entry in Quick Actions only | Detail screens use contextual actions, not global FAB |
+| `background`, `textPrimary`, `textBody`, `textSecondary`, `surfaceAlt` | `canvas`, `ink`, `body`, `muted`, `surfaceRaised` | 2026-06-09 — Token alignment: all components migrated to canvas/ink/body/muted/surfaceRaised aliases per edit-entry standard |
