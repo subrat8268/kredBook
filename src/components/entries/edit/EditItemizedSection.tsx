@@ -25,45 +25,47 @@ export default function EditItemizedSection({
   const t = useTheme();
   const [expanded, setExpanded] = useState(defaultExpanded);
 
-  const N = items.length;
-  const countLabel = N > 0 ? ` (${N})` : "";
-
-  return (
-    <View
-      style={{
-        backgroundColor: t.colors.surface,
-        borderColor: t.colors.borderDefault,
-        borderWidth: 1,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 1,
-      }}
-      className="mx-4 mb-3 rounded-xl overflow-hidden"
-    >
-      {/* Accordion Header */}
-      <Pressable
-        onPress={() => setExpanded(!expanded)}
+    const N = items.length;
+    const countLabel = N > 0 ? ` (${N})` : " (0)";
+    const emptySubtext = N === 0 && !expanded ? " — Tap to add items" : "";
+  
+    return (
+      <View
         style={{
-          backgroundColor: t.colors.surfaceRaised,
-          borderBottomWidth: expanded ? 1 : 0,
-          borderBottomColor: t.colors.borderDefault,
+          backgroundColor: t.colors.surface,
+          borderColor: t.colors.borderDefault,
+          borderWidth: 1,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 1,
         }}
-        className="w-full flex-row justify-between items-center p-4"
+        className="mx-4 mb-3 rounded-xl overflow-hidden"
       >
-        <View className="flex-row items-center gap-1.5">
-          <Pencil size={15} color={t.colors.primary} />
-          <Text
-            style={{
-              fontFamily: t.fontFamily.bodySemiBold,
-              color: t.colors.ink,
-            }}
-            className="text-base font-semibold"
-          >
-            Itemized Details{countLabel}
-          </Text>
-        </View>
+        {/* Accordion Header */}
+        <Pressable
+          onPress={() => setExpanded(!expanded)}
+          style={{
+            backgroundColor: t.colors.surfaceRaised,
+            borderBottomWidth: expanded ? 1 : 0,
+            borderBottomColor: t.colors.borderDefault,
+          }}
+          className="w-full flex-row justify-between items-center p-4"
+        >
+          <View className="flex-row items-center gap-1.5 flex-1 pr-2">
+            <Pencil size={15} color={t.colors.primary} />
+            <Text
+              style={{
+                fontFamily: t.fontFamily.bodySemiBold,
+                color: t.colors.ink,
+              }}
+              className="text-base font-semibold"
+              numberOfLines={1}
+            >
+              Itemized Details{countLabel}{emptySubtext}
+            </Text>
+          </View>
         {expanded ? (
           <ChevronUp size={20} color={t.colors.body} />
         ) : (

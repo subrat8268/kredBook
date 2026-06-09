@@ -17,6 +17,10 @@ export default function EntrySummaryCard({
   const t = useTheme();
   const totalOutstanding = previousBalance + newTotal;
 
+  if (previousBalance <= 0) {
+    return null;
+  }
+
   return (
     <View
       style={{

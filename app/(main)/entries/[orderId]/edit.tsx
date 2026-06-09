@@ -535,7 +535,7 @@ export default function EditOrderScreen() {
                   onChangeText={setQuickAmount}
                   keyboardType="numeric"
                   autoFocus
-                  variant="white"
+                  variant="neutral"
                   containerStyle={styles.quickAmountInputContainer}
                   inputStyle={styles.quickAmountInput}
                 />
@@ -786,7 +786,7 @@ export default function EditOrderScreen() {
                 placeholder="Item Name"
                 value={itemName}
                 onChangeText={setItemName}
-                variant="white"
+                variant="neutral"
               />
               {itemNameCache.length ? (
                 <View className="mt-2 flex-row flex-wrap" style={{ gap: 6 }}>

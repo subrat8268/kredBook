@@ -15,7 +15,7 @@ import { usePeople } from "@/src/hooks/usePeople";
 import { useAuthStore } from "@/src/store/authStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatINR } from "@/src/utils/format";
-import { handleNumpadInput } from "@/src/utils/numpad";
+import { handleNumpadInput, NumpadKey } from "@/src/utils/numpad";
 import { getRecentCustomerIds, prependRecentCustomer } from "@/src/utils/recentCustomers";
 import { buildEntryShareMessage } from "@/src/utils/shareTemplates";
 import { useQueryClient } from "@tanstack/react-query";
@@ -879,7 +879,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                                 return;
                               }
-                            setQuickAmount((prev) => handleNumpadInput(prev, key));
+                            setQuickAmount((prev) => handleNumpadInput(prev, key as NumpadKey));
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           }}
                           onLongPress={() => {
@@ -1082,7 +1082,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                     placeholder="Item Name"
                     value={itemName}
                     onChangeText={setItemName}
-                    variant="white"
+                    variant="neutral"
                   />
                   {itemNameCache.length ? (
                     <View className="mt-2 flex-row flex-wrap" style={{ gap: 6 }}>
@@ -1140,7 +1140,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                                 return;
                               }
-                              setItemRateInput((prev) => handleNumpadInput(prev, key));
+                              setItemRateInput((prev) => handleNumpadInput(prev, key as NumpadKey));
                               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             }}
                             onLongPress={() => {
