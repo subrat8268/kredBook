@@ -27,7 +27,7 @@ export default function DashboardRecentActivity({
   return (
     <>
       <View className="mt-section-md flex-row items-center justify-between">
-        <Text className="text-section-title text-textPrimary dark:text-textPrimary-dark">Recent activity</Text>
+        <Text className="text-section-title text-ink dark:text-ink-dark">Recent activity</Text>
         <Pressable
           onPress={onOpenEntries}
           accessibilityRole="button"
@@ -51,7 +51,7 @@ export default function DashboardRecentActivity({
             </View>
             <View className="flex-1 border-l border-danger-light pl-3 dark:border-danger-dark">
               <Text className="text-card-title text-danger-text">Couldn&apos;t load recent activity</Text>
-              <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={2}>
+              <Text className="mt-1 text-caption text-muted dark:text-muted-dark" numberOfLines={2}>
                 {errorMessage}
               </Text>
               <Pressable
@@ -70,8 +70,8 @@ export default function DashboardRecentActivity({
               <ClipboardList size={16} color={colors.textMuted} strokeWidth={2.2} />
             </View>
             <View className="flex-1">
-              <Text className="text-card-title text-textPrimary dark:text-textPrimary-dark">No recent transactions yet</Text>
-              <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark">Create an entry or record a payment to see activity here.</Text>
+              <Text className="text-card-title text-ink dark:text-ink-dark">No recent transactions yet</Text>
+              <Text className="mt-1 text-caption text-muted dark:text-muted-dark">Create an entry or record a payment to see activity here.</Text>
             </View>
           </View>
         ) : (

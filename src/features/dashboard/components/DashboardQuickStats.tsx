@@ -62,7 +62,7 @@ export default function DashboardQuickStats({
             </Text>
             <Text
               className="mt-1 text-[22px] font-inter-bold"
-              style={{ color: isOverdue ? colors.warning : colors.textPrimary }}
+              style={{ color: isOverdue ? colors.warning : colors.ink }}
               numberOfLines={1}
               adjustsFontSizeToFit
               minimumFontScale={0.6}

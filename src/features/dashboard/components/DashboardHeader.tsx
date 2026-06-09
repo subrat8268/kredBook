@@ -30,7 +30,7 @@ export default function DashboardHeader({ colors, spacing, businessName, overdue
           <Text style={{ color: colors.surface, fontSize: 14, fontWeight: "700" }}>{getBusinessInitials(businessName)}</Text>
         </View>
         <View style={{ marginLeft: spacing.md, flex: 1 }}>
-          <Text numberOfLines={1} style={{ fontSize: 15, fontWeight: "700", color: colors.textPrimary }}>{businessName}</Text>
+          <Text numberOfLines={1} style={{ fontSize: 15, fontWeight: "700", color: colors.ink }}>{businessName}</Text>
           <Text numberOfLines={1} style={{ fontSize: 12, color: colors.textMuted }}>{getGreetingOnly()} 👋</Text>
         </View>
       </View>

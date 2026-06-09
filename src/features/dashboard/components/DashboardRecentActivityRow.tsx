@@ -16,13 +16,13 @@ export default function DashboardRecentActivityRow({ item, isLast, onOpenEntries
     <View>
       <Pressable className="flex-row items-start" onPress={onOpenEntries}>
         <View className="mr-3 mt-1 h-8 w-8 items-center justify-center rounded-full bg-surface-alt dark:bg-surface-dark">
-          <Receipt size={16} color={colors.textSecondary} strokeWidth={2} />
+          <Receipt size={16} color={colors.muted} strokeWidth={2} />
         </View>
         <View className="flex-1">
-          <Text className="text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>
+          <Text className="text-body font-inter-semibold text-ink dark:text-ink-dark" numberOfLines={1}>
             {item.name || item.title}
           </Text>
-          <Text className="mt-0.5 text-caption text-textSecondary dark:text-textSecondary-dark">
+          <Text className="mt-0.5 text-caption text-muted dark:text-muted-dark">
             {item.title} · {new Date(item.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
           </Text>
         </View>

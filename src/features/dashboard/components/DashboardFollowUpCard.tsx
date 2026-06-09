@@ -27,7 +27,7 @@ export default function DashboardFollowUpCard({ person, onCollect }: Props) {
           <Text className="text-[11px] font-inter-semibold text-warning-dark dark:text-warning-light">{person.daysSince}d overdue</Text>
         </View>
       </View>
-      <Text className="mt-3 text-body font-inter-semibold text-textPrimary dark:text-textPrimary-dark" numberOfLines={1}>
+      <Text className="mt-3 text-body font-inter-semibold text-ink dark:text-ink-dark" numberOfLines={1}>
         {person.name}
       </Text>
       <Text className="mt-1 text-card-title text-overdue-text dark:text-danger">{formatINR(person.balance)}</Text>

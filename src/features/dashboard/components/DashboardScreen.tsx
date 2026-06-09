@@ -120,16 +120,16 @@ export default function DashboardScreen({
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={["top"]}>
-        <StatusBar barStyle={statusBarStyle} backgroundColor={colors.background} translucent={false} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }} edges={["top"]}>
+        <StatusBar barStyle={statusBarStyle} backgroundColor={colors.canvas} translucent={false} />
         <DashboardSkeleton spacing={spacing} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={["top"]}>
-      <StatusBar barStyle={statusBarStyle} backgroundColor={colors.background} translucent={false} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }} edges={["top"]}>
+      <StatusBar barStyle={statusBarStyle} backgroundColor={colors.canvas} translucent={false} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

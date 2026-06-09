@@ -32,7 +32,7 @@ export default function DashboardFollowUpSection({
     <>
       <View className="mt-section-md flex-row items-center justify-between">
         <View className="flex-row items-center">
-          <Text className="text-section-title text-textPrimary dark:text-textPrimary-dark">Top follow-up</Text>
+          <Text className="text-section-title text-ink dark:text-ink-dark">Top follow-up</Text>
           <View className="ml-2 rounded-full bg-border px-2 py-0.5 dark:bg-border-dark">
             <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: "600" }}>{overdueTotalCount}</Text>
           </View>
@@ -59,7 +59,7 @@ export default function DashboardFollowUpSection({
           </View>
           <View className="flex-1 pl-3">
             <Text className="text-card-title text-danger-text">Couldn&apos;t load follow-up list</Text>
-            <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark" numberOfLines={2}>
+            <Text className="mt-1 text-caption text-muted dark:text-muted-dark" numberOfLines={2}>
               {errorMessage}
             </Text>
             <Pressable
@@ -79,8 +79,8 @@ export default function DashboardFollowUpSection({
           </View>
           <View className="flex-1">
             <Text className="text-card-title text-success-dark">All clear! No overdue customers</Text>
-            <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark">Great job - payments are on track for now.</Text>
-            <Text className="mt-1 text-caption text-textSecondary dark:text-textSecondary-dark">When customers go overdue, they&apos;ll show up here.</Text>
+            <Text className="mt-1 text-caption text-muted dark:text-muted-dark">Great job - payments are on track for now.</Text>
+            <Text className="mt-1 text-caption text-muted dark:text-muted-dark">When customers go overdue, they&apos;ll show up here.</Text>
           </View>
         </View>
       ) : (
