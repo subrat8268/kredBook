@@ -45,12 +45,7 @@ export default function OrdersScreen() {
 
   const { isConnected } = useNetworkSync();
 
-  const FILTER_OPTIONS: { label: StatusFilter; color: string; bg: string }[] = [
-    { label: "All", color: colors.textPrimary, bg: colors.surface },
-    { label: "Paid", color: colors.primary, bg: colors.successBg },
-    { label: "Pending", color: colors.warning, bg: colors.warningBg },
-    { label: "Overdue", color: colors.overdue.text, bg: colors.overdue.bg },
-  ];
+  const FILTER_OPTIONS: StatusFilter[] = ["All", "Paid", "Pending", "Overdue"];
 
   // Filter orders by status (client-side)
   const orders = useMemo(() => {
@@ -126,23 +121,23 @@ export default function OrdersScreen() {
           className="mb-3 -mx-2"
         >
           {FILTER_OPTIONS.map((f) => {
-            const active = filter === f.label;
+            const active = filter === f;
             return (
               <TouchableOpacity
-                key={f.label}
-                onPress={() => setFilter(f.label as StatusFilter)}
+                key={f}
+                onPress={() => setFilter(f)}
                 className="px-3 py-1.5 rounded-full mr-2"
                 style={{
-                  backgroundColor: active ? f.color : f.bg,
-                  borderWidth: active ? 0 : 1,
-                  borderColor: colors.border,
+                  backgroundColor: active ? colors.primary : colors.surface,
+                  borderWidth: 1,
+                  borderColor: active ? colors.primary : colors.border,
                 }}
               >
                 <Text
                   className="text-[13px] font-bold"
-                  style={{ color: active ? colors.surface : f.color }}
+                  style={{ color: active ? colors.surface : colors.muted }}
                 >
-                  {f.label}
+                  {f}
                 </Text>
               </TouchableOpacity>
             );
@@ -160,7 +155,7 @@ export default function OrdersScreen() {
       {/* ── Entry list ────────────────────────────────────────────────── */}
       {isLoading && orders.length === 0 ? (
         <View className="flex-1 items-center justify-center">
-          <Text className="text-textSecondary dark:text-textSecondary-dark text-[14px]">
+          <Text className="text-muted text-[14px]">
             Loading entries…
           </Text>
         </View>
@@ -203,7 +198,7 @@ export default function OrdersScreen() {
           ListFooterComponent={
             isFetchingNextPage ? (
                 <Text
-                  className="text-center text-textSecondary dark:text-textSecondary-dark text-[13px]"
+                  className="text-center text-muted text-[13px]"
                   style={{ padding: spacing.lg }}
                 >
                 Loading more…
@@ -213,7 +208,7 @@ export default function OrdersScreen() {
           ListEmptyComponent={
             !isConnected ? (
               <View className="flex-1 items-center justify-center px-8 pt-20">
-                <Text className="text-textSecondary dark:text-textSecondary-dark text-[14px] text-center">
+                <Text className="text-muted text-[14px] text-center">
                   Connect to the internet to load entries.
                 </Text>
               </View>
