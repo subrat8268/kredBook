@@ -1,55 +1,15 @@
-/**
- * DateRangePicker & DatePickerSheet
- *
- * Architecture notes:
- * - DatePickerSheet uses a direct BottomSheetModal ref (NOT BaseBottomSheet)
- *   to avoid nested-modal conflicts that caused 5–10 s delay.
- * - Columns use plain React Native ScrollView (NOT BottomSheetScrollView)
- *   because the outer container is BottomSheetView, not a scroll container.
- *   This eliminates the gesture-recognizer conflict that froze scrolling.
- * - Only 3× repetition per column (≤93 items max) for instant rendering.
- * - Fixed snapPoints=["50%"] so the sheet never opens full-screen.
- * - DateRangePicker keeps BaseBottomSheet (it has no inner scrollers).
- */
-
 import { useTheme } from "@/src/theme/useTheme";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
-  BottomSheetScrollView,
   BottomSheetView,
   type BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
-import {
-  memo,
-  useCallback,
-  useMemo,
-  useState,
-  useEffect,
-  useRef,
-} from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ChevronLeft, ChevronRight } from "lucide-react-native";
+import { memo, useCallback, useMemo, useState, useEffect, useRef } from "react";
+import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BaseBottomSheet from "../layer2/BaseBottomSheet";
-
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR - 5 + i);
-const MONTHS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
-
-// 3× repetition gives enough runway without rendering thousands of items
-const REPEAT = 3;
-const ITEM_H = 44;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -72,118 +32,22 @@ function formatDisplay(str?: string): string {
   });
 }
 
-// ─── PickerColumn ─────────────────────────────────────────────────────────────
+const MONTHS_FULL = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
-interface PickerColumnProps {
-  items: (number | string)[];
-  selected: number; // index into items[]
-  onSelect: (index: number) => void;
-  label: string;
-}
-
-const PickerColumn = memo(function PickerColumn({
-  items,
-  selected,
-  onSelect,
-  label,
-}: PickerColumnProps) {
-  const t = useTheme();
-  const scrollRef = useRef<any>(null);
-
-  // Build repeated array: [items, items, items]
-  // Start offset = 1 * items.length so there is runway in both directions
-  const repeated = useMemo<(number | string)[]>(() => {
-    const out: (number | string)[] = [];
-    for (let r = 0; r < REPEAT; r++) out.push(...items);
-    return out;
-  }, [items]);
-
-  const startOffset = items.length; // index of the first "middle" copy
-
-  // Scroll to current selection (in the middle copy) without animation
-  const scrollToIdx = useCallback(
-    (idx: number, animated: boolean) => {
-      const targetY = (startOffset + idx) * ITEM_H;
-      scrollRef.current?.scrollTo({ y: targetY, animated });
-    },
-    [startOffset],
-  );
-
-  // On mount and whenever selection changes, snap to position
-  useEffect(() => {
-    const t = setTimeout(() => scrollToIdx(selected, false), 80);
-    return () => clearTimeout(t);
-  }, [selected, scrollToIdx]);
-
-  const handleMomentumEnd = useCallback(
-    (e: any) => {
-      const rawIdx = Math.round(e.nativeEvent.contentOffset.y / ITEM_H);
-      // Map absolute index back to item index (wrapping)
-      const itemIdx = ((rawIdx % items.length) + items.length) % items.length;
-      onSelect(itemIdx);
-      // Silently re-center to the middle copy so there is always runway
-      const centeredY = (startOffset + itemIdx) * ITEM_H;
-      scrollRef.current?.scrollTo({ y: centeredY, animated: false });
-    },
-    [items.length, startOffset, onSelect],
-  );
-
-  return (
-    <View style={styles.columnWrap}>
-      <Text style={[styles.colLabel, { color: t.colors.muted, fontFamily: t.fontFamily.body }]}>
-        {label}
-      </Text>
-
-      {/* Selection highlight band */}
-      <View style={styles.columnInner}>
-        <View
-          pointerEvents="none"
-          style={[
-            styles.highlightBand,
-            {
-              borderColor: t.colors.borderDefault,
-              backgroundColor: t.colors.surfaceRaised,
-            },
-          ]}
-        />
-
-        <BottomSheetScrollView
-          ref={scrollRef}
-          showsVerticalScrollIndicator={false}
-          snapToInterval={ITEM_H}
-          contentContainerStyle={{ paddingVertical: ITEM_H }}
-          onMomentumScrollEnd={handleMomentumEnd}
-        >
-          {repeated.map((item, i) => {
-            const itemIdx = i % items.length;
-            const isSelected = itemIdx === selected;
-            return (
-              <Pressable
-                key={i}
-                style={styles.colItem}
-                onPress={() => {
-                  onSelect(itemIdx);
-                  scrollToIdx(itemIdx, true);
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 17,
-                    fontFamily: isSelected ? t.fontFamily.bodyBold : t.fontFamily.body,
-                    fontWeight: isSelected ? "700" : "400",
-                    color: isSelected ? t.colors.ink : t.colors.muted,
-                  }}
-                >
-                  {typeof item === "number" ? String(item).padStart(2, "0") : item}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </BottomSheetScrollView>
-      </View>
-    </View>
-  );
-});
+const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 // ─── DatePickerSheet ─────────────────────────────────────────────────────────
 
@@ -193,6 +57,8 @@ export interface DatePickerSheetProps {
   visible: boolean;
   onConfirm: (d: Date) => void;
   onClose: () => void;
+  minDate?: Date;
+  maxDate?: Date;
 }
 
 export function DatePickerSheet({
@@ -201,30 +67,28 @@ export function DatePickerSheet({
   visible,
   onConfirm,
   onClose,
+  minDate,
+  maxDate,
 }: DatePickerSheetProps) {
   const t = useTheme();
   const insets = useSafeAreaInsets();
   const modalRef = useRef<BottomSheetModal>(null);
   const isOpenRef = useRef(false);
 
-  // ── Local state for the three wheels ──
-  const [day, setDay] = useState(() => value.getDate() - 1);
-  const [month, setMonth] = useState(() => value.getMonth());
-  const [year, setYear] = useState(() => {
-    const idx = YEARS.indexOf(value.getFullYear());
-    return idx >= 0 ? idx : YEARS.indexOf(CURRENT_YEAR) >= 0 ? YEARS.indexOf(CURRENT_YEAR) : 5;
-  });
+  // Calendar navigation state
+  const [navDate, setNavDate] = useState(() => new Date(value));
+  // Selected date inside calendar
+  const [selectedDate, setSelectedDate] = useState(() => new Date(value));
 
-  // Sync wheels when sheet opens or value changes
+  // Sync selected and navigated dates when opening
   useEffect(() => {
     if (!visible) return;
-    setDay(value.getDate() - 1);
-    setMonth(value.getMonth());
-    const idx = YEARS.indexOf(value.getFullYear());
-    setYear(idx >= 0 ? idx : YEARS.indexOf(CURRENT_YEAR) >= 0 ? YEARS.indexOf(CURRENT_YEAR) : 5);
+    const initial = new Date(value);
+    setSelectedDate(initial);
+    setNavDate(initial);
   }, [visible, value]);
 
-  // Open / close the native BottomSheetModal
+  // Open / close BottomSheetModal
   useEffect(() => {
     if (visible) {
       if (!isOpenRef.current) {
@@ -252,38 +116,111 @@ export function DatePickerSheet({
   );
 
   const handleConfirm = useCallback(() => {
-    const y = YEARS[year] ?? CURRENT_YEAR;
-    const d = new Date(y, month, day + 1);
-    onConfirm(d);
+    onConfirm(selectedDate);
     onClose();
-  }, [day, month, year, onConfirm, onClose]);
+  }, [selectedDate, onConfirm, onClose]);
 
   const handleDismiss = useCallback(() => {
     isOpenRef.current = false;
     onClose();
   }, [onClose]);
 
+  // Month navigation helpers
+  const handlePrevMonth = () => {
+    setNavDate((prev) => {
+      const next = new Date(prev);
+      next.setMonth(next.getMonth() - 1);
+      return next;
+    });
+  };
+
+  const handleNextMonth = () => {
+    setNavDate((prev) => {
+      const next = new Date(prev);
+      next.setMonth(next.getMonth() + 1);
+      return next;
+    });
+  };
+
+  const gridCells = useMemo(() => {
+    const year = navDate.getFullYear();
+    const month = navDate.getMonth();
+
+    const firstDay = new Date(year, month, 1);
+    let startDayOfWeek = firstDay.getDay();
+    startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+
+    const totalDays = new Date(year, month + 1, 0).getDate();
+
+    const prevMonthTotalDays = new Date(year, month, 0).getDate();
+
+    const cells: { date: Date; isCurrentMonth: boolean; key: string }[] = [];
+
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+      const dayVal = prevMonthTotalDays - i;
+      const prevDate = new Date(year, month - 1, dayVal);
+      cells.push({
+        date: prevDate,
+        isCurrentMonth: false,
+        key: `prev-${dayVal}`,
+      });
+    }
+
+    // Add current month days
+    for (let d = 1; d <= totalDays; d++) {
+      const currDate = new Date(year, month, d);
+      cells.push({
+        date: currDate,
+        isCurrentMonth: true,
+        key: `curr-${d}`,
+      });
+    }
+
+    const totalGridSlots = 42;
+    const remaining = totalGridSlots - cells.length;
+    for (let i = 1; i <= remaining; i++) {
+      const nextDate = new Date(year, month + 1, i);
+      cells.push({
+        date: nextDate,
+        isCurrentMonth: false,
+        key: `next-${i}`,
+      });
+    }
+
+    return cells;
+  }, [navDate]);
+
+  const navMonthName = MONTHS_FULL[navDate.getMonth()];
+  const navYear = navDate.getFullYear();
+
   return (
     <BottomSheetModal
       ref={modalRef}
       index={0}
-      snapPoints={["50%"]}
+      snapPoints={["71%"]}
       enableDynamicSizing={false}
       enablePanDownToClose
       backdropComponent={renderBackdrop}
       onDismiss={handleDismiss}
-      handleIndicatorStyle={{ backgroundColor: t.colors.borderDefault, width: 40 }}
-      backgroundStyle={{ backgroundColor: t.colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24 }}
+      handleIndicatorStyle={{
+        backgroundColor: t.colors.borderDefault,
+        width: 40,
+      }}
+      backgroundStyle={{
+        backgroundColor: t.colors.surface,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+      }}
     >
       <BottomSheetView
         style={{
           flex: 1,
           paddingHorizontal: t.layout.screenPaddingH,
-          paddingBottom: insets.bottom + t.spacing[3],
+          paddingBottom: Math.max(insets.bottom, 24) + t.spacing[4],
         }}
       >
         {/* Header */}
-        <View style={styles.sheetHeader}>
+        <View className="flex-row items-center justify-between py-3 mb-1">
           <Text
             style={{
               fontSize: 18,
@@ -294,24 +231,132 @@ export function DatePickerSheet({
           >
             {title}
           </Text>
-          <Pressable onPress={onClose} hitSlop={12} style={styles.closeBtn}>
-            <Text style={{ fontSize: 22, color: t.colors.muted, lineHeight: 26 }}>✕</Text>
+          <Pressable onPress={onClose} hitSlop={12} className="p-1">
+            <Text
+              style={{ fontSize: 22, color: t.colors.muted, lineHeight: 26 }}
+            >
+              ✕
+            </Text>
           </Pressable>
         </View>
 
-        {/* Wheel columns */}
-        <View style={styles.wheelsRow}>
-          <PickerColumn items={DAYS} selected={day} onSelect={setDay} label="Day" />
-          <PickerColumn items={MONTHS} selected={month} onSelect={setMonth} label="Month" />
-          <PickerColumn items={YEARS} selected={year} onSelect={setYear} label="Year" />
+        {/* Month Selector Control Row */}
+        <View className="flex-row items-center justify-between py-2 mb-2">
+          <Pressable onPress={handlePrevMonth} className="p-2" hitSlop={12}>
+            <ChevronLeft size={20} color={t.colors.ink} />
+          </Pressable>
+          <Text
+            style={[
+              { color: t.colors.ink, fontFamily: t.fontFamily.displaySemiBold },
+            ]}
+            className="text-base font-semibold"
+          >
+            {navMonthName} {navYear}
+          </Text>
+          <Pressable onPress={handleNextMonth} className="p-2" hitSlop={12}>
+            <ChevronRight size={20} color={t.colors.ink} />
+          </Pressable>
         </View>
 
-        {/* Confirm button */}
+        {/* Calendar Grid Header (Weekday Names) */}
+        <View className="flex-row justify-around py-1 mb-1">
+          {WEEKDAYS.map((day, idx) => (
+            <Text
+              key={idx}
+              style={[
+                { color: t.colors.muted, fontFamily: t.fontFamily.bodyMedium },
+              ]}
+              className="w-[38px] text-center text-[12px] font-semibold"
+            >
+              {day}
+            </Text>
+          ))}
+        </View>
+
+        {/* Calendar Days Grid */}
+        <View className="flex-row flex-wrap justify-around gap-1 gap-y-2">
+          {gridCells.map((cell) => {
+            const isSelected =
+              cell.date.getDate() === selectedDate.getDate() &&
+              cell.date.getMonth() === selectedDate.getMonth() &&
+              cell.date.getFullYear() === selectedDate.getFullYear();
+
+            const isToday =
+              cell.date.getDate() === new Date().getDate() &&
+              cell.date.getMonth() === new Date().getMonth() &&
+              cell.date.getFullYear() === new Date().getFullYear();
+
+            // Check if day is outside bounds (minDate / maxDate validation)
+            const cellTime = new Date(
+              cell.date.getFullYear(),
+              cell.date.getMonth(),
+              cell.date.getDate(),
+            ).getTime();
+            const minTime = minDate
+              ? new Date(
+                  minDate.getFullYear(),
+                  minDate.getMonth(),
+                  minDate.getDate(),
+                ).getTime()
+              : null;
+            const maxTime = maxDate
+              ? new Date(
+                  maxDate.getFullYear(),
+                  maxDate.getMonth(),
+                  maxDate.getDate(),
+                ).getTime()
+              : null;
+
+            const isDisabled =
+              (minTime !== null && cellTime < minTime) ||
+              (maxTime !== null && cellTime > maxTime);
+
+            return (
+              <Pressable
+                key={cell.key}
+                disabled={isDisabled}
+                style={[
+                  isSelected && { backgroundColor: t.colors.primary },
+                  !isSelected &&
+                    isToday && {
+                      borderWidth: 1.5,
+                      borderColor: t.colors.primary,
+                    },
+                ]}
+                className={`w-[38px] h-[38px] rounded-full justify-center items-center ${isDisabled ? "opacity-25" : ""}`}
+                onPress={() => {
+                  setSelectedDate(new Date(cell.date));
+                  if (!cell.isCurrentMonth) {
+                    setNavDate(new Date(cell.date));
+                  }
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontFamily: isSelected
+                      ? t.fontFamily.bodyBold
+                      : t.fontFamily.body,
+                    color: isSelected
+                      ? t.colors.onPrimary
+                      : cell.isCurrentMonth
+                        ? t.colors.ink
+                        : t.colors.faint,
+                  }}
+                >
+                  {cell.date.getDate()}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* Confirm Button */}
         <Pressable
           style={[
-            styles.confirmBtn,
             { backgroundColor: t.colors.primary, borderRadius: t.radius.lg },
           ]}
+          className="py-3.5 items-center mt-auto"
           onPress={handleConfirm}
         >
           <Text
@@ -357,53 +402,6 @@ const DateRangePicker = memo(function DateRangePicker({
   const fromDate = useMemo(() => parseDate(value.from), [value.from]);
   const toDate = useMemo(() => parseDate(value.to), [value.to]);
 
-  const s = useMemo(
-    () =>
-      StyleSheet.create({
-        row: {
-          flexDirection: "row",
-          gap: t.spacing[3],
-          marginBottom: t.spacing[4],
-        },
-        field: { flex: 1 },
-        label: {
-          ...t.typeStyles.caption,
-          color: t.colors.muted,
-          marginBottom: t.spacing[1],
-        },
-        pill: {
-          flexDirection: "row",
-          alignItems: "center",
-          borderWidth: 1,
-          borderColor: t.colors.borderDefault,
-          borderRadius: t.radius.lg,
-          paddingHorizontal: t.spacing[4],
-          paddingVertical: 12,
-          backgroundColor: t.colors.surface,
-        },
-        pillText: {
-          flex: 1,
-          ...t.typeStyles.body,
-          color: t.colors.ink,
-        },
-        placeholder: {
-          ...t.typeStyles.body,
-          color: t.colors.muted,
-        },
-        clearBtn: {
-          marginLeft: t.spacing[2],
-          paddingVertical: 8,
-        },
-        clearText: {
-          color: t.colors.error,
-          fontSize: 14,
-          fontWeight: "600",
-          fontFamily: t.fontFamily.bodySemiBold,
-        },
-      }),
-    [t],
-  );
-
   return (
     <>
       <BaseBottomSheet
@@ -413,19 +411,57 @@ const DateRangePicker = memo(function DateRangePicker({
         snapPoints={["35%"]}
         withScroll={false}
       >
-        <View style={s.row}>
-          <View style={s.field}>
-            <Text style={s.label}>From</Text>
-            <Pressable style={s.pill} onPress={() => setShowFromPicker(true)}>
-              <Text style={value.from ? s.pillText : s.placeholder}>
+        <View className="flex-row gap-3 mb-4">
+          <View className="flex-1">
+            <Text
+              style={[{ color: t.colors.muted, fontFamily: t.fontFamily.body }]}
+              className="text-[13px] tracking-wide mb-1"
+            >
+              From
+            </Text>
+            <Pressable
+              style={{
+                borderColor: t.colors.borderDefault,
+                borderRadius: t.radius.lg,
+                backgroundColor: t.colors.surface,
+              }}
+              className="flex-row items-center border px-4 py-3"
+              onPress={() => setShowFromPicker(true)}
+            >
+              <Text
+                style={{
+                  fontFamily: t.fontFamily.body,
+                  color: value.from ? t.colors.ink : t.colors.muted,
+                }}
+                className="flex-1 text-[15px]"
+              >
                 {value.from ? formatDisplay(value.from) : "Select start date"}
               </Text>
             </Pressable>
           </View>
-          <View style={s.field}>
-            <Text style={s.label}>To</Text>
-            <Pressable style={s.pill} onPress={() => setShowToPicker(true)}>
-              <Text style={value.to ? s.pillText : s.placeholder}>
+          <View className="flex-1">
+            <Text
+              style={[{ color: t.colors.muted, fontFamily: t.fontFamily.body }]}
+              className="text-[13px] tracking-wide mb-1"
+            >
+              To
+            </Text>
+            <Pressable
+              style={{
+                borderColor: t.colors.borderDefault,
+                borderRadius: t.radius.lg,
+                backgroundColor: t.colors.surface,
+              }}
+              className="flex-row items-center border px-4 py-3"
+              onPress={() => setShowToPicker(true)}
+            >
+              <Text
+                style={{
+                  fontFamily: t.fontFamily.body,
+                  color: value.to ? t.colors.ink : t.colors.muted,
+                }}
+                className="flex-1 text-[15px]"
+              >
                 {value.to ? formatDisplay(value.to) : "Select end date"}
               </Text>
             </Pressable>
@@ -435,9 +471,17 @@ const DateRangePicker = memo(function DateRangePicker({
         {(value.from || value.to) && (
           <Pressable
             onPress={() => onChange({ from: undefined, to: undefined })}
-            style={s.clearBtn}
+            className="ml-2 py-2"
           >
-            <Text style={s.clearText}>Clear dates</Text>
+            <Text
+              style={{
+                color: t.colors.error,
+                fontFamily: t.fontFamily.bodySemiBold,
+              }}
+              className="text-[14px] font-semibold"
+            >
+              Clear dates
+            </Text>
           </Pressable>
         )}
       </BaseBottomSheet>
@@ -447,8 +491,17 @@ const DateRangePicker = memo(function DateRangePicker({
         title="Select From Date"
         value={fromDate}
         visible={showFromPicker}
-        onConfirm={(d) => onChange({ ...value, from: toDateStr(d) })}
+        onConfirm={(d) => {
+          const fromStr = toDateStr(d);
+          let newTo = value.to;
+          // Validation: If selected From Date is after current To Date, update To Date to match
+          if (value.to && new Date(fromStr) > new Date(value.to)) {
+            newTo = fromStr;
+          }
+          onChange({ from: fromStr, to: newTo });
+        }}
         onClose={() => setShowFromPicker(false)}
+        maxDate={value.to ? parseDate(value.to) : undefined}
       />
       <DatePickerSheet
         title="Select To Date"
@@ -456,69 +509,10 @@ const DateRangePicker = memo(function DateRangePicker({
         visible={showToPicker}
         onConfirm={(d) => onChange({ ...value, to: toDateStr(d) })}
         onClose={() => setShowToPicker(false)}
+        minDate={value.from ? parseDate(value.from) : undefined}
       />
     </>
   );
-});
-
-// ─── Shared styles ────────────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-  columnWrap: {
-    flex: 1,
-    alignItems: "center",
-  },
-  colLabel: {
-    fontSize: 11,
-    fontWeight: "500",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-    marginBottom: 6,
-  },
-  columnInner: {
-    height: ITEM_H * 3,
-    width: "100%",
-    overflow: "hidden",
-    position: "relative",
-  },
-  highlightBand: {
-    position: "absolute",
-    top: ITEM_H,
-    left: 4,
-    right: 4,
-    height: ITEM_H,
-    borderTopWidth: 1.5,
-    borderBottomWidth: 1.5,
-    borderRadius: 10,
-    opacity: 0.55,
-    zIndex: 1,
-  },
-  colItem: {
-    height: ITEM_H,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  sheetHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-    marginBottom: 4,
-  },
-  closeBtn: {
-    padding: 4,
-  },
-  wheelsRow: {
-    flexDirection: "row",
-    gap: 8,
-    flex: 1,
-    alignItems: "center",
-  },
-  confirmBtn: {
-    paddingVertical: 14,
-    alignItems: "center",
-    marginTop: 12,
-  },
 });
 
 export default DateRangePicker;
