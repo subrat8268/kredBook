@@ -340,18 +340,15 @@ export default function CustomersScreen() {
               status === "Paid" ? 0 : Math.abs(item.outstandingBalance ?? 0);
 
             return (
-                <ListItem
-                  title={item.name}
-                  titleNode={renderHighlightedName(item.name)}
-                  subtitle={`Last activity: ${formatRelativeActivity(item.lastActiveAt)}`}
-                  leftSlot={<Avatar name={item.name} size="md" />}
+              <ListItem
+                title={item.name}
+                titleNode={renderHighlightedName(item.name)}
+                subtitle={`Last activity: ${formatRelativeActivity(item.lastActiveAt)}`}
+                leftSlot={<Avatar name={item.name} size="md" />}
                 amount={displayBalance}
                 amountColor={amountColorMap[status]}
                 status={status}
                 onPress={() => handleOpenCustomer(item.id)}
-                variant="row"
-                bordered={index < filteredCustomers.length - 1}
-                noMargin
                 secondaryAction={
                   <Pressable
                     onPress={() => handleAddEntry(item)}
@@ -445,7 +442,7 @@ const createStyles = (
     },
     chipText: {
       ...typography.caption,
-      color: colors.textSecondary,
+      color: colors.muted,
       fontWeight: "600",
     },
     chipTextActive: {
@@ -459,12 +456,12 @@ const createStyles = (
     },
     activeFilterLabel: {
       ...typography.caption,
-      color: colors.textSecondary,
+      color: colors.muted,
     },
     searchCountLabel: {
       ...typography.small,
       marginTop: spacing.xs,
-      color: colors.textSecondary,
+      color: colors.muted,
     },
     highlightText: {
       color: colors.primary,
@@ -478,7 +475,7 @@ const createStyles = (
       borderRadius: radius.full,
       borderWidth: 1,
       borderColor: colors.border,
-      backgroundColor: colors.surfaceAlt,
+      backgroundColor: colors.surfaceRaised,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.xs,
     },
@@ -487,7 +484,7 @@ const createStyles = (
     },
     entryActionText: {
       ...typography.small,
-      color: colors.textSecondary,
+      color: colors.muted,
       fontWeight: "600",
     },
   });

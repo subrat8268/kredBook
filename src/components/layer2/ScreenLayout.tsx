@@ -17,7 +17,7 @@ export default memo(function ScreenLayout({
   withStatusBar = true,
 }: Props) {
   const { colors, statusBarStyle } = useTheme();
-  const resolvedBackgroundColor = backgroundColor ?? colors.background;
+  const resolvedBackgroundColor = backgroundColor ?? colors.canvas;
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: resolvedBackgroundColor }]} edges={edges}>

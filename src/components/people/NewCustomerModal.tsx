@@ -106,7 +106,7 @@ export default function NewCustomerModal({
         <View className="h-16 w-16 items-center justify-center rounded-full mb-2" style={{ backgroundColor: avatarColor }}>
           <Text className="text-surface text-[22px] font-bold">{avatarLabel}</Text>
         </View>
-        <Text className="text-xs text-textSecondary dark:text-textSecondary-dark">Avatar auto-generated from name</Text>
+        <Text className="text-xs text-muted">Avatar auto-generated from name</Text>
       </View>
 
       <View className="gap-3">

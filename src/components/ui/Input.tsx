@@ -70,7 +70,7 @@ export default memo(function Input({
       StyleSheet.create({
         label: {
           ...typography.label,
-          color: colors.textSecondary,
+          color: colors.muted,
           marginBottom: spacing.xs,
         },
         container: {
@@ -90,7 +90,7 @@ export default memo(function Input({
           justifyContent: "flex-start",
         },
         input: {
-          color: colors.textPrimary,
+          color: colors.ink,
           fontSize: 16,
           paddingVertical: 0,
           minHeight: 24,
@@ -145,7 +145,7 @@ export default memo(function Input({
             onBlur={onBlur}
             secureTextEntry={secureTextEntry}
             keyboardType={keyboardType}
-            placeholderTextColor={placeholderTextColor ?? colors.textSecondary}
+            placeholderTextColor={placeholderTextColor ?? colors.muted}
             multiline={multiline}
             numberOfLines={numberOfLines}
             maxLength={maxLength}

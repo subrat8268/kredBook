@@ -55,7 +55,7 @@ export default memo(function ListItem({
   const { colors, radius, spacing, typography } = useTheme();
   const styles = useMemo(() => {
     const shadowStyle: ViewStyle = {
-      shadowColor: colors.textPrimary,
+      shadowColor: colors.ink,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.04,
       shadowRadius: 8,
@@ -181,7 +181,7 @@ export default memo(function ListItem({
               (onPress && !status && !trailingSlot ? (
                 <View style={styles.detailsRow}>
                   <Text style={typography.caption}>View details</Text>
-                  <ChevronRight size={14} color={colors.textSecondary} strokeWidth={2} />
+                  <ChevronRight size={14} color={colors.muted} strokeWidth={2} />
                 </View>
               ) : null)}
           </View>
