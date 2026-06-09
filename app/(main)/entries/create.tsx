@@ -555,7 +555,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={["top", "left", "right"]}>
+      <SafeAreaView className="flex-1 bg-canvas" edges={["top", "left", "right"]}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
@@ -571,7 +571,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             >
               <ArrowLeft
                 size={22}
-                color={colors.textPrimary}
+                color={colors.ink}
                 strokeWidth={2.2}
               />
             </TouchableOpacity>
@@ -598,7 +598,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                     color:
                       entryType === "bill" && entryMode === "quick"
                         ? colors.surface
-                        : colors.textSecondary,
+                        : colors.muted,
                   }}
                 >
                   Quick Entry
@@ -624,7 +624,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                     color:
                       entryType === "bill" && entryMode === "bill"
                         ? colors.surface
-                        : colors.textSecondary,
+                        : colors.muted,
                   }}
                 >
                   Bill Mode
@@ -643,7 +643,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               >
                 <Text
                   className="text-[12px] font-bold"
-                  style={{ color: entryType === "payment" ? colors.surface : colors.textSecondary }}
+                  style={{ color: entryType === "payment" ? colors.surface : colors.muted }}
                 >
                   Payment
                 </Text>
@@ -656,7 +656,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             <View className="mt-2 flex-row items-center justify-end gap-2">
               <SyncStatus />
               {queueLength > 0 ? (
-                <Text className="text-[12px] text-textSecondary dark:text-textSecondary-dark">
+                <Text className="text-[12px] text-muted">
                   ({queueLength} pending)
                 </Text>
               ) : null}
@@ -687,7 +687,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                     style={{
                       backgroundColor: selectedCustomerMeta
                         ? getAvatarColor(selectedCustomerMeta.name, avatarColors)
-                        : colors.background,
+                        : colors.canvas,
                     }}
                 >
                   {selectedCustomerMeta ? (
@@ -695,13 +695,13 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                       {getInitials(selectedCustomerMeta.name)}
                     </Text>
                   ) : (
-                    <User size={24} color={colors.textSecondary} />
+                    <User size={24} color={colors.muted} />
                   )}
                 </View>
 
                 <View className="flex-1">
                   <Text
-                    className="text-[17px] font-bold text-textPrimary dark:text-textPrimary-dark"
+                    className="text-[17px] font-bold text-ink"
                     numberOfLines={1}
                   >
                     {selectedCustomerMeta
@@ -709,7 +709,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                       : "Select Customer"}
                   </Text>
                   {!selectedCustomerMeta && (
-                    <Text className="mt-0.5 text-[14px] text-textSecondary dark:text-textSecondary-dark">
+                    <Text className="mt-0.5 text-[14px] text-muted">
                       Choose from your customers list below
                     </Text>
                   )}
@@ -751,7 +751,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             ) : null}
 
             {selectedCustomerMeta && isPaymentZeroBalance ? (
-              <Text className="mt-1 text-[12px] text-textSecondary dark:text-textSecondary-dark">
+              <Text className="mt-1 text-[12px] text-muted">
                 This customer has no pending balance
               </Text>
             ) : null}
@@ -772,7 +772,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
               >
             {entryType === "bill" && entryMode === "bill" ? (
               <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
-                <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">
+                <Text className="mb-2 text-[11px] font-bold tracking-widest text-muted">
                   ITEMS
                 </Text>
                 {lineItems.length ? (
@@ -814,12 +814,12 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                         >
                           <View className="flex-row items-center justify-between">
                             <View className="flex-1">
-                              <Text className="font-semibold text-textPrimary dark:text-textPrimary-dark">{item.name}</Text>
-                              <Text className="text-textSecondary dark:text-textSecondary-dark">{item.quantity} × {formatINR(item.rate)}</Text>
+                              <Text className="font-semibold text-ink">{item.name}</Text>
+                              <Text className="text-muted">{item.quantity} × {formatINR(item.rate)}</Text>
                             </View>
                             <View className="items-end">
-                              <Text className="font-bold text-textPrimary dark:text-textPrimary-dark">{formatINR(item.quantity * item.rate)}</Text>
-                              <Text className="text-[10px] text-textSecondary dark:text-textSecondary-dark">tap to edit</Text>
+                              <Text className="font-bold text-ink">{formatINR(item.quantity * item.rate)}</Text>
+                              <Text className="text-[10px] text-muted">tap to edit</Text>
                             </View>
                           </View>
                         </TouchableOpacity>
@@ -847,13 +847,13 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             {/* AMOUNT HERO + NUMPAD */}
             {entryMode === "quick" ? (
             <View className="mt-2">
-              <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">
+              <Text className="mb-2 text-[11px] font-bold tracking-widest text-muted">
                 {entryType === "payment" ? "PAYMENT AMOUNT" : "AMOUNT"}
               </Text>
-              <View className="rounded-2xl px-5 py-6" style={{ backgroundColor: colors.surfaceAlt, borderRadius: 16, padding: 8 }}>
+              <View className="rounded-2xl px-5 py-6" style={{ backgroundColor: colors.surfaceRaised, borderRadius: 16, padding: 8 }}>
                 <Text
                   className="text-center text-[52px] font-extrabold"
-                  style={{ color: entryAmount === 0 ? colors.textMuted : colors.primary }}
+                  style={{ color: entryAmount === 0 ? colors.faint : colors.primary }}
                 >
                   {formatINR(parseFloat(quickAmount || "0"), { maximumFractionDigits: 2 })}
                 </Text>
@@ -911,7 +911,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             <View>
               {orderNoteExpanded || orderNote.trim() ? (
                 <View>
-                  <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">
+                  <Text className="mb-2 text-[11px] font-bold tracking-widest text-muted">
                     ADD NOTE (OPTIONAL)
                   </Text>
                   <View className="rounded-2xl border border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
@@ -919,7 +919,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                       placeholder="Optional note (e.g. delivery address, PO number…)"
                       value={orderNote}
                       onChangeText={setOrderNote}
-                      variant="white"
+                      variant="neutral"
                       multiline
                       numberOfLines={3}
                       maxLength={280}
@@ -932,7 +932,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             </View>
 
             <View className="mt-5" style={{ display: entryType === "payment" ? "none" : "flex" }}>
-              <Text className="mb-2 text-[11px] font-bold tracking-widest text-textSecondary dark:text-textSecondary-dark">DUE DATE</Text>
+              <Text className="mb-2 text-[11px] font-bold tracking-widest text-muted">DUE DATE</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -982,10 +982,10 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                           chip.key === "custom"
                             ? isCustomDateActive
                               ? colors.surface
-                              : colors.textSecondary
+                              : colors.muted
                             : duePreset === chip.key
                               ? colors.surface
-                              : colors.textSecondary,
+                              : colors.muted,
                         fontWeight: "600",
                       }}
                     >
@@ -1025,20 +1025,20 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
             {entryType === "payment" && (
               <View className="mt-2 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
                 <View className="flex-row justify-between items-center mb-2">
-                  <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">
+                  <Text className="text-[14px] text-muted">
                     Payment Amount
                   </Text>
-                  <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
+                  <Text className="text-[16px] font-bold text-ink">
                     {formatINR(entryAmount, { maximumFractionDigits: 2 })}
                   </Text>
                 </View>
 
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-[14px] text-textSecondary dark:text-textSecondary-dark">Previous Balance</Text>
-                  <Text className="text-[16px] font-bold text-textPrimary dark:text-textPrimary-dark">
+                  <Text className="text-[14px] text-muted">Previous Balance</Text>
+                  <Text className="text-[16px] font-bold text-ink">
                     {formatINR(previousBalance, { maximumFractionDigits: 2 })}
                   </Text>
-</View>
+                </View>
               </View>
             )}
               </Animated.View>
@@ -1076,7 +1076,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
           >
             <View className="flex-1 items-center justify-end bg-black/40 px-4 pb-6">
               <View className="w-full rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
-                <Text className="text-lg font-bold text-textPrimary dark:text-textPrimary-dark">{editingItemId ? "Edit Item" : "Add Item"}</Text>
+                <Text className="text-lg font-bold text-ink">{editingItemId ? "Edit Item" : "Add Item"}</Text>
                 <View className="mt-3">
                   <Input
                     placeholder="Item Name"
@@ -1096,7 +1096,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                             className="rounded-full border border-border px-3 py-1 dark:border-border-dark"
                             activeOpacity={0.75}
                           >
-                            <Text className="text-xs text-textSecondary dark:text-textSecondary-dark">{name}</Text>
+                            <Text className="text-xs text-muted">{name}</Text>
                           </TouchableOpacity>
                         ))}
                     </View>
@@ -1104,10 +1104,10 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                 </View>
 
                 <View className="mt-4">
-                  <Text className="font-semibold text-textPrimary dark:text-textPrimary-dark mb-2">Quantity</Text>
+                  <Text className="font-semibold text-ink mb-2">Quantity</Text>
                   <View className="rounded-xl border border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
                     <TextInput
-                      className="text-[20px] font-bold text-textPrimary dark:text-textPrimary-dark text-center"
+                      className="text-[20px] font-bold text-ink text-center"
                       value={itemQtyInput}
                       onChangeText={(text) => {
                         const cleaned = text.replace(/[^0-9.]/g, "");
@@ -1117,13 +1117,13 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                       }}
                       keyboardType="decimal-pad"
                       placeholder="1"
-                      placeholderTextColor={colors.textSecondary}
+                      placeholderTextColor={colors.muted}
                     />
                   </View>
                 </View>
 
                 <View className="mt-4">
-                  <Text className="mb-2 font-semibold text-textPrimary dark:text-textPrimary-dark">Rate</Text>
+                  <Text className="mb-2 font-semibold text-ink">Rate</Text>
                   <Text className="mb-2 text-2xl font-extrabold text-primary">{formatINR(parseFloat(itemRateInput || "0"))}</Text>
                   <View style={{ gap: 8 }}>
                     {["1,2,3", "4,5,6", "7,8,9", ".,0,⌫"].map((row) => (
@@ -1151,7 +1151,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                             }}
                             delayLongPress={500}
                           >
-                            <Text className="text-[24px] font-bold text-textPrimary dark:text-textPrimary-dark">{key}</Text>
+                            <Text className="text-[24px] font-bold text-ink">{key}</Text>
                           </TouchableOpacity>
                         ))}
                       </View>
@@ -1159,7 +1159,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                   </View>
                 </View>
 
-                <Text className="mt-3 text-right font-semibold text-textPrimary dark:text-textPrimary-dark">
+                <Text className="mt-3 text-right font-semibold text-ink">
                   Total: {formatINR((parseFloat(itemRateInput) || 0) * (parseFloat(itemQtyInput) || 1))}
                 </Text>
 
@@ -1182,10 +1182,10 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
           >
             <View className="flex-1 items-center justify-center bg-black/50 px-5">
               <View className="w-full max-w-[360px] rounded-2xl border border-border bg-surface p-5 dark:border-border-dark dark:bg-surface-dark">
-                <Text className="text-[18px] font-bold text-textPrimary dark:text-textPrimary-dark">
+                <Text className="text-[18px] font-bold text-ink">
                   Entry saved
                 </Text>
-                <Text className="mt-2 text-[14px] text-textSecondary dark:text-textSecondary-dark">
+                <Text className="mt-2 text-[14px] text-muted">
                   Choose what you want to do next.
                 </Text>
 
@@ -1204,7 +1204,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                   className="mt-3 rounded-xl border border-border py-3 dark:border-border-dark"
                   activeOpacity={0.75}
                 >
-                  <Text className="text-center text-[15px] font-semibold text-textPrimary dark:text-textPrimary-dark">
+                  <Text className="text-center text-[15px] font-semibold text-ink">
                     View Entry
                   </Text>
                 </TouchableOpacity>
@@ -1214,7 +1214,7 @@ const parsedQty = parseFloat(itemQtyInput) || 1;
                   className="mt-3 py-2"
                   activeOpacity={0.75}
                 >
-                  <Text className="text-center text-[14px] font-semibold text-textSecondary dark:text-textSecondary-dark">
+                  <Text className="text-center text-[14px] font-semibold text-muted">
                     Done
                   </Text>
                 </TouchableOpacity>
@@ -1266,6 +1266,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     },
     noteInput: {
       fontSize: 15,
-      color: colors.textPrimary,
+      color: colors.ink,
     },
   });
