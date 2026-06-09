@@ -30,10 +30,12 @@
 
 ## ⚡ Next Up (Priority Queue)
 
-> Updated 2026-06-01. 4.1.5 Customer Detail is pending final screenshot
-> verification only (4.1.5d.5). Entry Detail P0 component build is now
-> IN PROGRESS — header ✅ done, overflow menu 🔄 in polish.
-> Component order: Header → Customer Card → Hero → Payments → Items → Action Bar.
+> Updated 2026-06-09. Entry Detail (all states P0–P10) is fully built,
+> audited, and locked. Edit Entry 4.2.4a + 4.2.4b are done.
+> Immediate next tasks in order:
+> 1. 4.1.5d.5 — Customer Detail final safe-area verification (closeout)
+> 2. 4.2.4c — Edit Entry screenshot polish
+> 3. 4.2.1a — Customer List audit (do NOT start before 4.1.5d.5 is closed)
 
 ---
 
@@ -287,13 +289,13 @@ Verification:
 | # | Component | Status | Notes | Commit |
 |---|---|---|---|---|
 | 4.2.3-H | Header — back, title, date, ⋮ overflow only | ✅ Done | Call button removed from header. Overflow icon is sole admin entry point. | [ddf9d9c](https://github.com/subrat8268/kredBook/commit/ddf9d9cc0cee06aef5cc4696b26ddb27b37fa7e2) |
-| 4.2.3-P2 | ⋮ Overflow Menu — 6 items, icon+label inline, dividers, backdrop | 🔄 In Polish | Icon+label stacking bug (View wrapper). Fix prompt issued. | [ddf9d9c](https://github.com/subrat8268/kredBook/commit/ddf9d9cc0cee06aef5cc4696b26ddb27b37fa7e2) |
-| 4.2.3-C | Customer Card — green avatar, name, phone, call+chat icons, tappable | ✅ Done | Wired click handlers for call and chat actions. |  |
-| 4.2.3-Hero | Hero Card — orange gradient, balance due, pending pill, due date | ⏳ Pending | After Customer Card. |  |
-| 4.2.3-Pay | Payments Card — progress track, empty state, payment rows | ⏳ Pending | After Hero. |  |
-| 4.2.3-Items | Items Card — collapsed subtotal, expand/collapse, item rows | ⏳ Pending | After Payments. |  |
-| 4.2.3-AB | Action Bar — sticky bottom, Remind secondary + Record Payment primary | ⏳ Pending | After Items. |  |
-| 4.2.3-States | PARTIAL (P9) + PAID (P10) + OVERDUE (P8) states | ⏳ Pending | After all P0 components locked. |  |
+| 4.2.3-P2 | ⋮ Overflow Menu — 6 items, icon+label inline, dividers, backdrop | ✅ Done | Icon+label stacking bug resolved. Bare Lucide elements confirmed. No View wrapper. | [ddf9d9c](https://github.com/subrat8268/kredBook/commit/ddf9d9cc0cee06aef5cc4696b26ddb27b37fa7e2) |
+| 4.2.3-C | Customer Card — green avatar, name, phone, call+chat icons, tappable | ✅ Done | Call and chat handlers wired. Deleted customer edge case handled. |  |
+| 4.2.3-Hero | Hero Card — orange gradient, balance due, pending pill, due date | ✅ Done | Status-driven gradient. Orange/Red/Blue/Green. Watermark circle top-right. |  |
+| 4.2.3-Pay | Payments Card — progress track, empty state, payment rows | ✅ Done | Progress bar, payment rows, empty state. No pagination in v1. |  |
+| 4.2.3-Items | Items Card — collapsed subtotal, expand/collapse, item rows | ✅ Done | Collapsed default. Auto-expand on 1 item. Subtotal ≠ grand total. |  |
+| 4.2.3-AB | Action Bar — sticky bottom, Remind secondary + Record Payment primary | ✅ Done | Sticky bottom. Record Payment + Remind. Full-width Share Receipt on PAID. |  |
+| 4.2.3-States | PARTIAL (P9) + PAID (P10) + OVERDUE (P8) states | ✅ Done | P8 Overdue, P9 Partial, P10 Paid all built and verified. |  |
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|---|
