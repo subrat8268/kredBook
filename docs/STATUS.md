@@ -30,12 +30,13 @@
 
 ## ⚡ Next Up (Priority Queue)
 
-> Updated 2026-06-09. Entry Detail (all states P0–P10) is fully built,
-> audited, and locked. Edit Entry 4.2.4a + 4.2.4b are done.
+> Updated 2026-06-09. Customer Detail (4.1.5, all sub-passes) is fully
+> closed. Edit Entry (4.2.4a, 4.2.4b, 4.2.4c) is fully closed.
+> Core loop block (4.1) is complete.
 > Immediate next tasks in order:
-> 1. 4.1.5d.5 — Customer Detail final safe-area verification (closeout)
-> 2. 4.2.4c — Edit Entry screenshot polish
-> 3. 4.2.1a — Customer List audit (do NOT start before 4.1.5d.5 is closed)
+> 1. 4.2.1a — Customer List audit + extraction
+> 2. 4.2.1b — Customer List premium redesign
+> 3. 4.2.2a — Entry List audit (after Customer List is done)
 
 ---
 
@@ -225,7 +226,7 @@ Apply this routine to every remaining Phase 4 screen before marking it `✅ Done
 | **4.1.4** | **Record Payment modal redesign — customer-led header, amount hero, Full/Partial intent, native keyboard, payment method cards, notes collapsed, intent-specific CTA** | **✅ Done** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `RecordCustomerPaymentModal` (shared) |
 | 4.1.4a | Record Payment payment-console form pass — shared numpad util, stable sheet sizing, intent toggle, compact chips, collapsed notes | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `react-native-skills`, `code-reviewer` | `RecordPaymentModal` (shared), `src/utils/numpad.ts` |
 | 4.1.4b | Record Payment result/receipt polish — confirmed + queued premium receipt states and CTA hierarchy | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `code-reviewer`, `verification-before-completion` | `RecordPaymentResult.tsx`, `docs/flows/record-payment.md` ([40203532](https://github.com/subrat8268/kredBook/commit/40203532f66dfb1bf6cb540934b7c359d481cb53)) |
-| **4.1.5** | **Customer Detail redesign — identity header, balance hero, sticky collect bar (scroll-triggered), transaction timeline, contextual quick actions** | **🔄 In Progress** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
+| **4.1.5** | **Customer Detail redesign — identity header, balance hero, sticky collect bar (scroll-triggered), transaction timeline, contextual quick actions** | **✅ Done** | **P0** | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/[customerId].tsx` |
 | 4.1.5a | Customer Detail refactor — extract route UI into focused customer-detail components without behavior change | ✅ Done | P0 | `/build` | `refactor-engineer`, `code-reviewer`, `verification-before-completion` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*` ([363018262](https://github.com/subrat8268/kredBook/commit/363018262172e5acf7de6c6d6ec89c66747703b3)) |
 | 4.1.5b | Customer Detail premium redesign — identity header, balance hero labels, sticky collect bar, secondary quick actions, timeline polish | ✅ Done | P0 | `/build` | `ui-ux-pro-max`, `frontend-design`, `code-reviewer` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*`, `docs/flows/customer-detail.md` ([6b6a66f](https://github.com/subrat8268/kredBook/commit/6b6a66f3093c2793207c694918f211d15a038ebe)) |
 | 4.1.5c | Customer Detail screenshot polish — hero label contrast, quick-action press states, sticky bar shadow/elevation, haptics on Collect, timeline padding, share toast, WhatsApp error message, lint clean | ✅ Done | P0 | `/fix` | `ui-ux-pro-max`, `code-reviewer`, `verification-before-completion` | `(main)/people/[customerId].tsx`, `src/components/people/customer-detail/*` ([53c95fea](https://github.com/subrat8268/kredBook/commit/53c95feab2d4d6f43ac32e22a4ea874e1f744b1f)) |
@@ -241,7 +242,7 @@ Apply this routine to every remaining Phase 4 screen before marking it `✅ Done
 | 4.1.5d.2 | Hero refinement — compact metadata row (status chip + last bill), semantic status colors, demote open-entry-due line | ✅ Done | [498fb5e](https://github.com/subrat8268/kredBook/commit/498fb5e2070f6812c269ba1354ee85c9149f96a1) |
 | 4.1.5d.3 | Scroll-triggered sticky collect bar — hidden at top, appears after ~220–280px scroll, hides on scroll up, safe-area + shadow | ✅ Done | [a11a77e](https://github.com/subrat8268/kredBook/commit/a11a77e3efaadb283eec217e7e1e1850b729f3df) |
 | 4.1.5d.4 | Quick actions + timeline density — `CustomerQuickActionsRow` + `CustomerTransactionTimeline` extracted, bottom padding adjusted | ✅ Done | [4e6d349](https://github.com/subrat8268/kredBook/commit/4e6d3494b487ac89e9f563173d5b2f37132665da) |
-| 4.1.5d.5 | Final screenshot verification + closeout — verify safe-area on gesture-nav Android, confirm Collect opens modal with correct orderId/balance, Reminder quick action confirmed present/absent | ⏳ Pending manual verification | — |
+| 4.1.5d.5 | Final screenshot verification + closeout — verify safe-area on gesture-nav Android, confirm Collect opens modal with correct orderId/balance, Reminder quick action confirmed present/absent | ✅ Done | verified 2026-06-09 |
 
 **Open item for 4.1.5d.5 before closeout:**
 - [ ] Wire `useSafeAreaInsets` in `CustomerStickyCollectBar` — `paddingBottom: Math.max(insets.bottom, 12)` — to avoid bar clipping into Android gesture area.
@@ -302,7 +303,7 @@ Verification:
 |---|---|---|---|---|---|---|---|
 | 4.2.4a | Edit Entry audit + extraction | ✅ Done | P2 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/entries/[orderId]/edit.tsx` | [41580ae](https://github.com/subrat8268/kredBook/commit/41580ae) |
 | 4.2.4b | Edit Entry premium redesign | ✅ Done | P2 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/entries/[orderId]/edit.tsx` | [41580ae](https://github.com/subrat8268/kredBook/commit/41580ae) |
-| 4.2.4c | Edit Entry screenshot polish + verification | ⏳ Not Started | P2 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/entries/[orderId]/edit.tsx` |
+| 4.2.4c | Edit Entry screenshot polish + verification | ✅ Done | P2 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/entries/[orderId]/edit.tsx` |
 | 4.2.1a | Customer List audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(main)/people/index.tsx` |
 | 4.2.1b | Customer List premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(main)/people/index.tsx` |
 | 4.2.1c | Customer List screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(main)/people/index.tsx` |
