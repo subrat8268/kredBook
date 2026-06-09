@@ -51,7 +51,7 @@ export default function CustomerBalanceHero({
       end={{ x: 1, y: 1 }}
       className="mx-4 mt-4 overflow-hidden rounded-xl px-5 py-5"
       style={{
-        shadowColor: "#000000",
+        shadowColor: colors.ink,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
         shadowRadius: 6,
@@ -102,7 +102,7 @@ export default function CustomerBalanceHero({
             {statusLabel === "OVERDUE" ? (
               <AlertCircle
                 size={11}
-                color="rgba(255,255,255,1.0)"
+                color={colors.customerDetail.heroText}
                 strokeWidth={2.2}
                 style={{ marginRight: 4 }}
               />
@@ -111,7 +111,7 @@ export default function CustomerBalanceHero({
               style={[
                 typography.caption,
                 {
-                  color: "rgba(255,255,255,1.0)",
+                  color: colors.customerDetail.heroText,
                   fontSize: 11,
                   fontWeight: "700",
                   letterSpacing: 0.8,

@@ -69,15 +69,19 @@ export default function CustomerTransactionTimeline({
 
   return (
     <View
-      className="mx-4 mt-2 overflow-hidden rounded-[28px] border bg-surface dark:bg-surface-dark dark:border-border-dark"
       style={{
         backgroundColor: colors.surface,
-        borderColor: colors.border + "40",
-        shadowColor: "#000",
+        borderColor: colors.border,
+        borderWidth: 1,
+        borderRadius: 16,
+        marginHorizontal: 16,
+        marginTop: 12,
+        shadowColor: colors.ink,
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.05,
         shadowRadius: 8,
         elevation: 2,
+        overflow: "hidden",
       }}
     >
       <CustomerTransactionTabs
@@ -85,7 +89,12 @@ export default function CustomerTransactionTimeline({
         onChangeFilter={onChangeFilter}
       />
 
-      <View className="border-b border-border/40 dark:border-border-dark/40" />
+      <View
+        style={{
+          borderBottomWidth: 1,
+          borderBottomColor: colors.borderSubtle,
+        }}
+      />
 
       <View className="pb-2" style={{ backgroundColor: colors.surface }}>
         {groups.map((group) => {
@@ -96,14 +105,17 @@ export default function CustomerTransactionTimeline({
               <View
                 className="pl-4 py-3"
                 style={{
-                  backgroundColor:
-                    (colors as { surfaceOffset?: string }).surfaceOffset ??
-                    colors.canvas,
+                  backgroundColor: colors.canvas,
                 }}
               >
                 <Text
-                  className="text-caption uppercase font-inter-bold"
-                  style={{ color: colors.muted }}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: "700",
+                    letterSpacing: 1.2,
+                    textTransform: "uppercase",
+                    color: colors.muted,
+                  }}
                 >
                   {group.label}
                 </Text>
@@ -116,7 +128,7 @@ export default function CustomerTransactionTimeline({
                     style={{
                       borderTopWidth: index === 0 ? 0 : 1,
                       borderTopColor:
-                        index === 0 ? "transparent" : colors.border + "59",
+                        index === 0 ? "transparent" : colors.borderSubtle,
                     }}
                   >
                     <CustomerTransactionRow tx={tx.data} />

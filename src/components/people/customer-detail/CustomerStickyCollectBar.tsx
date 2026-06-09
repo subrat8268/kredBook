@@ -30,15 +30,15 @@ export default function CustomerStickyCollectBar({
       style={{
         backgroundColor: colors.surface,
         borderTopWidth: 1,
-        borderTopColor: colors.border + "60",
-        shadowColor: "#000",
+        borderTopColor: colors.border,
+        shadowColor: colors.ink,
         shadowOffset: { width: 0, height: -3 },
         shadowOpacity: 0.1,
         shadowRadius: 12,
         elevation: 12,
         paddingHorizontal: 16,
         paddingTop: 12,
-        paddingBottom: Math.max(Math.min(insets.bottom, 12), 4),
+        paddingBottom: Math.max(insets.bottom, 12),
       }}
     >
       <View
@@ -85,7 +85,7 @@ export default function CustomerStickyCollectBar({
       >
         <ArrowDownLeft size={18} color="#fff" strokeWidth={2.5} />
         <Text
-          className="ml-2 text-[15px] font-bold text-surface"
+          className="ml-2 text-[15px] font-bold"
           style={{ color: "#fff", letterSpacing: 0.2 }}
         >
           Collect Payment

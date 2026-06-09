@@ -345,8 +345,8 @@ export default function CustomerDetailScreen() {
 
   return (
     <SafeAreaView
-      className="flex-1 bg-canvas"
       edges={["top", "left", "right"]}
+      style={{ flex: 1, backgroundColor: colors.canvas }}
     >
       <Stack.Screen options={{ headerShown: false }} />
 

@@ -1,9 +1,23 @@
+import { useTheme } from "@/src/utils/ThemeProvider";
 import { View, type ViewProps } from "react-native";
 
-export default function CustomerDetailSectionShell({ className, ...props }: ViewProps) {
+export default function CustomerDetailSectionShell({ style, ...props }: ViewProps) {
+  const { colors } = useTheme();
+
   return (
     <View
-      className={`mx-4 mt-4 overflow-hidden rounded-xl border border-border bg-surface dark:border-border-dark dark:bg-surface-dark ${className ?? ""}`}
+      style={[
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderWidth: 1,
+          borderRadius: 16,
+          marginHorizontal: 16,
+          marginTop: 12,
+          overflow: "hidden",
+        },
+        style,
+      ]}
       {...props}
     />
   );
