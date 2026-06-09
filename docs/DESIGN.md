@@ -72,6 +72,39 @@ KredBook's canvas is a warm off-white — not clinical white, not dark mode. For
 | `border-strong` | `#d1d5db` | Input borders, focused containers |
 | `border-focus` | `#16a34a` | Input focus ring colour |
 
+### 2.6 Semantic Token Map (`useTheme()`)
+
+All components consume colours via `useTheme()` → `t.colors.*`.
+No hardcoded hex values in any component file.
+
+> **Source of truth:** `src/utils/theme.ts`
+> **Usage:** `const t = useTheme();` then `t.colors.[key]`
+
+| `t.colors.*` key | Light | Dark | Usage |
+|---|---|---|---|
+| `canvas` | `#f3f4f6` | `#0f1117` | Screen background |
+| `surface` | `#ffffff` | `#1a1d23` | Card / sheet surface |
+| `surfaceRaised` | `#f9fafb` | `#21242c` | Inset / secondary surface |
+| `borderDefault` | `#e5e7eb` | `#374151` | Card borders |
+| `borderSubtle` | `#f3f4f6` | `#1f2937` | Dividers / hairlines |
+| `ink` | `#111827` | `#f9fafb` | Primary text |
+| `muted` | `#6b7280` | `#9ca3af` | Secondary text |
+| `faint` | `#9ca3af` | `#6b7280` | Placeholder / inactive |
+| `body` | `#374151` | `#d1d5db` | Body / label text |
+| `primary` | `#16a34a` | `#4ade80` | Brand CTA / paid state |
+| `primaryActive` | `#15803d` | `#22c55e` | CTA pressed |
+| `primaryBorderFill` | `#dcfce7` | `rgba(74,222,128,0.15)` | Success fill bg |
+| `pending` | `#f97316` | `#fb923c` | Pending state |
+| `pendingSurface` | `#fff7ed` | `rgba(251,146,60,0.10)` | Pending tinted bg |
+| `overdue` | `#dc2626` | `#f87171` | Overdue state |
+| `paid` | `#16a34a` | `#4ade80` | Paid state |
+| `partial` | `#2563eb` | `#60a5fa` | Partial payment state |
+| `warningSurface` | `#fffbeb` | `rgba(251,191,36,0.10)` | Warning / alert bg |
+| `surfaceOverlay` | `rgba(0,0,0,0.50)` | `rgba(0,0,0,0.65)` | Modal backdrop |
+
+> **Rule:** When adding a new token to `theme.ts`, add a row here in the
+> same commit. These two files are always in sync.
+
 ---
 
 ## 3. Typography
