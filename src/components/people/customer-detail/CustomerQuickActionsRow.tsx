@@ -35,7 +35,7 @@ export default function CustomerQuickActionsRow({
       {/* 2 — Share ledger link */}
       <QuickActionTile
         label={isSharingLedgerLink ? "Sharing" : "Share"}
-        icon={<Share2 size={20} color={colors.textSecondary} strokeWidth={2} />}
+        icon={<Share2 size={20} color={colors.muted} strokeWidth={2} />}
         onPress={onShare}
         loading={isSharingLedgerLink}
       />
@@ -44,7 +44,7 @@ export default function CustomerQuickActionsRow({
       <QuickActionTile
         label={exporting ? "Exporting" : "PDF"}
         icon={
-          <Download size={20} color={colors.textSecondary} strokeWidth={2} />
+          <Download size={20} color={colors.muted} strokeWidth={2} />
         }
         onPress={onDownload}
         loading={exporting}

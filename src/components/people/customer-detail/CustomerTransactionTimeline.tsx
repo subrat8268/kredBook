@@ -98,12 +98,12 @@ export default function CustomerTransactionTimeline({
                 style={{
                   backgroundColor:
                     (colors as { surfaceOffset?: string }).surfaceOffset ??
-                    colors.background,
+                    colors.canvas,
                 }}
               >
                 <Text
-                  className="text-caption uppercase font-inter-bold dark:text-textSecondary-dark"
-                  style={{ color: colors.textSecondary }}
+                  className="text-caption uppercase font-inter-bold"
+                  style={{ color: colors.muted }}
                 >
                   {group.label}
                 </Text>

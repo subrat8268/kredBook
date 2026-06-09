@@ -99,7 +99,7 @@ function buildStatementHtml(
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/>
 <style>
-  body{font-family:Arial,sans-serif;padding:24px;color:${themeColors.textPrimary};}
+  body{font-family:Arial,sans-serif;padding:24px;color:${themeColors.ink};}
   h1{font-size:22px;}
   table{width:100%;border-collapse:collapse;margin-top:20px;}
   th{background:${themeColors.primary};color:white;padding:10px 8px;text-align:left;}
@@ -345,7 +345,7 @@ export default function CustomerDetailScreen() {
 
   return (
     <SafeAreaView
-      className="flex-1 bg-background dark:bg-background-dark"
+      className="flex-1 bg-canvas"
       edges={["top", "left", "right"]}
     >
       <Stack.Screen options={{ headerShown: false }} />

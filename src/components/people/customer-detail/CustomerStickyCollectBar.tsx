@@ -55,14 +55,14 @@ export default function CustomerStickyCollectBar({
 
       <View className="flex-1 pr-2">
         <Text
-          className="mb-0.5 text-[10px] font-semibold uppercase tracking-[1.2px] text-textSecondary"
-          style={{ color: colors.textSecondary }}
+          className="mb-0.5 text-[10px] font-semibold uppercase tracking-[1.2px] text-muted"
+          style={{ color: colors.muted }}
         >
           BALANCE DUE
         </Text>
         <Text
-          className="text-[20px] font-extrabold tracking-[-0.5px] text-textPrimary"
-          style={{ color: colors.textPrimary }}
+          className="text-[20px] font-extrabold tracking-[-0.5px] text-ink"
+          style={{ color: colors.ink }}
         >
           {formatINR(balanceDue, { maximumFractionDigits: 2 })}
         </Text>

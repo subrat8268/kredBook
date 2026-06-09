@@ -69,21 +69,21 @@ export default function CustomerTransactionRow({ tx }: Props) {
     : isOverdue
       ? colors.danger + "15"
       : isPaid
-        ? colors.textSecondary + "15"
+        ? colors.muted + "15"
         : colors.warning + "18";
   const iconColor = isPayment
     ? colors.success
     : isOverdue
       ? colors.danger
       : isPaid
-        ? colors.textSecondary
+        ? colors.muted
         : colors.warning;
 
   const amountColor = isPayment
     ? colors.success
     : isPaid
-      ? colors.textSecondary
-      : colors.textPrimary;
+      ? colors.muted
+      : colors.ink;
   const amountWeight = isPayment || !isPaid ? "700" : "500";
   const amountPrefix = isPayment ? "+ " : "";
 
@@ -110,7 +110,7 @@ export default function CustomerTransactionRow({ tx }: Props) {
 
       <View className="flex-1 pr-2">
         <Text
-          className="text-[14px] font-semibold text-textPrimary dark:text-textPrimary-dark"
+          className="text-[14px] font-semibold text-ink"
           numberOfLines={1}
         >
           {title}
@@ -120,7 +120,7 @@ export default function CustomerTransactionRow({ tx }: Props) {
           style={{ minHeight: 18 }}
         >
           <Text
-            className="text-[12px] text-textSecondary dark:text-textSecondary-dark"
+            className="text-[12px] text-muted"
             numberOfLines={1}
           >
             {subtitle}
@@ -151,7 +151,7 @@ export default function CustomerTransactionRow({ tx }: Props) {
           {formatINR(tx.amount, { maximumFractionDigits: 2 })}
         </Text>
         <Text
-          className="mt-0.5 text-[11px] text-textMuted dark:text-textMuted-dark"
+          className="mt-0.5 text-[11px] text-faint"
           numberOfLines={1}
         >
           Bal: {formatINR(tx.runningBalance, { maximumFractionDigits: 2 })}
