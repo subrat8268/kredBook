@@ -79,8 +79,9 @@
 - **DetailHeader shared component** — `src/components/layer2/DetailHeader.tsx`
   now powers Entry Detail, Edit Entry, Customer Detail, Profile Edit.
   Entry Detail uses: back + title + date + ⋮ overflow only. No call button in header.
-- **EntrySummaryCard component** — new shared component at `src/components/entries/EntrySummaryCard.tsx`. Used by both Create Entry and Edit Entry screens to display outstanding balance summary.
-- **EntryQuickActions dead code** — `src/components/entries/EntryQuickActions.tsx` is completely unused. Edit/Delete live in overflow. Remind lives in Action Bar. Scheduled for deletion.
+- **EntrySummaryCard component** — lives at `src/components/entries/edit/EntrySummaryCard.tsx`. Used by Edit Entry only. Returns `null` when `previousBalance <= 0` — no ₹0 row shown.
+- **EntryQuickActions DELETED** — `src/components/entries/EntryQuickActions.tsx` has been removed from the codebase. Edit/Delete live in overflow menu. Remind lives in Action Bar. Do not re-create.
+- **Entry Detail screen LOCKED** — All P0–P10 states are built, audited, and verified. `docs/screens/entry-detail.md` is the source of truth. No component changes without a doc update first.
 
 ---
 
