@@ -47,10 +47,14 @@ export const colors = {
   successLight: "#DCFCE7",
 
   // ─ Neutrals
+  /** @deprecated Use `t.colors.canvas` instead */
   background: "#F9FAFB", // gray-50
   surface: "#FFFFFF", // cards, modals, panels
+  /** @deprecated Use `t.colors.ink` instead */
   textPrimary: "#111827", // gray-900
+  /** @deprecated Use `t.colors.body` instead */
   textBody: "#374151", // gray-700 — body labels, menu items, overflow rows
+  /** @deprecated Use `t.colors.muted` instead */
   textSecondary: "#6B7280", // gray-500
   border: "#E5E7EB", // gray-200
   borderLight: "#F1F5F9", // Slate-100 — innercard borders, sub-box dividers
@@ -67,6 +71,7 @@ export const colors = {
   warningBadgeBg: "#FEF3C7", // Amber-100 — Remind action bar button bg (= pending.bg)
 
   // ─ Surface variants
+  /** @deprecated Use `t.colors.surfaceRaised` instead */
   surfaceAlt: "#F8FAFC", // Slate-50 — inner sub-boxes on cards
 
   // ─ Text variants
@@ -245,10 +250,14 @@ export const darkColors: ColorTokens = {
   success: "#22C55E",
   successDark: "#16A34A",
   successLight: "#14532D",
+  /** @deprecated Use `t.colors.canvas` instead */
   background: "#08111F",
   surface: "#122036",
+  /** @deprecated Use `t.colors.ink` instead */
   textPrimary: "#F3F4F6",
+  /** @deprecated Use `t.colors.body` instead */
   textBody: "#D1D5DB", // gray-300 — body labels, menu items in dark mode
+  /** @deprecated Use `t.colors.muted` instead */
   textSecondary: "#B4C0D4",
   border: "#31415D",
   borderLight: "#24334D",
@@ -259,6 +268,7 @@ export const darkColors: ColorTokens = {
   dangerBg: "#3A1118",
   warningBg: "#3A2A0E",
   warningBadgeBg: "#4A3411",
+  /** @deprecated Use `t.colors.surfaceRaised` instead */
   surfaceAlt: "#1A2A43",
   textMuted: "#A3AEC0",
   paid: {
