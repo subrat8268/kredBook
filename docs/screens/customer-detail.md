@@ -1,233 +1,487 @@
-# Customer Detail Screen — Design Spec
+# Customer Detail Screen — Full UX Redesign Spec
 
-> **Status:** ✅ Locked — All sub-passes (4.1.5a–d) built, audited, and verified.
+> **Status:** 🔴 Design-first. Awaiting Stitch approval before any code changes.
 > **Last updated:** 2026-06-09
-> **Doc version:** 1.0
-> **Product Lead:** No open items remain.
+> **Doc version:** 2.0 (full rethink from scratch)
+> **Route:** `app/(main)/people/[customerId].tsx`
 
 ---
 
 ## 1. SCREEN PURPOSE
 
-The **Customer Detail** screen is the primary daily hub of the KredBook application. Shopkeepers spend the vast majority of their session time on this page. It serves three main objectives:
-1. **At-a-glance Balance Verification:** Instantly know if the customer owes money, has cleared their balance, or holds an advance.
-2. **Seamless Payment Collection:** Launch the payment collection console with a single tap to settle dues.
-3. **Audit Trail Inspection:** Review chronologically grouped ledger transaction entries (sales entries vs. recorded payments).
+The **Customer Detail screen is the most visited screen in KredBook.** A shopkeeper opens this screen multiple times per day — when a customer walks in, calls, or when the owner wants to check outstanding dues at end of day. It serves three jobs:
 
-**Route:** `app/(main)/people/[customerId].tsx`
-**Hook:** `src/hooks/usePeople.ts` → `usePersonDetail`
+1. **Status at a glance** — How much does this person owe me? Since when? Am I in trouble here?
+2. **Collect or remind** — Record a payment right now, or send a reminder with one tap.
+3. **Audit trail** — What did I sell? What has been paid? What's still open?
+
+Everything else is secondary.
 
 ---
 
-## 2. USER MENTAL MODEL
+## 2. RETHINKING FROM SCRATCH — WHAT THE CURRENT SCREEN GETS WRONG
 
-The screen visual hierarchy follows a natural logical cascade representing how a shopkeeper evaluates a customer:
-1. **WHO:** Confirm the customer identity via header avatar, name, and contact buttons.
-2. **HOW MUCH:** View the net outstanding balance state (Overdue, Pending, Advance, or Settled) on the large primary hero card.
-3. **WHAT DO I DO:** Launch quick actions to add a new transaction entry, share the ledger link, or export the PDF statement.
-4. **WHAT HAPPENED:** Browse historical details of all entries and payments chronologically, with the ability to filter by transaction type.
-5. **COLLECT MONEY:** Confirm and record a custom or full balance settlement via the sticky collect bar at the bottom.
+### Current Problems
+
+| Problem | Why It Matters |
+|---|---|
+| Quick Actions row (Add Entry · Share · PDF) sits between Hero and Timeline | These are secondary admin actions. They break the visual flow from balance → collect |
+| Sticky Collect Bar only appears when `balance_due > 0` | A settled customer should still have an option to start a new entry — the bar disappears entirely |
+| Transaction Timeline tabs (All · Entries · Payments) require a tap to filter | Most owners want to see "Entries" first — open dues are the primary concern, not a mix of everything |
+| No urgency signal anywhere on the page for overdue entries | An entry 45 days overdue looks the same as one created yesterday |
+| "Last bill: [date]" sub-label on hero is passive | Owners need to know HOW LONG money has been owed, not just the last bill date |
+| PDF / Share actions are buried in Quick Actions | These are admin tasks. They should be in an overflow menu, not the primary screen flow |
+| No entry-level aging on the timeline rows | Each transaction row doesn't tell you "this is 22 days old" — owners need that urgency signal inline |
+| Payment rows are not tappable — no view detail | If an owner disputes a recorded payment, they have no way to see or delete it |
+| Empty state is too generic | First-time view for a new customer with no entries should guide the owner toward creating the first entry, not just show a blank state |
+
+### The Correct Mental Model Order
+
+```
+1. WHO      → Customer identity + contact actions
+2. HOW MUCH → Net balance, status, since how long
+3. ACT NOW  → Collect payment or add new entry — always visible
+4. HISTORY  → Timeline of what happened — entries and payments
+5. ADMIN    → Share, PDF, edit customer — overflow only
+```
 
 ---
 
 ## 3. PLATFORM & CANVAS SPEC
 
-- **Platform:** Android & iOS (React Native / Expo SDK 52)
-- **Target device:** `390×844pt` (Pixel 7 / iPhone 14 class)
-- **Canvas bg:** `t.colors.canvas`
-- **Icons:** Lucide React Native, `strokeWidth: 2`, default `20–24px`
-- **Cards:** `bg: t.colors.surface`, `border: 1px solid t.colors.borderDefault`, `borderRadius: 16px`, horizontal margin `16px`, gap `16px`
-- **No global tab bar** on this screen.
-- **Safe area:** `SafeAreaView` from `react-native-safe-area-context` targeting `["top", "left", "right"]`.
-- Edit Entry is the styling reference for this screen
+> Apply to every Stitch prompt in this flow.
+
+- **Platform:** Android & iOS, React Native / Expo SDK 52
+- **Target device:** `390×844pt`
+- **Style:** Clean, minimal, trust-first. PhonePe / Razorpay / Khatabook aesthetic.
+- **Font:** Inter throughout.
+- **Canvas bg:** `t.colors.canvas` → `#fafaf7` light / `#0f1117` dark
+- **Icons:** Lucide React Native, `strokeWidth: 2`, `20–24px` default.
+- **Cards:** `bg: t.colors.surface`, `border: 1px solid t.colors.borderDefault`, `borderRadius: 16px`, `16px` horizontal screen margin, `12px` gap between cards.
+- **No tab bar** on this screen.
+- **Safe area:** top + left + right only.
 
 ### Design Token Reference
 
-All colours resolved via `useTheme()` → `t.colors.*`. No hardcoded hex in any component.
-
-| Semantic Token | `t.colors.*` key | Light | Dark | Usage |
+| Token | `t.colors.*` key | Light | Dark | Usage |
 |---|---|---|---|---|
 | Canvas | `canvas` | `#fafaf7` | `#0f1117` | Screen background |
-| Card surface | `surface` | `#ffffff` | `#1a1d23` | Cards and sheets |
-| Raised surface | `surfaceRaised` | `#f9fafb` | `#21242c` | Inset / secondary surface |
+| Surface | `surface` | `#ffffff` | `#1a1d23` | Cards, sheets |
+| Surface Raised | `surfaceRaised` | `#f9fafb` | `#21242c` | Inset / secondary areas |
 | Border | `borderDefault` | `#e5e7eb` | `#374151` | Card borders |
 | Divider | `borderSubtle` | `#f3f4f6` | `#1f2937` | Row separators |
-| Text primary | `ink` | `#111827` | `#f9fafb` | Names, headings |
-| Text secondary | `muted` | `#6b7280` | `#9ca3af` | Labels, timestamps |
+| Text Primary | `ink` | `#111827` | `#f9fafb` | Names, amounts |
+| Text Secondary | `muted` | `#6b7280` | `#9ca3af` | Labels, timestamps |
+| Text Faint | `subtle` | `#9ca3af` | `#6b7280` | Tertiary hints |
+| Brand Green | `primary` | `#16a34a` | `#22c55e` | CTAs, positive |
+| Green Light bg | `primarySubtle` | `#dcfce7` | `#14532d` | Payment icons, chips |
+| Danger | `danger` | `#ef4444` | `#f87171` | Overdue signals |
+| Warning | `warning` | `#f59e0b` | `#fbbf24` | Pending signals |
+| Blue | `info` | `#3b82f6` | `#60a5fa` | Advance state |
 
-### Hero Card Gradients (by status)
+### Hero Card Gradients (by balance state)
 
-| State | Gradient Start | Gradient End |
-|---|---|---|
-| Overdue | `#991B1B` | `#B91C1C` |
-| Pending | `#F59E0B` | `#B45309` |
-| Advance | `#3B82F6` | `#EFF6FF` |
-| Settled | `#166534` | `#052E16` |
+| State | Gradient Start | Gradient End | Trigger |
+|---|---|---|---|
+| Overdue | `#991B1B` | `#B91C1C` | Any entry past due date |
+| Pending | `#F59E0B` | `#B45309` | Balance > 0, no overdue entry |
+| Advance | `#3B82F6` | `#1D4ED8` | Customer paid more than owed |
+| Settled | `#166534` | `#052E16` | Balance = 0, no open entries |
 
 ---
 
-## 4. INFORMATION HIERARCHY (Top → Bottom)
+## 4. INFORMATION HIERARCHY (New — Top → Bottom)
 
 ```
 SafeAreaView (canvas bg)
-  ├── CustomerDetailHeader          ← back + avatar + name + Call + WhatsApp
+  ├── [C1] CustomerDetailHeader        ← WHO: back + avatar + name + contact actions
   ├── ScrollView
-  │     ├── CustomerBalanceHero     ← balance amount, status pill, last bill metadata
-  │     ├── CustomerQuickActionsRow ← Add Entry · Share Ledger · PDF Statement
-  │     └── CustomerTransactionTimeline
-  │             ├── CustomerTransactionTabs  (All · Entries · Payments)
-  │             └── CustomerTransactionRow (chronologically grouped)
-  ├── RecordCustomerPaymentModal    (bottom sheet, offscreen)
-  └── CustomerStickyCollectBar      ← fixed bottom (only when balance_due > 0)
+  │     ├── [C2] CustomerBalanceHero   ← HOW MUCH: amount + status + aging + open entries count
+  │     ├── [C3] CustomerActionStrip   ← ACT NOW: Collect Payment + Add Entry (always visible, inline)
+  │     └── [C4] CustomerTransactionTimeline
+  │             ├── [C4a] SectionHeader  (date group label)
+  │             ├── [C4b] EntryRow       (per entry — with aging badge + status)
+  │             └── [C4c] PaymentRow     (per payment — tappable in v2, view-only in v1)
+  │             └── [C4d] EmptyState     (first-time or filtered empty)
+  └── [M1] RecordCustomerPaymentModal  ← bottom sheet, offscreen until triggered
+  └── [M2] CustomerOverflowMenu        ← dropdown from header ⋮ icon
+  └── [M3] PaymentDetailSheet          ← view/delete recorded payment (v1: view only)
 ```
+
+### What Changed in the Hierarchy
+
+| Old Position | Component | New Position | Reason |
+|---|---|---|---|
+| Between Hero and Timeline | `CustomerQuickActionsRow` (Add · Share · PDF) | Removed from main flow | Admin actions, not daily tasks |
+| Below Hero | `CustomerStickyCollectBar` | Replaced by `CustomerActionStrip` inline after Hero | Always visible, not floating |
+| Header (right side) | Share + PDF icons | Moved to `⋮` overflow | Header = nav + contact only |
+| None | Aging signal on Hero | `"Overdue · 22 days"` sub-label added | Critical missing context |
+| None | Aging badge on Entry rows | `"12d overdue"` chip on each entry row | Urgency at item level |
+| None | Open entries count on Hero | `"2 open entries · ₹18,000 due"` line | Owner sees how many are pending |
 
 ---
 
 ## 5. COMPONENT SPECS
 
-### 5.1 CustomerDetailHeader
+### [C1] CustomerDetailHeader
 **File:** `src/components/people/customer-detail/CustomerDetailHeader.tsx`
 
-Extends shared `DetailHeader` (`src/components/layer2/DetailHeader.tsx`).
+**Purpose:** Confirm identity, go back, communicate.
 
-- **Left:** Back arrow → `router.back()` + compact circular avatar (initials).
-- **Center:** Customer name `17px/600 t.colors.ink` · subtitle `"Last active [X]"` `13px t.colors.muted`.
-- **Right:** `Phone` + `MessageCircle` (WhatsApp) icons — only rendered if customer has a valid phone number. Both use `t.colors.primary`, `44dp` touch target.
-- **No Share or PDF icons in header** — those live in Quick Actions only.
+- **Left:** ← back arrow (`t.colors.ink`) + `44×44dp` circular avatar (initials, `bg: t.colors.primarySubtle`, `color: t.colors.primary`, `Inter 15px/700`).
+- **Center:**
+  - Name: `Inter 17px/600 t.colors.ink`
+  - Subtitle: `"₹[balance] due"` when balance > 0, or `"All settled"` when balance = 0, or `"₹[amount] advance"` when advance — `Inter 13px/400 t.colors.muted`. **This replaces the passive "Last active [X]" sub-label.**
+- **Right:** `⋮` overflow icon (`24px t.colors.ink`) + Phone icon + WhatsApp icon.
+  - Phone + WhatsApp: only rendered when customer has a valid phone number.
+  - Both: `44dp` touch target, `t.colors.primary`.
+  - `⋮` icon: opens `CustomerOverflowMenu` (M2).
+- **bg:** `t.colors.surface`, no bottom shadow.
+
+**Decision:** Header subtitle now shows live balance state, not passive last-active timestamp. Owner gets context the instant the screen opens.
 
 ---
 
-### 5.2 CustomerBalanceHero
+### [C2] CustomerBalanceHero
 **File:** `src/components/people/customer-detail/CustomerBalanceHero.tsx`
 
-High-impact card with status-driven `LinearGradient`.
+**Purpose:** The single most important number on the screen.
 
-- **Label:** `"BALANCE DUE"` / `"ADVANCE"` / `"ALL SETTLED"` — `11px/600 uppercase letter-spacing: 1.4`.
-- **Amount:** `formatINR()` — `36px ExtraBold`, white.
-- **Status Badge:** Translucent dark pill `rgba(0,0,0,0.22)`, white label. OVERDUE adds inline `AlertCircle` icon.
-- **Sub-label:** `"Last bill: [date]"` or `"Add an entry to start this ledger"` if no activity.
-- **Open Dues line:** `"1 open entry · ₹[amount] due"` — shown when `pendingOrderBalance > 0`.
-- **Watermark:** Wallet image, absolute bottom-right, decorative.
+**Visual Spec:**
+- Full-width card, `borderRadius: 20px`, no border.
+- Status-driven `LinearGradient` background (see token table).
+- Large semi-transparent circle watermark (decorative, absolute bottom-right, white `15%` opacity).
+
+**Content (top → bottom):**
+
+| Row | Content | Typography |
+|---|---|---|
+| Label | `"BALANCE DUE"` / `"ADVANCE"` / `"ALL SETTLED"` | `Inter 11px/600 white uppercase letter-spacing: 1.4` |
+| Amount | `formatINR(netBalance)` | `Inter 40px/800 white` |
+| Status row | Status badge (left) + aging label (right) | See below |
+| Open entries | `"N open entr[y/ies] · ₹X due"` (only when `pendingOrderBalance > 0`) | `Inter 13px/400 white 75% opacity` |
+
+**Status Badge (pill, inside hero):**
+- Background: `rgba(255,255,255,0.20)`, `borderRadius: full`.
+- Text: status label — `Inter 12px/700 white`.
+- Overdue state: adds inline `AlertCircle` icon `16px white` before text.
+
+**Aging Label (right of status row):**
+- Overdue: `"Overdue · [X] days"` — `Inter 13px/400 white 75% opacity`.
+- Pending (due date exists): `"Due [date]"` — same style.
+- Pending (no due date): hidden.
+- Settled / Advance: hidden.
+
+**Decision:** "Last bill: [date]" sub-label removed. Replaced by aging signal. An owner doesn't need to know *when* the last bill was — they need to know *how long money has been waiting.*
 
 ---
 
-### 5.3 CustomerQuickActionsRow
-**File:** `src/components/people/customer-detail/CustomerQuickActionsRow.tsx`
+### [C3] CustomerActionStrip *(new component, replaces StickyCollectBar + Quick Actions row)*
+**File:** `src/components/people/customer-detail/CustomerActionStrip.tsx`
 
-Three equal `QuickActionTile` columns:
+**Purpose:** Single always-visible strip for the two most frequent actions: collect money and add a new entry.
 
-| # | Label | Icon | Action |
-|---|---|---|---|
-| 1 | Add Entry | `plus-circle` | Navigate to `entries/create` pre-filled with customer payload |
-| 2 | Share | `share-2` | RPC `upsert_access_token` → native share sheet |
-| 3 | PDF | `download` | `buildStatementHtml` → system print dialog. Disabled if no transactions. |
+**Layout:** Full-width, below Hero card, `bg: t.colors.surface`, `borderRadius: 16px`, `border: 1px solid t.colors.borderDefault`, `padding: 14px 16px`.
+
+**Always shows two buttons side-by-side:**
+
+| Button | State: Has Balance | State: Settled / Advance |
+|---|---|---|
+| Primary (60% width) | `"Collect Payment"` — solid green `t.colors.primary`, white text `Inter 15px/600`, `ArrowDownLeft` icon, `borderRadius: full`, `height: 52px` | `"Record Payment"` — same style, slightly muted (owner can still record an advance) |
+| Secondary (36% width) | `"+ Add Entry"` — outline `border: 1px t.colors.borderDefault`, `color: t.colors.ink Inter 14px/500`, `Plus` icon, `borderRadius: full`, `height: 52px` | `"+ Add Entry"` — same |
+
+**Gap between buttons:** `10px`.
+
+**Haptics:** `Haptics.impactAsync(Medium)` on Collect Payment press.
+
+**Decision:** The old `CustomerStickyCollectBar` only appeared when `balance_due > 0`, hiding itself completely for settled customers. This broke the Add Entry flow for settled customers. The new `CustomerActionStrip` is **always visible, always inline** — no floating overlay, no conditional visibility.
+
+**Decision:** Share, PDF, and Edit Customer actions are removed from this strip entirely and moved to `⋮` overflow.
 
 ---
 
-### 5.4 CustomerTransactionTimeline
+### [C4] CustomerTransactionTimeline
 **File:** `src/components/people/customer-detail/CustomerTransactionTimeline.tsx`
 
-- **Tabs:** `CustomerTransactionTabs` — `All` · `Entries` · `Payments` filter chips.
-- **Grouping:** Date headers (`"Today"`, `"Yesterday"`, `"10 Jan 2026"`).
-- **Pagination:** First 10 rows shown. `"View Older History (N more)"` pressable expands full list.
-- **Empty state:** `CustomerDetailEmptyState` — prompts to record a payment or add a bill.
+**Purpose:** Chronological record of everything that has happened with this customer.
 
----
+**Default view:** Show all transactions (entries + payments), most recent first, grouped by date.
 
-### 5.5 CustomerTransactionRow
+#### [C4a] Section Header (date group label)
+- `"Today"`, `"Yesterday"`, `"[Day], [Date]"` (e.g. `"Mon, 02 Jun 2026"`).
+- `Inter 12px/600 t.colors.muted uppercase letter-spacing: 1.2`.
+- `paddingHorizontal: 16px`, `paddingVertical: 8px`.
+- No card/border — plain label.
+
+#### Filter Tabs (above timeline, below Action Strip)
+- `All` · `Entries` · `Payments` — horizontal scroll chips.
+- Selected: `bg: t.colors.primary`, white text `Inter 13px/600`.
+- Unselected: `bg: t.colors.surfaceRaised`, `t.colors.muted Inter 13px/400`.
+- `borderRadius: full`, `paddingH: 14px`, `paddingV: 7px`.
+- **Default selected tab: `"All"`** (not Entries — showing full picture is the right default).
+
+#### [C4b] Entry Row
 **File:** `src/components/people/customer-detail/CustomerTransactionRow.tsx`
 
-- **Icon:** Circle bg — green for payments, red/orange/gray for entries. `ArrowDownLeft` for payment, `ArrowUpRight` for entry.
-- **Title:** `"Payment Received"` or `"Entry #[bill_number]"`.
-- **Subtitle:** `"3 items · 10:30 am"` + payment mode (`"UPI"` / `"Cash"`).
-- **Status chip:** `StatusBadge` on entry rows only. Hidden for payment rows.
-- **Right:** Amount (green for payments) + running balance `"Bal: ₹X"`.
-- **Tap:** Entry rows → navigate to Entry Detail. Payment rows → not tappable in v1.
+- **Left icon:** `32×32px` circle. Color by status: Pending `bg: #fef3c7 icon: #f59e0b`, Partial `bg: #eff6ff icon: #3b82f6`, Paid `bg: #dcfce7 icon: #16a34a`, Overdue `bg: #fee2e2 icon: #ef4444`. Icon: `FileText`.
+- **Title:** `"Entry #[bill_number]"` — `Inter 14px/600 t.colors.ink`.
+- **Subtitle:** `"[N] item[s] · [time]"` — `Inter 13px/400 t.colors.muted`.
+- **Status badge:** `StatusBadge` component, inline right of title.
+- **Aging badge (NEW):** Shown only for PENDING / PARTIAL / OVERDUE entries.
+  - Overdue: `bg: #fee2e2`, `color: #ef4444`, label `"[N]d overdue"` `Inter 11px/600`.
+  - Pending: `bg: #fef3c7`, `color: #d97706`, label `"Due [date]"` `Inter 11px/600`. Hidden if no due date.
+  - `borderRadius: full`, `paddingH: 8px`, `paddingV: 3px`.
+- **Right:** Amount `Inter 15px/600 t.colors.danger` for unpaid, `t.colors.primary` for paid + running balance `"Bal: ₹X"` `Inter 12px/400 t.colors.muted` below.
+- **Tap:** → Entry Detail screen (`entries/[orderId].tsx`), pass `orderId`, `customerId`.
+
+#### [C4c] Payment Row
+**File:** `src/components/people/customer-detail/CustomerTransactionRow.tsx`
+
+- **Left icon:** `32×32px` circle, `bg: t.colors.primarySubtle`, `ArrowDownLeft` icon `t.colors.primary`.
+- **Title:** `"Payment Received"` — `Inter 14px/600 t.colors.ink`.
+- **Subtitle:** `"[Method] · [time]"` (e.g. `"UPI · 10:30 am"`) — `Inter 13px/400 t.colors.muted`.
+- **Right:** Amount `Inter 15px/600 t.colors.primary` + running balance below.
+- **Tap:** Opens `PaymentDetailSheet` (M3) — view details. No edit in v1.
+- **No status badge** on payment rows.
+
+#### [C4d] Empty State
+**File:** `src/components/people/customer-detail/CustomerDetailEmptyState.tsx`
+
+**Two variants:**
+
+1. **No transactions ever (new customer):**
+   - Illustration: ledger / book icon `48px t.colors.muted`.
+   - Title: `"No entries yet"` `Inter 16px/600 t.colors.ink`.
+   - Sub: `"Add the first entry to start tracking this person's balance"` `Inter 14px/400 t.colors.muted`, centered.
+   - CTA: `"+ Add First Entry"` — green outline button.
+   - *This is the most important empty state in the app. New onboarding users land here.*
+
+2. **Filtered empty (e.g. Payments tab, no payments recorded):**
+   - Title: `"No [entries / payments] yet"` `Inter 15px/600 t.colors.ink`.
+   - Sub: `"Nothing to show for this filter"` — `Inter 14px/400 t.colors.muted`.
+   - No CTA.
+
+#### Pagination
+- First **15 rows** shown (increased from 10 — 10 was too few for active customers).
+- `"View [N] older records →"` pressable below last row — loads all remaining rows.
+- No infinite scroll in v1 — avoids nested `ScrollView` virtualization conflicts in RN.
 
 ---
 
-### 5.6 CustomerStickyCollectBar
-**File:** `src/components/people/customer-detail/CustomerStickyCollectBar.tsx`
+### [M1] RecordCustomerPaymentModal
+**File:** `src/components/people/RecordCustomerPaymentModal.tsx`
 
-Absolute-positioned fixed bar. Renders **only** when `pendingOrderBalance > 0`.
+> Use the **built version**. Do not redesign.
 
-- **Left:** `"BALANCE DUE"` micro-label + pending amount bold.
-- **Right:** `"Collect Payment"` green primary button with `ArrowDownLeft` icon.
-- **Safe area:** `paddingBottom: Math.max(insets.bottom, 12)` via `useSafeAreaInsets` — Android gesture nav safe.
-- **Haptics:** `Haptics.impactAsync(Medium)` on press before opening modal.
-- **List clearance:** ScrollView `paddingBottom: 100` so last row is never hidden behind bar.
+- **Trigger:** `"Collect Payment"` in `CustomerActionStrip` (C3).
+- **Pre-fills:** Customer name, outstanding balance (single entry mode when coming from sticky bar on a specific entry, full customer balance when from action strip).
+- **On save:** Closes modal, refreshes timeline, shows success banner.
+
+**Success banner (after save):**
+- Inline banner at top of scroll content, below header.
+- `bg: t.colors.primarySubtle`, `borderRadius: 12px`, `padding: 12px 16px`.
+- `check-circle` icon `t.colors.primary` + `"Payment of ₹[amount] recorded"` `Inter 14px/600 t.colors.primary`.
+- Auto-dismiss after `3s` or on scroll.
 
 ---
 
-## 6. NAVIGATION CONTRACT
+### [M2] CustomerOverflowMenu (⋮ header tap)
+**File:** `src/components/people/customer-detail/CustomerOverflowMenu.tsx`
+
+**Triggered by:** `⋮` icon in header.
+
+**Visual spec:**
+- Dropdown from top-right, below header.
+- `bg: t.colors.surface`, `borderRadius: 12px`, `shadow-lg`, `width: 200px`.
+- Overlay: `rgba(0,0,0,0.20)` dims screen.
+- Item height: `44px`, `paddingH: 16px`, `Inter 14px/500`.
+- Icon: `20px` Lucide stroke, `8px` gap.
+- `1px t.colors.borderSubtle` divider between groups.
+
+| # | Label | Icon | Color | Action |
+|---|---|---|---|---|
+| 1 | Share Ledger | `share-2` | `t.colors.ink` | `upsert_access_token` → native share sheet |
+| 2 | PDF Statement | `download` | `t.colors.ink` | `buildStatementHtml` → print dialog. Disabled if no transactions. |
+| — | divider | — | — | — |
+| 3 | Edit Customer | `pencil` | `t.colors.ink` | Navigate to Edit Customer screen |
+| — | divider | — | — | — |
+| 4 | Delete Customer | `trash-2` | `t.colors.danger` | Delete confirm bottom sheet |
+
+**Decision:** Share and PDF removed from the Quick Actions row and placed here. These are low-frequency admin tasks — they don't belong in the primary screen flow.
+
+---
+
+### [M3] PaymentDetailSheet *(new — v1: view only)*
+**File:** `src/components/people/customer-detail/PaymentDetailSheet.tsx`
+
+**Triggered by:** Tapping a Payment row in the timeline.
+
+**Visual spec:**
+- Bottom sheet, `height: auto` (not full screen), `bg: t.colors.surface`, `borderRadius: 20px` top-only.
+- Handle pill: `40×4px #d1d5db`, centered top.
+- `padding: 20px`.
+
+**Content:**
+
+| Row | Content |
+|---|---|
+| Title | `"Payment Details"` `Inter 17px/600 t.colors.ink` |
+| Amount | `formatINR(amount)` `Inter 32px/700 t.colors.primary` |
+| Method | `"Paid via [Cash / UPI / Cheque / Bank Transfer]"` `Inter 14px/400 t.colors.muted` |
+| Date | `"[Full date + time]"` `Inter 14px/400 t.colors.muted` |
+| Note | `"Note: [note]"` — only if note exists |
+| Linked Entry | `"Entry #[bill_number]"` link → tappable to navigate. Only if payment is linked to a specific entry. |
+
+**Actions (bottom of sheet):**
+- `"Close"` — plain text button, centered, `Inter 15px/500 t.colors.muted`.
+- `"Delete Payment"` — `Inter 14px/500 t.colors.danger`, below Close. *(v1: disabled, greyed out, tooltip: "Coming soon").*
+
+---
+
+## 6. STATE MATRIX
+
+| Component | Overdue | Pending | Partial | Settled | Advance |
+|---|---|---|---|---|---|
+| Hero gradient | Red | Amber | Amber | Dark green | Blue |
+| Hero label | `BALANCE DUE` | `BALANCE DUE` | `BALANCE DUE` | `ALL SETTLED` | `ADVANCE` |
+| Hero aging | `"Overdue · X days"` | `"Due [date]"` or hidden | `"Due [date]"` or hidden | hidden | hidden |
+| Status badge | Red `AlertCircle` + `"Overdue"` | Amber `"Pending"` | Blue `"Partial"` | Green `"Settled"` | Blue `"Advance"` |
+| Open entries line | `"N entries · ₹X overdue"` | `"N entries · ₹X due"` | `"N entries · ₹X due"` | hidden | hidden |
+| Header subtitle | `"₹X due"` | `"₹X due"` | `"₹X due"` | `"All settled"` | `"₹X advance"` |
+| Action Strip Primary | `"Collect Payment"` (red-tinted label optional) | `"Collect Payment"` | `"Collect Payment"` | `"Record Payment"` (muted) | `"Record Payment"` |
+| Action Strip Secondary | `"+ Add Entry"` | `"+ Add Entry"` | `"+ Add Entry"` | `"+ Add Entry"` | `"+ Add Entry"` |
+| Entry row aging badge | `"[N]d overdue"` red | `"Due [date]"` amber | Mixed per entry | — | — |
+| Success banner | — | — | — | shown if `justPaid=true` | shown if `justPaid=true` |
+
+---
+
+## 7. NAVIGATION CONTRACT
 
 ### Navigates FROM
 
 | Source | Trigger | Params received |
 |---|---|---|
 | Customer List (`people/index.tsx`) | Tap customer card | `customerId` |
-| Entry List (`entries/index.tsx`) | Tap customer metadata link | `customerId` |
-| Dashboard (`dashboard/index.tsx`) | Tap activity item or hero collect | `customerId` |
-| Record Payment success | Auto-redirect after payment | `customerId` |
+| Dashboard | Tap activity item or hero collect | `customerId` |
+| Entry Detail | Tap customer name / View Customer | `customerId` |
+| Record Payment success | Auto-redirect after payment | `customerId`, `justPaid=true` |
 
 ### Navigates TO
 
 | Destination | Trigger | Params passed |
 |---|---|---|
-| Create Entry (`entries/create.tsx`) | Quick Actions → Add Entry | `customer` (JSON), `customerId` |
-| Entry Detail (`entries/[orderId].tsx`) | Tap transaction row | `orderId`, `customerId` |
-| Record Payment modal | Sticky bar → Collect Payment | `orderId`, `balanceDue`, `customerId`, `customerName` |
-| System dialer | Header → Phone icon | Customer phone number |
-| WhatsApp | Header → MessageCircle icon | Pre-filled reminder message |
+| Entry Detail (`entries/[orderId].tsx`) | Tap entry row | `orderId`, `customerId` |
+| Create Entry (`entries/create.tsx`) | `"+ Add Entry"` in Action Strip | `customer` (JSON), `customerId` |
+| Record Payment modal (M1) | `"Collect Payment"` | `customerId`, `customerName`, `balanceDue` |
+| System dialer | Phone icon in header | customer phone |
+| WhatsApp | `MessageCircle` icon in header | pre-filled reminder message |
+| `⋮` overflow menu (M2) | `⋮` header icon | — |
+| Edit Customer | M2 → Edit Customer | `customerId` |
+| Delete confirm sheet | M2 → Delete Customer | `customerId` |
 
-### Back navigation
-- Back arrow → `router.back()`.
-- Android hardware back = same as back arrow.
+### Back Navigation
+- ← back arrow → `router.back()`.
+- Android hardware back → same.
 
 ---
 
-## 7. ACTION BAR / STICKY BAR SPEC
+## 8. LINKED STITCH SCREENS
 
-| Property | Value |
+| # | Screen | Triggered by | Status |
+|---|---|---|---|
+| CD-0 | Customer Detail — Overdue state | State-driven | 🔴 Needs design |
+| CD-1 | Customer Detail — Pending state | State-driven | 🔴 Needs design |
+| CD-2 | Customer Detail — Settled state | State-driven | 🔴 Needs design |
+| CD-3 | Customer Detail — Advance state | State-driven | 🔴 Needs design |
+| CD-4 | Customer Detail — Empty state (new customer) | First visit | 🔴 Needs design |
+| CD-5 | `⋮` Overflow menu open | `⋮` header icon | 🔴 Needs design |
+| CD-6 | Payment Detail Sheet (M3) | Payment row tap | 🔴 Needs design |
+| CD-7 | Record Payment success banner | `justPaid=true` | 🔴 Needs design |
+
+> **Build order:** CD-0 (Overdue) is the most important state — design this first as the canonical base. Then CD-1, CD-2, CD-3, CD-4 as deltas.
+
+---
+
+## 9. COMPONENT FILE MAP
+
+| Component | File | Status |
+|---|---|---|
+| Screen route | `app/(main)/people/[customerId].tsx` | Exists — needs update |
+| CustomerDetailHeader | `src/components/people/customer-detail/CustomerDetailHeader.tsx` | Exists — needs subtitle update |
+| CustomerBalanceHero | `src/components/people/customer-detail/CustomerBalanceHero.tsx` | Exists — needs aging line |
+| CustomerActionStrip *(new)* | `src/components/people/customer-detail/CustomerActionStrip.tsx` | 🔴 New file |
+| CustomerTransactionTimeline | `src/components/people/customer-detail/CustomerTransactionTimeline.tsx` | Exists — pagination update |
+| CustomerTransactionTabs | `src/components/people/customer-detail/CustomerTransactionTabs.tsx` | Exists — default tab update |
+| CustomerTransactionRow | `src/components/people/customer-detail/CustomerTransactionRow.tsx` | Exists — aging badge needed |
+| CustomerDetailEmptyState | `src/components/people/customer-detail/CustomerDetailEmptyState.tsx` | Exists — two variants needed |
+| RecordCustomerPaymentModal | `src/components/people/RecordCustomerPaymentModal.tsx` | Exists — use as-is |
+| CustomerOverflowMenu *(new)* | `src/components/people/customer-detail/CustomerOverflowMenu.tsx` | 🔴 New file |
+| PaymentDetailSheet *(new)* | `src/components/people/customer-detail/PaymentDetailSheet.tsx` | 🔴 New file (v1: view only) |
+| CustomerStickyCollectBar | `src/components/people/customer-detail/CustomerStickyCollectBar.tsx` | 🗑️ Delete — replaced by CustomerActionStrip |
+| CustomerQuickActionsRow | `src/components/people/customer-detail/CustomerQuickActionsRow.tsx` | 🗑️ Delete — actions moved to overflow + action strip |
+| Data hook | `src/hooks/usePeople.ts` → `usePersonDetail` | Exists — add `oldestOverdueDays` field |
+| API layer | `src/api/people.ts` → `fetchPersonDetail` | Exists — no change needed |
+
+---
+
+## 10. DATA REQUIREMENTS
+
+### New fields needed from `usePersonDetail` hook
+
+| Field | Type | Purpose |
+|---|---|---|
+| `oldestOverdueDays` | `number \| null` | Aging label on hero: `"Overdue · X days"` |
+| `nearestDueDate` | `Date \| null` | Aging label on hero: `"Due [date]"` for pending entries |
+| `openEntriesCount` | `number` | `"N open entries · ₹X due"` line on hero |
+| `balanceState` | `'overdue' \| 'pending' \| 'partial' \| 'settled' \| 'advance'` | Drives hero gradient + status badge + action strip variant |
+
+> These fields can be computed client-side from `entries` data already fetched. No new RPC needed.
+
+---
+
+## 11. EDGE CASES
+
+| Case | Behaviour |
 |---|---|
-| Position | Absolute bottom, full width |
-| Background | `t.colors.surface` + `t.colors.primary` at 8% opacity overlay |
-| Top border | `1px t.colors.borderSubtle` |
-| Bottom padding | `Math.max(insets.bottom, 12)` |
-| Button | Full green `t.colors.primary`, `borderRadius: full`, `height: 48px` |
-| Visibility | Only when `pendingOrderBalance > 0` |
-| Android ripple | White `#ffffff30`, boundary constrained |
+| Customer has no phone number | Phone + WhatsApp icons hidden in header. No crash, no empty placeholder. |
+| Customer has phone but it already has `+91` prefix | Strip existing prefix before rendering — prevent `+91 +91` duplication bug. |
+| Customer has 0 transactions | Show CD-4 empty state. Action strip still visible. |
+| All entries are paid, balance = 0 | `"All settled"` hero, no aging line, action strip shows `"Record Payment"` (muted). |
+| Advance (customer paid more than owed) | Blue hero, `"ADVANCE"` label, amount shown as advance credit. Action strip shows `"Record Payment"`. |
+| Very long customer name (`> 20 chars`) | Header center: truncate at `1` line with `...`. Full name visible on Customer Profile. |
+| Network error loading timeline | Show skeleton rows (3 rows) with shimmer. `"Tap to retry"` button below. |
+| `justPaid=true` on arrive | Show success banner for `3s` then auto-dismiss. Hero should reflect updated balance immediately. |
+| Empty Payments tab filter | Show variant 2 empty state: `"No payments yet"` with no CTA. |
+| PDF disabled (no transactions) | `"PDF Statement"` in overflow is greyed out with tooltip `"Add entries first"`. |
 
 ---
 
-## 8. COMPONENT MAP
-
-| Component | File |
-|---|---|
-| Screen route | `app/(main)/people/[customerId].tsx` |
-| CustomerDetailHeader | `src/components/people/customer-detail/CustomerDetailHeader.tsx` |
-| CustomerBalanceHero | `src/components/people/customer-detail/CustomerBalanceHero.tsx` |
-| CustomerQuickActionsRow | `src/components/people/customer-detail/CustomerQuickActionsRow.tsx` |
-| CustomerTransactionTimeline | `src/components/people/customer-detail/CustomerTransactionTimeline.tsx` |
-| CustomerTransactionTabs | `src/components/people/customer-detail/CustomerTransactionTabs.tsx` |
-| CustomerTransactionRow | `src/components/people/customer-detail/CustomerTransactionRow.tsx` |
-| CustomerStickyCollectBar | `src/components/people/customer-detail/CustomerStickyCollectBar.tsx` |
-| CustomerDetailEmptyState | `src/components/people/customer-detail/CustomerDetailEmptyState.tsx` |
-| RecordCustomerPaymentModal | `src/components/people/RecordCustomerPaymentModal.tsx` |
-| Data hook | `src/hooks/usePeople.ts` → `usePersonDetail` |
-| API layer | `src/api/people.ts` → `fetchPersonDetail` |
-| Shared header | `src/components/layer2/DetailHeader.tsx` |
-
----
-
-## 9. WHAT CHANGED AND WHY (Decision Log)
+## 12. WHAT CHANGED AND WHY (Full Decision Log)
 
 | Old | New | Reason |
 |---|---|---|
-| Share + PDF icons in header | Moved to `CustomerQuickActionsRow` | Header reserved for nav + direct communication only |
-| Floating collect card always visible | Sticky bar shown only when `balance_due > 0` | Removes noise for settled/advance customers |
-| Inline scroll pagination | First 10 rows + expand trigger | Avoids nested `ScrollView` virtualization conflicts in RN |
-| Client-side balance calculation | `sync_party_customer_balance` Postgres trigger | Single source of truth, no client drift |
-| `useSafeAreaInsets` not wired in sticky bar | `paddingBottom: Math.max(insets.bottom, 12)` | Android gesture nav area no longer clips bar |
-| Global FAB on detail screen | Removed — Add Entry in Quick Actions only | Detail screens use contextual actions, not global FAB |
-| `background`, `textPrimary`, `textBody`, `textSecondary`, `surfaceAlt` | `canvas`, `ink`, `body`, `muted`, `surfaceRaised` | 2026-06-09 — Token alignment: all components migrated to canvas/ink/body/muted/surfaceRaised aliases per edit-entry standard |
+| `CustomerQuickActionsRow` (Add · Share · PDF) between Hero and Timeline | Removed from main flow | Admin tasks, not daily actions. Broke visual flow from balance → collect. |
+| Share + PDF icons in header | Moved to `⋮` overflow menu | Header = navigation + communication only. Admin actions in overflow. |
+| `CustomerStickyCollectBar` (floating, conditional) | Replaced by `CustomerActionStrip` (inline, always visible) | Floating bar disappeared for settled customers. Add Entry became inaccessible. |
+| Header subtitle: `"Last active [X]"` | `"₹X due"` / `"All settled"` / `"₹X advance"` | Passive timestamp vs live financial state. Owners need the number, not the date. |
+| Hero sub-label: `"Last bill: [date]"` | Aging label: `"Overdue · X days"` or `"Due [date]"` | Owners need urgency context, not last activity date. |
+| No open entries count on hero | `"N open entries · ₹X due"` line added | Owner needs to know depth of exposure, not just total balance. |
+| No aging badge on timeline rows | `"[N]d overdue"` / `"Due [date]"` chip per entry row | Urgency at item level — owner can see which specific entry is overdue. |
+| Payment rows not tappable | Tap opens `PaymentDetailSheet` (view only v1) | Owners dispute recorded payments and need to verify details. |
+| 10 rows paginated | 15 rows before expand trigger | 10 rows was too few for customers with frequent transactions. |
+| Default timeline tab: `"All"` | Kept as `"All"` | Full picture is the right default. Filtering is opt-in. |
+| `CustomerStickyCollectBar` file | Deleted, replaced by `CustomerActionStrip` | Cleaner architecture, no conditional visibility logic. |
+| Blue avatar color on some screens | Green avatar system: `bg: primarySubtle, color: primary` | Consistency across all screens. |
+| `background`, `textPrimary`, `surfaceAlt` old tokens | `canvas`, `ink`, `surfaceRaised` aligned tokens | Token alignment: all components use the same aliases. |
+
+---
+
+## 13. OPEN QUESTIONS — TO RESOLVE BEFORE BUILD
+
+| # | Question | Options | Recommendation |
+|---|---|---|---|
+| 1 | When customer has multiple overdue entries, which aging do we show on hero? | Oldest overdue / most recent overdue / total overdue count | Show **oldest overdue days** — worst case is what matters |
+| 2 | Should `"+ Add Entry"` in Action Strip pre-select the customer automatically? | Yes always / Ask user / No pre-select | Yes always — coming from a specific customer's screen, context is clear |
+| 3 | Should PaymentDetailSheet (M3) allow deletion in v1? | Yes / No (view only) | **v1: view only.** Add delete in v2 after observing usage. |
+| 4 | Overdue state — should Collect Payment button have red tint to signal urgency? | Green always / Red when overdue | **Green always.** Red on a CTA feels like an error state. Urgency is already signalled by the hero. |
+| 5 | Should the timeline show a `"running balance"` after each row? | Yes (current) / No (simpler) | **Yes, keep it.** Shopkeepers use this to verify hand-counted totals. |
