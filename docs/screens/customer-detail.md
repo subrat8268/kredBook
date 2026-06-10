@@ -1,8 +1,8 @@
 # Customer Detail Screen — Full UX Redesign Spec
 
-> **Status:** 🔴 Design-first. Awaiting Stitch approval before any code changes.
-> **Last updated:** 2026-06-09
-> **Doc version:** 2.0 (full rethink from scratch)
+> **Status:** 🟢 Stitch-ready. All open questions resolved. Awaiting Stitch screen generation.
+> **Last updated:** 2026-06-10
+> **Doc version:** 2.1 (all open questions locked)
 > **Route:** `app/(main)/people/[customerId].tsx`
 
 ---
@@ -101,11 +101,11 @@ SafeAreaView (canvas bg)
   │     └── [C4] CustomerTransactionTimeline
   │             ├── [C4a] SectionHeader  (date group label)
   │             ├── [C4b] EntryRow       (per entry — with aging badge + status)
-  │             └── [C4c] PaymentRow     (per payment — tappable in v2, view-only in v1)
+  │             └── [C4c] PaymentRow     (per payment — tappable, view-only in v1)
   │             └── [C4d] EmptyState     (first-time or filtered empty)
   └── [M1] RecordCustomerPaymentModal  ← bottom sheet, offscreen until triggered
   └── [M2] CustomerOverflowMenu        ← dropdown from header ⋮ icon
-  └── [M3] PaymentDetailSheet          ← view/delete recorded payment (v1: view only)
+  └── [M3] PaymentDetailSheet          ← view recorded payment (v1: view only, delete in v2)
 ```
 
 ### What Changed in the Hierarchy
@@ -167,8 +167,11 @@ SafeAreaView (canvas bg)
 - Overdue state: adds inline `AlertCircle` icon `16px white` before text.
 
 **Aging Label (right of status row):**
-- Overdue: `"Overdue · [X] days"` — `Inter 13px/400 white 75% opacity`.
-- Pending (due date exists): `"Due [date]"` — same style.
+
+> **✅ LOCKED — Q1:** When multiple overdue entries exist, always show **oldest overdue days** (worst-case exposure is what drives action).
+
+- Overdue: `"Overdue · [X] days"` where X = `oldestOverdueDays` — `Inter 13px/400 white 75% opacity`.
+- Pending (due date exists): `"Due [date]"` where date = `nearestDueDate` — same style.
 - Pending (no due date): hidden.
 - Settled / Advance: hidden.
 
@@ -193,6 +196,10 @@ SafeAreaView (canvas bg)
 **Gap between buttons:** `10px`.
 
 **Haptics:** `Haptics.impactAsync(Medium)` on Collect Payment press.
+
+> **✅ LOCKED — Q2:** `"+ Add Entry"` **always pre-selects the customer automatically.** Navigation passes `customer` (JSON object) + `customerId` so the Create Entry screen skips the customer picker entirely. Coming from a specific customer's screen, context is already known.
+
+> **✅ LOCKED — Q4:** `"Collect Payment"` button is **green always** (`t.colors.primary`). Never red-tinted even in Overdue state. Red on a CTA reads as error/blocked — urgency is already communicated by the red hero gradient and `"Overdue · X days"` aging label.
 
 **Decision:** The old `CustomerStickyCollectBar` only appeared when `balance_due > 0`, hiding itself completely for settled customers. This broke the Add Entry flow for settled customers. The new `CustomerActionStrip` is **always visible, always inline** — no floating overlay, no conditional visibility.
 
@@ -231,7 +238,10 @@ SafeAreaView (canvas bg)
   - Overdue: `bg: #fee2e2`, `color: #ef4444`, label `"[N]d overdue"` `Inter 11px/600`.
   - Pending: `bg: #fef3c7`, `color: #d97706`, label `"Due [date]"` `Inter 11px/600`. Hidden if no due date.
   - `borderRadius: full`, `paddingH: 8px`, `paddingV: 3px`.
-- **Right:** Amount `Inter 15px/600 t.colors.danger` for unpaid, `t.colors.primary` for paid + running balance `"Bal: ₹X"` `Inter 12px/400 t.colors.muted` below.
+- **Right:** Amount `Inter 15px/600 t.colors.danger` for unpaid, `t.colors.primary` for paid.
+
+> **✅ LOCKED — Q5:** **Running balance shown on every timeline row.** `"Bal: ₹X"` `Inter 12px/400 t.colors.muted` below the amount. Shopkeepers use this to verify hand-counted totals — it's one of the highest-trust features in the timeline.
+
 - **Tap:** → Entry Detail screen (`entries/[orderId].tsx`), pass `orderId`, `customerId`.
 
 #### [C4c] Payment Row
@@ -240,8 +250,11 @@ SafeAreaView (canvas bg)
 - **Left icon:** `32×32px` circle, `bg: t.colors.primarySubtle`, `ArrowDownLeft` icon `t.colors.primary`.
 - **Title:** `"Payment Received"` — `Inter 14px/600 t.colors.ink`.
 - **Subtitle:** `"[Method] · [time]"` (e.g. `"UPI · 10:30 am"`) — `Inter 13px/400 t.colors.muted`.
-- **Right:** Amount `Inter 15px/600 t.colors.primary` + running balance below.
-- **Tap:** Opens `PaymentDetailSheet` (M3) — view details. No edit in v1.
+- **Right:** Amount `Inter 15px/600 t.colors.primary` + running balance `"Bal: ₹X"` below.
+- **Tap:** Opens `PaymentDetailSheet` (M3) — view details.
+
+> **✅ LOCKED — Q3:** **v1: view only.** No delete in v1. Delete reserved for v2 after observing usage patterns. `"Delete Payment"` button exists in sheet UI but is greyed out with `"Coming soon"` tooltip.
+
 - **No status badge** on payment rows.
 
 #### [C4d] Empty State
@@ -311,7 +324,7 @@ SafeAreaView (canvas bg)
 
 ---
 
-### [M3] PaymentDetailSheet *(new — v1: view only)*
+### [M3] PaymentDetailSheet *(v1: view only)*
 **File:** `src/components/people/customer-detail/PaymentDetailSheet.tsx`
 
 **Triggered by:** Tapping a Payment row in the timeline.
@@ -344,13 +357,14 @@ SafeAreaView (canvas bg)
 |---|---|---|---|---|---|
 | Hero gradient | Red | Amber | Amber | Dark green | Blue |
 | Hero label | `BALANCE DUE` | `BALANCE DUE` | `BALANCE DUE` | `ALL SETTLED` | `ADVANCE` |
-| Hero aging | `"Overdue · X days"` | `"Due [date]"` or hidden | `"Due [date]"` or hidden | hidden | hidden |
+| Hero aging | `"Overdue · X days"` (oldest) | `"Due [date]"` (nearest) or hidden | `"Due [date]"` or hidden | hidden | hidden |
 | Status badge | Red `AlertCircle` + `"Overdue"` | Amber `"Pending"` | Blue `"Partial"` | Green `"Settled"` | Blue `"Advance"` |
 | Open entries line | `"N entries · ₹X overdue"` | `"N entries · ₹X due"` | `"N entries · ₹X due"` | hidden | hidden |
 | Header subtitle | `"₹X due"` | `"₹X due"` | `"₹X due"` | `"All settled"` | `"₹X advance"` |
-| Action Strip Primary | `"Collect Payment"` (red-tinted label optional) | `"Collect Payment"` | `"Collect Payment"` | `"Record Payment"` (muted) | `"Record Payment"` |
-| Action Strip Secondary | `"+ Add Entry"` | `"+ Add Entry"` | `"+ Add Entry"` | `"+ Add Entry"` | `"+ Add Entry"` |
+| Action Strip Primary | `"Collect Payment"` green (never red) | `"Collect Payment"` | `"Collect Payment"` | `"Record Payment"` (muted) | `"Record Payment"` |
+| Action Strip Secondary | `"+ Add Entry"` (pre-selects customer) | `"+ Add Entry"` (pre-selects) | `"+ Add Entry"` (pre-selects) | `"+ Add Entry"` (pre-selects) | `"+ Add Entry"` (pre-selects) |
 | Entry row aging badge | `"[N]d overdue"` red | `"Due [date]"` amber | Mixed per entry | — | — |
+| Timeline running balance | ✅ shown every row | ✅ shown every row | ✅ shown every row | ✅ shown every row | ✅ shown every row |
 | Success banner | — | — | — | shown if `justPaid=true` | shown if `justPaid=true` |
 
 ---
@@ -371,7 +385,7 @@ SafeAreaView (canvas bg)
 | Destination | Trigger | Params passed |
 |---|---|---|
 | Entry Detail (`entries/[orderId].tsx`) | Tap entry row | `orderId`, `customerId` |
-| Create Entry (`entries/create.tsx`) | `"+ Add Entry"` in Action Strip | `customer` (JSON), `customerId` |
+| Create Entry (`entries/create.tsx`) | `"+ Add Entry"` in Action Strip | `customer` (JSON), `customerId` *(pre-selected, customer picker skipped)* |
 | Record Payment modal (M1) | `"Collect Payment"` | `customerId`, `customerName`, `balanceDue` |
 | System dialer | Phone icon in header | customer phone |
 | WhatsApp | `MessageCircle` icon in header | pre-filled reminder message |
@@ -398,7 +412,7 @@ SafeAreaView (canvas bg)
 | CD-6 | Payment Detail Sheet (M3) | Payment row tap | 🔴 Needs design |
 | CD-7 | Record Payment success banner | `justPaid=true` | 🔴 Needs design |
 
-> **Build order:** CD-0 (Overdue) is the most important state — design this first as the canonical base. Then CD-1, CD-2, CD-3, CD-4 as deltas.
+> **Build order:** CD-0 (Overdue) is the most emotionally charged state — design this first as the canonical base. Then CD-1, CD-2, CD-3, CD-4 as deltas.
 
 ---
 
@@ -412,14 +426,14 @@ SafeAreaView (canvas bg)
 | CustomerActionStrip *(new)* | `src/components/people/customer-detail/CustomerActionStrip.tsx` | 🔴 New file |
 | CustomerTransactionTimeline | `src/components/people/customer-detail/CustomerTransactionTimeline.tsx` | Exists — pagination update |
 | CustomerTransactionTabs | `src/components/people/customer-detail/CustomerTransactionTabs.tsx` | Exists — default tab update |
-| CustomerTransactionRow | `src/components/people/customer-detail/CustomerTransactionRow.tsx` | Exists — aging badge needed |
+| CustomerTransactionRow | `src/components/people/customer-detail/CustomerTransactionRow.tsx` | Exists — aging badge + running balance |
 | CustomerDetailEmptyState | `src/components/people/customer-detail/CustomerDetailEmptyState.tsx` | Exists — two variants needed |
 | RecordCustomerPaymentModal | `src/components/people/RecordCustomerPaymentModal.tsx` | Exists — use as-is |
 | CustomerOverflowMenu *(new)* | `src/components/people/customer-detail/CustomerOverflowMenu.tsx` | 🔴 New file |
 | PaymentDetailSheet *(new)* | `src/components/people/customer-detail/PaymentDetailSheet.tsx` | 🔴 New file (v1: view only) |
 | CustomerStickyCollectBar | `src/components/people/customer-detail/CustomerStickyCollectBar.tsx` | 🗑️ Delete — replaced by CustomerActionStrip |
 | CustomerQuickActionsRow | `src/components/people/customer-detail/CustomerQuickActionsRow.tsx` | 🗑️ Delete — actions moved to overflow + action strip |
-| Data hook | `src/hooks/usePeople.ts` → `usePersonDetail` | Exists — add `oldestOverdueDays` field |
+| Data hook | `src/hooks/usePeople.ts` → `usePersonDetail` | Exists — add 4 new computed fields |
 | API layer | `src/api/people.ts` → `fetchPersonDetail` | Exists — no change needed |
 
 ---
@@ -428,14 +442,14 @@ SafeAreaView (canvas bg)
 
 ### New fields needed from `usePersonDetail` hook
 
-| Field | Type | Purpose |
-|---|---|---|
-| `oldestOverdueDays` | `number \| null` | Aging label on hero: `"Overdue · X days"` |
-| `nearestDueDate` | `Date \| null` | Aging label on hero: `"Due [date]"` for pending entries |
-| `openEntriesCount` | `number` | `"N open entries · ₹X due"` line on hero |
-| `balanceState` | `'overdue' \| 'pending' \| 'partial' \| 'settled' \| 'advance'` | Drives hero gradient + status badge + action strip variant |
+| Field | Type | Purpose | Computed from |
+|---|---|---|---|
+| `oldestOverdueDays` | `number \| null` | Aging label on hero: `"Overdue · X days"` *(oldest overdue — worst case)* | `entries` — find overdue entries, calc max days past due |
+| `nearestDueDate` | `Date \| null` | Aging label on hero: `"Due [date]"` for pending entries | `entries` — find earliest upcoming due date |
+| `openEntriesCount` | `number` | `"N open entries · ₹X due"` line on hero | `entries` filter by non-paid status |
+| `balanceState` | `'overdue' \| 'pending' \| 'partial' \| 'settled' \| 'advance'` | Drives hero gradient + status badge + action strip variant | Computed from `netBalance` + `entries` |
 
-> These fields can be computed client-side from `entries` data already fetched. No new RPC needed.
+> All 4 fields are computable client-side from `entries` data already fetched. **No new RPC or API call needed.**
 
 ---
 
@@ -453,6 +467,7 @@ SafeAreaView (canvas bg)
 | `justPaid=true` on arrive | Show success banner for `3s` then auto-dismiss. Hero should reflect updated balance immediately. |
 | Empty Payments tab filter | Show variant 2 empty state: `"No payments yet"` with no CTA. |
 | PDF disabled (no transactions) | `"PDF Statement"` in overflow is greyed out with tooltip `"Add entries first"`. |
+| Multiple overdue entries exist | Show `oldestOverdueDays` on hero (worst-case). All overdue entry rows show their own individual aging badges. |
 
 ---
 
@@ -473,15 +488,22 @@ SafeAreaView (canvas bg)
 | `CustomerStickyCollectBar` file | Deleted, replaced by `CustomerActionStrip` | Cleaner architecture, no conditional visibility logic. |
 | Blue avatar color on some screens | Green avatar system: `bg: primarySubtle, color: primary` | Consistency across all screens. |
 | `background`, `textPrimary`, `surfaceAlt` old tokens | `canvas`, `ink`, `surfaceRaised` aligned tokens | Token alignment: all components use the same aliases. |
+| `"+ Add Entry"` navigated to blank Create Entry form | Pre-selects current customer automatically | Coming from a specific customer's screen — context is already known. |
+| Hero aging used most-recent overdue | Hero aging uses **oldest** overdue days | Worst-case is the number that drives action. |
+| Payment delete in v1 | View only in v1, delete deferred to v2 | Irreversible action — build usage confidence first. |
+| Collect Payment had red tint option in Overdue | Green always | Red CTA = error state. Urgency is the hero's job. |
+| Running balance on timeline rows was uncertain | Running balance always shown | Shopkeepers verify hand-counted totals — highest-trust detail in timeline. |
 
 ---
 
-## 13. OPEN QUESTIONS — TO RESOLVE BEFORE BUILD
+## 13. OPEN QUESTIONS — ✅ ALL RESOLVED
 
-| # | Question | Options | Recommendation |
+All 5 questions resolved on **2026-06-10**. No blockers for Stitch.
+
+| # | Question | ✅ Decision | Rationale |
 |---|---|---|---|
-| 1 | When customer has multiple overdue entries, which aging do we show on hero? | Oldest overdue / most recent overdue / total overdue count | Show **oldest overdue days** — worst case is what matters |
-| 2 | Should `"+ Add Entry"` in Action Strip pre-select the customer automatically? | Yes always / Ask user / No pre-select | Yes always — coming from a specific customer's screen, context is clear |
-| 3 | Should PaymentDetailSheet (M3) allow deletion in v1? | Yes / No (view only) | **v1: view only.** Add delete in v2 after observing usage. |
-| 4 | Overdue state — should Collect Payment button have red tint to signal urgency? | Green always / Red when overdue | **Green always.** Red on a CTA feels like an error state. Urgency is already signalled by the hero. |
-| 5 | Should the timeline show a `"running balance"` after each row? | Yes (current) / No (simpler) | **Yes, keep it.** Shopkeepers use this to verify hand-counted totals. |
+| 1 | Which aging to show on hero when multiple overdue entries? | **Oldest overdue days** | Worst-case drives action |
+| 2 | Should `"+ Add Entry"` pre-select customer? | **Yes, always** | Context is already established |
+| 3 | PaymentDetailSheet delete in v1? | **v1: view only, delete in v2** | Irreversible — build confidence first |
+| 4 | Collect Payment red tint in Overdue state? | **Green always** | Red = error; urgency belongs on hero |
+| 5 | Show running balance on timeline? | **Yes, keep it** | Shopkeepers verify hand-totals |
