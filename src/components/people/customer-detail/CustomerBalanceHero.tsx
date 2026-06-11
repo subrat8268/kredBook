@@ -49,7 +49,7 @@ export default function CustomerBalanceHero({
       colors={[heroTone.start, heroTone.end]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      className="mx-4 mt-4 overflow-hidden rounded-xl px-5 py-5"
+      className="mx-4 mt-4 mb-3 overflow-hidden rounded-xl px-5 py-5"
       style={{
         shadowColor: colors.ink,
         shadowOffset: { width: 0, height: 2 },

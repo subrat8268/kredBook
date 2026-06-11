@@ -50,8 +50,7 @@ export default function CustomerQuickActionsRow({
 
   return (
     <View
-      className="mx-4 flex-row gap-2"
-      style={{ marginTop: 12 }}
+      className="mx-4 mb-3 flex-row gap-2"
     >
       {actions.map((act) => {
         const disabled = act.disabled || act.loading;

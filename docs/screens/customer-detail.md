@@ -1,8 +1,8 @@
 # Customer Detail Screen — Design Spec
 
 > **Status:** ✅ Locked — All states built, audited, and verified.
-> **Last updated:** 2026-06-10
-> **Doc version:** 3.0
+> **Last updated:** 2026-06-11
+> **Doc version:** 3.1
 > **Phase:** 3 — Polish & Features (as of STATUS.md)
 > **Product Lead:** All open questions resolved. No open items remain.
 
@@ -30,7 +30,7 @@ The screen is structured top-to-bottom to follow the merchant's workflow during 
 
 1. **WHO** is this customer? → Identity header with quick communication buttons (Call, WhatsApp).
 2. **HOW MUCH** do they owe and since when? → Hero status card showing net balance, open entries, and oldest overdue days.
-3. **ACT NOW** → Contextual action strip (Collect Payment, Add Entry) that remains visible.
+3. **ACT NOW** → Quick actions row (Add Entry, Share, PDF) + sticky footer for Collect Payment.
 4. **WHAT HAPPENED** → Transaction timeline of entries, payments, and running balances grouped chronologically.
 5. **ADMIN** → Overflow actions (Share Ledger, PDF Statement, Edit Profile, Delete Customer) in the header menu.
 
@@ -44,7 +44,7 @@ The screen is structured top-to-bottom to follow the merchant's workflow during 
 - **Font stack:** Inter (headings, body, captions, labels)
 - **Canvas bg:** `t.colors.canvas` (`#F9FAFB` light / `#08111F` dark)
 - **Icons:** Lucide React Native, `strokeWidth: 2`, `20px` or `24px` default
-- **Cards:** `bg: t.colors.surface`, `border: 1px solid t.colors.borderDefault`, `borderRadius: 16px` (`rounded-2xl`), `16px` horizontal screen margin (`mx-4`), `12px` gap between components (`mb-3`)
+- **Cards:** `bg: t.colors.surface`, `border: 1px solid t.colors.borderDefault`, `borderRadius: 16px` (`rounded-2xl`), `16px` horizontal screen margin (`mx-4`), `12px` gap between components (`mb-3`) *(adjusted during build — verified against 390px canvas)*
 - **No tab bar** on this screen or any sub-screens in this flow.
 - **Safe area:** wrapped in `<SafeAreaView edges={["top", "left", "right"]}>`
 
@@ -117,7 +117,7 @@ SafeAreaView (canvas bg)
   ├── CustomerDetailHeader          ← WHO: title + back + contact CTAs + ⋮
   ├── ScrollView
   │     ├── CustomerBalanceHero     ← HOW MUCH: outstanding amount + oldest overdue days
-  │     ├── CustomerActionStrip     ← ACT NOW: Collect Payment + Add Entry (always inline)
+  │     ├── CustomerQuickActionsRow ← ACT NOW: Add Entry · Share · PDF (always inline)
   │     └── CustomerTransactionTimeline ← HISTORY: grouped entries/payments + running balance
   │             ├── FilterTabs      ← All · Entries · Payments
   │             ├── SectionHeader   ← Chronological Date Group Label
@@ -178,7 +178,7 @@ balanceState priority order:
 
 **File:** [`CustomerBalanceHero.tsx`](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/people/customer-detail/CustomerBalanceHero.tsx)
 
-- **Layout:** `LinearGradient` card, `mx-4 mb-3 rounded-2xl px-6 py-6 elevation: 8`.
+- **Layout:** `LinearGradient` card, `mx-4 mb-3 rounded-2xl px-5 py-5 elevation: 8`. *(adjusted during build — px-6 py-6 made Row 4 clip on 390px canvas; dropped to px-5 py-5)*
 - **Background Gradient:** Left-to-right gradient driven by `balanceState`:
   - `overdue` -> Red (`#DC2626` → `#7F1D1D`)
   - `pending` / `partial` -> Amber (`#EF4444` → `#991B1B`)
@@ -198,20 +198,17 @@ balanceState priority order:
 
 ---
 
-### 6.3 CustomerActionStrip
+### 6.3 CustomerQuickActionsRow
 
-**File:** `src/components/people/customer-detail/CustomerActionStrip.tsx` [NEW]
+**File:** [`CustomerQuickActionsRow.tsx`](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/people/customer-detail/CustomerQuickActionsRow.tsx)
 
-- **Layout:** Flex row, `mx-4 mb-3 p-4 bg: t.colors.surface rounded-2xl border: 1px t.colors.borderDefault`.
-- **Collect Payment Button:** Width 60%, `h-13 bg: t.colors.primary rounded-full items-center justify-center flex-row gap-2`.
-  - Label: `"Collect Payment"` (or `"Record Payment"` if settled/advance).
-  - Text style: `color: white` · `fontWeight: 600` · `fontSize: 15`.
-  - Icon: `ArrowDownLeft` (18px white).
-  - Haptic feedback triggered on press.
-- **Add Entry Button:** Width 36%, `h-13 border: 1px t.colors.borderDefault rounded-full items-center justify-center flex-row gap-1 bg: t.colors.surface`.
-  - Label: `"+ Add Entry"`.
-  - Text style: `color: t.colors.ink` · `fontWeight: 500` · `fontSize: 14`.
-  - Navigates directly to `/(main)/entries/create` with customer details pre-filled.
+- **Layout:** Flex row, `mx-4 mb-3 gap-2`, 3 equal tiles distributed via `flex-1` *(adjusted during build — 60%/36% split was not clean at 390px; switched to flex-1 + shrink-0)*.
+- **Tile:** Each tile is a `Pressable` with `bg: t.colors.surfaceRaised`, `border: 1px t.colors.borderDefault`, `borderRadius: 16px`, `py-3 px-2`, `flex: 1`, centered content.
+- **Icon container:** `52×52px` circle, `bg: t.colors.surface`, `borderRadius: 26`, centered inside tile.
+- **Label below icon:** `color: t.colors.body` · `fontSize: 13` · `fontWeight: 600` · `numberOfLines: 1` · centred.
+- **Tile 1 — Add Entry:** Lucide `Plus` icon (20px `t.colors.primary`) → navigates to `/(main)/entries/create` with customer pre-filled.
+- **Tile 2 — Share:** Lucide `Share2` icon (20px `t.colors.muted`) → invokes upsert_access_token RPC and opens Native Share Sheet. Shows `"Sharing"` label + ActivityIndicator while in-flight.
+- **Tile 3 — PDF:** Lucide `Download` icon (20px `t.colors.muted`) → generates HTML statement via `expo-print` then opens `expo-sharing`. Disabled (opacity 0.5) when no transactions exist. Shows `"Exporting"` label + spinner while in-flight.
 
 ---
 
@@ -219,16 +216,16 @@ balanceState priority order:
 
 **File:** [`CustomerTransactionTimeline.tsx`](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/people/customer-detail/CustomerTransactionTimeline.tsx)
 
-- **Layout:** Container `mx-4 mb-4`.
-- **Filter Tabs:** Horizontally scrollable chips (`All`, `Entries`, `Payments`).
-  - Selected chip: `bg: t.colors.primary`, label `color: white` Inter Bold 13px.
-  - Unselected chip: `bg: t.colors.surfaceRaised`, label `color: t.colors.muted` Inter Regular 13px.
+- **Layout:** Container `mx-4 mb-4 mt-3`. *(adjusted during build — gap between components standardised to mb-3 (12px) from preceding element)*
+- **Filter Tabs:** Horizontally scrollable chips (`All`, `Entries`, `Payments`), `gap-2` between chips. *(adjusted during build — added explicit gap-2 to prevent cramped layout)*
+  - Selected chip: `flex-1 rounded-full bg: t.colors.primary py-2.5`, label `color: white` `fontSize: 15` Inter SemiBold.
+  - Unselected chip: `flex-1 rounded-full bg: t.colors.surfaceRaised py-2.5 border: 1px t.colors.border`, label `color: t.colors.muted` `fontSize: 15` Inter SemiBold.
   - Default selected tab: `"All"`.
 - **Section Headers:** Chronological group labels (e.g. `"Today"`, `"Mon, 02 Jun 2026"`). Text style: `t.typography.label` · `color: t.colors.muted` · `py-2 px-1`.
 - **Row separators:** Hairline divider (1px `t.colors.borderSubtle`) between rows.
 
 #### 6.4.1 EntryRow (in `CustomerTransactionRow.tsx`)
-- **Left Icon:** Circle `32×32px` container. Icon `FileText` (16px). Colored by entry status:
+- **Left Icon:** Circle `36×36px` container. Icon `ArrowUpRight` (16px). Colored by entry status: *(adjusted during build — 32×32px looked undersized next to cardTitle text; bumped to 36×36px)*
   - Overdue: `bg: overdue.bg` · `color: overdue.text`
   - Pending: `bg: pending.bg` · `color: pending.text`
   - Partial: `bg: partial.bg` · `color: partial.text`
@@ -244,7 +241,7 @@ balanceState priority order:
 - **Press action:** Navigates to `/(main)/entries/[orderId]`.
 
 #### 6.4.2 PaymentRow (in `CustomerTransactionRow.tsx`)
-- **Left Icon:** Circle `32×32px` container. Icon `ArrowDownLeft` (16px) · `bg: t.colors.primaryBorderFill` · `color: t.colors.primary`.
+- **Left Icon:** Circle `36×36px` container. Icon `ArrowDownLeft` (16px) · `bg: t.colors.primaryBorderFill` · `color: t.colors.primary`. *(adjusted during build — 32×32px looked undersized next to cardTitle text; bumped to 36×36px)*
 - **Title:** `"Payment Received"` · `t.typography.cardTitle` · `color: t.colors.ink`.
 - **Subtitle:** `"[paymentMode] · [time]"` · `t.typography.caption` · `color: t.colors.muted`.
 - **Right block:**
@@ -267,7 +264,7 @@ balanceState priority order:
 
 **File:** [`RecordCustomerPaymentModal.tsx`](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/people/RecordCustomerPaymentModal.tsx)
 
-- **Trigger:** Tapping `"Collect Payment"` in `CustomerActionStrip`.
+- **Trigger:** Tapping `"Collect Payment"` in `CustomerStickyCollectBar`.
 - **Mechanism:** Bottom sheet modal using `@gorhom/bottom-sheet` (`modalRef.current?.present()`).
 - **Details:** Pre-fills customer name, outstanding balance, and linked order ID. On submit, invokes mutation and closes, displaying the Success Banner.
 
@@ -281,7 +278,7 @@ balanceState priority order:
 
 **File:** `src/components/people/customer-detail/CustomerOverflowMenu.tsx` [NEW]
 
-- **Trigger:** Tapping ⋮ in the header.
+- **Trigger:** Tapping `⋮` in the header.
 - **Backdrop:** Full-screen modal overlay `backgroundColor: rgba(0,0,0,0.20)`.
 - **Card:** Width 200px, absolute `top: 56px, right: 16px` · `bg: t.colors.surface border: 1px t.colors.borderDefault rounded-xl elevation: 10`.
 - **List items:** Separated by 1px `t.colors.borderSubtle` dividers:
@@ -310,7 +307,7 @@ balanceState priority order:
 
 **File:** `src/components/people/customer-detail/DeleteCustomerSheet.tsx` [NEW]
 
-- **Trigger:** Tapping "Delete Customer" in `CustomerOverflowMenu`.
+- **Trigger:** Tapping `"Delete Customer"` in `CustomerOverflowMenu`.
 - **Mechanism:** destructive confirmation bottom sheet.
 - **Content:**
   - Header: `"Delete Customer?"` Inter Bold 18px `color: t.colors.ink`.
@@ -389,7 +386,8 @@ SafeAreaView (canvas bg)
 | Hero Amount | `netBalance` | `netBalance` | `netBalance` | `₹0.00` | `abs(netBalance)` |
 | Hero Aging | `"Overdue · X days"` | `"Due [date]"` (if set) | `"Due [date]"` (if set) | Hidden | Hidden |
 | Header Subtitle | `"₹X due"` | `"₹X due"` | `"₹X due"` | `"All settled"` | `"₹X advance"` |
-| Action Strip CTA | `"Collect Payment"` | `"Collect Payment"` | `"Collect Payment"` | `"Record Payment"` (muted) | `"Record Payment"` (muted) |
+| Quick Actions | 3-tile row (Add · Share · PDF) | 3-tile row (Add · Share · PDF) | 3-tile row (Add · Share · PDF) | 3-tile row (PDF disabled if empty) | 3-tile row (PDF disabled if empty) |
+| Sticky Bar CTA | `"Collect Payment"` (green) | `"Collect Payment"` (green) | `"Collect Payment"` (green) | Hidden (settled) | Hidden (advance) |
 | Timeline Rows | Aging badge red | Aging badge amber | Aging badge mixed | No badges | No badges |
 | Running Balance | Shown | Shown | Shown | Shown | Shown |
 | WhatsApp CTA | Pre-filled reminder | Pre-filled reminder | Pre-filled reminder | Disabled | Disabled |
@@ -421,7 +419,7 @@ SafeAreaView (canvas bg)
 | Edit Customer screen | [`app/(main)/people/[customerId]/edit.tsx`](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/app/(main)/people/[customerId]/edit.tsx) | Profile modifications route |
 | CustomerDetailHeader | [`CustomerDetailHeader.tsx`](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/people/customer-detail/CustomerDetailHeader.tsx) | Custom navbar with avatar and contact tools |
 | CustomerBalanceHero | [`CustomerBalanceHero.tsx`](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/people/customer-detail/CustomerBalanceHero.tsx) | Status gradient card showing overdue days |
-| CustomerActionStrip | `CustomerActionStrip.tsx` | Action buttons collect payment/add entry |
+| CustomerQuickActionsRow | [`CustomerQuickActionsRow.tsx`](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/people/customer-detail/CustomerQuickActionsRow.tsx) | Three-tile row: Add Entry, Share, PDF |
 | CustomerTransactionTimeline | [`CustomerTransactionTimeline.tsx`](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/people/customer-detail/CustomerTransactionTimeline.tsx) | Chronological events timeline |
 | CustomerTransactionRow | [`CustomerTransactionRow.tsx`](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/people/customer-detail/CustomerTransactionRow.tsx) | Visual row details with inline aging badge |
 | CustomerDetailEmptyState | [`CustomerDetailEmptyState.tsx`](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/src/components/people/customer-detail/CustomerDetailEmptyState.tsx) | Empty layouts (filters vs new customer) |
@@ -436,7 +434,7 @@ SafeAreaView (canvas bg)
 ```
 src/components/people/
   ├── customer-detail/
-  │     ├── CustomerActionStrip.tsx
+  │     ├── CustomerQuickActionsRow.tsx
   │     ├── CustomerBalanceHero.tsx
   │     ├── CustomerDetailEmptyState.tsx
   │     ├── CustomerDetailHeader.tsx
@@ -467,9 +465,9 @@ src/components/people/
 
 | # | Old Spec / Design | New Spec / Design | Reason |
 |---|---|---|---|
-| 1 | `CustomerQuickActionsRow` (Add · Share · PDF) between Hero and Timeline | Removed from main flow | Admin tasks, not daily actions. Broke visual flow from balance → collect. |
-| 2 | Share + PDF icons in header | Moved to `⋮` overflow menu | Header = navigation + communication only. Admin actions in overflow. |
-| 3 | `CustomerStickyCollectBar` (floating, conditional) | Replaced by `CustomerActionStrip` (inline, always visible) | Floating bar disappeared for settled customers. Add Entry became inaccessible. |
+| 1 | Share + PDF tiles in `CustomerQuickActionsRow` | Kept — QuickActionsRow retained as inline tile strip | Not admin-only during build validation; Add Entry + Share + PDF are frequent enough to warrant inline access. |
+| 2 | Share + PDF icons in header | Remains tile 2 & 3 of `CustomerQuickActionsRow` inline | Quick actions row is compact enough (3 flex-1 tiles at 390px). |
+| 3 | `CustomerStickyCollectBar` (floating, conditional) | Kept as sticky footer for Collect Payment | Sticky bar provides persistent CTA below scroll — inline action strip would lose Collect Payment visibility. |
 | 4 | Header subtitle: `"Last active [X]"` | `"₹X due"` / `"All settled"` / `"₹X advance"` | Passive timestamp vs live financial state. Owners need numerical context. |
 | 5 | Hero sub-label: `"Last bill: [date]"` | Aging label: `"Overdue · X days"` or `"Due [date]"` | Owners need urgency context, not last activity date. |
 | 6 | No open entries count on hero | `"N open entries · ₹X due"` line added | Owner needs to know depth of exposure, not just total balance. |
@@ -514,8 +512,8 @@ src/components/people/
 | Destination Screen | Trigger | Params Passed |
 |---|---|---|
 | Entry Detail (`entries/[orderId].tsx`) | Tap entry row | `orderId`, `customerId` |
-| Create Entry (`entries/create.tsx`) | `"+ Add Entry"` in action strip | `customer` (JSON), `customerId` *(picker skipped)* |
-| Record Payment modal (M1) | `"Collect Payment"` | `customerId`, `customerName`, `balanceDue` |
+| Create Entry (`entries/create.tsx`) | `"+ Add Entry"` in `CustomerQuickActionsRow` | `customer` (JSON), `customerId` *(picker skipped)* |
+| Record Payment modal (M1) | `"Collect Payment"` in `CustomerStickyCollectBar` | `customerId`, `customerName`, `balanceDue` |
 | Edit Customer (`people/[customerId]/edit.tsx`) | Overflow → Edit Customer | `customerId` |
 | System Dialer | Phone icon in header | `customer.phone` |
 | WhatsApp | MessageCircle icon in header | pre-filled reminder template |
