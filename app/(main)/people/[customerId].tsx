@@ -20,7 +20,6 @@ import { supabase } from "@/src/services/supabase";
 import DetailHeader, { type HeaderAction } from "@/src/components/layer2/DetailHeader";
 import CustomerBalanceHero from "@/src/components/people/customer-detail/CustomerBalanceHero";
 import CustomerActionStrip from "@/src/components/people/customer-detail/CustomerActionStrip";
-import CustomerQuickActionsRow from "@/src/components/people/customer-detail/CustomerQuickActionsRow";
 import CustomerTransactionTimeline from "@/src/components/people/customer-detail/CustomerTransactionTimeline";
 import { type MenuItem } from "@/src/components/layer2/OverflowMenu";
 import PaymentDetailSheet from "@/src/components/people/customer-detail/PaymentDetailSheet";
@@ -141,11 +140,9 @@ export default function CustomerDetailScreen() {
 
   // Local state
   const [txFilter, setTxFilter] = useState<TxFilter>("All");
-  const [exporting, setExporting] = useState(false);
   const [historyExpanded, setHistoryExpanded] = useState(false);
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
   const [shareQueued, setShareQueued] = useState(false);
-  const [isSharingLedgerLink, setIsSharingLedgerLink] = useState(false);
 
   const menuItems = useMemo<MenuItem[]>(() => {
     if (!customer) return [];
@@ -245,9 +242,6 @@ export default function CustomerDetailScreen() {
     return actions;
   }, [customer, balanceState, netBalance, colors, handleWhatsAppReminder]);
 
-  const hasPendingPayment =
-    !!customer?.pendingOrderId && (customer.pendingOrderBalance ?? 0) > 0;
-
   // Auto-dismiss success banner after 3 seconds
   useEffect(() => {
     if (showSuccessBanner) {
@@ -268,8 +262,6 @@ export default function CustomerDetailScreen() {
   // Share ledger message link
   const handleShareLedger = useCallback(async () => {
     if (!customer) return;
-
-    setIsSharingLedgerLink(true);
     try {
       const { data, error } = await supabase.rpc("upsert_access_token", {
         p_party_id: customer.id,
@@ -299,8 +291,6 @@ export default function CustomerDetailScreen() {
       showToast({ message: "Ledger link ready to share", type: "success" });
     } catch {
       showToast({ message: "Could not create share link.", type: "error" });
-    } finally {
-      setIsSharingLedgerLink(false);
     }
   }, [customer, profile, i18n.language, showToast]);
 
@@ -333,8 +323,6 @@ export default function CustomerDetailScreen() {
       });
       return;
     }
-
-    setExporting(true);
     try {
       const html = buildStatementHtml(
         customer.name,
@@ -352,21 +340,11 @@ export default function CustomerDetailScreen() {
       });
     } catch {
       showToast({ message: "Could not generate statement.", type: "error" });
-    } finally {
-      setExporting(false);
     }
   }, [customer, showToast, profile, colors]);
 
   // Open record payment modal
   const openPaymentFlow = (amountSeed?: number) => {
-    if (!hasPendingPayment) {
-      showToast({
-        message: "No outstanding balance for this customer.",
-        type: "error",
-      });
-      return;
-    }
-
     setQuickPaymentAmount(
       amountSeed && amountSeed > 0 ? String(amountSeed) : "",
     );
@@ -513,15 +491,6 @@ export default function CustomerDetailScreen() {
             onAddEntryPress={handleAddEntryNavigation}
           />
 
-          <CustomerQuickActionsRow
-            isSharingLedgerLink={isSharingLedgerLink}
-            exporting={exporting}
-            canDownload={(customer.transactions || []).length > 0}
-            onAddEntry={handleAddEntryNavigation}
-            onShare={handleShareLedger}
-            onDownload={downloadStatement}
-          />
-
           <CustomerTransactionTimeline
             customer={customer}
             balanceState={balanceState}
@@ -544,22 +513,20 @@ export default function CustomerDetailScreen() {
       {/* Modals & Bottom Sheets */}
 
       {/* M1: Record Customer Payment Modal */}
-      {hasPendingPayment && (
-        <RecordCustomerPaymentModal
-          ref={paymentModalRef}
-          onSuccess={(amount) => {
-            paymentModalRef.current?.dismiss();
-            handlePaymentSuccess(amount);
-          }}
-          orderId={customer.pendingOrderId!}
-          balanceDue={customer.pendingOrderBalance ?? 0}
-          customerId={customer.id}
-          customerName={customer.name}
-          initialAmount={
-            quickPaymentAmount ? Number(quickPaymentAmount) : undefined
-          }
-        />
-      )}
+      <RecordCustomerPaymentModal
+        ref={paymentModalRef}
+        onSuccess={(amount) => {
+          paymentModalRef.current?.dismiss();
+          handlePaymentSuccess(amount);
+        }}
+        orderId={customer.pendingOrderId ?? customer.id}
+        balanceDue={customer.pendingOrderBalance ?? 0}
+        customerId={customer.id}
+        customerName={customer.name}
+        initialAmount={
+          quickPaymentAmount ? Number(quickPaymentAmount) : undefined
+        }
+      />
 
 
 
