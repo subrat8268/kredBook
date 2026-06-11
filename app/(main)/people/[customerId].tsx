@@ -1,8 +1,32 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, Share, View, StyleSheet, Text, Linking } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  ScrollView,
+  Share,
+  View,
+  StyleSheet,
+  Text,
+  Linking,
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { CheckCircle, Share2, Download, Pencil, Trash2, Phone, MessageCircle } from "lucide-react-native";
+import {
+  CheckCircle,
+  Share2,
+  Download,
+  Pencil,
+  Trash2,
+  Phone,
+  MessageCircle,
+} from "lucide-react-native";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useTranslation } from "react-i18next";
@@ -17,7 +41,9 @@ import { useTheme } from "@/src/theme/useTheme";
 import { supabase } from "@/src/services/supabase";
 
 // Components
-import DetailHeader, { type HeaderAction } from "@/src/components/layer2/DetailHeader";
+import DetailHeader, {
+  type HeaderAction,
+} from "@/src/components/layer2/DetailHeader";
 import CustomerBalanceHero from "@/src/components/people/customer-detail/CustomerBalanceHero";
 import CustomerActionStrip from "@/src/components/people/customer-detail/CustomerActionStrip";
 import CustomerTransactionTimeline from "@/src/components/people/customer-detail/CustomerTransactionTimeline";
@@ -31,8 +57,12 @@ import EmptyState from "@/src/components/ui/EmptyState";
 // Utilities
 import { formatINR } from "@/src/utils/format";
 import { buildLedgerShareMessage } from "@/src/utils/shareTemplates";
-import type { TxFilter, TxListItem } from "@/src/components/people/customer-detail/types";
+import type {
+  TxFilter,
+  TxListItem,
+} from "@/src/components/people/customer-detail/types";
 import type { Transaction } from "@/src/components/people/customer-detail/CustomerTransactionRow";
+import { spacing } from "@/src/theme";
 
 const INITIAL_TX_COUNT = 15;
 
@@ -41,7 +71,9 @@ function getDateLabel(iso: string): string {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const diffDays = Math.round((today.getTime() - target.getTime()) / 86_400_000);
+  const diffDays = Math.round(
+    (today.getTime() - target.getTime()) / 86_400_000,
+  );
 
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
@@ -67,7 +99,8 @@ function buildStatementHtml(
   const rows = transactions
     .map((tx) => {
       const sign = tx.type === "payment" ? "+" : "";
-      const color = tx.type === "payment" ? themeColors.primary : themeColors.danger;
+      const color =
+        tx.type === "payment" ? themeColors.primary : themeColors.danger;
       const label =
         tx.type === "bill"
           ? `Entry ${tx.billNumber ?? ""}`
@@ -175,7 +208,9 @@ export default function CustomerDetailScreen() {
       }
 
       const url = `https://kredbook.app/l/${token}`;
-      const locale = i18n.language?.toLowerCase().startsWith("hi") ? "hi" : "en";
+      const locale = i18n.language?.toLowerCase().startsWith("hi")
+        ? "hi"
+        : "en";
       await Share.share({
         message: buildLedgerShareMessage({
           locale,
@@ -295,7 +330,13 @@ export default function CustomerDetailScreen() {
 
       actions.push({
         key: "call",
-        icon: <Phone size={22} color={isMuted ? colors.faint : colors.primary} strokeWidth={2.2} />,
+        icon: (
+          <Phone
+            size={22}
+            color={isMuted ? colors.faint : colors.primary}
+            strokeWidth={2.2}
+          />
+        ),
         onPress: () => {
           if (!isMuted) {
             Linking.openURL(`tel:${cleanedPhone}`);
@@ -307,12 +348,20 @@ export default function CustomerDetailScreen() {
 
       actions.push({
         key: "whatsapp",
-        icon: <MessageCircle size={22} color={isMuted ? colors.faint : colors.primary} strokeWidth={2.2} />,
+        icon: (
+          <MessageCircle
+            size={22}
+            color={isMuted ? colors.faint : colors.primary}
+            strokeWidth={2.2}
+          />
+        ),
         onPress: () => {
           if (!isMuted) {
             const message = `Dear Customer, your outstanding balance is ${formatINR(netBalance)}. Please arrange payment. Thank you.`;
             const encodedMessage = encodeURIComponent(message);
-            Linking.openURL(`https://wa.me/91${cleanedPhone}?text=${encodedMessage}`);
+            Linking.openURL(
+              `https://wa.me/91${cleanedPhone}?text=${encodedMessage}`,
+            );
             handleWhatsAppReminder();
           }
         },
@@ -461,16 +510,31 @@ export default function CustomerDetailScreen() {
           className="flex-1"
           onScroll={handleScroll}
           scrollEventThrottle={16}
-          contentContainerStyle={{
-            paddingBottom: insets.bottom + 24,
-          }}
+          contentContainerStyle={{ paddingTop: spacing[3], paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
         >
           {/* Success Banner */}
           {showSuccessBanner && (
-            <View style={[styles.successBanner, { backgroundColor: colors.primaryBorderFill }]}>
-              <CheckCircle size={18} color={colors.primary} style={styles.successBannerIcon} />
-              <Text style={[styles.successBannerText, { color: colors.primary, fontFamily: t.fontFamily.bodySemiBold }]}>
+            <View
+              style={[
+                styles.successBanner,
+                { backgroundColor: colors.primaryBorderFill },
+              ]}
+            >
+              <CheckCircle
+                size={18}
+                color={colors.primary}
+                style={styles.successBannerIcon}
+              />
+              <Text
+                style={[
+                  styles.successBannerText,
+                  {
+                    color: colors.primary,
+                    fontFamily: t.fontFamily.bodySemiBold,
+                  },
+                ]}
+              >
                 Payment of {formatINR(successBannerAmount)} recorded
               </Text>
             </View>
@@ -530,8 +594,6 @@ export default function CustomerDetailScreen() {
         />
       )}
 
-
-
       {/* M3: Payment Details Bottom Sheet */}
       <PaymentDetailSheet
         ref={paymentDetailSheetRef}
@@ -544,7 +606,10 @@ export default function CustomerDetailScreen() {
         ref={deleteCustomerSheetRef}
         customerName={customer.name}
         entriesCount={customer.orders?.length || 0}
-        paymentsCount={(customer.transactions || []).filter(t => t.type === 'payment').length}
+        paymentsCount={
+          (customer.transactions || []).filter((t) => t.type === "payment")
+            .length
+        }
         isDeleting={isDeleting}
         onConfirm={() => onDeleteCustomer()}
       />
