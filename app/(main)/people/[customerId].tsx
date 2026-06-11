@@ -144,6 +144,90 @@ export default function CustomerDetailScreen() {
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
   const [shareQueued, setShareQueued] = useState(false);
 
+  // WhatsApp reminder
+  const handleWhatsAppReminder = useCallback(() => {
+    if (customer) {
+      logReminderSent({
+        customerId: customer.id,
+        customerName: customer.name,
+        amount: netBalance,
+        channel: "whatsapp",
+      });
+    }
+  }, [customer, logReminderSent, netBalance]);
+
+  // Share ledger message link
+  const handleShareLedger = useCallback(async () => {
+    if (!customer) return;
+    try {
+      const { data, error } = await supabase.rpc("upsert_access_token", {
+        p_party_id: customer.id,
+      });
+
+      if (error) throw error;
+
+      const token =
+        typeof data === "string"
+          ? data
+          : (data as { token?: string } | null)?.token;
+      if (!token) {
+        throw new Error("Token generation failed");
+      }
+
+      const url = `https://kredbook.app/l/${token}`;
+      const locale = i18n.language?.toLowerCase().startsWith("hi") ? "hi" : "en";
+      await Share.share({
+        message: buildLedgerShareMessage({
+          locale,
+          customerName: customer.name,
+          balance: customer.outstandingBalance,
+          businessName: profile?.business_name || profile?.name || "KredBook",
+          publicLedgerUrl: url,
+        }),
+      });
+      showToast({ message: "Ledger link ready to share", type: "success" });
+    } catch {
+      showToast({ message: "Could not create share link.", type: "error" });
+    }
+  }, [customer, profile, i18n.language, showToast]);
+
+  useEffect(() => {
+    if (shareQueued && customer && profile) {
+      handleShareLedger().finally(() => setShareQueued(false));
+    }
+  }, [shareQueued, customer, profile, handleShareLedger]);
+
+  // Download Statement
+  const downloadStatement = useCallback(async () => {
+    if (!customer) return;
+
+    if ((customer.transactions || []).length === 0) {
+      showToast({
+        message: "No transactions yet — add an entry or payment first.",
+        type: "error",
+      });
+      return;
+    }
+    try {
+      const html = buildStatementHtml(
+        customer.name,
+        customer.phone,
+        customer.outstandingBalance,
+        customer.transactions || [],
+        profile?.business_name || "KredBook",
+        colors,
+      );
+
+      const { uri } = await Print.printToFileAsync({ html });
+      await Sharing.shareAsync(uri, {
+        mimeType: "application/pdf",
+        UTI: ".pdf",
+      });
+    } catch {
+      showToast({ message: "Could not generate statement.", type: "error" });
+    }
+  }, [customer, showToast, profile, colors]);
+
   const menuItems = useMemo<MenuItem[]>(() => {
     if (!customer) return [];
     return [
@@ -209,7 +293,6 @@ export default function CustomerDetailScreen() {
     if (customer.phone && customer.phone.trim().length > 0) {
       const cleanedPhone = customer.phone.replace(/\D/g, "");
 
-      // Phone action
       actions.push({
         key: "call",
         icon: <Phone size={22} color={isMuted ? colors.faint : colors.primary} strokeWidth={2.2} />,
@@ -222,7 +305,6 @@ export default function CustomerDetailScreen() {
         noBackground: true,
       });
 
-      // WhatsApp action
       actions.push({
         key: "whatsapp",
         icon: <MessageCircle size={22} color={isMuted ? colors.faint : colors.primary} strokeWidth={2.2} />,
@@ -258,90 +340,6 @@ export default function CustomerDetailScreen() {
       setShareQueued(true);
     }
   }, [focus]);
-
-  // Share ledger message link
-  const handleShareLedger = useCallback(async () => {
-    if (!customer) return;
-    try {
-      const { data, error } = await supabase.rpc("upsert_access_token", {
-        p_party_id: customer.id,
-      });
-
-      if (error) throw error;
-
-      const token =
-        typeof data === "string"
-          ? data
-          : (data as { token?: string } | null)?.token;
-      if (!token) {
-        throw new Error("Token generation failed");
-      }
-
-      const url = `https://kredbook.app/l/${token}`;
-      const locale = i18n.language?.toLowerCase().startsWith("hi") ? "hi" : "en";
-      await Share.share({
-        message: buildLedgerShareMessage({
-          locale,
-          customerName: customer.name,
-          balance: customer.outstandingBalance,
-          businessName: profile?.business_name || profile?.name || "KredBook",
-          publicLedgerUrl: url,
-        }),
-      });
-      showToast({ message: "Ledger link ready to share", type: "success" });
-    } catch {
-      showToast({ message: "Could not create share link.", type: "error" });
-    }
-  }, [customer, profile, i18n.language, showToast]);
-
-  useEffect(() => {
-    if (shareQueued && customer && profile) {
-      handleShareLedger().finally(() => setShareQueued(false));
-    }
-  }, [shareQueued, customer, profile, handleShareLedger]);
-
-  // WhatsApp reminder
-  const handleWhatsAppReminder = useCallback(() => {
-    if (customer) {
-      logReminderSent({
-        customerId: customer.id,
-        customerName: customer.name,
-        amount: netBalance,
-        channel: "whatsapp",
-      });
-    }
-  }, [customer, logReminderSent, netBalance]);
-
-  // Download Statement
-  const downloadStatement = useCallback(async () => {
-    if (!customer) return;
-
-    if ((customer.transactions || []).length === 0) {
-      showToast({
-        message: "No transactions yet — add an entry or payment first.",
-        type: "error",
-      });
-      return;
-    }
-    try {
-      const html = buildStatementHtml(
-        customer.name,
-        customer.phone,
-        customer.outstandingBalance,
-        customer.transactions || [],
-        profile?.business_name || "KredBook",
-        colors,
-      );
-
-      const { uri } = await Print.printToFileAsync({ html });
-      await Sharing.shareAsync(uri, {
-        mimeType: "application/pdf",
-        UTI: ".pdf",
-      });
-    } catch {
-      showToast({ message: "Could not generate statement.", type: "error" });
-    }
-  }, [customer, showToast, profile, colors]);
 
   // Open record payment modal
   const openPaymentFlow = (amountSeed?: number) => {

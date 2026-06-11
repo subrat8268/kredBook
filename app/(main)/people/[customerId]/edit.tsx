@@ -26,7 +26,7 @@ export default function EditCustomerScreen() {
   const { customerId } = useLocalSearchParams<{ customerId: string }>();
 
   // Fetch customer details
-  const { data: customer, isLoading, isError } = usePersonDetail(customerId);
+  const { customer, isLoading, isError } = usePersonDetail(customerId);
   const updateMutation = useUpdatePerson(customerId);
 
   // Form states
