@@ -1,4 +1,4 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
+import { useTheme } from "@/src/theme/useTheme";
 import { formatINR } from "@/src/utils/format";
 import {
   ArrowLeft,
@@ -38,6 +38,8 @@ export default memo(function CustomerDetailHeader({
 }: CustomerDetailHeaderProps) {
   const t = useTheme();
 
+  // Initials logic: split name by space, take first character of first word and first character of last word, uppercase both.
+  // If single word name, use only the first character.
   const getInitials = (name: string): string => {
     const trimmed = name.trim();
     if (!trimmed) return "";
@@ -93,6 +95,8 @@ export default memo(function CustomerDetailHeader({
         paddingHorizontal: 16,
         alignItems: "center",
         backgroundColor: t.colors.surface,
+        borderBottomWidth: 1,
+        borderBottomColor: t.colors.borderSubtle,
       }}
     >
       {/* LEFT section: back button and avatar */}
@@ -107,10 +111,10 @@ export default memo(function CustomerDetailHeader({
               alignItems: "center",
               justifyContent: "center",
             },
-            pressed && { opacity: 0.7 },
+            pressed && { opacity: 0.75 },
           ]}
         >
-          <ArrowLeft size={24} color={t.colors.ink} strokeWidth={2} />
+          <ArrowLeft size={22} color={t.colors.ink} strokeWidth={2.2} />
         </Pressable>
 
         <View
@@ -125,7 +129,7 @@ export default memo(function CustomerDetailHeader({
         >
           <Text
             style={{
-              fontFamily: t.typography.fontFamilies.bold,
+              fontFamily: t.fontFamily.bodyBold,
               fontSize: 15,
               fontWeight: "700",
               color: t.colors.primary,
@@ -139,13 +143,25 @@ export default memo(function CustomerDetailHeader({
       {/* CENTER section: customer name and subtitle */}
       <View style={{ flex: 1, marginHorizontal: 8, justifyContent: "center" }}>
         <Text
-          style={[t.typography.cardTitle, { color: t.colors.ink }]}
+          style={{
+            fontFamily: t.fontFamily.displaySemiBold,
+            fontSize: 17,
+            fontWeight: "600",
+            color: t.colors.ink,
+            lineHeight: 22,
+          }}
           numberOfLines={1}
         >
           {customerName}
         </Text>
         <Text
-          style={[t.typography.caption, { color: t.colors.muted }]}
+          style={{
+            fontFamily: t.fontFamily.body,
+            fontSize: 13,
+            color: t.colors.muted,
+            lineHeight: 18,
+            marginTop: 2,
+          }}
           numberOfLines={1}
         >
           {getSubtitle()}
@@ -166,7 +182,7 @@ export default memo(function CustomerDetailHeader({
                   opacity: 0.4,
                 }}
               >
-                <Phone size={24} color={t.colors.faint} strokeWidth={2} />
+                <Phone size={22} color={t.colors.faint} strokeWidth={2.2} />
               </View>
             ) : (
               <Pressable
@@ -178,10 +194,10 @@ export default memo(function CustomerDetailHeader({
                     alignItems: "center",
                     justifyContent: "center",
                   },
-                  pressed && { opacity: 0.7 },
+                  pressed && { opacity: 0.75 },
                 ]}
               >
-                <Phone size={24} color={t.colors.primary} strokeWidth={2} />
+                <Phone size={22} color={t.colors.primary} strokeWidth={2.2} />
               </Pressable>
             )}
 
@@ -196,9 +212,9 @@ export default memo(function CustomerDetailHeader({
                 }}
               >
                 <MessageCircle
-                  size={24}
+                  size={22}
                   color={t.colors.faint}
-                  strokeWidth={2}
+                  strokeWidth={2.2}
                 />
               </View>
             ) : (
@@ -211,13 +227,13 @@ export default memo(function CustomerDetailHeader({
                     alignItems: "center",
                     justifyContent: "center",
                   },
-                  pressed && { opacity: 0.7 },
+                  pressed && { opacity: 0.75 },
                 ]}
               >
                 <MessageCircle
-                  size={24}
+                  size={22}
                   color={t.colors.primary}
-                  strokeWidth={2}
+                  strokeWidth={2.2}
                 />
               </Pressable>
             )}
@@ -233,10 +249,10 @@ export default memo(function CustomerDetailHeader({
               alignItems: "center",
               justifyContent: "center",
             },
-            pressed && { opacity: 0.7 },
+            pressed && { opacity: 0.75 },
           ]}
         >
-          <MoreVertical size={24} color={t.colors.ink} strokeWidth={2} />
+          <MoreVertical size={22} color={t.colors.ink} strokeWidth={2.2} />
         </Pressable>
       </View>
     </View>
