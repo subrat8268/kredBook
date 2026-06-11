@@ -17,6 +17,7 @@ export type MenuItem = {
   color?: string; // Hex color for icon and text
   isDestructive?: boolean;
   isDivider?: boolean;
+  disabled?: boolean;
 };
 
 type OverflowMenuProps = {
@@ -34,9 +35,11 @@ export default memo(function OverflowMenu({
 
   const renderItem = ({ item }: { item: MenuItem }) => {
     let itemColor: string = t.colors.body;
-    if (item.key === "mark-as-paid") {
+    if (item.disabled) {
+      itemColor = t.colors.faint;
+    } else if (item.key === "mark-as-paid") {
       itemColor = t.colors.paid;
-    } else if (item.key === "delete-entry") {
+    } else if (item.key === "delete-entry" || item.isDestructive) {
       itemColor = t.colors.error;
     } else if (item.color) {
       itemColor = item.color;
@@ -45,8 +48,9 @@ export default memo(function OverflowMenu({
     return (
       <View className="w-full">
         <Pressable
+          disabled={item.disabled}
           style={({ pressed }) =>
-            pressed && { backgroundColor: t.colors.borderSubtle }
+            pressed && !item.disabled && { backgroundColor: t.colors.borderSubtle }
           }
           className="self-stretch flex-row items-center gap-2 h-12 px-4"
           accessibilityRole="menuitem"

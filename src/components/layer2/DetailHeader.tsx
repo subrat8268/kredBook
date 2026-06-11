@@ -2,15 +2,16 @@ import { useTheme } from "@/src/theme/useTheme";
 import { ArrowLeft, MoreVertical } from "lucide-react-native";
 import { memo, type ReactNode, useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import OverflowMenu, { type MenuItem } from "./OverflowMenu"; // Import the new component
+import OverflowMenu, { type MenuItem } from "./OverflowMenu";
 
-type HeaderAction = {
+export type HeaderAction = {
   key: string;
   icon: ReactNode;
   onPress: () => void;
   color?: string;
   disabled?: boolean;
   accessibilityLabel?: string;
+  noBackground?: boolean;
 };
 
 type Props = {
@@ -20,7 +21,7 @@ type Props = {
   leadingSlot?: ReactNode;
   actions?: HeaderAction[];
   overflow?: boolean;
-  menuItems?: MenuItem[]; // Add menuItems prop
+  menuItems?: MenuItem[];
 };
 
 export default memo(function DetailHeader({
@@ -30,10 +31,10 @@ export default memo(function DetailHeader({
   leadingSlot,
   actions = [],
   overflow = false,
-  menuItems = [], // Initialize menuItems
+  menuItems = [],
 }: Props) {
   const t = useTheme();
-  const [isMenuVisible, setIsMenuVisible] = useState(false); // State for menu visibility
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
 
   return (
     <View
@@ -53,44 +54,45 @@ export default memo(function DetailHeader({
           onPress={onBack}
           hitSlop={10}
           style={({ pressed }) => [pressed ? { opacity: 0.75 } : null]}
-          className="mr-3"
+          className="w-11 h-11 items-center justify-center rounded-full"
         >
           <ArrowLeft size={22} color={t.colors.ink} strokeWidth={2.2} />
         </Pressable>
 
-        {leadingSlot ? <View className="ml-0 mr-3">{leadingSlot}</View> : null}
-
-        <View className="flex-1">
-          <Text
-            style={{
-              fontFamily: t.fontFamily.displaySemiBold,
-              fontSize: 17,
-              fontWeight: "600",
-              color: t.colors.ink,
-              lineHeight: 22,
-            }}
-            numberOfLines={1}
-          >
-            {title}
-          </Text>
-          {subtitle ? (
+        <View className="flex-1 flex-row">
+          {leadingSlot ? <View className="ml-1">{leadingSlot}</View> : null}
+          <View className="flex-1 ml-2">
             <Text
               style={{
-                fontFamily: t.fontFamily.body,
-                fontSize: 13,
-                color: t.colors.muted,
-                lineHeight: 18,
-                marginTop: 2,
+                fontFamily: t.fontFamily.displaySemiBold,
+                fontSize: 17,
+                fontWeight: "600",
+                color: t.colors.ink,
+                lineHeight: 22,
               }}
               numberOfLines={1}
             >
-              {subtitle}
+              {title}
             </Text>
-          ) : null}
+            {subtitle ? (
+              <Text
+                style={{
+                  fontFamily: t.fontFamily.body,
+                  fontSize: 13,
+                  color: t.colors.muted,
+                  lineHeight: 18,
+                  marginTop: 2,
+                }}
+                numberOfLines={1}
+              >
+                {subtitle}
+              </Text>
+            ) : null}
+          </View>
         </View>
 
         {actions.length > 0 ? (
-          <View className="flex-row items-center gap-2 ml-3">
+          <View className="flex-row items-center gap-5">
             {actions.map((action) => (
               <Pressable
                 key={action.key}
@@ -106,10 +108,12 @@ export default memo(function DetailHeader({
                       ? { opacity: 0.75 }
                       : null,
                   {
-                    width: 42,
-                    height: 42,
-                    borderRadius: 21,
-                    backgroundColor: t.colors.surfaceRaised,
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: action.noBackground
+                      ? "transparent"
+                      : t.colors.surfaceRaised,
                     alignItems: "center",
                     justifyContent: "center",
                   },
@@ -121,20 +125,17 @@ export default memo(function DetailHeader({
           </View>
         ) : null}
 
-        {overflow && menuItems.length > 0 ? ( // Only show overflow if overflow is true and there are menu items
+        {overflow && menuItems.length > 0 ? (
           <>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="More options"
               onPress={() => setIsMenuVisible(true)}
               hitSlop={10}
-              className="w-[42px] h-[42px] rounded-full items-center justify-center ml-3"
+              style={({ pressed }) => [pressed ? { opacity: 0.75 } : null]}
+              className="w-11 h-11 rounded-full items-center justify-center ml-2"
             >
-              <MoreVertical
-                size={22}
-                color={t.colors.ink}
-                strokeWidth={2.2}
-              />
+              <MoreVertical size={22} color={t.colors.ink} strokeWidth={2.2} />
             </Pressable>
             <OverflowMenu
               visible={isMenuVisible}
@@ -147,4 +148,3 @@ export default memo(function DetailHeader({
     </View>
   );
 });
-

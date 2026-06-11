@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, Share, View, StyleSheet, Text } from "react-native";
+import { ScrollView, Share, View, StyleSheet, Text, Linking } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { CheckCircle } from "lucide-react-native";
+import { CheckCircle, Share2, Download, Pencil, Trash2, Phone, MessageCircle } from "lucide-react-native";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useTranslation } from "react-i18next";
@@ -17,12 +17,12 @@ import { useTheme } from "@/src/theme/useTheme";
 import { supabase } from "@/src/services/supabase";
 
 // Components
-import CustomerDetailHeader from "@/src/components/people/customer-detail/CustomerDetailHeader";
+import DetailHeader, { type HeaderAction } from "@/src/components/layer2/DetailHeader";
 import CustomerBalanceHero from "@/src/components/people/customer-detail/CustomerBalanceHero";
 import CustomerActionStrip from "@/src/components/people/customer-detail/CustomerActionStrip";
 import CustomerQuickActionsRow from "@/src/components/people/customer-detail/CustomerQuickActionsRow";
 import CustomerTransactionTimeline from "@/src/components/people/customer-detail/CustomerTransactionTimeline";
-import CustomerOverflowMenu from "@/src/components/people/customer-detail/CustomerOverflowMenu";
+import { type MenuItem } from "@/src/components/layer2/OverflowMenu";
 import PaymentDetailSheet from "@/src/components/people/customer-detail/PaymentDetailSheet";
 import DeleteCustomerSheet from "@/src/components/people/customer-detail/DeleteCustomerSheet";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
@@ -144,9 +144,106 @@ export default function CustomerDetailScreen() {
   const [exporting, setExporting] = useState(false);
   const [historyExpanded, setHistoryExpanded] = useState(false);
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
-  const [overflowVisible, setOverflowVisible] = useState(false);
   const [shareQueued, setShareQueued] = useState(false);
   const [isSharingLedgerLink, setIsSharingLedgerLink] = useState(false);
+
+  const menuItems = useMemo<MenuItem[]>(() => {
+    if (!customer) return [];
+    return [
+      {
+        key: "share-ledger",
+        label: "Share Ledger",
+        icon: <Share2 />,
+        onPress: handleShareLedger,
+      },
+      {
+        key: "pdf-statement",
+        label: "PDF Statement",
+        icon: <Download />,
+        onPress: downloadStatement,
+        disabled: (customer.transactions || []).length === 0,
+      },
+      {
+        key: "edit-customer",
+        label: "Edit Customer",
+        icon: <Pencil />,
+        onPress: () => router.push(`/(main)/people/${customer.id}/edit` as any),
+      },
+      {
+        key: "delete-customer",
+        label: "Delete Customer",
+        icon: <Trash2 />,
+        onPress: () => deleteCustomerSheetRef.current?.present(),
+        isDestructive: true,
+      },
+    ];
+  }, [customer, handleShareLedger, downloadStatement, router]);
+
+  const getInitials = (name: string): string => {
+    const trimmed = name.trim();
+    if (!trimmed) return "";
+    const parts = trimmed.split(/\s+/);
+    if (parts.length > 1) {
+      const firstWord = parts[0];
+      const lastWord = parts[parts.length - 1];
+      return (firstWord.charAt(0) + lastWord.charAt(0)).toUpperCase();
+    }
+    return trimmed.charAt(0).toUpperCase();
+  };
+
+  const getSubtitle = () => {
+    if (balanceState === null) {
+      return "No entries yet";
+    }
+    if (balanceState === "settled") {
+      return "All settled";
+    }
+    if (balanceState === "advance") {
+      return `${formatINR(Math.abs(netBalance))} advance`;
+    }
+    return `${formatINR(netBalance)} due`;
+  };
+
+  const headerActions = useMemo<HeaderAction[]>(() => {
+    if (!customer) return [];
+    const actions: HeaderAction[] = [];
+    const isMuted = balanceState === "settled" || balanceState === "advance";
+
+    if (customer.phone && customer.phone.trim().length > 0) {
+      const cleanedPhone = customer.phone.replace(/\D/g, "");
+
+      // Phone action
+      actions.push({
+        key: "call",
+        icon: <Phone size={22} color={isMuted ? colors.faint : colors.primary} strokeWidth={2.2} />,
+        onPress: () => {
+          if (!isMuted) {
+            Linking.openURL(`tel:${cleanedPhone}`);
+          }
+        },
+        disabled: isMuted,
+        noBackground: true,
+      });
+
+      // WhatsApp action
+      actions.push({
+        key: "whatsapp",
+        icon: <MessageCircle size={22} color={isMuted ? colors.faint : colors.primary} strokeWidth={2.2} />,
+        onPress: () => {
+          if (!isMuted) {
+            const message = `Dear Customer, your outstanding balance is ${formatINR(netBalance)}. Please arrange payment. Thank you.`;
+            const encodedMessage = encodeURIComponent(message);
+            Linking.openURL(`https://wa.me/91${cleanedPhone}?text=${encodedMessage}`);
+            handleWhatsAppReminder();
+          }
+        },
+        disabled: isMuted,
+        noBackground: true,
+      });
+    }
+
+    return actions;
+  }, [customer, balanceState, netBalance, colors, handleWhatsAppReminder]);
 
   const hasPendingPayment =
     !!customer?.pendingOrderId && (customer.pendingOrderBalance ?? 0) > 0;
@@ -214,7 +311,7 @@ export default function CustomerDetailScreen() {
   }, [shareQueued, customer, profile, handleShareLedger]);
 
   // WhatsApp reminder
-  const handleWhatsAppReminder = () => {
+  const handleWhatsAppReminder = useCallback(() => {
     if (customer) {
       logReminderSent({
         customerId: customer.id,
@@ -223,10 +320,10 @@ export default function CustomerDetailScreen() {
         channel: "whatsapp",
       });
     }
-  };
+  }, [customer, logReminderSent, netBalance]);
 
   // Download Statement
-  const downloadStatement = async () => {
+  const downloadStatement = useCallback(async () => {
     if (!customer) return;
 
     if ((customer.transactions || []).length === 0) {
@@ -258,7 +355,7 @@ export default function CustomerDetailScreen() {
     } finally {
       setExporting(false);
     }
-  };
+  }, [customer, showToast, profile, colors]);
 
   // Open record payment modal
   const openPaymentFlow = (amountSeed?: number) => {
@@ -356,15 +453,30 @@ export default function CustomerDetailScreen() {
     >
       <Stack.Screen options={{ headerShown: false }} />
 
-      <CustomerDetailHeader
-        customerName={customer.name}
-        netBalance={netBalance}
-        balanceState={balanceState}
-        phone={customer.phone ?? undefined}
+      <DetailHeader
+        title={customer.name}
+        subtitle={getSubtitle()}
         onBack={() => router.back()}
-        onCall={() => {}}
-        onWhatsApp={handleWhatsAppReminder}
-        onOverflow={() => setOverflowVisible(true)}
+        leadingSlot={
+          <View
+            style={{ backgroundColor: colors.primaryBorderFill }}
+            className="w-11 h-11 rounded-full items-center justify-center"
+          >
+            <Text
+              style={{
+                fontFamily: t.fontFamily.bodyBold,
+                fontSize: 15,
+                fontWeight: "700",
+                color: colors.primary,
+              }}
+            >
+              {getInitials(customer.name)}
+            </Text>
+          </View>
+        }
+        actions={headerActions}
+        overflow={true}
+        menuItems={menuItems}
       />
 
       <View style={{ flex: 1 }}>
@@ -449,16 +561,7 @@ export default function CustomerDetailScreen() {
         />
       )}
 
-      {/* M2: Overflow Dropdown Menu */}
-      <CustomerOverflowMenu
-        visible={overflowVisible}
-        onClose={() => setOverflowVisible(false)}
-        onShareLedger={handleShareLedger}
-        onDownloadStatement={downloadStatement}
-        onEditCustomer={() => router.push(`/(main)/people/${customer.id}/edit` as any)}
-        onDeleteCustomer={() => deleteCustomerSheetRef.current?.present()}
-        hasTransactions={(customer.transactions || []).length > 0}
-      />
+
 
       {/* M3: Payment Details Bottom Sheet */}
       <PaymentDetailSheet
