@@ -126,6 +126,7 @@ export async function fetchPersonDetail(
     .eq("is_customer", true)
     .maybeSingle();
 
+
   if (custErr) {
     console.error("Error fetching person:", custErr.message);
     return null;
@@ -136,7 +137,7 @@ export async function fetchPersonDetail(
   const [ordersResult, statementsResult] = await Promise.all([
     supabase
       .from("orders")
-      .select("id, created_at, total_amount, amount_paid, balance_due, status, bill_number")
+      .select("id, created_at, total_amount, amount_paid, balance_due, status, bill_number, due_date")
       .eq("customer_id", customerId)
       .order("created_at", { ascending: true }),
     supabase
@@ -203,8 +204,57 @@ export async function fetchPersonDetail(
         id: o.id,
         created_at: o.created_at,
         amount: Number(o.total_amount),
+        amount_paid: Number(o.amount_paid),
+        balance_due: Number(o.balance_due),
+        due_date: o.due_date,
         status: o.status as "Paid" | "Pending" | "Partially Paid",
       })),
     transactions: allEvents,
   };
 }
+
+export async function deletePerson(
+  customerId: string,
+  vendorId: string,
+): Promise<void> {
+  return executeWithOfflineQueue(
+    async () => {
+      const { error } = await supabase
+        .from("parties")
+        .delete()
+        .eq("id", customerId);
+      if (error) throw error;
+    },
+    {
+      entity: "customer",
+      operation: "DELETE",
+      payload: { id: customerId, vendorId },
+    }
+  );
+}
+
+export async function updatePerson(
+  customerId: string,
+  vendorId: string,
+  values: { name: string; phone?: string | null; address?: string | null }
+): Promise<void> {
+  return executeWithOfflineQueue(
+    async () => {
+      const { error } = await supabase
+        .from("parties")
+        .update({
+          name: values.name,
+          phone: values.phone || null,
+          address: values.address || null,
+        })
+        .eq("id", customerId);
+      if (error) throw error;
+    },
+    {
+      entity: "customer",
+      operation: "UPDATE",
+      payload: { id: customerId, vendorId, ...values },
+    }
+  );
+}
+

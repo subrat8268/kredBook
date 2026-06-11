@@ -1,124 +1,244 @@
-import Avatar from "@/src/components/ui/Avatar";
 import { useTheme } from "@/src/utils/ThemeProvider";
-import { ArrowLeft, MessageCircle, Phone } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { formatINR } from "@/src/utils/format";
+import {
+  ArrowLeft,
+  MessageCircle,
+  MoreVertical,
+  Phone,
+} from "lucide-react-native";
+import React, { memo } from "react";
+import { Linking, Pressable, Text, View } from "react-native";
 
-type Props = {
+interface CustomerDetailHeaderProps {
   customerName: string;
-  lastActiveLabel: string;
+  phone?: string;
+  balanceState:
+    | "overdue"
+    | "pending"
+    | "partial"
+    | "settled"
+    | "advance"
+    | null;
+  netBalance: number;
   onBack: () => void;
-  onReminder: () => void;
   onCall: () => void;
-  canSendReminder: boolean;
-};
+  onWhatsApp: () => void;
+  onOverflow: () => void;
+}
 
-export default function CustomerDetailHeader({
+export default memo(function CustomerDetailHeader({
   customerName,
-  lastActiveLabel,
+  phone,
+  balanceState,
+  netBalance,
   onBack,
-  onReminder,
   onCall,
-  canSendReminder,
-}: Props) {
-  const { colors, typography } = useTheme();
+  onWhatsApp,
+  onOverflow,
+}: CustomerDetailHeaderProps) {
+  const t = useTheme();
+
+  const getInitials = (name: string): string => {
+    const trimmed = name.trim();
+    if (!trimmed) return "";
+    const parts = trimmed.split(/\s+/);
+    if (parts.length > 1) {
+      const firstWord = parts[0];
+      const lastWord = parts[parts.length - 1];
+      return (firstWord.charAt(0) + lastWord.charAt(0)).toUpperCase();
+    }
+    return trimmed.charAt(0).toUpperCase();
+  };
+
+  // Subtitle logic
+  const getSubtitle = (): string => {
+    if (balanceState === null) {
+      return "No entries yet";
+    }
+    if (balanceState === "settled") {
+      return "All settled";
+    }
+    if (balanceState === "advance") {
+      return `${formatINR(Math.abs(netBalance))} advance`;
+    }
+    return `${formatINR(netBalance)} due`;
+  };
+
+  const hasPhone = typeof phone === "string" && phone.trim().length > 0;
+  const isMuted = balanceState === "settled" || balanceState === "advance";
+
+  const handleCall = () => {
+    if (phone) {
+      const cleanedPhone = phone.replace(/\D/g, "");
+      Linking.openURL(`tel:${cleanedPhone}`);
+      onCall();
+    }
+  };
+
+  const handleWhatsApp = () => {
+    if (phone) {
+      const cleanedPhone = phone.replace(/\D/g, "");
+      const message = `Dear Customer, your outstanding balance is ${formatINR(netBalance)}. Please arrange payment. Thank you.`;
+      const encodedMessage = encodeURIComponent(message);
+      Linking.openURL(`https://wa.me/91${cleanedPhone}?text=${encodedMessage}`);
+      onWhatsApp();
+    }
+  };
 
   return (
     <View
       style={{
-        backgroundColor: colors.canvas,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderSubtle,
+        flexDirection: "row",
+        height: 56,
         paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 12,
+        alignItems: "center",
+        backgroundColor: t.colors.surface,
       }}
     >
-      <View className="flex-row items-center">
+      {/* LEFT section: back button and avatar */}
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
           onPress={onBack}
           hitSlop={10}
-          style={({ pressed }) => [pressed ? { opacity: 0.75 } : null]}
-          className="mr-3"
+          style={({ pressed }) => [
+            {
+              width: 44,
+              height: 44,
+              alignItems: "center",
+              justifyContent: "center",
+            },
+            pressed && { opacity: 0.7 },
+          ]}
         >
-          <ArrowLeft size={22} color={colors.ink} strokeWidth={2.2} />
+          <ArrowLeft size={24} color={t.colors.ink} strokeWidth={2} />
         </Pressable>
 
-        <View className="ml-0 mr-3">
-          <Avatar name={customerName} size="sm" />
-        </View>
-
-        <View className="flex-1">
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 9999,
+            backgroundColor: t.colors.primaryBorderFill,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Text
             style={{
-              fontFamily: typography.fontFamilies.semiBold,
-              fontSize: 17,
-              fontWeight: "600",
-              color: colors.ink,
-              lineHeight: 22,
+              fontFamily: t.typography.fontFamilies.bold,
+              fontSize: 15,
+              fontWeight: "700",
+              color: t.colors.primary,
             }}
-            numberOfLines={1}
           >
-            {customerName}
-          </Text>
-          <Text
-            style={{
-              fontFamily: typography.fontFamilies.regular,
-              fontSize: 12,
-              color: colors.muted,
-              lineHeight: 18,
-              marginTop: 2,
-            }}
-            numberOfLines={1}
-          >
-            {lastActiveLabel}
+            {getInitials(customerName)}
           </Text>
         </View>
+      </View>
 
-        {canSendReminder ? (
-          <View className="flex-row items-center gap-2 ml-3">
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Send reminder"
-              onPress={onReminder}
-              hitSlop={10}
-              style={({ pressed }) => [
-                pressed ? { opacity: 0.75 } : null,
-                {
-                  width: 42,
-                  height: 42,
-                  borderRadius: 21,
-                  backgroundColor: colors.surfaceRaised,
+      {/* CENTER section: customer name and subtitle */}
+      <View style={{ flex: 1, marginHorizontal: 8, justifyContent: "center" }}>
+        <Text
+          style={[t.typography.cardTitle, { color: t.colors.ink }]}
+          numberOfLines={1}
+        >
+          {customerName}
+        </Text>
+        <Text
+          style={[t.typography.caption, { color: t.colors.muted }]}
+          numberOfLines={1}
+        >
+          {getSubtitle()}
+        </Text>
+      </View>
+
+      {/* RIGHT section: communication and overflow buttons */}
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+        {hasPhone && (
+          <>
+            {isMuted ? (
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
                   alignItems: "center",
                   justifyContent: "center",
-                },
-              ]}
-            >
-              <MessageCircle size={20} color={colors.primary} strokeWidth={2} />
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Call customer"
-              onPress={onCall}
-              hitSlop={10}
-              style={({ pressed }) => [
-                pressed ? { opacity: 0.75 } : null,
-                {
-                  width: 42,
-                  height: 42,
-                  borderRadius: 21,
-                  backgroundColor: colors.surfaceRaised,
+                  opacity: 0.4,
+                }}
+              >
+                <Phone size={24} color={t.colors.faint} strokeWidth={2} />
+              </View>
+            ) : (
+              <Pressable
+                onPress={handleCall}
+                style={({ pressed }) => [
+                  {
+                    width: 44,
+                    height: 44,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  },
+                  pressed && { opacity: 0.7 },
+                ]}
+              >
+                <Phone size={24} color={t.colors.primary} strokeWidth={2} />
+              </Pressable>
+            )}
+
+            {isMuted ? (
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
                   alignItems: "center",
                   justifyContent: "center",
-                },
-              ]}
-            >
-              <Phone size={20} color={colors.primary} strokeWidth={2} />
-            </Pressable>
-          </View>
-        ) : null}
+                  opacity: 0.4,
+                }}
+              >
+                <MessageCircle
+                  size={24}
+                  color={t.colors.faint}
+                  strokeWidth={2}
+                />
+              </View>
+            ) : (
+              <Pressable
+                onPress={handleWhatsApp}
+                style={({ pressed }) => [
+                  {
+                    width: 44,
+                    height: 44,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  },
+                  pressed && { opacity: 0.7 },
+                ]}
+              >
+                <MessageCircle
+                  size={24}
+                  color={t.colors.primary}
+                  strokeWidth={2}
+                />
+              </Pressable>
+            )}
+          </>
+        )}
+
+        <Pressable
+          onPress={onOverflow}
+          style={({ pressed }) => [
+            {
+              width: 44,
+              height: 44,
+              alignItems: "center",
+              justifyContent: "center",
+            },
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <MoreVertical size={24} color={t.colors.ink} strokeWidth={2} />
+        </Pressable>
       </View>
     </View>
   );
-}
+});

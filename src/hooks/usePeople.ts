@@ -10,8 +10,12 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Alert } from "react-native";
-import { fetchPeople, fetchPersonDetail, PAGE_SIZE } from "../api/people";
+import { useState, useMemo, useCallback } from "react";
+import { Alert, Linking } from "react-native";
+import { useRouter } from "expo-router";
+import { useToast } from "@/src/components/feedback/Toast";
+import { useAuthStore } from "@/src/store/authStore";
+import { fetchPeople, fetchPersonDetail, PAGE_SIZE, deletePerson, updatePerson } from "../api/people";
 import { ApiError } from "../lib/supabaseQuery";
 import { supabase } from "../services/supabase";
 import { Person, PersonDetail } from "../types/customer";
@@ -176,6 +180,221 @@ export function useCustomerDetail(customerId?: string) {
   });
 }
 
+export function usePersonDetail(customerId?: string) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { profile } = useAuthStore();
+  const { show: showToast } = useToast();
+
+  const { data: customer, isLoading, isError, refetch } = useQuery<PersonDetail | null>({
+    queryKey: ["customerDetail", customerId],
+    queryFn: () =>
+      customerId ? fetchPersonDetail(customerId) : Promise.resolve(null),
+    enabled: !!customerId,
+    staleTime: 30_000,
+  });
+
+  // Visibilities and UI states
+  const [showDeleteSheet, setShowDeleteSheet] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<any>(null);
+  const [showPaymentDetailSheet, setShowPaymentDetailSheet] = useState(false);
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
+  const [successBannerAmount, setSuccessBannerAmount] = useState<number>(0);
+
+  // Deletion mutation
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      if (!customerId || !profile?.id) throw new Error("Missing customerId or vendorId");
+      return deletePerson(customerId, profile.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      showToast({
+        message: "Customer deleted successfully",
+        type: "success",
+      });
+      router.replace("/(main)/people" as any);
+    },
+    onError: (err: any) => {
+      showToast({
+        message: `Error deleting customer: ${err.message}`,
+        type: "error",
+      });
+    },
+  });
+
+  // Computed Values
+  const netBalance = customer?.outstandingBalance ?? 0;
+
+  const oldestOverdueDays = useMemo(() => {
+    if (!customer?.orders) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let maxDays = 0;
+    let found = false;
+
+    for (const order of customer.orders) {
+      if (order.balance_due > 0 && order.due_date) {
+        const dueDate = new Date(order.due_date);
+        if (dueDate < today) {
+          found = true;
+          const diff = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+          if (diff > maxDays) {
+            maxDays = diff;
+          }
+        }
+      }
+    }
+    return found ? maxDays : null;
+  }, [customer?.orders]);
+
+  const nearestDueDate = useMemo(() => {
+    if (!customer?.orders) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let minDate: Date | null = null;
+
+    for (const order of customer.orders) {
+      if (order.balance_due > 0 && order.due_date) {
+        const dueDate = new Date(order.due_date);
+        if (dueDate >= today) {
+          if (!minDate || dueDate < minDate) {
+            minDate = dueDate;
+          }
+        }
+      }
+    }
+    return minDate;
+  }, [customer?.orders]);
+
+  const openEntriesCount = useMemo(() => {
+    if (!customer?.orders) return 0;
+    return customer.orders.filter((o) => o.status !== "Paid" && o.balance_due > 0).length;
+  }, [customer?.orders]);
+
+  const balanceState = useMemo<'overdue' | 'pending' | 'partial' | 'settled' | 'advance'>(() => {
+    if (!customer) return 'settled';
+
+    const hasOverdue = oldestOverdueDays !== null;
+    const hasPartial = customer.orders?.some(o => o.amount_paid > 0 && o.balance_due > 0);
+
+    if (netBalance > 0 && hasOverdue) {
+      return 'overdue';
+    }
+    if (netBalance < 0) {
+      return 'advance';
+    }
+    if (netBalance === 0) {
+      return 'settled';
+    }
+    if (netBalance > 0 && hasPartial) {
+      return 'partial';
+    }
+    return 'pending';
+  }, [customer, netBalance, oldestOverdueDays]);
+
+  // Communication Handlers
+  const onCall = useCallback(() => {
+    if (customer?.phone) {
+      const cleaned = customer.phone.replace(/\D/g, "");
+      if (cleaned) {
+        Linking.openURL(`tel:${cleaned}`);
+      }
+    }
+  }, [customer?.phone]);
+
+  const onWhatsApp = useCallback(async () => {
+    if (customer?.phone && customer?.name) {
+      const cleaned = customer.phone.replace(/\D/g, "");
+      if (cleaned) {
+        try {
+          const biz = profile?.business_name || "our store";
+          const msg = `Dear ${customer.name}, your outstanding balance with ${biz} is Rs. ${netBalance}. Please arrange payment. Thank you.`;
+          const waUrl = `https://wa.me/91${cleaned}?text=${encodeURIComponent(msg)}`;
+          await Linking.openURL(waUrl);
+        } catch {
+          Alert.alert(
+            "Cannot open WhatsApp",
+            "Please install WhatsApp and try again.",
+          );
+        }
+      }
+    }
+  }, [customer?.phone, customer?.name, profile, netBalance]);
+
+  // Payment record success callbacks
+  const handlePaymentSuccess = useCallback((amount?: number) => {
+    setSuccessBannerAmount(amount ?? 0);
+    setShowSuccessBanner(true);
+    refetch();
+    // Cache invalidation (do not skip)
+    queryClient.invalidateQueries({ queryKey: ['customerDetail', customerId] });
+    queryClient.invalidateQueries({ queryKey: ['customers'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    queryClient.invalidateQueries({ queryKey: ["orders"] });
+  }, [customerId, refetch, queryClient]);
+
+  return {
+    customer,
+    isLoading,
+    isError,
+    refetch,
+
+    // Computed values
+    netBalance,
+    oldestOverdueDays,
+    nearestDueDate,
+    openEntriesCount,
+    balanceState,
+
+    // Visibilities
+    showDeleteSheet,
+    setShowDeleteSheet,
+    selectedPayment,
+    setSelectedPayment,
+    showPaymentDetailSheet,
+    setShowPaymentDetailSheet,
+    showSuccessBanner,
+    setShowSuccessBanner,
+    successBannerAmount,
+
+    // Actions
+    onCall,
+    onWhatsApp,
+    onDeleteCustomer: () => deleteMutation.mutate(),
+    isDeleting: deleteMutation.isPending,
+    handlePaymentSuccess,
+  };
+}
+
 // Preferred alias (new naming)
 export const useAddPerson = useAddCustomer;
-export const usePersonDetail = useCustomerDetail;
+
+export function useUpdatePerson(customerId: string) {
+  const queryClient = useQueryClient();
+  const { profile } = useAuthStore();
+  const { show: showToast } = useToast();
+
+  return useMutation({
+    mutationFn: (values: { name: string; phone?: string | null; address?: string | null }) => {
+      if (!profile?.id) throw new Error("Missing vendorId");
+      return updatePerson(customerId, profile.id, values);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customerDetail", customerId] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      showToast({
+        message: "Profile updated successfully",
+        type: "success",
+      });
+    },
+    onError: (err: any) => {
+      showToast({
+        message: `Error updating profile: ${err.message}`,
+        type: "error",
+      });
+    },
+  });
+}
+

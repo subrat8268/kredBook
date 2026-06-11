@@ -1,38 +1,43 @@
+import React from "react";
+import { Pressable, Text, View, StyleSheet } from "react-native";
+import { useTheme } from "@/src/theme/useTheme";
 import type { PersonDetail } from "@/src/types/customer";
-import { useTheme } from "@/src/utils/ThemeProvider";
-import { Pressable, Text, View } from "react-native";
 import CustomerDetailEmptyState from "./CustomerDetailEmptyState";
-import CustomerTransactionRow from "./CustomerTransactionRow";
+import CustomerTransactionRow, { type Transaction } from "./CustomerTransactionRow";
 import CustomerTransactionTabs from "./CustomerTransactionTabs";
 import type { TxFilter, TxListItem } from "./types";
 
-type Props = {
+interface CustomerTransactionTimelineProps {
   customer: PersonDetail;
+  balanceState: "overdue" | "pending" | "partial" | "settled" | "advance";
   visibleListItems: TxListItem[];
   listItems: TxListItem[];
   historyExpanded: boolean;
   initialCount: number;
   onExpandHistory: () => void;
   onAddEntry: () => void;
-  onRecordPayment?: () => void;
   txFilter: TxFilter;
   onChangeFilter: (tab: TxFilter) => void;
-};
+  onPressTx: (tx: Transaction) => void;
+}
 
 export default function CustomerTransactionTimeline({
   customer,
+  balanceState,
   visibleListItems,
   listItems,
   historyExpanded,
   initialCount,
   onExpandHistory,
   onAddEntry,
-  onRecordPayment,
   txFilter,
   onChangeFilter,
-}: Props) {
-  const { colors } = useTheme();
+  onPressTx,
+}: CustomerTransactionTimelineProps) {
+  const t = useTheme();
+  const { colors } = t;
 
+  // Group visible items by date headers
   const groups: {
     label: string;
     txs: Extract<TxListItem, { kind: "tx" }>[];
@@ -57,81 +62,97 @@ export default function CustomerTransactionTimeline({
     currentGroup.txs.push(item);
   }
 
+  const isNew = !customer.transactions || (customer.transactions || []).length === 0;
+
   if (listItems.length === 0) {
     return (
-      <CustomerDetailEmptyState
-        customer={customer}
-        onAddEntry={onAddEntry}
-        onRecordPayment={onRecordPayment}
-      />
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.borderDefault,
+          },
+        ]}
+      >
+        {!isNew && (
+          <>
+            <CustomerTransactionTabs
+              txFilter={txFilter}
+              onChangeFilter={onChangeFilter}
+            />
+            <View style={[styles.divider, { backgroundColor: colors.borderSubtle }]} />
+          </>
+        )}
+        <CustomerDetailEmptyState
+          variant={isNew ? "new_customer" : "filtered_empty"}
+          filter={txFilter}
+          onAddEntry={onAddEntry}
+        />
+      </View>
     );
   }
 
   return (
     <View
-      style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.border,
-        borderWidth: 1,
-        borderRadius: 16,
-        marginHorizontal: 16,
-        marginTop: 12,
-        shadowColor: colors.ink,
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 2,
-        overflow: "hidden",
-      }}
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.borderDefault,
+        },
+      ]}
     >
       <CustomerTransactionTabs
         txFilter={txFilter}
         onChangeFilter={onChangeFilter}
       />
 
-      <View
-        style={{
-          borderBottomWidth: 1,
-          borderBottomColor: colors.borderSubtle,
-        }}
-      />
+      <View style={[styles.divider, { backgroundColor: colors.borderSubtle }]} />
 
-      <View className="pb-2" style={{ backgroundColor: colors.surface }}>
-        {groups.map((group) => {
+      <View style={{ backgroundColor: colors.surface }}>
+        {groups.map((group, gIndex) => {
           if (!group.txs.length) return null;
 
           return (
             <View key={`${group.label}-${group.txs[0].key}`}>
+              {/* Chronological Date Group Label */}
               <View
-                className="pl-4 py-3"
-                style={{
-                  backgroundColor: colors.canvas,
-                }}
+                style={[
+                  styles.sectionHeader,
+                  {
+                    backgroundColor: colors.canvas,
+                  },
+                ]}
               >
                 <Text
-                  style={{
-                    fontSize: 11,
-                    fontWeight: "700",
-                    letterSpacing: 1.2,
-                    textTransform: "uppercase",
-                    color: colors.muted,
-                  }}
+                  style={[
+                    styles.sectionHeaderText,
+                    {
+                      color: colors.muted,
+                      fontFamily: t.fontFamily.bodySemiBold,
+                    },
+                  ]}
                 >
                   {group.label}
                 </Text>
               </View>
 
-              <View className="overflow-hidden rounded-[14px] border border-transparent">
+              <View style={styles.rowsContainer}>
                 {group.txs.map((tx, index) => (
                   <View
                     key={tx.key}
                     style={{
                       borderTopWidth: index === 0 ? 0 : 1,
-                      borderTopColor:
-                        index === 0 ? "transparent" : colors.borderSubtle,
+                      borderTopColor: colors.borderSubtle,
                     }}
                   >
-                    <CustomerTransactionRow tx={tx.data} />
+                    <CustomerTransactionRow
+                      tx={tx.data}
+                      orders={customer.orders || []}
+                      balanceState={balanceState}
+                      onPress={() => onPressTx(tx.data)}
+                    />
                   </View>
                 ))}
               </View>
@@ -139,12 +160,18 @@ export default function CustomerTransactionTimeline({
           );
         })}
 
+        {/* Pagination Trigger */}
         {!historyExpanded && listItems.length > initialCount ? (
           <Pressable
-            className="w-full items-center py-4"
+            style={[styles.expandButton, { borderTopWidth: 1, borderTopColor: colors.borderSubtle }]}
             onPress={onExpandHistory}
           >
-            <Text className="text-[13px] font-semibold text-primary">
+            <Text
+              style={[
+                styles.expandButtonText,
+                { color: colors.primary, fontFamily: t.fontFamily.displaySemiBold },
+              ]}
+            >
               View Older History ({listItems.length - initialCount} more)
             </Text>
           </Pressable>
@@ -153,3 +180,43 @@ export default function CustomerTransactionTimeline({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderWidth: 1,
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginTop: 12,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    overflow: "hidden",
+  },
+  divider: {
+    height: 1,
+    alignSelf: "stretch",
+  },
+  sectionHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  sectionHeaderText: {
+    fontSize: 11,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+  },
+  rowsContainer: {
+    overflow: "hidden",
+  },
+  expandButton: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+  },
+  expandButtonText: {
+    fontSize: 13,
+  },
+});

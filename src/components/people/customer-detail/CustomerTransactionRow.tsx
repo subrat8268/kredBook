@@ -1,8 +1,28 @@
-import type { Transaction } from "@/src/types/customer";
-import { useTheme } from "@/src/utils/ThemeProvider";
+import React, { useMemo } from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
+import { FileText, ArrowDownLeft } from "lucide-react-native";
+import { useTheme } from "@/src/theme/useTheme";
 import { formatINR } from "@/src/utils/format";
-import { ArrowDownLeft, ArrowUpRight } from "lucide-react-native";
-import { Text, View } from "react-native";
+
+export interface Transaction {
+  id: string;
+  type: "bill" | "payment";
+  created_at: string;
+  amount: number;
+  runningBalance: number;
+  billNumber?: string | null;
+  status?: "Paid" | "Pending" | "Partially Paid" | string | null;
+  itemCount?: number | null;
+  paymentMode?: string | null;
+  orderBillNumber?: string | null;
+}
+
+interface CustomerTransactionRowProps {
+  tx: Transaction;
+  orders?: any[];
+  onPress: () => void;
+  balanceState?: "overdue" | "pending" | "partial" | "settled" | "advance";
+}
 
 const MODE_LABEL: Record<string, string> = {
   cash: "Cash",
@@ -13,150 +33,194 @@ const MODE_LABEL: Record<string, string> = {
   online: "UPI",
 };
 
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
+export default function CustomerTransactionRow({
+  tx,
+  orders = [],
+  onPress,
+  balanceState,
+}: CustomerTransactionRowProps) {
+  const t = useTheme();
+  const { colors, typeStyles } = t;
 
-type Props = {
-  tx: Transaction;
-};
-
-export default function CustomerTransactionRow({ tx }: Props) {
-  const { colors } = useTheme();
   const isPayment = tx.type === "payment";
 
+  // Resolve matching order for due date calculation
+  const matchingOrder = useMemo(() => {
+    if (isPayment) return null;
+    return orders.find((o) => o.id === tx.id);
+  }, [isPayment, orders, tx.id]);
+
+  // Format time (e.g. 10:30 am)
+  const formatTime = (iso: string) => {
+    return new Date(iso).toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // Status mapping
+  const normalizedStatus = String(tx.status || "pending").toLowerCase();
+  const isPaid = normalizedStatus === "paid";
+
+  // Resolve aging chip data
+  const agingChip = useMemo(() => {
+    if (isPayment || isPaid) return null;
+    if (balanceState === "settled" || balanceState === "advance") return null;
+    if (!matchingOrder?.due_date) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = new Date(matchingOrder.due_date);
+
+    if (dueDate < today) {
+      // Overdue entry
+      const diff = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+      return {
+        type: "overdue" as const,
+        label: `${diff}d overdue`,
+        bg: colors.overdueSurface,
+        text: colors.overdueText,
+      };
+    } else {
+      // Pending/Partial entry with future due date
+      const dateStr = dueDate.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+      });
+      return {
+        type: "pending" as const,
+        label: `Due ${dateStr}`,
+        bg: colors.pendingSurface,
+        text: colors.pendingText,
+      };
+    }
+  }, [isPayment, isPaid, balanceState, matchingOrder, colors]);
+
+  // Title and subtitle
   const title = isPayment
     ? "Payment Received"
     : `Entry${tx.billNumber ? ` #${tx.billNumber}` : ""}`;
+
   const modeLabel = tx.paymentMode
     ? (MODE_LABEL[tx.paymentMode.toLowerCase()] ?? tx.paymentMode)
-    : "";
-  const normalizedStatus = String(tx.status ?? "pending").toLowerCase();
-  const isOverdue = normalizedStatus === "overdue";
-  const isPaid = normalizedStatus === "paid";
-  const isPartial =
-    normalizedStatus === "partially_paid" ||
-    normalizedStatus === "partially paid" ||
-    normalizedStatus === "partial";
-  const statusChipLabel = (() => {
-    if (isPayment || isPaid) return "";
-    if (isOverdue) return "OVERDUE";
-    if (isPartial) return "PENDING";
-    return "PENDING";
-  })();
-  const statusChipBg = isOverdue
-    ? colors.danger + "15"
-    : colors.warning + "18";
-  const statusChipText = isOverdue
-    ? colors.danger
-    : colors.warning;
+    : "Payment";
 
   const subtitle = isPayment
-    ? [modeLabel || "Payment", formatTime(tx.created_at)]
-        .filter(Boolean)
-        .join(" · ")
-    : [
-        tx.itemCount ? `${tx.itemCount} items` : "Entry",
-        formatTime(tx.created_at),
-      ].join(" · ");
+    ? `${modeLabel} · ${formatTime(tx.created_at)}`
+    : `${tx.itemCount || 0} item(s) · ${formatTime(tx.created_at)}`;
 
+  // Icon configurations
   const iconBg = isPayment
-    ? colors.success + "18"
-    : isOverdue
-      ? colors.danger + "15"
+    ? colors.primaryBorderFill
+    : agingChip?.type === "overdue"
+      ? colors.overdueSurface
       : isPaid
-        ? colors.muted + "15"
-        : colors.warning + "18";
+        ? colors.borderSubtle
+        : colors.pendingSurface;
+
   const iconColor = isPayment
-    ? colors.success
-    : isOverdue
-      ? colors.danger
+    ? colors.primary
+    : agingChip?.type === "overdue"
+      ? colors.overdue
       : isPaid
-        ? colors.muted
-        : colors.warning;
+        ? colors.faint
+        : colors.pending;
 
   const amountColor = isPayment
-    ? colors.success
+    ? colors.primary
     : isPaid
       ? colors.muted
-      : colors.ink;
-  const amountWeight = isPayment || !isPaid ? "700" : "500";
-  const amountPrefix = isPayment ? "+ " : "";
+      : colors.danger;
 
   return (
-    <View
-      className="flex-row items-center px-3"
-      style={{ paddingHorizontal: 14, paddingVertical: 11 }}
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.rowContainer,
+        {
+          backgroundColor: pressed ? colors.borderSubtle : "transparent",
+          borderColor: colors.borderSubtle,
+        },
+      ]}
     >
-      <View
-        className="mr-3 items-center justify-center"
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: 18,
-          backgroundColor: iconBg,
-        }}
-      >
+      {/* Left Icon */}
+      <View style={[styles.iconContainer, { backgroundColor: iconBg }]}>
         {isPayment ? (
-          <ArrowDownLeft size={16} color={iconColor} strokeWidth={2.1} />
+          <ArrowDownLeft size={16} color={iconColor} strokeWidth={2.5} />
         ) : (
-          <ArrowUpRight size={16} color={iconColor} strokeWidth={2.1} />
+          <FileText size={16} color={iconColor} strokeWidth={2} />
         )}
       </View>
 
-      <View className="flex-1 pr-2">
-        <Text
-          className="text-[14px] font-semibold text-ink"
-          numberOfLines={1}
-        >
+      {/* Middle Text Details */}
+      <View style={styles.textContainer}>
+        <Text style={[typeStyles.cardTitle, { color: colors.ink }]} numberOfLines={1}>
           {title}
         </Text>
-        <View
-          className="mt-0.5 flex-row items-center"
-          style={{ minHeight: 18 }}
-        >
-          <Text
-            className="text-[12px] text-muted"
-            numberOfLines={1}
-          >
-            {subtitle}
-          </Text>
+        <Text style={[typeStyles.caption, { color: colors.muted, marginTop: 2 }]}>
+          {subtitle}
+        </Text>
 
-          {!isPayment && statusChipLabel ? (
-            <View
-              className="ml-2 rounded-full px-2 py-0.5"
-              style={{ backgroundColor: statusChipBg }}
-            >
-              <Text
-                className="text-[10px] font-semibold uppercase"
-                style={{ color: statusChipText, letterSpacing: 0.6 }}
-              >
-                {statusChipLabel}
+        {/* Aging Chip on its own line */}
+        {agingChip && (
+          <View style={styles.chipRow}>
+            <View style={[styles.chip, { backgroundColor: agingChip.bg }]}>
+              <Text style={[styles.chipText, { color: agingChip.text, fontFamily: t.fontFamily.bodyBold }]}>
+                {agingChip.label}
               </Text>
             </View>
-          ) : null}
-        </View>
+          </View>
+        )}
       </View>
 
-      <View className="items-end">
-        <Text
-          className="text-card-title"
-          style={{ color: amountColor, fontWeight: amountWeight }}
-        >
-          {amountPrefix}
-          {formatINR(tx.amount, { maximumFractionDigits: 2 })}
+      {/* Right Amounts */}
+      <View style={styles.amountContainer}>
+        <Text style={[typeStyles.amountSm, { color: amountColor, fontFamily: t.fontFamily.bodyBold }]}>
+          {isPayment ? "+ " : ""}
+          {formatINR(tx.amount)}
         </Text>
-        <Text
-          className="mt-0.5 text-[11px] text-faint"
-          numberOfLines={1}
-        >
-          Bal: {formatINR(tx.runningBalance, { maximumFractionDigits: 2 })}
+        <Text style={[typeStyles.caption, { color: colors.faint, marginTop: 4 }]}>
+          Bal: {formatINR(tx.runningBalance)}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  rowContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+  },
+  iconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  textContainer: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  chipRow: {
+    flexDirection: "row",
+    marginTop: 6,
+  },
+  chip: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 9999,
+  },
+  chipText: {
+    fontSize: 11,
+  },
+  amountContainer: {
+    alignItems: "flex-end",
+  },
+});
