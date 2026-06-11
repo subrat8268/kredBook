@@ -8,12 +8,14 @@ interface CustomerActionStripProps {
   balanceState: "overdue" | "pending" | "partial" | "settled" | "advance";
   onCollectPress: () => void;
   onAddEntryPress: () => void;
+  collectDisabled?: boolean;
 }
 
 export default function CustomerActionStrip({
   balanceState,
   onCollectPress,
   onAddEntryPress,
+  collectDisabled = false,
 }: CustomerActionStripProps) {
   const t = useTheme();
   const { colors } = t;
@@ -21,7 +23,7 @@ export default function CustomerActionStrip({
   const isMuted = balanceState === "settled" || balanceState === "advance";
 
   const handleCollectPress = () => {
-    // Trigger medium haptic feedback
+    if (collectDisabled) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     onCollectPress();
   };
@@ -40,15 +42,20 @@ export default function CustomerActionStrip({
       {/* Collect / Record Payment Button (60% width) */}
       <Pressable
         onPress={handleCollectPress}
+        disabled={collectDisabled}
         style={({ pressed }) => [
           styles.primaryButton,
           {
-            backgroundColor: pressed ? colors.primaryActive : colors.primary,
+            backgroundColor: collectDisabled
+              ? colors.borderSubtle
+              : pressed
+                ? colors.primaryActive
+                : colors.primary,
           },
         ]}
       >
-        <ArrowDownLeft size={18} color="#ffffff" style={styles.icon} />
-        <Text style={[styles.primaryText, { fontFamily: t.fontFamily.bodySemiBold }]}>
+        <ArrowDownLeft size={18} color={collectDisabled ? colors.muted : "#ffffff"} style={styles.icon} />
+        <Text style={[styles.primaryText, { fontFamily: t.fontFamily.bodySemiBold, color: collectDisabled ? colors.muted : "#ffffff" }]}>
           {isMuted ? "Record Payment" : "Collect Payment"}
         </Text>
       </Pressable>

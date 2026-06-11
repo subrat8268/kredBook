@@ -343,6 +343,7 @@ export default function CustomerDetailScreen() {
 
   // Open record payment modal
   const openPaymentFlow = (amountSeed?: number) => {
+    if (!customer?.pendingOrderId) return;
     setQuickPaymentAmount(
       amountSeed && amountSeed > 0 ? String(amountSeed) : "",
     );
@@ -487,6 +488,7 @@ export default function CustomerDetailScreen() {
             balanceState={balanceState}
             onCollectPress={() => openPaymentFlow()}
             onAddEntryPress={handleAddEntryNavigation}
+            collectDisabled={!customer.pendingOrderId}
           />
 
           <CustomerTransactionTimeline
@@ -510,21 +512,23 @@ export default function CustomerDetailScreen() {
 
       {/* Modals & Bottom Sheets */}
 
-      {/* M1: Record Customer Payment Modal */}
-      <RecordCustomerPaymentModal
-        ref={paymentModalRef}
-        onSuccess={(amount) => {
-          paymentModalRef.current?.dismiss();
-          handlePaymentSuccess(amount);
-        }}
-        orderId={customer.pendingOrderId ?? customer.id}
-        balanceDue={customer.pendingOrderBalance ?? 0}
-        customerId={customer.id}
-        customerName={customer.name}
-        initialAmount={
-          quickPaymentAmount ? Number(quickPaymentAmount) : undefined
-        }
-      />
+      {/* M1: Record Customer Payment Modal (only when a pending order exists) */}
+      {customer.pendingOrderId && (
+        <RecordCustomerPaymentModal
+          ref={paymentModalRef}
+          onSuccess={(amount) => {
+            paymentModalRef.current?.dismiss();
+            handlePaymentSuccess(amount);
+          }}
+          orderId={customer.pendingOrderId}
+          balanceDue={customer.pendingOrderBalance ?? 0}
+          customerId={customer.id}
+          customerName={customer.name}
+          initialAmount={
+            quickPaymentAmount ? Number(quickPaymentAmount) : undefined
+          }
+        />
+      )}
 
 
 
