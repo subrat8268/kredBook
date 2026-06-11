@@ -14,6 +14,8 @@ type Props = {
   onPress: () => void;
   title?: string;
   children?: React.ReactNode;
+  style?: any;
+  className?: string;
 };
 
 const sizeTokens = {
@@ -22,11 +24,21 @@ const sizeTokens = {
   lg: { height: 52, fontSize: 16, paddingHorizontal: 20 },
 };
 
-const variantStyles = {
+const variantStyles: Record<
+  "primary" | "outline" | "secondary" | "ghost" | "danger",
+  {
+    bg: string;
+    text: string;
+    pressedBg: string;
+    border: string;
+    shadow: boolean;
+  }
+> = {
   primary: {
     bg: colors.primary,
     text: "#FFFFFF",
     pressedBg: colors.primaryDark,
+    border: "transparent",
     shadow: true,
   },
   outline: {
@@ -54,6 +66,7 @@ const variantStyles = {
     bg: colors.danger,
     text: "#FFFFFF",
     pressedBg: "#B91C1C",
+    border: "transparent",
     shadow: true,
   },
 };
@@ -70,6 +83,7 @@ export default memo(function Button({
   onPress,
   title,
   children,
+  style: styleProp,
 }: Props) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const content = title ?? children ?? "";
@@ -94,7 +108,7 @@ export default memo(function Button({
   };
 
   return (
-    <Animated.View style={{ transform: [{ scale: scaleAnim }], width: fullWidth ? "100%" : undefined }}>
+    <Animated.View style={[{ transform: [{ scale: scaleAnim }], width: fullWidth ? "100%" : undefined }, styleProp]}>
       <Pressable
         onPress={onPress}
         onPressIn={handlePressIn}

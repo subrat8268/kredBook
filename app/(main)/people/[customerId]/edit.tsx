@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -132,7 +133,7 @@ export default function EditCustomerScreen() {
                 value={name}
                 onChangeText={setName}
                 placeholder="Enter customer name"
-                variant={name.trim().length > 0 && !isValid ? "error" : "neutral"}
+                variant="neutral"
                 error={name.trim().length > 0 && !isValid ? "Name must be between 2 and 50 characters" : undefined}
               />
             </View>
@@ -149,9 +150,9 @@ export default function EditCustomerScreen() {
 
             {/* Warning Banner if phone number is modified and existing entries exist */}
             {isPhoneModified && hasTransactions && (
-              <View style={[styles.warningBanner, { backgroundColor: colors.warningBg }]}>
-                <AlertCircle size={18} color={colors.warning} style={styles.warningIcon} />
-                <Text style={[styles.warningText, { color: colors.warning, fontFamily: t.fontFamily.body }]}>
+              <View style={[styles.warningBanner, { backgroundColor: colors.pendingSurface }]}>
+                <AlertCircle size={18} color={colors.pending} style={styles.warningIcon} />
+                <Text style={[styles.warningText, { color: colors.pending, fontFamily: t.fontFamily.body }]}>
                   Warning: Changing the phone number will affect WhatsApp communication hooks.
                 </Text>
               </View>
@@ -170,9 +171,10 @@ export default function EditCustomerScreen() {
             <View style={styles.inputSpacing}>
               <Input
                 label="Outstanding Balance (Locked)"
+                placeholder=""
                 value={formatINR(customer.outstandingBalance)}
                 onChangeText={() => {}}
-                disabled={true}
+                editable={false}
               />
               <Text style={[styles.infoText, { color: colors.muted, fontFamily: t.fontFamily.body }]}>
                 Opening and outstanding balances cannot be edited to maintain accounting integrity.

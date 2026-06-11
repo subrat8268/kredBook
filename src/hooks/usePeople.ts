@@ -273,8 +273,9 @@ export function usePersonDetail(customerId?: string) {
     return customer.orders.filter((o) => o.status !== "Paid" && o.balance_due > 0).length;
   }, [customer?.orders]);
 
-  const balanceState = useMemo<'overdue' | 'pending' | 'partial' | 'settled' | 'advance'>(() => {
-    if (!customer) return 'settled';
+  const balanceState = useMemo<'overdue' | 'pending' | 'partial' | 'settled' | 'advance' | null>(() => {
+    if (!customer) return null;
+    if (!customer.orders || customer.orders.length === 0) return null;
 
     const hasOverdue = oldestOverdueDays !== null;
     const hasPartial = customer.orders?.some(o => o.amount_paid > 0 && o.balance_due > 0);

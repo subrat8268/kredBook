@@ -9,7 +9,7 @@ import type { TxFilter, TxListItem } from "./types";
 
 interface CustomerTransactionTimelineProps {
   customer: PersonDetail;
-  balanceState: "overdue" | "pending" | "partial" | "settled" | "advance";
+  balanceState: "overdue" | "pending" | "partial" | "settled" | "advance" | null;
   visibleListItems: TxListItem[];
   listItems: TxListItem[];
   historyExpanded: boolean;

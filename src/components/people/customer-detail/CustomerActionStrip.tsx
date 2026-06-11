@@ -5,7 +5,7 @@ import * as Haptics from "expo-haptics";
 import { useTheme } from "@/src/theme/useTheme";
 
 interface CustomerActionStripProps {
-  balanceState: "overdue" | "pending" | "partial" | "settled" | "advance";
+  balanceState: "overdue" | "pending" | "partial" | "settled" | "advance" | null;
   onCollectPress: () => void;
   onAddEntryPress: () => void;
   collectDisabled?: boolean;

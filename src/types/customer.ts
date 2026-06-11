@@ -47,6 +47,9 @@ export interface PersonDetail {
     id: string;
     created_at: string;
     amount: number;
+    amount_paid: number;
+    balance_due: number;
+    due_date?: string | null;
     status: "Paid" | "Pending" | "Partially Paid";
   }[];
   transactions: Transaction[];

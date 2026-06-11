@@ -49,7 +49,7 @@ export function Skeleton({
     <View
       style={[
         {
-          width,
+          width: width as any,
           height,
           borderRadius: radiusOverride ?? radius.sm,
           backgroundColor: colors.surfaceAlt,

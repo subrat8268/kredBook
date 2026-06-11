@@ -111,7 +111,7 @@ function RootLayout() {
     if (!ready || !isInitialized) return;
     if (user && isFetchingProfile && !profile) return;
 
-    const currentPath = segments[0];
+    const currentPath = segments[0] as string;
     const isOnMain = currentPath === "(main)";
     const isOnAuth = currentPath === "(auth)";
     const isOnRoot = !currentPath || currentPath === "";

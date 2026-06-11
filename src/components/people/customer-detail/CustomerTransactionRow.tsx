@@ -21,7 +21,7 @@ interface CustomerTransactionRowProps {
   tx: Transaction;
   orders?: any[];
   onPress: () => void;
-  balanceState?: "overdue" | "pending" | "partial" | "settled" | "advance";
+  balanceState?: "overdue" | "pending" | "partial" | "settled" | "advance" | null;
 }
 
 const MODE_LABEL: Record<string, string> = {
@@ -131,7 +131,7 @@ export default function CustomerTransactionRow({
     ? colors.primary
     : isPaid
       ? colors.muted
-      : colors.danger;
+      : colors.overdue;
 
   return (
     <Pressable
@@ -176,7 +176,7 @@ export default function CustomerTransactionRow({
 
       {/* Right Amounts */}
       <View style={styles.amountContainer}>
-        <Text style={[typeStyles.amountSm, { color: amountColor, fontFamily: t.fontFamily.bodyBold }]}>
+        <Text style={[typeStyles.amountSm as any, { color: amountColor, fontFamily: t.fontFamily.bodyBold }]}>
           {isPayment ? "+ " : ""}
           {formatINR(tx.amount)}
         </Text>

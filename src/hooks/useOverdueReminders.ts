@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { AppStateStatus } from "react-native";
 import {
   cancelAllOverdueReminders,
   ensureNotificationPermission,

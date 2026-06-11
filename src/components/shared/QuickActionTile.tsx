@@ -1,10 +1,10 @@
 import { useTheme } from "@/src/utils/ThemeProvider";
+import React, { ReactNode } from "react";
 import {
   ActivityIndicator,
   Pressable,
   Text,
   View,
-  type ReactNode,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
