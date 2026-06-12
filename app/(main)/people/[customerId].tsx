@@ -19,6 +19,7 @@ import {
 } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
+  AlertTriangle,
   CheckCircle,
   Share2,
   Download,
@@ -327,6 +328,8 @@ export default function CustomerDetailScreen() {
 
     if (customer.phone && customer.phone.trim().length > 0) {
       const cleanedPhone = customer.phone.replace(/\D/g, "");
+      // Fix #4: only prefix +91 for standard 10-digit Indian numbers
+      const waPrefix = cleanedPhone.length === 10 ? "91" : "";
 
       actions.push({
         key: "call",
@@ -360,7 +363,7 @@ export default function CustomerDetailScreen() {
             const message = `Dear Customer, your outstanding balance is ${formatINR(netBalance)}. Please arrange payment. Thank you.`;
             const encodedMessage = encodeURIComponent(message);
             Linking.openURL(
-              `https://wa.me/91${cleanedPhone}?text=${encodedMessage}`,
+              `https://wa.me/${waPrefix}${cleanedPhone}?text=${encodedMessage}`,
             );
             handleWhatsAppReminder();
           }
@@ -513,6 +516,33 @@ export default function CustomerDetailScreen() {
           contentContainerStyle={{ paddingTop: spacing[3], paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
         >
+          {/* #2: Reconciliation warning banner — shown only when DB and computed balance diverge */}
+          {customer.reconciliationWarning && (
+            <View
+              style={[
+                styles.reconciliationBanner,
+                { backgroundColor: colors.overdueSurface, borderColor: colors.overdueText },
+              ]}
+            >
+              <AlertTriangle
+                size={16}
+                color={colors.overdueText}
+                style={styles.bannerIcon}
+              />
+              <Text
+                style={[
+                  styles.bannerText,
+                  {
+                    color: colors.overdueText,
+                    fontFamily: t.fontFamily.bodySemiBold,
+                  },
+                ]}
+              >
+                Balance mismatch detected. Please refresh or contact support.
+              </Text>
+            </View>
+          )}
+
           {/* Success Banner */}
           {showSuccessBanner && (
             <View
@@ -606,7 +636,7 @@ export default function CustomerDetailScreen() {
         customerName={customer.name}
         entriesCount={customer.orders?.length || 0}
         paymentsCount={
-          (customer.transactions || []).filter((t) => t.type === "payment")
+          (customer.transactions || []).filter((tx) => tx.type === "payment")
             .length
         }
         isDeleting={isDeleting}
@@ -617,6 +647,22 @@ export default function CustomerDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  reconciliationBanner: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 12,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  bannerIcon: {
+    marginRight: 8,
+  },
+  bannerText: {
+    fontSize: 13,
+    flex: 1,
+  },
   successBanner: {
     borderRadius: 12,
     padding: 12,

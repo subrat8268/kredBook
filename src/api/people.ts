@@ -62,7 +62,9 @@ export async function fetchPeople(
   return people.map((person) => ({
     ...person,
     isOverdue: overdueIds.has(person.id),
-    outstandingBalance: balanceByPerson[person.id] ?? 0,
+    // Fix #3: round to 2dp to prevent JS floating-point drift
+    outstandingBalance:
+      Math.round((balanceByPerson[person.id] ?? 0) * 100) / 100,
     lastActiveAt: lastActiveByPerson[person.id] ?? person.created_at,
   }));
 }
@@ -118,14 +120,13 @@ export const fetchCustomerDetail = fetchPersonDetail;
 export async function fetchPersonDetail(
   customerId: string,
 ): Promise<PersonDetail | null> {
-  // Fetch person profile from parties table
+  // Fix #2: also fetch customer_balance (DB trigger-maintained column)
   const { data: person, error: custErr } = await supabase
     .from("parties")
-    .select("id, name, phone, address")
+    .select("id, name, phone, address, customer_balance")
     .eq("id", customerId.trim())
     .eq("is_customer", true)
     .maybeSingle();
-
 
   if (custErr) {
     console.error("Error fetching person:", custErr.message);
@@ -154,10 +155,28 @@ export async function fetchPersonDetail(
   }
 
   const orderList = ordersResult.data ?? [];
-  const outstandingBalance = orderList.reduce(
-    (sum, o) => sum + Number(o.balance_due),
-    0,
-  );
+
+  // Fix #3: round to 2dp to prevent JS floating-point drift
+  const outstandingBalance =
+    Math.round(
+      orderList.reduce((sum, o) => sum + Number(o.balance_due), 0) * 100,
+    ) / 100;
+
+  // Fix #2: compare client-computed balance with DB trigger balance
+  const dbBalance =
+    person.customer_balance != null
+      ? Math.round(Number(person.customer_balance) * 100) / 100
+      : null;
+  const reconciliationWarning =
+    dbBalance !== null && Math.abs(outstandingBalance - dbBalance) > 0.01;
+
+  if (__DEV__ && reconciliationWarning) {
+    console.error(
+      `[kredBook] Balance reconciliation mismatch for customer ${customerId}: ` +
+        `computed=${outstandingBalance}, db=${dbBalance}. ` +
+        `Possible trigger lag or data integrity issue.`,
+    );
+  }
 
   // Overdue: outstanding balance AND most recent order is >30 days old
   const lastOrder = orderList[orderList.length - 1];
@@ -184,14 +203,19 @@ export async function fetchPersonDetail(
     orderBillNumber: s.order_bill_number,
   }));
 
-  // Find oldest pending/partially-paid order for payment recording
+  // Fix #7: normalize status casing when finding oldest pending order
   const pendingOrder = orderList.find(
-    (o) => o.status !== "Paid" && Number(o.balance_due) > 0,
+    (o) => o.status?.toLowerCase() !== "paid" && Number(o.balance_due) > 0,
   );
 
   return {
-    ...person,
+    id: person.id,
+    name: person.name,
+    phone: person.phone,
+    address: person.address,
     outstandingBalance,
+    dbBalance: dbBalance ?? undefined,
+    reconciliationWarning: reconciliationWarning || undefined,
     isOverdue,
     daysSinceLastOrder,
     lastActiveAt: lastOrderDate,
@@ -257,4 +281,3 @@ export async function updatePerson(
     }
   );
 }
-

@@ -70,8 +70,9 @@ export default function CustomerTransactionTimeline({
     currentGroup.txs.push(item);
   }
 
-  const isNew =
-    !customer.transactions || (customer.transactions || []).length === 0;
+  // Fix #6: use orders.length to determine new customer — not transactions
+  // (a customer can have orders with no payments, making transactions non-empty)
+  const isNew = (customer.orders || []).length === 0;
 
   return (
     <View
@@ -112,7 +113,8 @@ export default function CustomerTransactionTimeline({
               if (!group.txs.length) return null;
 
               return (
-                <View key={`${group.label}-${group.txs[0].key}`}>
+                // Fix #8: use gIndex as key to prevent collisions on empty group labels
+                <View key={`group-${gIndex}`}>
                   {/* Chronological Date Group Label */}
                   <View
                     className="self-stretch px-4 py-2"
