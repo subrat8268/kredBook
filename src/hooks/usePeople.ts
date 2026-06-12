@@ -15,11 +15,9 @@ import { Alert, Linking } from "react-native";
 import { useRouter } from "expo-router";
 import { useToast } from "@/src/components/feedback/Toast";
 import { useAuthStore } from "@/src/store/authStore";
-import { fetchPeople, fetchPersonDetail, PAGE_SIZE, deletePerson, updatePerson } from "../api/people";
+import { fetchPeople, fetchPersonDetail, addPerson, PAGE_SIZE, deletePerson, updatePerson } from "../api/people";
 import { ApiError } from "../lib/supabaseQuery";
-import { supabase } from "../services/supabase";
 import { Person, PersonDetail } from "../types/customer";
-import type { Party } from "../types/party";
 import { useDebounce } from "./useDebounce";
 
 function dedupeById<T extends { id: string }>(items: T[]): T[] {
@@ -30,21 +28,6 @@ function dedupeById<T extends { id: string }>(items: T[]): T[] {
     seen.add(item.id);
     return true;
   });
-}
-
-// Helper: Convert Party to Person type
-function partyToPerson(party: Party): Person {
-  return {
-    id: party.id,
-    name: party.name,
-    phone: party.phone || "",
-    vendor_id: party.vendor_id,
-    address: party.address || undefined,
-    created_at: party.created_at,
-    outstandingBalance: party.customer_balance,
-    isOverdue: false, // Will be calculated if needed
-    lastActiveAt: party.updated_at,
-  };
 }
 
 export const customerKeys = {
@@ -102,22 +85,7 @@ export const useAddCustomer = (vendorId: string) => {
     { previousQueries: [import("@tanstack/react-query").QueryKey, unknown][] }
   >({
     mutationFn: async (values) => {
-      // Insert into parties table instead of legacy customers table
-      const { data, error } = await supabase
-        .from("parties")
-        .insert({
-          vendor_id: vendorId,
-          name: values.name,
-          phone: values.phone || null,
-          address: values.address || null,
-          is_customer: true,
-          customer_balance: (values as any).openingBalance || 0,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return partyToPerson(data as Party);
+      return addPerson(vendorId, values);
     },
     onMutate: async (newCustomer) => {
       const queryKey = customerKeys.all(vendorId);

@@ -38,10 +38,10 @@ export async function fetchPeople(
     (overdueOrders ?? []).map((o: any) => o.customer_id),
   );
 
-  // Fetch sum of balance_due per person
+  // Fetch sum of balance_due per person (exclude paid orders — matches trigger logic)
   const { data: balanceRows } = await supabase
     .from("orders")
-    .select("customer_id, balance_due, created_at")
+    .select("customer_id, balance_due, created_at, status")
     .eq("vendor_id", vendorId)
     .in(
       "customer_id",
@@ -51,8 +51,10 @@ export async function fetchPeople(
   const balanceByPerson: Record<string, number> = {};
   const lastActiveByPerson: Record<string, string> = {};
   for (const row of balanceRows ?? []) {
-    balanceByPerson[row.customer_id] =
-      (balanceByPerson[row.customer_id] ?? 0) + Number(row.balance_due);
+    if (row.status?.toLowerCase() !== "paid") {
+      balanceByPerson[row.customer_id] =
+        (balanceByPerson[row.customer_id] ?? 0) + Number(row.balance_due);
+    }
     const existing = lastActiveByPerson[row.customer_id];
     if (!existing || row.created_at > existing) {
       lastActiveByPerson[row.customer_id] = row.created_at;
@@ -79,7 +81,7 @@ export async function addPerson(
       const { openingBalance, ...rest } = values as any;
       const payload: Record<string, any> = { ...rest, vendor_id: vendorId };
       if (openingBalance && openingBalance > 0) {
-        payload.opening_balance = openingBalance;
+        payload.customer_balance = openingBalance;
       }
        const { data, error } = await supabase
          .from("parties")
@@ -174,7 +176,7 @@ export async function fetchPersonDetail(
     );
   }
 
-  // Overdue: outstanding balance AND most recent order is >30 days old
+  // Overdue: outstanding balance AND any order has past-due unpaid balance
   const lastOrder = orderList[orderList.length - 1];
   const lastOrderDate = lastOrder?.created_at ?? null;
   const daysSinceLastOrder = lastOrderDate
@@ -183,7 +185,14 @@ export async function fetchPersonDetail(
           (1000 * 60 * 60 * 24),
       )
     : 0;
-  const isOverdue = outstandingBalance > 0 && daysSinceLastOrder > 30;
+  const isOverdue =
+    outstandingBalance > 0 &&
+    orderList.some(
+      (o) =>
+        Number(o.balance_due) > 0 &&
+        o.due_date &&
+        new Date(o.due_date) < new Date(),
+    );
 
   // Map RPC statements to unified entry list
   const allEvents = (detail?.statements ?? []).map((s: any) => ({

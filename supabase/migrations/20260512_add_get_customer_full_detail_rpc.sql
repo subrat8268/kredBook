@@ -87,7 +87,7 @@ BEGIN
     SELECT
       id, type, created_at, amount,
       SUM(CASE WHEN type = 'bill' THEN amount ELSE -amount END)
-        OVER (ORDER BY created_at ASC, type ASC) AS running_balance,
+        OVER (ORDER BY created_at ASC, type ASC, id ASC) AS running_balance,
       bill_number, status, item_count, payment_mode, order_bill_number
     FROM combined_events
   )
