@@ -1,4 +1,4 @@
-import { useTheme } from "@/src/utils/ThemeProvider";
+import { useTheme } from "@/src/theme/useTheme";
 import { Pressable, Text, View } from "react-native";
 import type { TxFilter } from "./types";
 

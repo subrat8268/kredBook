@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import {
   BottomSheetModal,
   BottomSheetBackdrop,
@@ -103,49 +103,82 @@ const PaymentDetailSheet = forwardRef<BottomSheetModal, PaymentDetailSheetProps>
           borderTopRightRadius: t.radius["3xl"],
         }}
       >
-        <BottomSheetScrollView contentContainerStyle={styles.content}>
+        <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 8, paddingBottom: 24 }}>
           {/* Title */}
-          <Text style={[styles.title, { color: colors.ink, fontFamily: t.fontFamily.displaySemiBold }]}>
+          <Text
+            className="text-[18px] text-center"
+            style={{ color: colors.ink, fontFamily: t.fontFamily.displaySemiBold }}
+          >
             Payment Details
           </Text>
 
           {/* Amount */}
-          <View style={styles.amountWrapper}>
-            <Text style={[styles.amount, { color: colors.primary, fontFamily: t.fontFamily.bodyBold }]}>
+          <View className="items-center my-5">
+            <Text
+              className="text-[32px]"
+              style={{ color: colors.primary, fontFamily: t.fontFamily.bodyBold }}
+            >
               {formatINR(payment.amount)}
             </Text>
           </View>
 
           {/* Details Body */}
-          <View style={[styles.detailBox, { backgroundColor: colors.surfaceRaised, borderRadius: t.radius.lg }]}>
-            <View style={styles.detailRow}>
-              <Text style={[styles.label, { color: colors.muted, fontFamily: t.fontFamily.body }]}>
+          <View
+            className="px-4 py-2 mb-6"
+            style={{ backgroundColor: colors.surfaceRaised, borderRadius: t.radius.lg }}
+          >
+            <View className="flex-row justify-between items-center py-3">
+              <Text
+                className="text-[14px]"
+                style={{ color: colors.muted, fontFamily: t.fontFamily.body }}
+              >
                 Method
               </Text>
-              <Text style={[styles.value, { color: colors.ink, fontFamily: t.fontFamily.bodyMedium }]}>
+              <Text
+                className="text-[14px] text-right max-w-[70%]"
+                style={{ color: colors.ink, fontFamily: t.fontFamily.bodyMedium }}
+              >
                 Paid via {modeText}
               </Text>
             </View>
 
-            <View style={[styles.divider, { backgroundColor: colors.borderSubtle }]} />
+            <View
+              className="h-[1px] self-stretch"
+              style={{ backgroundColor: colors.borderSubtle }}
+            />
 
-            <View style={styles.detailRow}>
-              <Text style={[styles.label, { color: colors.muted, fontFamily: t.fontFamily.body }]}>
+            <View className="flex-row justify-between items-center py-3">
+              <Text
+                className="text-[14px]"
+                style={{ color: colors.muted, fontFamily: t.fontFamily.body }}
+              >
                 Date
               </Text>
-              <Text style={[styles.value, { color: colors.ink, fontFamily: t.fontFamily.bodyMedium }]}>
+              <Text
+                className="text-[14px] text-right max-w-[70%]"
+                style={{ color: colors.ink, fontFamily: t.fontFamily.bodyMedium }}
+              >
                 {formattedDate}
               </Text>
             </View>
 
             {payment.orderBillNumber && (
               <>
-                <View style={[styles.divider, { backgroundColor: colors.borderSubtle }]} />
-                <View style={styles.detailRow}>
-                  <Text style={[styles.label, { color: colors.muted, fontFamily: t.fontFamily.body }]}>
+                <View
+                  className="h-[1px] self-stretch"
+                  style={{ backgroundColor: colors.borderSubtle }}
+                />
+                <View className="flex-row justify-between items-center py-3">
+                  <Text
+                    className="text-[14px]"
+                    style={{ color: colors.muted, fontFamily: t.fontFamily.body }}
+                  >
                     Linked Entry
                   </Text>
-                  <Text style={[styles.value, { color: colors.primary, fontFamily: t.fontFamily.bodySemiBold }]}>
+                  <Text
+                    className="text-[14px] text-right max-w-[70%]"
+                    style={{ color: colors.primary, fontFamily: t.fontFamily.bodySemiBold }}
+                  >
                     Entry #{payment.orderBillNumber}
                   </Text>
                 </View>
@@ -154,12 +187,22 @@ const PaymentDetailSheet = forwardRef<BottomSheetModal, PaymentDetailSheetProps>
 
             {payment.notes && payment.notes.trim().length > 0 && (
               <>
-                <View style={[styles.divider, { backgroundColor: colors.borderSubtle }]} />
-                <View style={styles.detailRow}>
-                  <Text style={[styles.label, { color: colors.muted, fontFamily: t.fontFamily.body }]}>
+                <View
+                  className="h-[1px] self-stretch"
+                  style={{ backgroundColor: colors.borderSubtle }}
+                />
+                <View className="flex-row justify-between items-center py-3">
+                  <Text
+                    className="text-[14px]"
+                    style={{ color: colors.muted, fontFamily: t.fontFamily.body }}
+                  >
                     Note
                   </Text>
-                  <Text style={[styles.value, { color: colors.ink, fontFamily: t.fontFamily.body }]} numberOfLines={2}>
+                  <Text
+                    className="text-[14px] text-right max-w-[70%]"
+                    style={{ color: colors.ink, fontFamily: t.fontFamily.body }}
+                    numberOfLines={2}
+                  >
                     {payment.notes}
                   </Text>
                 </View>
@@ -168,27 +211,27 @@ const PaymentDetailSheet = forwardRef<BottomSheetModal, PaymentDetailSheetProps>
           </View>
 
           {/* CTAs at Bottom */}
-          <View style={styles.footer}>
+          <View className="items-center gap-4">
             <Pressable
               onPress={handleClose}
-              style={({ pressed }) => [
-                styles.closeButton,
-                pressed && { opacity: 0.7 },
-              ]}
+              className="py-3 self-stretch items-center active:opacity-70"
             >
-              <Text style={[styles.closeText, { color: colors.muted, fontFamily: t.fontFamily.bodySemiBold }]}>
+              <Text
+                className="text-[15px]"
+                style={{ color: colors.muted, fontFamily: t.fontFamily.bodySemiBold }}
+              >
                 Close
               </Text>
             </Pressable>
 
             <Pressable
               onPress={handleDeletePress}
-              style={({ pressed }) => [
-                styles.deleteButton,
-                pressed && { opacity: 0.7 },
-              ]}
+              className="py-2 self-stretch items-center active:opacity-70"
             >
-              <Text style={[styles.deleteText, { color: colors.faint, fontFamily: t.fontFamily.bodyMedium }]}>
+              <Text
+                className="text-[13px]"
+                style={{ color: colors.faint, fontFamily: t.fontFamily.bodyMedium }}
+              >
                 Delete Payment
               </Text>
             </Pressable>
@@ -202,65 +245,3 @@ const PaymentDetailSheet = forwardRef<BottomSheetModal, PaymentDetailSheetProps>
 PaymentDetailSheet.displayName = "PaymentDetailSheet";
 
 export default PaymentDetailSheet;
-
-const styles = StyleSheet.create({
-  content: {
-    paddingHorizontal: 24,
-    paddingTop: 8,
-    paddingBottom: 24,
-  },
-  title: {
-    fontSize: 18,
-    textAlign: "center",
-  },
-  amountWrapper: {
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  amount: {
-    fontSize: 32,
-  },
-  detailBox: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: 24,
-  },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  label: {
-    fontSize: 14,
-  },
-  value: {
-    fontSize: 14,
-    textAlign: "right",
-    maxWidth: "70%",
-  },
-  divider: {
-    height: 1,
-    alignSelf: "stretch",
-  },
-  footer: {
-    alignItems: "center",
-    gap: 16,
-  },
-  closeButton: {
-    paddingVertical: 12,
-    alignSelf: "stretch",
-    alignItems: "center",
-  },
-  closeText: {
-    fontSize: 15,
-  },
-  deleteButton: {
-    paddingVertical: 8,
-    alignSelf: "stretch",
-    alignItems: "center",
-  },
-  deleteText: {
-    fontSize: 13,
-  },
-});

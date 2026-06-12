@@ -21,7 +21,13 @@ interface CustomerTransactionRowProps {
   tx: Transaction;
   orders?: any[];
   onPress: () => void;
-  balanceState?: "overdue" | "pending" | "partial" | "settled" | "advance" | null;
+  balanceState?:
+    | "overdue"
+    | "pending"
+    | "partial"
+    | "settled"
+    | "advance"
+    | null;
 }
 
 const MODE_LABEL: Record<string, string> = {
@@ -75,7 +81,9 @@ export default function CustomerTransactionRow({
 
     if (dueDate < today) {
       // Overdue entry
-      const diff = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+      const diff = Math.floor(
+        (today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
+      );
       return {
         type: "overdue" as const,
         label: `${diff}d overdue`,
@@ -143,7 +151,7 @@ export default function CustomerTransactionRow({
     >
       {/* Left Icon (Figma: w-10 h-10 rounded-lg) */}
       <View
-        className="w-10 h-10 rounded-lg items-center justify-center mr-3"
+        className="w-10 h-10 rounded-md items-center justify-center mr-3"
         style={{ backgroundColor: iconBg }}
       >
         {isPayment ? (

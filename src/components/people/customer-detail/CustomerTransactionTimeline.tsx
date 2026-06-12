@@ -73,35 +73,6 @@ export default function CustomerTransactionTimeline({
   const isNew =
     !customer.transactions || (customer.transactions || []).length === 0;
 
-  if (listItems.length === 0) {
-    return (
-      <View
-        className="border mx-4 mb-3 rounded-2xl overflow-hidden self-stretch"
-        style={{
-          borderColor: colors.borderDefault,
-          backgroundColor: colors.surface,
-          shadowColor: "#000000",
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.05,
-          shadowRadius: 2,
-          elevation: 1,
-        }}
-      >
-        {!isNew && (
-          <CustomerTransactionTabs
-            txFilter={txFilter}
-            onChangeFilter={onChangeFilter}
-          />
-        )}
-        <CustomerDetailEmptyState
-          variant={isNew ? "new_customer" : "filtered_empty"}
-          filter={txFilter}
-          onAddEntry={onAddEntry}
-        />
-      </View>
-    );
-  }
-
   return (
     <View
       className="border mx-4 mb-3 rounded-2xl overflow-hidden self-stretch"
@@ -115,75 +86,93 @@ export default function CustomerTransactionTimeline({
         elevation: 1,
       }}
     >
-      <CustomerTransactionTabs
-        txFilter={txFilter}
-        onChangeFilter={onChangeFilter}
-      />
+      {listItems.length === 0 ? (
+        <>
+          {!isNew && (
+            <CustomerTransactionTabs
+              txFilter={txFilter}
+              onChangeFilter={onChangeFilter}
+            />
+          )}
+          <CustomerDetailEmptyState
+            variant={isNew ? "new_customer" : "filtered_empty"}
+            filter={txFilter}
+            onAddEntry={onAddEntry}
+          />
+        </>
+      ) : (
+        <>
+          <CustomerTransactionTabs
+            txFilter={txFilter}
+            onChangeFilter={onChangeFilter}
+          />
 
-      <View style={{ backgroundColor: colors.surface }}>
-        {groups.map((group, gIndex) => {
-          if (!group.txs.length) return null;
+          <View style={{ backgroundColor: colors.surface }}>
+            {groups.map((group, gIndex) => {
+              if (!group.txs.length) return null;
 
-          return (
-            <View key={`${group.label}-${group.txs[0].key}`}>
-              {/* Chronological Date Group Label */}
-              <View
-                className="self-stretch px-4 py-2"
-                style={{
-                  backgroundColor: colors.canvas,
-                }}
-              >
-                <Text
-                  className="font-inter-bold text-[11px] tracking-wider uppercase"
-                  style={{
-                    color: colors.muted,
-                    lineHeight: 16,
-                  }}
-                >
-                  {group.label}
-                </Text>
-              </View>
-
-              <View className="overflow-hidden">
-                {group.txs.map((tx, index) => (
+              return (
+                <View key={`${group.label}-${group.txs[0].key}`}>
+                  {/* Chronological Date Group Label */}
                   <View
-                    key={tx.key}
+                    className="self-stretch px-4 py-2"
                     style={{
-                      borderTopWidth: index === 0 ? 0 : 1,
-                      borderTopColor: colors.borderSubtle,
+                      backgroundColor: colors.canvas,
                     }}
                   >
-                    <CustomerTransactionRow
-                      tx={tx.data}
-                      orders={customer.orders || []}
-                      balanceState={balanceState}
-                      onPress={() => onPressTx(tx.data)}
-                    />
+                    <Text
+                      className="font-inter-bold text-[11px] tracking-wider uppercase"
+                      style={{
+                        color: colors.muted,
+                        lineHeight: 16,
+                      }}
+                    >
+                      {group.label}
+                    </Text>
                   </View>
-                ))}
-              </View>
-            </View>
-          );
-        })}
 
-        {/* Pagination Trigger */}
-        {!historyExpanded && listItems.length > initialCount ? (
-          <Pressable
-            className="w-full items-center justify-center py-4 border-t"
-            style={{ borderTopColor: colors.borderSubtle }}
-            onPress={onExpandHistory}
-          >
-            <Text
-              className="text-[13px] font-inter-semibold"
-              style={{
-                color: colors.primary,
-              }}
-            >
-              View Older History ({listItems.length - initialCount} more)
-            </Text>
-          </Pressable>
-        ) : null}
-      </View>
+                  <View className="overflow-hidden">
+                    {group.txs.map((tx, index) => (
+                      <View
+                        key={tx.key}
+                        style={{
+                          borderTopWidth: index === 0 ? 0 : 1,
+                          borderTopColor: colors.borderSubtle,
+                        }}
+                      >
+                        <CustomerTransactionRow
+                          tx={tx.data}
+                          orders={customer.orders || []}
+                          balanceState={balanceState}
+                          onPress={() => onPressTx(tx.data)}
+                        />
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              );
+            })}
+
+            {/* Pagination Trigger */}
+            {!historyExpanded && listItems.length > initialCount ? (
+              <Pressable
+                className="w-full items-center justify-center py-4 border-t"
+                style={{ borderTopColor: colors.borderSubtle }}
+                onPress={onExpandHistory}
+              >
+                <Text
+                  className="text-[13px] font-inter-semibold"
+                  style={{
+                    color: colors.primary,
+                  }}
+                >
+                  View Older History ({listItems.length - initialCount} more)
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
+        </>
+      )}
     </View>
   );
 }
