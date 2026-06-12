@@ -136,18 +136,21 @@ export async function fetchPersonDetail(
   if (!person) return null;
 
   // Single RPC: orders + statement in 1 round-trip
-  const { data: detail, error: detailErr } = await supabase
+  const { data: detailRow, error: detailErr } = await supabase
     .rpc("get_customer_full_detail", {
       p_customer_id: customerId,
       p_vendor_id: vendorId,
     })
-    .single();
+    .maybeSingle();
 
   if (detailErr) {
     console.error("Error fetching customer detail:", detailErr.message);
     return null;
   }
+  if (!detailRow) return null;
 
+  // PostgREST wraps scalar returns under the function-name key
+  const detail = (detailRow as any)?.get_customer_full_detail as any;
   const orderList = (detail?.orders ?? []) as any[];
 
   const outstandingBalance =

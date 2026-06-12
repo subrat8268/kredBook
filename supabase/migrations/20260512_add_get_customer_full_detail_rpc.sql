@@ -86,11 +86,8 @@ BEGIN
   running AS (
     SELECT
       id, type, created_at, amount,
-      GREATEST(
-        SUM(CASE WHEN type = 'bill' THEN amount ELSE -amount END)
-          OVER (ORDER BY created_at ASC, type ASC),
-        0
-      ) AS running_balance,
+      SUM(CASE WHEN type = 'bill' THEN amount ELSE -amount END)
+        OVER (ORDER BY created_at ASC, type ASC) AS running_balance,
       bill_number, status, item_count, payment_mode, order_bill_number
     FROM combined_events
   )
@@ -118,6 +115,9 @@ BEGIN
   );
 END;
 $$;
+
+-- Drop old RPC (replaced by get_customer_full_detail)
+DROP FUNCTION IF EXISTS public.get_customer_statement(UUID);
 
 -- Grant execute to authenticated users
 REVOKE EXECUTE ON FUNCTION public.get_customer_full_detail(UUID, UUID) FROM PUBLIC;
