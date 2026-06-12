@@ -13,8 +13,8 @@ import { useToast } from "@/src/components/feedback/Toast";
 interface Payment {
   id: string;
   amount: number;
-  payment_date: string;
-  payment_mode: string;
+  created_at: string;
+  paymentMode: string;
   notes?: string | null;
   billNumber?: string | null;
   orderBillNumber?: string | null;
@@ -68,8 +68,8 @@ const PaymentDetailSheet = forwardRef<BottomSheetModal, PaymentDetailSheetProps>
 
     // Format date & time
     const formattedDate = useMemo(() => {
-      if (!payment?.payment_date) return "";
-      const dateObj = new Date(payment.payment_date);
+      if (!payment?.created_at) return "";
+      const dateObj = new Date(payment.created_at);
       return dateObj.toLocaleDateString("en-IN", {
         day: "numeric",
         month: "long",
@@ -81,12 +81,10 @@ const PaymentDetailSheet = forwardRef<BottomSheetModal, PaymentDetailSheetProps>
     }, [payment]);
 
     const modeText = useMemo(() => {
-      if (!payment?.payment_mode) return "Payment";
-      const mode = payment.payment_mode.toLowerCase();
-      return MODE_LABEL[mode] || payment.payment_mode;
+      if (!payment?.paymentMode) return "Payment";
+      const mode = payment.paymentMode.toLowerCase();
+      return MODE_LABEL[mode] || payment.paymentMode;
     }, [payment]);
-
-    if (!payment) return null;
 
     return (
       <BottomSheetModal
@@ -103,6 +101,7 @@ const PaymentDetailSheet = forwardRef<BottomSheetModal, PaymentDetailSheetProps>
           borderTopRightRadius: t.radius["3xl"],
         }}
       >
+        {payment && (
         <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 8, paddingBottom: 24 }}>
           {/* Title */}
           <Text
@@ -237,6 +236,7 @@ const PaymentDetailSheet = forwardRef<BottomSheetModal, PaymentDetailSheetProps>
             </Pressable>
           </View>
         </BottomSheetScrollView>
+        )}
       </BottomSheetModal>
     );
   }
