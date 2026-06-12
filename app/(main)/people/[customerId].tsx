@@ -549,7 +549,6 @@ export default function CustomerDetailScreen() {
           />
 
           <CustomerActionStrip
-            balanceState={balanceState}
             onCollectPress={() => openPaymentFlow()}
             onAddEntryPress={handleAddEntryNavigation}
             collectDisabled={!customer.pendingOrderId}

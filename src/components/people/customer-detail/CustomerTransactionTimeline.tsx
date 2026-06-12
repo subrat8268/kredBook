@@ -1,15 +1,23 @@
 import React from "react";
-import { Pressable, Text, View, StyleSheet } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useTheme } from "@/src/theme/useTheme";
 import type { PersonDetail } from "@/src/types/customer";
 import CustomerDetailEmptyState from "./CustomerDetailEmptyState";
-import CustomerTransactionRow, { type Transaction } from "./CustomerTransactionRow";
+import CustomerTransactionRow, {
+  type Transaction,
+} from "./CustomerTransactionRow";
 import CustomerTransactionTabs from "./CustomerTransactionTabs";
 import type { TxFilter, TxListItem } from "./types";
 
 interface CustomerTransactionTimelineProps {
   customer: PersonDetail;
-  balanceState: "overdue" | "pending" | "partial" | "settled" | "advance" | null;
+  balanceState:
+    | "overdue"
+    | "pending"
+    | "partial"
+    | "settled"
+    | "advance"
+    | null;
   visibleListItems: TxListItem[];
   listItems: TxListItem[];
   historyExpanded: boolean;
@@ -62,27 +70,28 @@ export default function CustomerTransactionTimeline({
     currentGroup.txs.push(item);
   }
 
-  const isNew = !customer.transactions || (customer.transactions || []).length === 0;
+  const isNew =
+    !customer.transactions || (customer.transactions || []).length === 0;
 
   if (listItems.length === 0) {
     return (
       <View
-        style={[
-          styles.container,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.borderDefault,
-          },
-        ]}
+        className="border mx-4 mb-3 rounded-2xl overflow-hidden self-stretch"
+        style={{
+          borderColor: colors.borderDefault,
+          backgroundColor: colors.surface,
+          shadowColor: "#000000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 1,
+        }}
       >
         {!isNew && (
-          <>
-            <CustomerTransactionTabs
-              txFilter={txFilter}
-              onChangeFilter={onChangeFilter}
-            />
-            <View style={[styles.divider, { backgroundColor: colors.borderSubtle }]} />
-          </>
+          <CustomerTransactionTabs
+            txFilter={txFilter}
+            onChangeFilter={onChangeFilter}
+          />
         )}
         <CustomerDetailEmptyState
           variant={isNew ? "new_customer" : "filtered_empty"}
@@ -95,20 +104,21 @@ export default function CustomerTransactionTimeline({
 
   return (
     <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: colors.surface,
-          borderColor: colors.borderDefault,
-        },
-      ]}
+      className="border mx-4 mb-3 rounded-2xl overflow-hidden self-stretch"
+      style={{
+        borderColor: colors.borderDefault,
+        backgroundColor: colors.surface,
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
+      }}
     >
       <CustomerTransactionTabs
         txFilter={txFilter}
         onChangeFilter={onChangeFilter}
       />
-
-      <View style={[styles.divider, { backgroundColor: colors.borderSubtle }]} />
 
       <View style={{ backgroundColor: colors.surface }}>
         {groups.map((group, gIndex) => {
@@ -118,27 +128,23 @@ export default function CustomerTransactionTimeline({
             <View key={`${group.label}-${group.txs[0].key}`}>
               {/* Chronological Date Group Label */}
               <View
-                style={[
-                  styles.sectionHeader,
-                  {
-                    backgroundColor: colors.canvas,
-                  },
-                ]}
+                className="self-stretch px-4 py-2"
+                style={{
+                  backgroundColor: colors.canvas,
+                }}
               >
                 <Text
-                  style={[
-                    styles.sectionHeaderText,
-                    {
-                      color: colors.muted,
-                      fontFamily: t.fontFamily.bodySemiBold,
-                    },
-                  ]}
+                  className="font-inter-bold text-[11px] tracking-wider uppercase"
+                  style={{
+                    color: colors.muted,
+                    lineHeight: 16,
+                  }}
                 >
                   {group.label}
                 </Text>
               </View>
 
-              <View style={styles.rowsContainer}>
+              <View className="overflow-hidden">
                 {group.txs.map((tx, index) => (
                   <View
                     key={tx.key}
@@ -163,14 +169,15 @@ export default function CustomerTransactionTimeline({
         {/* Pagination Trigger */}
         {!historyExpanded && listItems.length > initialCount ? (
           <Pressable
-            style={[styles.expandButton, { borderTopWidth: 1, borderTopColor: colors.borderSubtle }]}
+            className="w-full items-center justify-center py-4 border-t"
+            style={{ borderTopColor: colors.borderSubtle }}
             onPress={onExpandHistory}
           >
             <Text
-              style={[
-                styles.expandButtonText,
-                { color: colors.primary, fontFamily: t.fontFamily.displaySemiBold },
-              ]}
+              className="text-[13px] font-inter-semibold"
+              style={{
+                color: colors.primary,
+              }}
             >
               View Older History ({listItems.length - initialCount} more)
             </Text>
@@ -180,43 +187,3 @@ export default function CustomerTransactionTimeline({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    borderWidth: 1,
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginTop: 12,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    overflow: "hidden",
-  },
-  divider: {
-    height: 1,
-    alignSelf: "stretch",
-  },
-  sectionHeader: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  sectionHeaderText: {
-    fontSize: 11,
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
-  },
-  rowsContainer: {
-    overflow: "hidden",
-  },
-  expandButton: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-  },
-  expandButtonText: {
-    fontSize: 13,
-  },
-});

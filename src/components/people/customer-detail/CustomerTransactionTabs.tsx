@@ -19,33 +19,36 @@ export default function CustomerTransactionTabs({
   ];
 
   return (
-    <View className="px-2 py-2">
-      <View className="flex-row gap-2">
-        {tabs.map((tab) => {
-          const active = txFilter === tab.key;
-          return (
-            <Pressable
-              key={tab.key}
-              onPress={() => onChangeFilter(tab.key)}
-              className="flex-1 rounded-full py-2.5"
+    <View
+      className="self-stretch flex-row p-4 border-b"
+      style={{
+        borderBottomColor: colors.borderSubtle,
+        gap: 8,
+      }}
+    >
+      {tabs.map((tab) => {
+        const active = txFilter === tab.key;
+        return (
+          <Pressable
+            key={tab.key}
+            onPress={() => onChangeFilter(tab.key)}
+            className="flex-1 py-1.5 rounded-full"
+            style={{
+              backgroundColor: active ? colors.primary : "transparent",
+            }}
+          >
+            <Text
+              className="text-center text-sm font-inter-semibold"
               style={{
-                borderWidth: 1,
-                borderColor: active ? colors.primary : colors.border,
-                backgroundColor: active ? colors.primary : colors.surfaceRaised,
+                color: active ? "#ffffff" : colors.muted,
+                lineHeight: 20,
               }}
             >
-              <Text
-                className="text-center text-[15px] font-semibold"
-                style={{
-                  color: active ? "#ffffff" : colors.muted,
-                }}
-              >
-                {tab.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+              {tab.label}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }

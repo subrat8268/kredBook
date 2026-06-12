@@ -1,26 +1,22 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, Pressable, Platform } from "react-native";
 import { ArrowDownLeft, Plus } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/src/theme/useTheme";
 
 interface CustomerActionStripProps {
-  balanceState: "overdue" | "pending" | "partial" | "settled" | "advance" | null;
   onCollectPress: () => void;
   onAddEntryPress: () => void;
   collectDisabled?: boolean;
 }
 
 export default function CustomerActionStrip({
-  balanceState,
   onCollectPress,
   onAddEntryPress,
   collectDisabled = false,
 }: CustomerActionStripProps) {
   const t = useTheme();
   const { colors } = t;
-
-  const isMuted = balanceState === "settled" || balanceState === "advance";
 
   const handleCollectPress = () => {
     if (collectDisabled) return;
@@ -30,92 +26,81 @@ export default function CustomerActionStrip({
 
   return (
     <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: colors.surface,
-          borderColor: colors.borderDefault,
-          borderRadius: t.radius["2xl"],
-        },
-      ]}
+      className="flex-row items-center border mx-4 mb-4 px-4 py-3.5 gap-2.5 self-stretch rounded-xl"
+      style={{
+        borderColor: colors.borderDefault,
+        backgroundColor: colors.surface,
+      }}
     >
-      {/* Collect / Record Payment Button (60% width) */}
+      {/* Collect Payment Button (Proportionate width via flex) */}
       <Pressable
         onPress={handleCollectPress}
         disabled={collectDisabled}
-        style={({ pressed }) => [
-          styles.primaryButton,
-          {
-            backgroundColor: collectDisabled
-              ? colors.borderSubtle
-              : pressed
-                ? colors.primaryActive
-                : colors.primary,
-          },
-        ]}
+        className="flex-row items-center justify-center rounded-lg flex-1 h-12 px-3 active:opacity-85"
+        style={{
+          backgroundColor: colors.primary,
+          opacity: collectDisabled ? 0.5 : 1,
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 12,
+          elevation: 4,
+        }}
       >
-        <ArrowDownLeft size={18} color={collectDisabled ? colors.muted : "#ffffff"} style={styles.icon} />
-        <Text style={[styles.primaryText, { fontFamily: t.fontFamily.bodySemiBold, color: collectDisabled ? colors.muted : "#ffffff" }]}>
-          {isMuted ? "Record Payment" : "Collect Payment"}
+        <ArrowDownLeft
+          size={18}
+          color={colors.onPrimary}
+          style={{ marginRight: 8 }}
+        />
+        <Text
+          adjustsFontSizeToFit
+          numberOfLines={1}
+          style={{
+            fontSize: 15,
+            fontWeight: "600",
+            color: colors.onPrimary,
+            fontFamily: t.fontFamily.bodySemiBold,
+          }}
+        >
+          Collect Payment
         </Text>
       </Pressable>
 
-      {/* Add Entry Button (36% width) */}
+      {/* Add Entry Button (Fixed width of 128 for consistent padding) */}
       <Pressable
         onPress={onAddEntryPress}
-        style={({ pressed }) => [
-          styles.secondaryButton,
-          {
-            borderColor: colors.borderDefault,
-            backgroundColor: pressed ? colors.borderSubtle : colors.surface,
-          },
-        ]}
+        className="flex-row items-center justify-center border rounded-lg h-12 px-3 active:opacity-85"
+        style={{
+          width: 128,
+          borderColor: colors.borderDefault,
+          backgroundColor: colors.surface,
+          ...Platform.select({
+            ios: {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 2,
+            },
+            android: {
+              elevation: 1,
+            },
+          }),
+        }}
       >
-        <Plus size={18} color={colors.ink} style={styles.icon} />
-        <Text style={[styles.secondaryText, { color: colors.ink, fontFamily: t.fontFamily.bodyMedium }]}>
+        <Plus size={18} color={colors.body} style={{ marginRight: 8 }} />
+        <Text
+          adjustsFontSizeToFit
+          numberOfLines={1}
+          style={{
+            fontSize: 15,
+            fontWeight: "600",
+            color: colors.body,
+            fontFamily: t.fontFamily.bodySemiBold,
+          }}
+        >
           Add Entry
         </Text>
       </Pressable>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 16,
-    marginBottom: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderWidth: 1,
-    justifyContent: "space-between",
-  },
-  primaryButton: {
-    width: "60%",
-    height: 52,
-    borderRadius: 9999,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryText: {
-    color: "#ffffff",
-    fontSize: 15,
-  },
-  secondaryButton: {
-    width: "36%",
-    height: 52,
-    borderRadius: 9999,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  secondaryText: {
-    fontSize: 14,
-  },
-  icon: {
-    marginRight: 6,
-  },
-});

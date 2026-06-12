@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { FileText, ArrowDownLeft } from "lucide-react-native";
 import { useTheme } from "@/src/theme/useTheme";
 import { formatINR } from "@/src/utils/format";
@@ -136,91 +136,83 @@ export default function CustomerTransactionRow({
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.rowContainer,
-        {
-          backgroundColor: pressed ? colors.borderSubtle : "transparent",
-          borderColor: colors.borderSubtle,
-        },
-      ]}
+      className="flex-row items-center p-4"
+      style={({ pressed }) => ({
+        backgroundColor: pressed ? colors.borderSubtle : "transparent",
+      })}
     >
-      {/* Left Icon */}
-      <View style={[styles.iconContainer, { backgroundColor: iconBg }]}>
+      {/* Left Icon (Figma: w-10 h-10 rounded-lg) */}
+      <View
+        className="w-10 h-10 rounded-lg items-center justify-center mr-3"
+        style={{ backgroundColor: iconBg }}
+      >
         {isPayment ? (
-          <ArrowDownLeft size={16} color={iconColor} strokeWidth={2.5} />
+          <ArrowDownLeft size={18} color={iconColor} strokeWidth={2.5} />
         ) : (
-          <FileText size={16} color={iconColor} strokeWidth={2} />
+          <FileText size={18} color={iconColor} strokeWidth={2} />
         )}
       </View>
 
       {/* Middle Text Details */}
-      <View style={styles.textContainer}>
-        <Text style={[typeStyles.cardTitle, { color: colors.ink }]} numberOfLines={1}>
-          {title}
-        </Text>
-        <Text style={[typeStyles.caption, { color: colors.muted, marginTop: 2 }]}>
-          {subtitle}
-        </Text>
-
-        {/* Aging Chip on its own line */}
-        {agingChip && (
-          <View style={styles.chipRow}>
-            <View style={[styles.chip, { backgroundColor: agingChip.bg }]}>
-              <Text style={[styles.chipText, { color: agingChip.text, fontFamily: t.fontFamily.bodyBold }]}>
+      <View className="flex-1 pr-2">
+        {/* Title and Aging Chip in same row (Figma gap-2) with shrink protection */}
+        <View className="flex-row items-center gap-2" style={{ flexShrink: 1 }}>
+          <Text
+            style={[typeStyles.cardTitle, { color: colors.ink, flexShrink: 1 }]}
+            numberOfLines={1}
+          >
+            {title}
+          </Text>
+          {agingChip && (
+            <View
+              className="px-2 py-0.5 rounded-full flex-shrink-0"
+              style={{ backgroundColor: agingChip.bg }}
+            >
+              <Text
+                style={{
+                  color: agingChip.text,
+                  fontSize: 11,
+                  fontWeight: "700",
+                  fontFamily: t.fontFamily.bodyBold,
+                }}
+              >
                 {agingChip.label}
               </Text>
             </View>
-          </View>
-        )}
+          )}
+        </View>
+        <Text
+          style={[typeStyles.caption, { color: colors.muted, marginTop: 4 }]}
+        >
+          {subtitle}
+        </Text>
       </View>
 
       {/* Right Amounts */}
-      <View style={styles.amountContainer}>
-        <Text style={[typeStyles.amountSm as any, { color: amountColor, fontFamily: t.fontFamily.bodyBold }]}>
+      <View className="items-end justify-center gap-[2px]">
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "700",
+            color: amountColor,
+            fontFamily: t.fontFamily.bodyBold,
+            lineHeight: 24,
+          }}
+        >
           {isPayment ? "+ " : ""}
           {formatINR(tx.amount)}
         </Text>
-        <Text style={[typeStyles.caption, { color: colors.faint, marginTop: 4 }]}>
+        <Text
+          style={{
+            fontSize: 12,
+            color: colors.muted,
+            fontFamily: t.fontFamily.body,
+            lineHeight: 16,
+          }}
+        >
           Bal: {formatINR(tx.runningBalance)}
         </Text>
       </View>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  rowContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-  },
-  iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  textContainer: {
-    flex: 1,
-    paddingRight: 8,
-  },
-  chipRow: {
-    flexDirection: "row",
-    marginTop: 6,
-  },
-  chip: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 9999,
-  },
-  chipText: {
-    fontSize: 11,
-  },
-  amountContainer: {
-    alignItems: "flex-end",
-  },
-});
