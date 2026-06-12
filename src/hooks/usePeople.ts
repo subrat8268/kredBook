@@ -170,16 +170,6 @@ export const useAddCustomer = (vendorId: string) => {
   });
 };
 
-export function useCustomerDetail(customerId?: string) {
-  return useQuery<PersonDetail | null>({
-    queryKey: ["customerDetail", customerId],
-    queryFn: () =>
-      customerId ? fetchPersonDetail(customerId) : Promise.resolve(null),
-    enabled: !!customerId,
-    staleTime: 30_000,
-  });
-}
-
 export function usePersonDetail(customerId?: string) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -194,10 +184,8 @@ export function usePersonDetail(customerId?: string) {
     staleTime: 30_000,
   });
 
-  // Visibilities and UI states
-  const [showDeleteSheet, setShowDeleteSheet] = useState(false);
+  // UI states
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
-  const [showPaymentDetailSheet, setShowPaymentDetailSheet] = useState(false);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const [successBannerAmount, setSuccessBannerAmount] = useState<number>(0);
 
@@ -268,31 +256,32 @@ export function usePersonDetail(customerId?: string) {
     return minDate;
   }, [customer?.orders]);
 
+  // Fix #7: normalize status casing
   const openEntriesCount = useMemo(() => {
     if (!customer?.orders) return 0;
-    return customer.orders.filter((o) => o.status !== "Paid" && o.balance_due > 0).length;
+    return customer.orders.filter(
+      (o) => o.status?.toLowerCase() !== "paid" && o.balance_due > 0,
+    ).length;
   }, [customer?.orders]);
 
+  // Fix #1: reordered balanceState branches — partial/overdue resolved correctly
   const balanceState = useMemo<'overdue' | 'pending' | 'partial' | 'settled' | 'advance' | null>(() => {
     if (!customer) return null;
     if (!customer.orders || customer.orders.length === 0) return null;
 
     const hasOverdue = oldestOverdueDays !== null;
-    const hasPartial = customer.orders?.some(o => o.amount_paid > 0 && o.balance_due > 0);
+    const hasPartial = customer.orders.some(
+      (o) => o.amount_paid > 0 && o.balance_due > 0,
+    );
 
-    if (netBalance > 0 && hasOverdue) {
-      return 'overdue';
+    if (netBalance < 0) return 'advance';
+    if (netBalance === 0) return 'settled';
+    if (netBalance > 0) {
+      if (hasOverdue) return 'overdue';
+      if (hasPartial) return 'partial';
+      return 'pending';
     }
-    if (netBalance < 0) {
-      return 'advance';
-    }
-    if (netBalance === 0) {
-      return 'settled';
-    }
-    if (netBalance > 0 && hasPartial) {
-      return 'partial';
-    }
-    return 'pending';
+    return null;
   }, [customer, netBalance, oldestOverdueDays]);
 
   // Communication Handlers
@@ -312,7 +301,9 @@ export function usePersonDetail(customerId?: string) {
         try {
           const biz = profile?.business_name || "our store";
           const msg = `Dear ${customer.name}, your outstanding balance with ${biz} is Rs. ${netBalance}. Please arrange payment. Thank you.`;
-          const waUrl = `https://wa.me/91${cleaned}?text=${encodeURIComponent(msg)}`;
+          // Fix #4: only prefix +91 for standard 10-digit Indian numbers
+          const prefix = cleaned.length === 10 ? "91" : "";
+          const waUrl = `https://wa.me/${prefix}${cleaned}?text=${encodeURIComponent(msg)}`;
           await Linking.openURL(waUrl);
         } catch {
           Alert.alert(
@@ -324,17 +315,15 @@ export function usePersonDetail(customerId?: string) {
     }
   }, [customer?.phone, customer?.name, profile, netBalance]);
 
-  // Payment record success callbacks
+  // Fix #5: removed duplicate refetch() — invalidateQueries handles cache update
   const handlePaymentSuccess = useCallback((amount?: number) => {
     setSuccessBannerAmount(amount ?? 0);
     setShowSuccessBanner(true);
-    refetch();
-    // Cache invalidation (do not skip)
     queryClient.invalidateQueries({ queryKey: ['customerDetail', customerId] });
     queryClient.invalidateQueries({ queryKey: ['customers'] });
     queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     queryClient.invalidateQueries({ queryKey: ["orders"] });
-  }, [customerId, refetch, queryClient]);
+  }, [customerId, queryClient]);
 
   return {
     customer,
@@ -349,13 +338,9 @@ export function usePersonDetail(customerId?: string) {
     openEntriesCount,
     balanceState,
 
-    // Visibilities
-    showDeleteSheet,
-    setShowDeleteSheet,
+    // UI states
     selectedPayment,
     setSelectedPayment,
-    showPaymentDetailSheet,
-    setShowPaymentDetailSheet,
     showSuccessBanner,
     setShowSuccessBanner,
     successBannerAmount,
@@ -398,4 +383,3 @@ export function useUpdatePerson(customerId: string) {
     },
   });
 }
-
