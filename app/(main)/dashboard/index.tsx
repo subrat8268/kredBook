@@ -46,7 +46,8 @@ export default function DashboardRoute() {
   } = usePeople(profile?.id, customerSearch);
 
   const openRecordPaymentForCustomer = useCallback(async (customerId: string, customerName: string): Promise<PaymentContext | null> => {
-    const detail = await fetchPersonDetail(customerId);
+    if (!profile?.id) return null;
+    const detail = await fetchPersonDetail(customerId, profile.id);
     if (!detail?.pendingOrderId || !detail.pendingOrderBalance) {
       return null;
     }
@@ -58,7 +59,7 @@ export default function DashboardRoute() {
       customerName,
       initialAmount: detail.pendingOrderBalance,
     };
-  }, []);
+  }, [profile?.id]);
 
   const clearActionParam = useCallback(() => {
     router.setParams({ action: undefined });

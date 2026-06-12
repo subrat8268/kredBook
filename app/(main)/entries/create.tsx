@@ -472,7 +472,7 @@ export default function CreateOrderScreen() {
     const paymentAmount = parseFloat(quickAmount) || 0;
     try {
       setIsFetchingBalance(true);
-      const detail = await fetchPersonDetail(selectedCustomerId);
+      const detail = await fetchPersonDetail(selectedCustomerId, profile.id);
       if (!detail?.pendingOrderId || (detail.pendingOrderBalance ?? 0) <= 0) {
         Alert.alert(
           "Up to date",

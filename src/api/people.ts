@@ -119,12 +119,13 @@ export const fetchCustomerDetail = fetchPersonDetail;
 
 export async function fetchPersonDetail(
   customerId: string,
+  vendorId: string,
 ): Promise<PersonDetail | null> {
-  // Fix #2: also fetch customer_balance (DB trigger-maintained column)
   const { data: person, error: custErr } = await supabase
     .from("parties")
-    .select("id, name, phone, address, customer_balance")
+    .select("id, vendor_id, name, phone, address, customer_balance")
     .eq("id", customerId.trim())
+    .eq("vendor_id", vendorId)
     .eq("is_customer", true)
     .maybeSingle();
 
@@ -134,29 +135,21 @@ export async function fetchPersonDetail(
   }
   if (!person) return null;
 
-  // Fetch orders and statements in parallel
-  const [ordersResult, statementsResult] = await Promise.all([
-    supabase
-      .from("orders")
-      .select("id, created_at, total_amount, amount_paid, balance_due, status, bill_number, due_date")
-      .eq("customer_id", customerId)
-      .order("created_at", { ascending: true }),
-    supabase
-      .rpc("get_customer_statement", { p_customer_id: customerId })
-  ]);
+  // Single RPC: orders + statement in 1 round-trip
+  const { data: detail, error: detailErr } = await supabase
+    .rpc("get_customer_full_detail", {
+      p_customer_id: customerId,
+      p_vendor_id: vendorId,
+    })
+    .single();
 
-  if (ordersResult.error) {
-    console.error("Error fetching orders:", ordersResult.error.message);
-    return null;
-  }
-  if (statementsResult.error) {
-    console.error("Error fetching statements:", statementsResult.error.message);
+  if (detailErr) {
+    console.error("Error fetching customer detail:", detailErr.message);
     return null;
   }
 
-  const orderList = ordersResult.data ?? [];
+  const orderList = (detail?.orders ?? []) as any[];
 
-  // Fix #3: round to 2dp to prevent JS floating-point drift
   const outstandingBalance =
     Math.round(
       orderList.reduce((sum, o) => sum + Number(o.balance_due), 0) * 100,
@@ -190,7 +183,7 @@ export async function fetchPersonDetail(
   const isOverdue = outstandingBalance > 0 && daysSinceLastOrder > 30;
 
   // Map RPC statements to unified entry list
-  const allEvents = (statementsResult.data ?? []).map((s: any) => ({
+  const allEvents = (detail?.statements ?? []).map((s: any) => ({
     id: s.id,
     type: s.type as "bill" | "payment",
     created_at: s.created_at,
@@ -199,8 +192,8 @@ export async function fetchPersonDetail(
     billNumber: s.bill_number,
     status: s.status as "Paid" | "Pending" | "Partially Paid" | undefined,
     itemCount: Number(s.item_count),
-    paymentMode: s.payment_mode,
-    orderBillNumber: s.order_bill_number,
+    paymentMode: s.payment_mode ? s.payment_mode : undefined,
+    orderBillNumber: s.order_bill_number ? s.order_bill_number : undefined,
   }));
 
   // Fix #7: normalize status casing when finding oldest pending order

@@ -179,7 +179,7 @@ export function usePersonDetail(customerId?: string) {
   const { data: customer, isLoading, isError, refetch } = useQuery<PersonDetail | null>({
     queryKey: ["customerDetail", customerId],
     queryFn: () =>
-      customerId ? fetchPersonDetail(customerId) : Promise.resolve(null),
+      customerId && profile?.id ? fetchPersonDetail(customerId, profile.id) : Promise.resolve(null),
     enabled: !!customerId,
     staleTime: 30_000,
   });
