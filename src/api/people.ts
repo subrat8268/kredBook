@@ -214,7 +214,7 @@ export async function fetchPersonDetail(
     phone: person.phone,
     address: person.address,
     outstandingBalance,
-    customer_balance: dbBalance ?? undefined,
+    dbBalance: dbBalance ?? undefined,
     reconciliationWarning: reconciliationWarning || undefined,
     isOverdue,
     daysSinceLastOrder,

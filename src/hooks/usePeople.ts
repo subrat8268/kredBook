@@ -280,7 +280,7 @@ export function usePersonDetail(customerId?: string) {
       if (hasPartial) return 'partial';
       return 'pending';
     }
-    return 'pending';
+    return null;
   }, [customer, netBalance, oldestOverdueDays]);
 
   // Communication Handlers
