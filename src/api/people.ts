@@ -62,9 +62,9 @@ export async function fetchPeople(
   return people.map((person) => ({
     ...person,
     isOverdue: overdueIds.has(person.id),
-    // Fix #3: round to 2dp to prevent JS floating-point drift
-    outstandingBalance:
-      Math.round((balanceByPerson[person.id] ?? 0) * 100) / 100,
+    outstandingBalance: balanceByPerson[person.id]
+      ? Math.round(balanceByPerson[person.id] * 100) / 100
+      : 0,
     lastActiveAt: lastActiveByPerson[person.id] ?? person.created_at,
   }));
 }
@@ -214,7 +214,7 @@ export async function fetchPersonDetail(
     phone: person.phone,
     address: person.address,
     outstandingBalance,
-    dbBalance: dbBalance ?? undefined,
+    customer_balance: dbBalance ?? undefined,
     reconciliationWarning: reconciliationWarning || undefined,
     isOverdue,
     daysSinceLastOrder,

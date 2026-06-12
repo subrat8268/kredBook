@@ -259,29 +259,28 @@ export function usePersonDetail(customerId?: string) {
   // Fix #7: normalize status casing
   const openEntriesCount = useMemo(() => {
     if (!customer?.orders) return 0;
-    return customer.orders.filter(
-      (o) => o.status?.toLowerCase() !== "paid" && o.balance_due > 0,
-    ).length;
+    return customer.orders.filter((o) => o.status?.toLowerCase() !== "paid" && o.balance_due > 0).length;
   }, [customer?.orders]);
 
-  // Fix #1: reordered balanceState branches — partial/overdue resolved correctly
   const balanceState = useMemo<'overdue' | 'pending' | 'partial' | 'settled' | 'advance' | null>(() => {
     if (!customer) return null;
     if (!customer.orders || customer.orders.length === 0) return null;
 
     const hasOverdue = oldestOverdueDays !== null;
-    const hasPartial = customer.orders.some(
-      (o) => o.amount_paid > 0 && o.balance_due > 0,
-    );
+    const hasPartial = customer.orders?.some(o => o.amount_paid > 0 && o.balance_due > 0);
 
-    if (netBalance < 0) return 'advance';
-    if (netBalance === 0) return 'settled';
+    if (netBalance < 0) {
+      return 'advance';
+    }
+    if (netBalance === 0) {
+      return 'settled';
+    }
     if (netBalance > 0) {
       if (hasOverdue) return 'overdue';
       if (hasPartial) return 'partial';
       return 'pending';
     }
-    return null;
+    return 'pending';
   }, [customer, netBalance, oldestOverdueDays]);
 
   // Communication Handlers
@@ -301,7 +300,6 @@ export function usePersonDetail(customerId?: string) {
         try {
           const biz = profile?.business_name || "our store";
           const msg = `Dear ${customer.name}, your outstanding balance with ${biz} is Rs. ${netBalance}. Please arrange payment. Thank you.`;
-          // Fix #4: only prefix +91 for standard 10-digit Indian numbers
           const prefix = cleaned.length === 10 ? "91" : "";
           const waUrl = `https://wa.me/${prefix}${cleaned}?text=${encodeURIComponent(msg)}`;
           await Linking.openURL(waUrl);
@@ -319,6 +317,7 @@ export function usePersonDetail(customerId?: string) {
   const handlePaymentSuccess = useCallback((amount?: number) => {
     setSuccessBannerAmount(amount ?? 0);
     setShowSuccessBanner(true);
+    // Cache invalidation (do not skip)
     queryClient.invalidateQueries({ queryKey: ['customerDetail', customerId] });
     queryClient.invalidateQueries({ queryKey: ['customers'] });
     queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -338,7 +337,7 @@ export function usePersonDetail(customerId?: string) {
     openEntriesCount,
     balanceState,
 
-    // UI states
+    // Visibilities
     selectedPayment,
     setSelectedPayment,
     showSuccessBanner,

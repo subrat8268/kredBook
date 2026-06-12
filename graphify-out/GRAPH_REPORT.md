@@ -1,7 +1,7 @@
 # Graph Report - kredBook  (2026-06-12)
 
 ## Corpus Check
-- 165 files · ~77,738 words
+- 165 files · ~77,976 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -52,28 +52,28 @@
   src\hooks\usePeople.ts → src\components\feedback\Toast.tsx
 - `scheduleOverdueReminder()` --calls--> `formatINR()`  [INFERRED]
   src\lib\notifications.ts → src\utils\format.ts
-- `exportNetPositionReport()` --calls--> `toApiError()`  [INFERRED]
-  src\api\dashboard.ts → src\lib\supabaseQuery.ts
-- `handleSubmit()` --calls--> `recordPayment()`  [INFERRED]
-  src\components\people\RecordCustomerPaymentModal.tsx → src\api\entries.ts
+- `RecordPaymentAmountConsole()` --calls--> `useTheme()`  [INFERRED]
+  src\components\people\record-payment\RecordPaymentAmountConsole.tsx → src\theme\useTheme.ts
+- `handleWhatsApp()` --calls--> `formatINR()`  [INFERRED]
+  app\(main)\entries\[orderId].tsx → src\utils\format.ts
 
-## Communities (107 total, 8 thin omitted)
+## Communities (107 total, 9 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.03
-Nodes (13): CustomerDetailSectionShell(), CustomerQuickActionsRow(), EntryQuickActions(), ErrorState(), Loader(), BillFooter(), OrderSummary(), RecordPaymentAmountConsole() (+5 more)
+Cohesion: 0.06
+Nodes (36): exportNetPositionReport(), getDashboardData(), getDashboardSummary(), getNetPositionReport(), createOrder(), deleteOrder(), fetchOrderDetail(), fetchOrders() (+28 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.05
-Nodes (21): DashboardRecentActivityRow(), getBalanceText(), renderRow(), handleWhatsApp(), useEntryDetail(), useOrderDetail(), useUpdateOrder(), usePayments() (+13 more)
+Cohesion: 0.04
+Nodes (12): CustomerDetailSectionShell(), CustomerQuickActionsRow(), EntryQuickActions(), ErrorState(), Loader(), BillFooter(), OrderSummary(), QuickActionTile() (+4 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.08
-Nodes (20): exportNetPositionReport(), getDashboardData(), getDashboardSummary(), getNetPositionReport(), deleteOrder(), fetchOrderDetail(), fetchOrders(), fetchPayments() (+12 more)
+Cohesion: 0.05
+Nodes (18): DashboardRecentActivityRow(), getBalanceText(), renderRow(), buildStatementHtml(), downloadStatement(), sendWhatsAppReminder(), RecordPaymentAmountConsole(), BalanceStatusPill() (+10 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.1
-Nodes (21): createOrder(), getCustomerPreviousBalance(), recordPayment(), addPerson(), deletePerson(), fetchPeople(), fetchPersonDetail(), updatePerson() (+13 more)
+Cohesion: 0.09
+Nodes (15): getCustomerPreviousBalance(), fetchPersonDetail(), handleRecordPayment(), handleSaveAndShare(), performSave(), handleWhatsApp(), useEntryDetail(), useOrderDetail() (+7 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.1
@@ -81,15 +81,15 @@ Nodes (14): DashboardScreen(), DashboardScreen(), OfflineToastListener(), useToa
 
 ### Community 5 - "Community 5"
 Cohesion: 0.09
-Nodes (15): init(), setupNotifications(), useAuth(), useFontsLoader(), fetchOverdueGroups(), getTodayDateString(), useOverdueNotifications(), createMMKVPersister() (+7 more)
+Nodes (14): init(), setupNotifications(), useFontsLoader(), fetchOverdueGroups(), getTodayDateString(), useOverdueNotifications(), createMMKVPersister(), configureNotificationChannels() (+6 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.09
 Nodes (6): useCreateOrder(), useOrders(), useInfiniteScroll(), useNetworkSync(), useSyncStatus(), formatRelativeActivity()
 
 ### Community 7 - "Community 7"
-Cohesion: 0.16
-Nodes (8): loginApi(), logoutApi(), resetPasswordApi(), signInWithGoogleApi(), signUpApi(), useGoogleSignIn(), useLogin(), useSignUp()
+Cohesion: 0.15
+Nodes (9): loginApi(), logoutApi(), resetPasswordApi(), signInWithGoogleApi(), signUpApi(), useAuth(), useGoogleSignIn(), useLogin() (+1 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.22
@@ -100,32 +100,28 @@ Cohesion: 0.32
 Nodes (12): clear(), dequeue(), enqueue(), getStats(), getStorage(), incrementRetry(), isEmpty(), list() (+4 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.26
-Nodes (8): shareCsv(), toCsv(), entryRow(), formatDate(), generateLedgerPdf(), shareLedgerPdf(), signAmount(), statusColor()
-
-### Community 11 - "Community 11"
 Cohesion: 0.29
 Nodes (7): getFileExtension(), getImageContentType(), uploadBusinessLogo(), uploadImage(), uploadToBucket(), handleLogoUpload(), pickImageFromLibrary()
 
-### Community 14 - "Community 14"
+### Community 13 - "Community 13"
 Cohesion: 0.33
 Nodes (6): useOverdueReminderOnForeground(), useOverdueReminders(), cancelAllOverdueReminders(), ensureNotificationPermission(), scheduleOverdueReminder(), syncOverdueReminders()
 
-### Community 17 - "Community 17"
+### Community 16 - "Community 16"
 Cohesion: 0.5
 Nodes (3): handleContinue(), proceedToNext(), usePhoneSetup()
 
 ## Knowledge Gaps
-- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `formatINR()` connect `Community 1` to `Community 0`, `Community 3`, `Community 4`, `Community 5`, `Community 8`, `Community 10`, `Community 14`?**
+- **Why does `formatINR()` connect `Community 2` to `Community 1`, `Community 3`, `Community 4`, `Community 5`, `Community 8`, `Community 13`?**
   _High betweenness centrality (0.244) - this node is a cross-community bridge._
-- **Why does `useTheme()` connect `Community 0` to `Community 1`, `Community 12`, `Community 4`?**
+- **Why does `useTheme()` connect `Community 1` to `Community 3`, `Community 2`, `Community 11`, `Community 4`?**
   _High betweenness centrality (0.130) - this node is a cross-community bridge._
-- **Why does `useToast()` connect `Community 4` to `Community 11`, `Community 1`, `Community 3`, `Community 6`?**
+- **Why does `useToast()` connect `Community 4` to `Community 0`, `Community 2`, `Community 3`, `Community 6`, `Community 10`?**
   _High betweenness centrality (0.120) - this node is a cross-community bridge._
 - **Are the 17 inferred relationships involving `formatINR()` (e.g. with `getBalanceText()` and `BalanceStatusPill()`) actually correct?**
   _`formatINR()` has 17 INFERRED edges - model-reasoned connections that need verification._

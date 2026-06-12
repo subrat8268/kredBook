@@ -37,13 +37,7 @@ export interface PersonDetail {
   email?: string;
   address?: string;
   outstandingBalance: number;
-  /** DB-maintained denormalized balance from parties.customer_balance */
-  dbBalance?: number;
-  /**
-   * True when the client-computed outstandingBalance diverges from the
-   * DB-maintained customer_balance by more than ₹0.01 — indicates a
-   * trigger lag or data integrity issue.
-   */
+  customer_balance?: number;
   reconciliationWarning?: boolean;
   isOverdue: boolean;
   daysSinceLastOrder: number;
