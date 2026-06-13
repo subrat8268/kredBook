@@ -170,9 +170,8 @@ export async function fetchPersonDetail(
     dbBalance !== null && Math.abs(outstandingBalance - dbBalance) > 0.01;
 
   if (__DEV__ && reconciliationWarning) {
-    console.error(
-      `[kredBook] Balance reconciliation mismatch for customer ${customerId}: ` +
-        `computed=${outstandingBalance}, db=${dbBalance}. ` +
+    console.warn(
+      `[kredBook] Balance reconciliation mismatch for customer ${customerId}. ` +
         `Possible trigger lag or data integrity issue.`,
     );
   }
@@ -252,7 +251,8 @@ export async function deletePerson(
       const { error } = await supabase
         .from("parties")
         .delete()
-        .eq("id", customerId);
+        .eq("id", customerId)
+        .eq("vendor_id", vendorId);
       if (error) throw error;
     },
     {
@@ -277,7 +277,8 @@ export async function updatePerson(
           phone: values.phone || null,
           address: values.address || null,
         })
-        .eq("id", customerId);
+        .eq("id", customerId)
+        .eq("vendor_id", vendorId);
       if (error) throw error;
     },
     {
