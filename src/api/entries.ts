@@ -259,6 +259,64 @@ export async function recordPayment(
   return { status: res.status };
 }
 
+export async function recordCustomerPayment(
+  customerId: string,
+  vendorId: string,
+  amount: number,
+  paymentMode: PaymentMode,
+  notes?: string,
+): Promise<{ status: "confirmed" | "queued" }> {
+  return executeWithOfflineQueueResult(
+    async () => {
+      const { data: orders, error: ordersErr } = await supabase
+        .from("orders")
+        .select("id, balance_due")
+        .eq("customer_id", customerId)
+        .eq("vendor_id", vendorId)
+        .neq("status", "Paid")
+        .gt("balance_due", 0)
+        .order("created_at", { ascending: true });
+
+      if (ordersErr) throw toApiError(ordersErr);
+      if (!orders?.length) throw new Error("No unpaid orders found");
+
+      let remaining = amount;
+      const paymentRows: Record<string, unknown>[] = [];
+
+      for (const order of orders) {
+        const orderBalance = Number(order.balance_due);
+        if (orderBalance <= 0) continue;
+
+        const paymentAmount = Math.min(remaining, orderBalance);
+        const row: Record<string, unknown> = {
+          order_id: order.id,
+          vendor_id: vendorId,
+          amount: paymentAmount,
+          payment_mode: paymentMode,
+        };
+        if (notes?.trim()) row.notes = notes.trim();
+        paymentRows.push(row);
+
+        remaining -= paymentAmount;
+        if (remaining <= 0) break;
+      }
+
+      if (!paymentRows.length) throw new Error("No payment to record");
+
+      const { error: insertErr } = await supabase
+        .from("payments")
+        .insert(paymentRows);
+
+      if (insertErr) throw toApiError(insertErr);
+    },
+    {
+      entity: "payment",
+      operation: "CREATE",
+      payload: { customerId, vendorId, amount, paymentMode, notes },
+    },
+  );
+}
+
 export async function deleteOrder(orderId: string, vendorId: string): Promise<void> {
   await executeWithOfflineQueue(
     async () => {

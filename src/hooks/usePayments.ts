@@ -1,4 +1,4 @@
-import { Payment, fetchPayments, recordPayment } from "@/src/api/entries";
+import { Payment, fetchPayments, recordPayment, recordCustomerPayment } from "@/src/api/entries";
 import { ApiError } from "@/src/lib/supabaseQuery";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
@@ -176,4 +176,63 @@ export function usePayments(
   );
 
   return { payments, isLoading, isError, refetch, recordPayment, isRecording };
+}
+
+/**
+ * Customer-level payment hook.
+ * Distributes payment across all unpaid orders (oldest first)
+ * instead of targeting a single order.
+ */
+export function useRecordCustomerPayment(vendorId?: string, customerId?: string) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation<
+    { status: "confirmed" | "queued" },
+    ApiError,
+    { amount: number; mode: "Cash" | "UPI" | "NEFT" | "Draft" | "Cheque"; notes?: string }
+  >({
+    mutationFn: async ({ amount, mode, notes }) => {
+      if (!vendorId || !customerId) throw new Error("Missing customer or vendor ID");
+      return await recordCustomerPayment(customerId, vendorId, amount, mode, notes);
+    },
+
+    onMutate: async ({ amount }) => {
+      if (!customerId) return;
+
+      await queryClient.cancelQueries({ queryKey: ["customerDetail", customerId] });
+
+      const previousCustomer = queryClient.getQueryData(["customerDetail", customerId]);
+
+      queryClient.setQueryData(["customerDetail", customerId], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          outstandingBalance: Math.max(0, (old.outstandingBalance || 0) - amount),
+        };
+      });
+
+      return { previousCustomer };
+    },
+
+    onSuccess: () => {
+      if (!vendorId || !customerId) return;
+      queryClient.invalidateQueries({ queryKey: ["customerDetail", customerId] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+
+    onError: (_err, _variables, context: any) => {
+      if (context?.previousCustomer && customerId) {
+        queryClient.setQueryData(
+          ["customerDetail", customerId],
+          context.previousCustomer,
+        );
+      }
+    },
+  });
+
+  return {
+    recordPayment: mutation.mutateAsync,
+    isRecording: mutation.isPending,
+  };
 }

@@ -1,4 +1,4 @@
-import { useRecordPayment } from "@/src/hooks/usePayments";
+import { useRecordCustomerPayment } from "@/src/hooks/usePayments";
 import { useAuthStore } from "@/src/store/authStore";
 import { buildPaymentShareMessage } from "@/src/utils/shareTemplates";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -19,9 +19,9 @@ function sanitizeAmountInput(raw: string) {
   return `${intPart}.${decPart}`;
 }
 
-function resolveInitialIntent(balanceDue: number, initialAmount?: number): PaymentIntent {
+function resolveInitialIntent(outstandingBalance: number, initialAmount?: number): PaymentIntent {
   if (!initialAmount || initialAmount <= 0) return "full";
-  return initialAmount >= balanceDue ? "full" : "partial";
+  return initialAmount >= outstandingBalance ? "full" : "partial";
 }
 
 function parseAmount(value: string) {
@@ -34,30 +34,28 @@ function parseAmount(value: string) {
 }
 
 type Params = {
-  orderId: string;
   customerId: string;
   customerName: string;
-  balanceDue: number;
+  outstandingBalance: number;
   initialAmount?: number;
   locale: string;
   onSuccess: (amountPaid?: number) => void;
 };
 
 export function useRecordCustomerPaymentModal({
-  orderId,
   customerId,
   customerName,
-  balanceDue,
+  outstandingBalance,
   initialAmount,
   locale,
   onSuccess,
 }: Params) {
   const profile = useAuthStore((s) => s.profile);
-  const { recordPayment, isRecording } = useRecordPayment(orderId, profile?.id, customerId);
+  const { recordPayment, isRecording } = useRecordCustomerPayment(profile?.id, customerId);
 
-  const [amount, setAmount] = useState(String(initialAmount ?? balanceDue));
+  const [amount, setAmount] = useState(String(initialAmount ?? outstandingBalance));
   const [paymentIntent, setPaymentIntent] = useState<PaymentIntent>(
-    resolveInitialIntent(balanceDue, initialAmount),
+    resolveInitialIntent(outstandingBalance, initialAmount),
   );
   const [mode, setMode] = useState<PaymentMode>("Cash");
   const [notes, setNotes] = useState("");
@@ -71,7 +69,7 @@ export function useRecordCustomerPaymentModal({
   const hasNotifiedSuccessRef = useRef(false);
 
   const parsedAmount = parseAmount(amount);
-  const effectiveBalance = balanceDue;
+  const effectiveBalance = outstandingBalance;
   const hasBalance = effectiveBalance > 0;
   const isPartialOverpay =
     paymentIntent === "partial" &&
@@ -108,12 +106,12 @@ export function useRecordCustomerPaymentModal({
                 : undefined;
 
   const reset = useCallback(() => {
-    setAmount(String(initialAmount ?? balanceDue));
-    setPaymentIntent(resolveInitialIntent(balanceDue, initialAmount));
+    setAmount(String(initialAmount ?? outstandingBalance));
+    setPaymentIntent(resolveInitialIntent(outstandingBalance, initialAmount));
     setMode("Cash");
     setNotes("");
     setLastPartialAmount(
-      initialAmount && initialAmount > 0 && initialAmount < balanceDue
+      initialAmount && initialAmount > 0 && initialAmount < outstandingBalance
         ? String(Number(initialAmount.toFixed(2)))
         : "",
     );
@@ -124,7 +122,7 @@ export function useRecordCustomerPaymentModal({
     setAmountTouched(false);
     setHasAttemptedSubmit(false);
     hasNotifiedSuccessRef.current = false;
-  }, [balanceDue, initialAmount]);
+  }, [outstandingBalance, initialAmount]);
 
   const setAmountSanitized = useCallback((value: string) => {
     const next = sanitizeAmountInput(value);

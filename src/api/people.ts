@@ -151,8 +151,9 @@ export async function fetchPersonDetail(
   }
   if (!detailRow) return null;
 
-  // PostgREST wraps scalar returns under the function-name key
-  const detail = (detailRow as any)?.get_customer_full_detail as any;
+  // PostgREST may wrap scalar returns under the function-name key
+  // or return the JSONB directly — handle both
+  const detail = ((detailRow as any)?.get_customer_full_detail ?? detailRow) as any;
   const orderList = (detail?.orders ?? []) as any[];
 
   const outstandingBalance =

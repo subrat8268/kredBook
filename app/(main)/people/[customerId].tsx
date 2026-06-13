@@ -6,7 +6,6 @@ import React, {
   useState,
 } from "react";
 import {
-  ScrollView,
   Share,
   View,
   StyleSheet,
@@ -395,7 +394,7 @@ export default function CustomerDetailScreen() {
 
   // Open record payment modal
   const openPaymentFlow = (amountSeed?: number) => {
-    if (!customer?.pendingOrderId) return;
+    if (!customer?.outstandingBalance || customer.outstandingBalance <= 0) return;
     setQuickPaymentAmount(
       amountSeed && amountSeed > 0 ? String(amountSeed) : "",
     );
@@ -436,20 +435,14 @@ export default function CustomerDetailScreen() {
     [historyExpanded, listItems],
   );
 
-  const handleScroll = () => {
-    if (showSuccessBanner) {
-      setShowSuccessBanner(false);
-    }
-  };
-
-  const handleTransactionPress = (tx: Transaction) => {
+  const handleTransactionPress = useCallback((tx: Transaction) => {
     if (tx.type === "payment") {
       setSelectedPayment(tx);
       paymentDetailSheetRef.current?.present();
     } else {
       router.push(`/(main)/entries/${tx.id}`);
     }
-  };
+  }, [router, setSelectedPayment]);
 
   const handleAddEntryNavigation = () => {
     router.push({
@@ -508,113 +501,105 @@ export default function CustomerDetailScreen() {
         menuItems={menuItems}
       />
 
-      <View style={{ flex: 1 }}>
-        <ScrollView
-          className="flex-1"
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-          contentContainerStyle={{ paddingTop: spacing[3], paddingBottom: 100 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* #2: Reconciliation warning banner — shown only when DB and computed balance diverge */}
-          {customer.reconciliationWarning && (
-            <View
-              style={[
-                styles.reconciliationBanner,
-                { backgroundColor: colors.overdueSurface, borderColor: colors.overdueText },
-              ]}
-            >
-              <AlertTriangle
-                size={16}
-                color={colors.overdueText}
-                style={styles.bannerIcon}
+      <View style={{ flex: 1, paddingTop: spacing[3] }}>
+        <CustomerTransactionTimeline
+          customer={customer}
+          balanceState={balanceState}
+          visibleListItems={visibleListItems}
+          listItems={listItems}
+          historyExpanded={historyExpanded}
+          initialCount={INITIAL_TX_COUNT}
+          onExpandHistory={() => setHistoryExpanded(true)}
+          onAddEntry={handleAddEntryNavigation}
+          txFilter={txFilter}
+          onChangeFilter={(tab) => {
+            setTxFilter(tab);
+            setHistoryExpanded(false);
+          }}
+          onPressTx={handleTransactionPress}
+          headerComponent={
+            <>
+              {customer.reconciliationWarning && (
+                <View
+                  style={[
+                    styles.reconciliationBanner,
+                    { backgroundColor: colors.overdueSurface, borderColor: colors.overdueText },
+                  ]}
+                >
+                  <AlertTriangle
+                    size={16}
+                    color={colors.overdueText}
+                    style={styles.bannerIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.bannerText,
+                      {
+                        color: colors.overdueText,
+                        fontFamily: t.fontFamily.bodySemiBold,
+                      },
+                    ]}
+                  >
+                    Balance mismatch detected. Please refresh or contact support.
+                  </Text>
+                </View>
+              )}
+
+              {showSuccessBanner && (
+                <View
+                  style={[
+                    styles.successBanner,
+                    { backgroundColor: colors.primaryBorderFill },
+                  ]}
+                >
+                  <CheckCircle
+                    size={18}
+                    color={colors.primary}
+                    style={styles.successBannerIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.successBannerText,
+                      {
+                        color: colors.primary,
+                        fontFamily: t.fontFamily.bodySemiBold,
+                      },
+                    ]}
+                  >
+                    Payment of {formatINR(successBannerAmount)} recorded
+                  </Text>
+                </View>
+              )}
+
+              <CustomerBalanceHero
+                netBalance={netBalance}
+                balanceState={balanceState}
+                oldestOverdueDays={oldestOverdueDays}
+                nearestDueDate={nearestDueDate}
+                openEntriesCount={openEntriesCount}
               />
-              <Text
-                style={[
-                  styles.bannerText,
-                  {
-                    color: colors.overdueText,
-                    fontFamily: t.fontFamily.bodySemiBold,
-                  },
-                ]}
-              >
-                Balance mismatch detected. Please refresh or contact support.
-              </Text>
-            </View>
-          )}
 
-          {/* Success Banner */}
-          {showSuccessBanner && (
-            <View
-              style={[
-                styles.successBanner,
-                { backgroundColor: colors.primaryBorderFill },
-              ]}
-            >
-              <CheckCircle
-                size={18}
-                color={colors.primary}
-                style={styles.successBannerIcon}
+              <CustomerActionStrip
+                onCollectPress={() => openPaymentFlow()}
+                onAddEntryPress={handleAddEntryNavigation}
+                collectDisabled={!customer.outstandingBalance || customer.outstandingBalance <= 0}
               />
-              <Text
-                style={[
-                  styles.successBannerText,
-                  {
-                    color: colors.primary,
-                    fontFamily: t.fontFamily.bodySemiBold,
-                  },
-                ]}
-              >
-                Payment of {formatINR(successBannerAmount)} recorded
-              </Text>
-            </View>
-          )}
-
-          <CustomerBalanceHero
-            netBalance={netBalance}
-            balanceState={balanceState}
-            oldestOverdueDays={oldestOverdueDays}
-            nearestDueDate={nearestDueDate}
-            openEntriesCount={openEntriesCount}
-          />
-
-          <CustomerActionStrip
-            onCollectPress={() => openPaymentFlow()}
-            onAddEntryPress={handleAddEntryNavigation}
-            collectDisabled={!customer.pendingOrderId}
-          />
-
-          <CustomerTransactionTimeline
-            customer={customer}
-            balanceState={balanceState}
-            visibleListItems={visibleListItems}
-            listItems={listItems}
-            historyExpanded={historyExpanded}
-            initialCount={INITIAL_TX_COUNT}
-            onExpandHistory={() => setHistoryExpanded(true)}
-            onAddEntry={handleAddEntryNavigation}
-            txFilter={txFilter}
-            onChangeFilter={(tab) => {
-              setTxFilter(tab);
-              setHistoryExpanded(false);
-            }}
-            onPressTx={handleTransactionPress}
-          />
-        </ScrollView>
+            </>
+          }
+        />
       </View>
 
       {/* Modals & Bottom Sheets */}
 
-      {/* M1: Record Customer Payment Modal (only when a pending order exists) */}
-      {customer.pendingOrderId && (
+      {/* M1: Record Customer Payment Modal (only when customer has balance) */}
+      {customer.outstandingBalance > 0 && (
         <RecordCustomerPaymentModal
           ref={paymentModalRef}
           onSuccess={(amount) => {
             paymentModalRef.current?.dismiss();
             handlePaymentSuccess(amount);
           }}
-          orderId={customer.pendingOrderId}
-          balanceDue={customer.pendingOrderBalance ?? 0}
+          outstandingBalance={customer.outstandingBalance}
           customerId={customer.id}
           customerName={customer.name}
           initialAmount={

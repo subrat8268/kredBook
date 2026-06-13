@@ -27,8 +27,7 @@ import { useRecordCustomerPaymentModal } from "./record-payment/useRecordCustome
 
 type Props = {
   onSuccess: (amountPaid?: number) => void;
-  orderId: string;
-  balanceDue: number;
+  outstandingBalance: number;
   customerId: string;
   customerName: string;
   onDismiss?: () => void;
@@ -40,8 +39,7 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
   (
     {
       onSuccess,
-      orderId,
-      balanceDue,
+      outstandingBalance,
       customerId,
       customerName,
       onDismiss,
@@ -61,10 +59,9 @@ const RecordCustomerPaymentModal = forwardRef<BottomSheetModal, Props>(
     const snapPoints = useMemo(() => ["82%"], []);
 
     const vm = useRecordCustomerPaymentModal({
-      orderId,
       customerId,
       customerName,
-      balanceDue,
+      outstandingBalance,
       initialAmount,
       locale: i18n.language,
       onSuccess,
