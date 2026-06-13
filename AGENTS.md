@@ -3,9 +3,9 @@
 **Priority order:** `SYSTEM_CONTEXT.md` > `AGENTS.md` > any other instruction file.
 
 ## Current State
-- **Phase:** 3 — Polish & Features (update from `SYSTEM_CONTEXT.md`)
-- **Last completed:** 3.13 — Export hardening fix
-- **Next:** 4.1 — Plan AI architecture
+- **Phase:** 4 — UI/UX Redesign (see `docs/STATUS.md` for task breakdown)
+- **Last completed:** 4.3.1a/4.3.1b/4.3.1c welcome screen — next is 4.3.2a login audit
+- **Next:** 4.3.2a — Login audit + extraction
 
 ## Non-negotiables
 - **Product nouns:** Customer / Entry / Payment. Screens: Dashboard / People / Entries / Profile
