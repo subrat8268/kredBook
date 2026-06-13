@@ -39,7 +39,7 @@ const MODE_LABEL: Record<string, string> = {
   online: "UPI",
 };
 
-export default function CustomerTransactionRow({
+const CustomerTransactionRow = React.memo(function CustomerTransactionRow({
   tx,
   orders = [],
   onPress,
@@ -223,4 +223,6 @@ export default function CustomerTransactionRow({
       </View>
     </Pressable>
   );
-}
+});
+
+export default CustomerTransactionRow;

@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import {
+  ScrollView,
   Share,
   View,
   StyleSheet,
@@ -501,92 +502,95 @@ export default function CustomerDetailScreen() {
         menuItems={menuItems}
       />
 
-      <View style={{ flex: 1, paddingTop: spacing[3] }}>
-        <CustomerTransactionTimeline
-          customer={customer}
-          balanceState={balanceState}
-          visibleListItems={visibleListItems}
-          listItems={listItems}
-          historyExpanded={historyExpanded}
-          initialCount={INITIAL_TX_COUNT}
-          onExpandHistory={() => setHistoryExpanded(true)}
-          onAddEntry={handleAddEntryNavigation}
-          txFilter={txFilter}
-          onChangeFilter={(tab) => {
-            setTxFilter(tab);
-            setHistoryExpanded(false);
-          }}
-          onPressTx={handleTransactionPress}
-          headerComponent={
-            <>
-              {customer.reconciliationWarning && (
-                <View
-                  style={[
-                    styles.reconciliationBanner,
-                    { backgroundColor: colors.overdueSurface, borderColor: colors.overdueText },
-                  ]}
-                >
-                  <AlertTriangle
-                    size={16}
-                    color={colors.overdueText}
-                    style={styles.bannerIcon}
-                  />
-                  <Text
-                    style={[
-                      styles.bannerText,
-                      {
-                        color: colors.overdueText,
-                        fontFamily: t.fontFamily.bodySemiBold,
-                      },
-                    ]}
-                  >
-                    Balance mismatch detected. Please refresh or contact support.
-                  </Text>
-                </View>
-              )}
-
-              {showSuccessBanner && (
-                <View
-                  style={[
-                    styles.successBanner,
-                    { backgroundColor: colors.primaryBorderFill },
-                  ]}
-                >
-                  <CheckCircle
-                    size={18}
-                    color={colors.primary}
-                    style={styles.successBannerIcon}
-                  />
-                  <Text
-                    style={[
-                      styles.successBannerText,
-                      {
-                        color: colors.primary,
-                        fontFamily: t.fontFamily.bodySemiBold,
-                      },
-                    ]}
-                  >
-                    Payment of {formatINR(successBannerAmount)} recorded
-                  </Text>
-                </View>
-              )}
-
-              <CustomerBalanceHero
-                netBalance={netBalance}
-                balanceState={balanceState}
-                oldestOverdueDays={oldestOverdueDays}
-                nearestDueDate={nearestDueDate}
-                openEntriesCount={openEntriesCount}
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ paddingTop: spacing[3], paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {customer.reconciliationWarning && (
+            <View
+              style={[
+                styles.reconciliationBanner,
+                { backgroundColor: colors.overdueSurface, borderColor: colors.overdueText },
+              ]}
+            >
+              <AlertTriangle
+                size={16}
+                color={colors.overdueText}
+                style={styles.bannerIcon}
               />
+              <Text
+                style={[
+                  styles.bannerText,
+                  {
+                    color: colors.overdueText,
+                    fontFamily: t.fontFamily.bodySemiBold,
+                  },
+                ]}
+              >
+                Balance mismatch detected. Please refresh or contact support.
+              </Text>
+            </View>
+          )}
 
-              <CustomerActionStrip
-                onCollectPress={() => openPaymentFlow()}
-                onAddEntryPress={handleAddEntryNavigation}
-                collectDisabled={!customer.outstandingBalance || customer.outstandingBalance <= 0}
+          {showSuccessBanner && (
+            <View
+              style={[
+                styles.successBanner,
+                { backgroundColor: colors.primaryBorderFill },
+              ]}
+            >
+              <CheckCircle
+                size={18}
+                color={colors.primary}
+                style={styles.successBannerIcon}
               />
-            </>
-          }
-        />
+              <Text
+                style={[
+                  styles.successBannerText,
+                  {
+                    color: colors.primary,
+                    fontFamily: t.fontFamily.bodySemiBold,
+                  },
+                ]}
+              >
+                Payment of {formatINR(successBannerAmount)} recorded
+              </Text>
+            </View>
+          )}
+
+          <CustomerBalanceHero
+            netBalance={netBalance}
+            balanceState={balanceState}
+            oldestOverdueDays={oldestOverdueDays}
+            nearestDueDate={nearestDueDate}
+            openEntriesCount={openEntriesCount}
+          />
+
+          <CustomerActionStrip
+            onCollectPress={() => openPaymentFlow()}
+            onAddEntryPress={handleAddEntryNavigation}
+            collectDisabled={!customer.outstandingBalance || customer.outstandingBalance <= 0}
+          />
+
+          <CustomerTransactionTimeline
+            customer={customer}
+            balanceState={balanceState}
+            visibleListItems={visibleListItems}
+            listItems={listItems}
+            historyExpanded={historyExpanded}
+            initialCount={INITIAL_TX_COUNT}
+            onExpandHistory={() => setHistoryExpanded(true)}
+            onAddEntry={handleAddEntryNavigation}
+            txFilter={txFilter}
+            onChangeFilter={(tab) => {
+              setTxFilter(tab);
+              setHistoryExpanded(false);
+            }}
+            onPressTx={handleTransactionPress}
+          />
+        </ScrollView>
       </View>
 
       {/* Modals & Bottom Sheets */}
