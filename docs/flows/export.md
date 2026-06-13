@@ -304,7 +304,7 @@ Try again.
 
 | Document | Purpose |
 |----------|---------|
-| `docs/design-system.md` | Color tokens |
+| `DESIGN.md` | Color tokens |
 | `docs/flows/` | Flow index |
 | `docs/flows/profile.md` | Triggered from Profile |
 | `app/(main)/export/index.tsx` | Screen implementation |

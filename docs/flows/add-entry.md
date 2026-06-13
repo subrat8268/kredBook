@@ -450,7 +450,7 @@ On "Record Payment":
 
 | Document | Purpose |
 |----------|---------|
-| `docs/design-system.md` | Color tokens, typography |
+| `DESIGN.md` | Color tokens, typography |
 | `docs/flows/` | Flow index |
 | `docs/STATUS.md` | What is implemented |
 | `docs/flows/people.md` | People flow |

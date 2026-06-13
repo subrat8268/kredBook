@@ -9,38 +9,22 @@ It helps one business owner:
 - see total outstanding on the **Dashboard**
 - manage settings and export from **Profile**
 
-## Canonical Product Scope
+## Current Status
 
-### In scope
-- Customers
-- Entries
-- Payments
-- Dashboard
-- People
-- Profile
-- Offline-first sync
-- EN/HI localization
-- CSV export
-- WhatsApp-first sharing
+**Phase 4 — UI/UX Redesign** (active)
 
-### Out of scope unless marked legacy
-- Suppliers
-- Distributor mode
-- Party abstraction as primary language
-- Product catalog
-- Reports
-- GST
-- Multi-user
-- Notifications/reminders as active product features
+Full design system overhaul, screen-by-screen component extraction and premium rebuild. See `docs/STATUS.md` for task-level tracking.
 
 ## Canonical Product Language
 
-- Business entity: **Customer**
-- Money owed: **Entry**
-- Money collected: **Payment**
-- Screens: **Dashboard**, **People**, **Entries**, **Profile**
+| Concept | Term |
+|---|---|
+| Business entity | **Customer** |
+| Money owed | **Entry** |
+| Money collected | **Payment** |
+| Screens | **Dashboard**, **People**, **Entries**, **Profile** |
 
-Do not use `Order`, `Party`, `Supplier`, `Vendor`, or `Distributor` as active product language unless explicitly marked as legacy or transitional.
+Legacy code terms (`order`, `party`, `vendor`) are transitional — do not use in new docs or UI.
 
 ## Tech Stack
 
@@ -48,77 +32,99 @@ Do not use `Order`, `Party`, `Supplier`, `Vendor`, or `Distributor` as active pr
 |---|---|
 | Framework | React Native + Expo |
 | Routing | Expo Router |
-| Styling | NativeWind + Tailwind config backed by `src/utils/theme.ts` |
+| Styling | NativeWind + `src/utils/theme.ts` design tokens |
 | Local state | Zustand |
 | Server state | TanStack Query |
-| Backend | Supabase |
-| Offline sync | MMKV-backed sync queue |
-| AI workflow | OpenCode + OMO + local repo guides |
-
-## Source of Truth
-
-Read in this order before non-trivial work:
-1. `SYSTEM_CONTEXT.md`
-2. `docs/naming-contract.md`
-3. `.agents/commands.md`
-4. `.agents/orchestration.md`
-5. `.agents/doc-sync-checklist.md`
-
-Supporting references:
-- `docs/design-system.md`
-- `docs/flows/`
-- `docs/STATUS.md`
+| Backend | Supabase (Postgres + RLS + Storage) |
+| Offline sync | MMKV-backed mutation queue |
 
 ## Local Development
 
-1. Install dependencies: `npm ci`
-2. Set env vars:
-   - `EXPO_PUBLIC_SUPABASE_URL`
-   - `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-   - Optional: `EXPO_PUBLIC_SENTRY_DSN`
-3. Start: `npm run start`
+```bash
+npm ci                          # Install dependencies
+npm run start                   # Expo dev server
+npm run android                 # Android build (generates gitignored /android)
+npm run ios                     # iOS build (generates gitignored /ios)
+npm run lint                    # ESLint
+```
 
-Other commands:
-- Lint: `npm run lint`
-- iOS/Android (generates gitignored `/ios` + `/android`): `npm run ios` / `npm run android`
+### Environment Variables
 
-## AI workflow (beginner-friendly)
+Create `.env.local` at root:
+```env
+EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+# Optional:
+EXPO_PUBLIC_SENTRY_DSN=https://sentry-dsn-url
+```
 
-Use short commands as prompts:
-- `/plan` — break down work safely
-- `/build` — implement a feature end-to-end
-- `/fix` — debug + fix with verification
-- `/refactor` — safe structure improvements
-- `/audit` — evidence-based repo/feature audit
+## Documentation Map
 
-See `AGENTS.md` and `.agents/commands.md`.
+### Root — Source of Truth
+
+| File | Purpose |
+|---|---|
+| `PRD.md` | Product requirements — scope, flows, roadmap, acceptance criteria |
+| `TRD.md` | Technical requirements — architecture, implementation spec |
+| `DESIGN.md` | Design system — tokens, shadows, z-index, tab bar, empty states |
+| `Schema.md` | Database schema — live-verified against Supabase |
+| `Rules.md` | Engineering guidelines — naming, code, PR, and doc rules |
+| `AppFlow.md` | End-to-end user journeys |
+| `ImplementationPlan.md` | Master roadmap and Phase 4 plan |
+| `AGENTS.md` | AI agent configuration |
+
+### `docs/` — Working References
+
+| Path | Purpose |
+|---|---|
+| `docs/STATUS.md` | Phase tracker — task-level status |
+| `docs/SCREEN_FLOWS.md` | Per-route engineering spec (hooks, tokens, state, drift) |
+| `docs/flows/*.md` | Screen-level behavior + layout docs |
+| `docs/screens/*.md` | Locked v3.0 visual/interaction specs |
+| `docs/audits/*.md` | Point-in-time audit reports |
+
+### Precedence Order
+
+If files conflict:
+1. `PRD.md` — scope, principles
+2. `AGENTS.md` — agent instructions
+3. `Schema.md` — data shape (never guess)
+4. `src/utils/theme.ts` — design tokens (never hardcode)
 
 ## Repo Layout
 
 ```text
 kredBook/
-├── app/                  # Expo Router app
+├── app/                  # Expo Router screens
+│   ├── (auth)/           # Login, signup, onboarding
+│   ├── (main)/           # Dashboard, people, entries, profile
+│   └── l/[token].tsx     # Public ledger share link
 ├── src/                  # Components, hooks, store, services, utils
-├── docs/                 # Product and engineering docs
-├── .agents/              # Repo operating system for agents
-└── AGENTS.md             # Short canonical operating guide
+├── docs/                 # Working documentation
+├── supabase/migrations/  # DB migration history
+├── .agents/              # Agent commands, pipelines, skills
+├── PRD.md                # Product spec
+├── TRD.md                # Technical spec
+├── DESIGN.md             # Design system
+├── Schema.md             # DB schema
+├── Rules.md              # Engineering rules
+└── AGENTS.md             # Agent config
 ```
 
-## Current Product Truth
+## AI Workflow
 
-- The repo still contains some legacy/transitional names in code such as `order`, `orderId`, and supplier/distributor-era concepts.
-- Current product mode is still strict and single-purpose: `Customer`, `Entry`, `Payment`.
-- Phase 3 is in progress: dark mode is now live (Profile toggle), with WhatsApp-first sharing and overdue badge consistency still underway.
-- Legacy internals may remain, but docs and user-facing language should stay aligned to the active product truth.
+Use short commands as prompts:
+- `/plan` — break down work safely
+- `/build` — implement end-to-end
+- `/fix` — debug with verification
+- `/refactor` — safe structure improvements
+- `/audit` — evidence-based audit
+
+See `AGENTS.md` and `.agents/commands.md`.
 
 ## Development Rules
 
-- `src/utils/theme.ts` is the design-token source of truth.
-- Do not guess backend schema; use Supabase MCP.
-- Any behavior, flow, setup, or workflow change must include related updates in `docs/` and/or `README.md` in the same task.
-- Treat docs drift as a product and engineering risk.
+- `src/utils/theme.ts` is the design-token source of truth — never hardcode colors.
+- Don't guess backend schema — use Supabase MCP.
+- Any behavior/flow change must update related docs in the same task.
 - Run `.agents/doc-sync-checklist.md` before closing non-trivial work.
-
-## Dev seeding
-
-No dev seeding guide is checked in yet.

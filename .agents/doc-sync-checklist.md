@@ -4,7 +4,7 @@ Use this checklist before closing any **non-trivial** change.
 
 ## Product + naming
 
-- [ ] Language matches `SYSTEM_CONTEXT.md` (Customer / Entry / Payment)
+- [ ] Language matches `PRD.md` §5 / `Rules.md` (Customer / Entry / Payment)
 - [ ] Legacy terms are labeled **legacy/transitional** (if present)
 - [ ] Out-of-scope features are not described as active
 

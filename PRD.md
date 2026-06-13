@@ -306,7 +306,7 @@ The application stack is fully locked. Every dependency version is specified bel
 
 ## 9. Database Schema Reference
 
-The database runs on Supabase (Postgres). The tables and columns are defined below based on [schema.sql](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/schema.sql):
+The database runs on Supabase (Postgres). The tables and columns are defined below based on [Schema.md](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/Schema.md):
 
 ### 1. `public.profiles` (Merchant Profile)
 Tracks authenticated business accounts:
@@ -414,7 +414,7 @@ vendor_id IN (SELECT id FROM profiles WHERE user_id = auth.uid())
 
 > [!WARNING]
 > **Duplicate RLS Policies (Production Issue)**
-> An audit of RLS rules in [schema.sql](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/schema.sql) revealed duplicate policies with different names. For example, `order_items` contains identical policies named `"Vendors can delete own order items"` and `"delete_own_order_items"`. This is also present in `orders`, `payments`, and `profiles` tables. This should be consolidated in a future migration sweep.
+> An audit of RLS rules in [Schema.md](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/Schema.md) revealed duplicate policies with different names. For example, `order_items` contains identical policies named `"Vendors can delete own order items"` and `"delete_own_order_items"`. This is also present in `orders`, `payments`, and `profiles` tables. This should be consolidated in a future migration sweep.
 
 ### Storage Buckets
 
@@ -938,7 +938,7 @@ These are **binary pass/fail gates** — not aspirational metrics. A phase is no
 | Risk | Impact | Mitigation |
 |---|---|---|
 | **Duplicate RLS policies in schema** | Low — safe but noisy | Clean up in a future migration; audit naming. |
-| **Legacy `order`/`party` terms confusing AI agents** | Medium | Strict naming contract enforced here + `SYSTEM_CONTEXT.md`. |
+| **Legacy `order`/`party` terms confusing AI agents** | Medium | Strict naming contract enforced here + `AGENTS.md`. |
 | **Dark mode drift if screens bypass `theme.ts`** | Medium | Biome lint rule + PR review gate. |
 | **Offline queue silent failure** | High | Surfaced errors mandatory; replay audit on reconnect. |
 | **WhatsApp text / link / PDF behavior diverging** | Medium | Single share service, unified entry point. |
@@ -1016,7 +1016,7 @@ npx supabase gen types typescript --project-id sfmoefgjmgkwvauyaiyz > src/types/
 | `babel.config.js` | Babel: Reanimated plugin registration |
 | `tailwind.config.js` | TailwindCSS + NativeWind theme configuration |
 | `tsconfig.json` | TypeScript paths + configuration |
-| `schema.sql` | DB schema snapshot — structural reference |
+| `Schema.md` | DB schema documentation — verified against live DB |
 | `supabase/migrations/` | Migration history |
 
 ---
@@ -1028,13 +1028,13 @@ When product truth changes, update **all** relevant docs **in the same commit or
 | Document | Owns |
 |---|---|
 | `PRD.md` ← this file | Product truth: scope, principles, flows, roadmap, success criteria |
-| `SYSTEM_CONTEXT.md` | AI agent operational truth: current phase, last completed, next |
+| `AGENTS.md` | AI agent operational truth: current phase, last completed, next |
 | `docs/STATUS.md` | Phase-by-phase implementation state |
-| `docs/ARCHITECTURE.md` | Technical boundaries, service contracts |
-| `docs/DESIGN.md` | Design system, tokens, component patterns |
+| `DESIGN.md` | Design system, tokens, component patterns |
+| `TRD.md` | Technical boundaries, service contracts |
+| `Schema.md` | DB schema — update after every migration |
+| `Rules.md` | Engineering guidelines, naming enforcement |
 | `docs/SCREEN_FLOWS.md` | Per-screen behavior specs |
-| `docs/naming-contract.md` | Canonical noun enforcement |
-| `schema.sql` | DB schema snapshot — update after every migration |
 | `README.md` | Setup, onboarding, active product framing |
 
 ### Conflict Resolution Rules
@@ -1044,8 +1044,8 @@ If files contain conflicting guidelines, the order of precedence is:
 | Priority | File | Wins On |
 |---|---|---|
 | 1 | `PRD.md` | Scope, principles, phase status |
-| 2 | `SYSTEM_CONTEXT.md` | AI agent operational instructions |
-| 3 | `schema.sql` | Data shape — never guess schema |
+| 2 | `AGENTS.md` | AI agent operational instructions |
+| 3 | `Schema.md` | Data shape — never guess schema |
 | 4 | `src/utils/theme.ts` | Design tokens — never hardcode |
 
 ---

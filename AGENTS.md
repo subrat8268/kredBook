@@ -1,6 +1,6 @@
 # Agent Notes (KredBook)
 
-**Priority order:** `SYSTEM_CONTEXT.md` > `AGENTS.md` > any other instruction file.
+**Priority order:** `PRD.md` > `AGENTS.md` > `Rules.md` > any other instruction file.
 
 ## Current State
 - **Phase:** 4 — UI/UX Redesign (see `docs/STATUS.md` for task breakdown)
@@ -21,7 +21,7 @@
 - **Stitch MCP:** disabled — ignore
 
 ## Context Budget
-- Skip: `package-lock.json`, full `schema.sql`, unused skills from `.agents/skills/`
+- Skip: `package-lock.json`, unused skills from `.agents/skills/`
 - Read once per session: `src/utils/theme.ts`
 - Read only current phase section: `docs/STATUS.md`
 

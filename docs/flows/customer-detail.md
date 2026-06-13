@@ -378,9 +378,9 @@ When no transactions:
 
 ## Related Documentation
 
-- `docs/design-system.md` — Color tokens, typography
+- `DESIGN.md` — Color tokens, typography
 - `docs/flows/record-payment.md` — Record Payment flow
-- `docs/ARCHITECTURE.md` — Data layer
+- `TRD.md` — Data layer, architecture
 
 ---
 

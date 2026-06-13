@@ -435,7 +435,7 @@ if (balance === 0) → PAID → Green amount + "PAID" badge
 
 | Document | Purpose |
 |----------|---------|
-| `docs/design-system.md` | Color tokens, typography |
+| `DESIGN.md` | Color tokens, typography |
 | `docs/flows/` | Flow index |
 | `docs/STATUS.md` | What is implemented |
 | `docs/flows/customer-detail.md` | Customer detail flow |

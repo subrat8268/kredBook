@@ -427,12 +427,13 @@ Before marking any task ✅ Done:
 
 | File | Purpose |
 |---|---|
-| `SYSTEM_CONTEXT.md` | Product contract, scope, non-goals |
+| `PRD.md` | Product contract, scope, non-goals |
 | `AGENTS.md` | AI agent conventions |
 | `docs/STATUS.md` | **This file — phase tracking and roadmap** |
-| `docs/prd.md` | Full 5-phase PRD |
-| `docs/ARCHITECTURE.md` | Stack, routes, offline-first, AI boundary |
-| `schema.sql` | Live schema snapshot (no data) |
+| `TRD.md` | Technical requirements + architecture |
+| `DESIGN.md` | Design system, tokens, component patterns |
+| `Schema.md` | DB schema (live-verified) |
+| `Rules.md` | Engineering guidelines |
 | `.agents/commands.md` | OpenCode command reference |
 | `.agents/orchestration.md` | Deterministic pipelines |
 | `.agents/skill-router.md` | Skill routing rules |

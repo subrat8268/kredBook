@@ -378,7 +378,7 @@ From Entry Detail screen:
 
 | Document | Purpose |
 |----------|---------|
-| `docs/design-system.md` | Color tokens, typography |
+| `DESIGN.md` | Color tokens, typography |
 | `docs/flows/` | Flow index |
 | `docs/STATUS.md` | What is implemented |
 | `docs/flows/add-entry.md` | Add entry flow |

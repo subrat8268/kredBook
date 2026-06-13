@@ -3,7 +3,7 @@
 This file defines **deterministic, command-driven pipelines** for the repo.
 
 Authoritative context:
-- `SYSTEM_CONTEXT.md`
+- `AGENTS.md`
 - `.agents/skill-router.md`
 
 ## /plan pipeline

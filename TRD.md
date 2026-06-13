@@ -23,7 +23,7 @@ This document specifies the technical requirements, architecture, API contracts,
 ### Document Precedence & Traceability
 If contradictions arise, the order of priority is:
 1. [PRD.md](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/PRD.md) (Product scope & principles)
-2. `schema.sql` (Database structures & constraints)
+2. `Schema.md` (Database structures & constraints)
 3. `TRD.md` (Engineering contract)
 
 ---
@@ -86,7 +86,7 @@ KredBook is built as a single-mode client application using Expo (React Native) 
 
 ## 3. Database Contract
 
-All database structures and constraints are defined in [schema.sql](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/schema.sql).
+All database structures and constraints are defined in [Schema.md](file:///c:/Users/Subrat/OneDrive/Desktop/kredBook/Schema.md).
 
 ### Table Operations Map
 
