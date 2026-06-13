@@ -52,7 +52,7 @@ import { type MenuItem } from "@/src/components/layer2/OverflowMenu";
 import PaymentDetailSheet from "@/src/components/people/customer-detail/PaymentDetailSheet";
 import DeleteCustomerSheet from "@/src/components/people/customer-detail/DeleteCustomerSheet";
 import RecordCustomerPaymentModal from "@/src/components/people/RecordCustomerPaymentModal";
-import Loader from "@/src/components/feedback/Loader";
+import { Skeleton, SkeletonHeroCard, SkeletonCard } from "@/src/components/ui/Skeleton";
 import EmptyState from "@/src/components/ui/EmptyState";
 
 // Utilities
@@ -165,16 +165,18 @@ export default function CustomerDetailScreen() {
     onDeleteCustomer,
     isDeleting,
     handlePaymentSuccess,
+    refetch,
   } = usePersonDetail(customerId);
 
-  // Bottom sheets references
+  // Refs
   const paymentModalRef = useRef<BottomSheetModal>(null);
   const paymentDetailSheetRef = useRef<BottomSheetModal>(null);
   const deleteCustomerSheetRef = useRef<BottomSheetModal>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // Local state
   const [txFilter, setTxFilter] = useState<TxFilter>("All");
-  const [historyExpanded, setHistoryExpanded] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_TX_COUNT);
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
   const [shareQueued, setShareQueued] = useState(false);
 
@@ -432,8 +434,8 @@ export default function CustomerDetailScreen() {
   }, [filteredTransactions]);
 
   const visibleListItems = useMemo(
-    () => (historyExpanded ? listItems : listItems.slice(0, INITIAL_TX_COUNT)),
-    [historyExpanded, listItems],
+    () => listItems.slice(0, visibleCount),
+    [visibleCount, listItems],
   );
 
   const handleTransactionPress = useCallback((tx: Transaction) => {
@@ -455,7 +457,35 @@ export default function CustomerDetailScreen() {
     } as any);
   };
 
-  if (isLoading) return <Loader />;
+  if (isLoading) {
+    return (
+      <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1, backgroundColor: colors.canvas }}>
+        <View className="flex-row items-center px-4 pt-2 pb-3">
+          <Skeleton width={32} height={32} borderRadius={16} />
+          <View className="ml-3 flex-row items-center flex-1">
+            <Skeleton width={40} height={40} borderRadius={20} />
+            <View className="ml-3" style={{ gap: 4 }}>
+              <Skeleton width={120} height={14} />
+              <Skeleton width={80} height={11} />
+            </View>
+          </View>
+        </View>
+        <ScrollView className="flex-1 px-4">
+          <SkeletonHeroCard />
+          <View className="mt-4 flex-row" style={{ gap: 12 }}>
+            <Skeleton height={48} style={{ flex: 1 }} borderRadius={24} />
+            <Skeleton height={48} style={{ flex: 1 }} borderRadius={24} />
+          </View>
+          <View className="mt-6" style={{ gap: 12 }}>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   if (isError || !customer) {
     return (
@@ -465,6 +495,8 @@ export default function CustomerDetailScreen() {
         headingHi="ग्राहक नहीं मिला"
         bodyEn="This customer could not be loaded"
         bodyHi="यह ग्राहक लोड नहीं हो पाया"
+        ctaLabel="Retry"
+        onCta={refetch}
       />
     );
   }
@@ -504,6 +536,7 @@ export default function CustomerDetailScreen() {
 
       <View style={{ flex: 1 }}>
         <ScrollView
+          ref={scrollViewRef}
           className="flex-1"
           contentContainerStyle={{ paddingTop: spacing[3], paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
@@ -579,14 +612,15 @@ export default function CustomerDetailScreen() {
             balanceState={balanceState}
             visibleListItems={visibleListItems}
             listItems={listItems}
-            historyExpanded={historyExpanded}
+            visibleCount={visibleCount}
             initialCount={INITIAL_TX_COUNT}
-            onExpandHistory={() => setHistoryExpanded(true)}
+            onExpandHistory={() => setVisibleCount((c) => c + 20)}
             onAddEntry={handleAddEntryNavigation}
             txFilter={txFilter}
             onChangeFilter={(tab) => {
               setTxFilter(tab);
-              setHistoryExpanded(false);
+              setVisibleCount(INITIAL_TX_COUNT);
+              scrollViewRef.current?.scrollTo({ y: 0 });
             }}
             onPressTx={handleTransactionPress}
           />

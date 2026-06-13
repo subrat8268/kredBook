@@ -15,6 +15,7 @@ import { Alert, Linking } from "react-native";
 import { useRouter } from "expo-router";
 import { useToast } from "@/src/components/feedback/Toast";
 import { useAuthStore } from "@/src/store/authStore";
+import { formatINR } from "@/src/utils/format";
 import { fetchPeople, fetchPersonDetail, addPerson, PAGE_SIZE, deletePerson, updatePerson } from "../api/people";
 import { ApiError } from "../lib/supabaseQuery";
 import { Person, PersonDetail } from "../types/customer";
@@ -262,22 +263,24 @@ export function usePersonDetail(customerId?: string) {
   }, [customer?.phone]);
 
   const onWhatsApp = useCallback(async () => {
-    if (customer?.phone && customer?.name) {
-      const cleaned = customer.phone.replace(/\D/g, "");
-      if (cleaned) {
-        try {
-          const biz = profile?.business_name || "our store";
-          const msg = `Dear ${customer.name}, your outstanding balance with ${biz} is Rs. ${netBalance}. Please arrange payment. Thank you.`;
-          const prefix = cleaned.length === 10 ? "91" : "";
-          const waUrl = `https://wa.me/${prefix}${cleaned}?text=${encodeURIComponent(msg)}`;
-          await Linking.openURL(waUrl);
-        } catch {
-          Alert.alert(
-            "Cannot open WhatsApp",
-            "Please install WhatsApp and try again.",
-          );
-        }
-      }
+    if (!customer?.phone || !customer?.name) return;
+    if (netBalance <= 0) {
+      Alert.alert("No outstanding balance", "This customer has no outstanding balance to send.");
+      return;
+    }
+    const cleaned = customer.phone.replace(/\D/g, "");
+    if (!cleaned) return;
+    try {
+      const biz = profile?.business_name || "our store";
+      const msg = `Dear ${customer.name}, your outstanding balance with ${biz} is ${formatINR(netBalance)}. Please arrange payment. Thank you.`;
+      const prefix = cleaned.length === 10 ? "91" : "";
+      const waUrl = `https://wa.me/${prefix}${cleaned}?text=${encodeURIComponent(msg)}`;
+      await Linking.openURL(waUrl);
+    } catch {
+      Alert.alert(
+        "Cannot open WhatsApp",
+        "Please install WhatsApp and try again.",
+      );
     }
   }, [customer?.phone, customer?.name, profile, netBalance]);
 

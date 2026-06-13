@@ -27,7 +27,7 @@ interface CustomerTransactionTimelineProps {
     | null;
   visibleListItems: TxListItem[];
   listItems: TxListItem[];
-  historyExpanded: boolean;
+  visibleCount: number;
   initialCount: number;
   onExpandHistory: () => void;
   onAddEntry: () => void;
@@ -41,7 +41,7 @@ const CustomerTransactionTimeline = React.memo(function CustomerTransactionTimel
   balanceState,
   visibleListItems,
   listItems,
-  historyExpanded,
+  visibleCount,
   initialCount,
   onExpandHistory,
   onAddEntry,
@@ -114,7 +114,8 @@ const CustomerTransactionTimeline = React.memo(function CustomerTransactionTimel
   ), [isNew, txFilter, onAddEntry]);
 
   const listFooterComponent = useMemo(() => {
-    if (hasItems && !historyExpanded && listItems.length > initialCount) {
+    if (hasItems && visibleCount < listItems.length) {
+      const remaining = listItems.length - visibleCount;
       return (
         <Pressable
           className="w-full items-center justify-center py-4 border-t"
@@ -127,13 +128,13 @@ const CustomerTransactionTimeline = React.memo(function CustomerTransactionTimel
               color: colors.primary,
             }}
           >
-            View Older History ({listItems.length - initialCount} more)
+            View Older History ({remaining} more)
           </Text>
         </Pressable>
       );
     }
     return null;
-  }, [hasItems, historyExpanded, listItems.length, initialCount, colors.borderSubtle, colors.primary, onExpandHistory]);
+  }, [hasItems, visibleCount, listItems.length, colors.borderSubtle, colors.primary, onExpandHistory]);
 
   const flashListHeight = useMemo(() => {
     const itemsHeight = visibleListItems.length * ITEM_ESTIMATED_SIZE;
