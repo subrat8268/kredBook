@@ -186,6 +186,7 @@ const CustomerTransactionTimeline = React.memo(function CustomerTransactionTimel
         renderItem={renderItem}
         keyExtractor={(item: TxListItem) => item.key}
         estimatedItemSize={ITEM_ESTIMATED_SIZE}
+        getItemType={(item: TxListItem) => item.kind}
         ListFooterComponent={listFooterComponent}
         showsVerticalScrollIndicator={false}
         scrollEnabled={false}
