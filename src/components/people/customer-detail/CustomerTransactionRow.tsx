@@ -125,8 +125,8 @@ const CustomerTransactionRow = React.memo(function CustomerTransactionRow({
   });
 
   const a11yLabel = isPayment
-    ? `Payment of ₹${formatINR(tx.amount)} on ${formattedDate}`
-    : `Entry of ₹${formatINR(tx.amount)} on ${formattedDate}, balance ₹${formatINR(tx.runningBalance)}`;
+    ? `Payment of ${formatINR(tx.amount)} on ${formattedDate}`
+    : `Entry of ${formatINR(tx.amount)} on ${formattedDate}, balance ${formatINR(tx.runningBalance)}`;
 
   // Icon configurations
   const iconBg = isPayment
