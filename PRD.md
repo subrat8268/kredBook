@@ -35,6 +35,9 @@ KredBook is a strict single-mode digital ledger (khata) designed for small busin
 20. [Risks & Open Questions](#20-risks--open-questions)
 21. [Environment & Setup](#21-environment--setup)
 22. [Doc Sync Contract](#22-doc-sync-contract)
+23. [Accessibility (a11y) & Font Scaling](#23-accessibility-a11y--font-scaling)
+24. [Security, Privacy & Compliance (DPDP Act)](#24-security-privacy--compliance-dpdp-act)
+25. [Testing Strategy & Quality Gates](#25-testing-strategy--quality-gates)
 
 ---
 
@@ -235,7 +238,8 @@ If legacy terms must appear in docs or comments, label them explicitly as **[leg
 
 | Constraint | Detail |
 |---|---|
-| **Free tier first** | Core features must work on the `free` subscription plan. |
+| **Free tier first** | Core features must work on the `free` subscription plan. Free features include: Customer management, entry creation, manual WhatsApp text sharing, local PDF generation, and MMKV offline sync queue. |
+| **Paid tier ("Pro")** | Premium features (UPI links, on-screen QR codes, automated WhatsApp reminders, CSV backups, and AI priorities/summaries) will be paywalled under the `pro` subscription plan. |
 | **Single-mode** | Product operates in customer-credit mode only — no supplier or inventory mode. |
 | **India-first** | All UX, currency (₹), and language (EN/HI) decisions default to Indian context. |
 | **WhatsApp-first share** | Any sharing surface must work via WhatsApp as the primary distribution channel. |
@@ -633,6 +637,11 @@ app/
 - **Entry Mode Toggle**: Switches between *Bill* (credit extended) and *Payment* (prefilled collect mode).
 - **Draft Engine**: Supports adding multiple item rows (prices, fractional quantities), GST%, and loading fees.
 - **Bill Footer**: Displays outstanding summary. Provides separate actions for **Save & Share** and **Save Only**.
+- **Bill Number Auto-Generation**:
+  - Auto-generated sequentially per vendor via Supabase RPC `get_next_bill_number` using `vendor_id` and the `bill_number_prefix` (default `INV`).
+  - Format: `<Prefix>-<PaddedSeqNumber>` (e.g., `INV-001`, `INV-002`).
+  - Uniqueness: Strictly scoped per-vendor via database unique constraint `UNIQUE(vendor_id, bill_number)`.
+  - Offline Fallback: If database query fails or user is offline, falls back to timestamp-based suffix: `${prefix}-${Date.now().toString().slice(-6)}`.
 
 **Acceptance Criteria:**
 - [ ] New Entry can be created in < 20 seconds (3 taps + form fill).
@@ -641,6 +650,8 @@ app/
 - [ ] Entries can be filtered by Pending / Partially Paid / Paid without network call.
 - [ ] Entry detail shows edit history (edit_count visible if > 0).
 - [ ] Offline Entry creation is queued and replayed on reconnect without data loss.
+- [ ] Auto-generation sequence correctly pads bill numbers (e.g. `INV-001`, `INV-002`) and increments correctly.
+- [ ] Fallback timestamp-based bill number is generated successfully when offline.
 
 ---
 
@@ -684,12 +695,18 @@ app/
 - Scheduled by `src/api/overdueReminders.ts`.
 - Fires for entries where `due_date < today` AND `status != 'Paid'`.
 - Uses `expo-notifications` (local, not server-push in Phase 4).
+- **Permission Flow**:
+  - Request permission during the ready/complete stage of Onboarding, or when the user toggles reminders on in Settings.
+  - Denials: If permission is denied, log quietly, toggle remains disabled, and store `remindersPermissionDenied = true` in preferences.
+  - Re-prompt Strategy: If permission was denied, subsequent toggling prompts the user to open native system settings (`Linking.openSettings()`).
 
 **Acceptance Criteria:**
 - [ ] Notification fires within the scheduled window for overdue entries.
 - [ ] Tapping notification navigates to correct Entry detail.
 - [ ] Notification does not fire for fully paid entries.
 - [ ] Respects device notification permissions — fails gracefully if denied.
+- [ ] Permission toggle gracefully fails when denied, resetting status to off.
+- [ ] Redirects user to native OS settings when enabling notifications after a previous denial.
 
 ---
 
@@ -706,6 +723,25 @@ app/
 - [ ] Revoked or expired token shows a clear "link is no longer active" message.
 - [ ] No edit or payment actions available in the public view.
 - [ ] Vendor can revoke the token from Customer detail screen.
+
+---
+
+### 8. Payment Overpay Validation & Downtime UI
+
+**Specification:**
+- **Overpay Prevention**:
+  - In the Record Payment modal, partial payments cannot exceed the outstanding balance due.
+  - Input amounts exceeding the outstanding balance display an inline error: `"Amount cannot exceed ₹due"`, and the submit button is disabled.
+- **Downtime UI Handling**:
+  - If Supabase is entirely down, read paths retrieve and display cached data from MMKV with a top warning status banner ("Offline - X changes saved locally").
+  - Attempting to record payments or create entries during downtime displays a warning or sync-pending state. Local mutations are queued.
+- **Malformed Ledger Token**:
+  - Accessing `/l/[token]` with an invalid, revoked, or expired token renders a "Link unavailable" error screen: "This link is invalid or has expired."
+
+**Acceptance Criteria:**
+- [ ] Entering an amount greater than the outstanding balance disables the collect/payment button and displays an inline warning.
+- [ ] Read paths retrieve cache and display stale warning banner when network or database is offline.
+- [ ] Malformed or expired shared tokens successfully render the "Link unavailable" screen instead of raw errors.
 
 ---
 
@@ -747,6 +783,7 @@ KredBook implements an offline-first strategy using a local cache and a mutation
   - **Offline**: Shows "Offline - X changes saved locally".
   - **Syncing**: Shows "Syncing changes...".
   - **Synced**: Shows "All changes synced".
+  - **Sync Error**: If Supabase is down or unreachable during sync replay, displays "Sync failed • Tap to retry". Replay retries up to 3 times before prompting manual retry or marking queue item as paused.
 
 ---
 
@@ -849,6 +886,9 @@ Success is measured against performance, engagement, and safety targets:
 | **Screen transition latency** | < 200ms |
 | **Local database sync accuracy** | 100% (zero silent data mismatches) |
 | **AI Edge Function API error rate** | < 1% |
+| **Cold start time** | < 1.5s on mid-range devices |
+| **Scroll performance (FlashList)** | 60fps average (zero frame drops on swipe) |
+| **Max payload size per page** | PAGE_SIZE = 10 items (paginated) |
 
 ---
 
@@ -885,6 +925,9 @@ These are **binary pass/fail gates** — not aspirational metrics. A phase is no
 - **PROD-4**: Public ledger (`app/l/[token]`) shows zero edit/payment actions.
 - **PROD-5**: Revoked or expired token shows correct error state.
 - **PROD-6**: RLS blocks cross-vendor data reads — verified by Supabase policy test.
+- **PROD-7**: Minimum touch target size of 44dp (iOS) / 48dp (Android) on all interactive elements.
+- **PROD-8**: 100% of linting checks run clean with Biome and ESLint (`npm run lint`).
+- **PROD-9**: RLS policies active and verified on all public schema tables.
 
 ---
 
@@ -1004,6 +1047,69 @@ If files contain conflicting guidelines, the order of precedence is:
 | 2 | `SYSTEM_CONTEXT.md` | AI agent operational instructions |
 | 3 | `schema.sql` | Data shape — never guess schema |
 | 4 | `src/utils/theme.ts` | Design tokens — never hardcode |
+
+---
+
+## 23. Accessibility (a11y) & Font Scaling
+
+### 1. Minimum Touch Targets
+All interactive controls, including tab bar buttons, floating action buttons (FABs), list items, edit fields, and dialog options, must adhere to standard physical target boundaries:
+- **Android**: Minimum of **48 x 48 dp**.
+- **iOS**: Minimum of **44 x 44 dp**.
+Dense table cells or small list accessories must use padding to expand the target area to satisfy these requirements.
+
+### 2. Dynamic Font Scaling
+To support merchants needing readability improvements (such as Dinesh, Persona 3):
+- Every text element must support user-selected system accessibility font scaling (React Native `allowFontScaling={true}`).
+- Components must use flexible layouts (`flex-wrap`, auto-wrapping text labels, and scrollable container limits) rather than hardcoded container heights to prevent text clipping, overlapping, or layout disruption when scaled up to 200%.
+
+### 3. Screen Reader Configuration
+Core elements must be fully compatible with VoiceOver (iOS) and TalkBack (Android):
+- **Labels**: Use explicit `accessibilityLabel` attributes to describe the function of graphic-only buttons (e.g. `accessibilityLabel="Record payment"` on the check icon button).
+- **Roles & States**: Assign appropriate `accessibilityRole` (e.g., `'button'`, `'checkbox'`, `'header'`) and track dynamic states using `accessibilityState`.
+
+### 4. Color Contrast Standards
+All foreground-to-background combinations must satisfy **WCAG 2.1 Level AA** contrast minimums:
+- **Normal Text**: Minimum contrast ratio of **4.5:1** against the background.
+- **Large Text (≥ 18dp Bold or 24dp Regular)**: Minimum contrast ratio of **3.0:1**.
+- **State Badges**: Color combinations for state indicators must maintain legibility (e.g. `colors.overdue.text` [Red-600] on `colors.overdue.bg` [Red-100] is verified at 5.1:1 contrast).
+
+---
+
+## 24. Security, Privacy & Compliance (DPDP Act)
+
+### 1. PII Handling & Isolation
+Merchant business names, customer names, phone numbers, addresses, bank details, and ledger balances represent Personally Identifiable Information (PII) under India's Digital Personal Data Protection (DPDP) Act.
+- **Data Scoping**: RLS policies strictly quarantine records. No vendor can access another vendor's profile, customers, or entries. Scoping is enforced via database RLS policy checking `vendor_id IN (SELECT id FROM profiles WHERE user_id = auth.uid())`.
+- **API Boundary**: Client-to-database requests are strictly authenticated. Public routes do not expose write APIs or internal vendor identifiers.
+
+### 2. User Data Deletion Workflow
+To respect the "Right to Erasure" under the DPDP Act, KredBook supports complete account deletion:
+- **Cascade Deletion**: When a user account is deleted in Supabase auth (`auth.users`), the system triggers a cascade delete down through the associated `public.profiles` record.
+- **Cleanup Chain**: The deletion cascades automatically to all associated `parties`, `orders`, `order_items`, `payments`, and `access_tokens` rows, permanently purging all transactional, ledger, and personal data from the database.
+
+### 3. Public Ledger Sharing Controls
+The read-only ledger links generated under `/l/[token]`:
+- Use unauthenticated GET mapping strictly to the RPC `get_ledger_by_token`.
+- Restrict visible data to the customer's specific transaction timeline (type, date, amount, bill number) and the vendor business name/phone.
+- Do not expose any edit/record payment capabilities, other vendor profiles, or other customers' ledgers.
+- Are instantly revocable by the merchant from the customer details screen, which deletes the corresponding token row and immediately disables access.
+
+---
+
+## 25. Testing Strategy & Quality Gates
+
+### 1. Testing Scopes
+- **Unit Tests (Jest)**: Target mathematical functions (INR currency formatting, interest/GST calculation, outstanding sum reductions), schema validation schemas (Yup, Formik inputs), and offline queue serialization helpers.
+- **Integration Tests (Zustand/Query)**: Validate state store actions, local MMKV cache hydration cycles, network status transitions, and offline write synchronization queues.
+- **End-to-End Tests (Maestro/Detox)**: Focus on primary critical paths: Onboarding flow, Customer creation, Entry recording, and Payment collecting.
+
+### 2. Release Quality Gates
+Prior to shipping a new phase or feature release, the application must pass these quality gates:
+1. **Linting Check**: `npm run lint` must return 0 errors and warning-clean logs on Biome and ESLint.
+2. **TypeScript Compilation**: The project must build without TypeScript compilation warnings or errors.
+3. **Database Consistency**: 100% of active schema tables must have verified RLS policies and passing security tests.
+4. **Offline Queue Replay Verification**: Replay success rate must meet the 99.9% target under simulated network latency.
 
 ---
 
