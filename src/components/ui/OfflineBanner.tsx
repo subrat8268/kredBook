@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Easing, StyleSheet, Text, View } from "react-native";
-import { useNetInfo } from "@react-native-community/netinfo";
-import { Wifi, WifiOff } from "lucide-react-native";
+import { AlertTriangle, CheckCircle, Wifi, WifiOff } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useIsOnline } from "@/src/hooks/useIsOnline";
 import { useNetworkSync } from "@/src/hooks/useNetworkSync";
 import { useLanguageStore } from "@/src/store/languageStore";
 import { useTheme } from "@/src/utils/ThemeProvider";
@@ -10,13 +10,13 @@ import { useTheme } from "@/src/utils/ThemeProvider";
 const BANNER_HEIGHT = 40;
 const HIDDEN_OFFSET = -48;
 const ANIMATION_DURATION = 280;
-const ONLINE_DISMISS_MS = 2500;
+const CONFIRM_DISMISS_MS = 2500;
 
-type BannerMode = "offline" | "online";
+type BannerMode = "offline" | "online" | "synced" | "error";
 
 export default function OfflineBanner() {
-  const netInfo = useNetInfo();
-  const { triggerSync } = useNetworkSync();
+  const isOnlineFlag = useIsOnline();
+  const { triggerSync, syncStatus, hasSyncError } = useNetworkSync();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const language = useLanguageStore((s) => s.language);
@@ -25,6 +25,7 @@ export default function OfflineBanner() {
   const [visible, setVisible] = useState(false);
   const translateY = useRef(new Animated.Value(HIDDEN_OFFSET)).current;
   const prevConnectedRef = useRef<boolean | null>(null);
+  const prevSyncStatusRef = useRef<string | null>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearHideTimer = useCallback(() => {
@@ -66,50 +67,79 @@ export default function OfflineBanner() {
     });
   }, [animateTo, clearHideTimer]);
 
+  // Track connectivity transitions (offline ↔ online)
   useEffect(() => {
-    const connected =
-      netInfo.isConnected === true && netInfo.isInternetReachable !== false;
-
     if (prevConnectedRef.current === null) {
-      prevConnectedRef.current = connected;
-      if (!connected) {
+      prevConnectedRef.current = isOnlineFlag;
+      if (!isOnlineFlag) {
         showBanner("offline");
       }
       return;
     }
 
     const wasConnected = prevConnectedRef.current;
-    prevConnectedRef.current = connected;
+    prevConnectedRef.current = isOnlineFlag;
 
-    if (!connected) {
+    if (!isOnlineFlag) {
       showBanner("offline");
       return;
     }
 
-    if (!wasConnected && connected) {
-      triggerSync().catch(() => {
-        // Sync trigger errors are handled inside the sync hook.
-      });
+    if (!wasConnected && isOnlineFlag) {
+      triggerSync().catch(() => {});
       showBanner("online");
-      hideTimerRef.current = setTimeout(() => {
-        hideBanner();
-      }, ONLINE_DISMISS_MS);
     }
-  }, [hideBanner, netInfo.isConnected, netInfo.isInternetReachable, showBanner, triggerSync]);
+  }, [isOnlineFlag, showBanner, triggerSync]);
+
+  // Track sync completion transitions (syncing → synced/offline)
+  useEffect(() => {
+    if (prevSyncStatusRef.current === "syncing" && syncStatus === "synced") {
+      if (hasSyncError) {
+        showBanner("error");
+      } else {
+        showBanner("synced");
+        hideTimerRef.current = setTimeout(() => {
+          hideBanner();
+        }, CONFIRM_DISMISS_MS);
+      }
+    }
+    prevSyncStatusRef.current = syncStatus;
+  }, [syncStatus, hasSyncError, showBanner, hideBanner]);
 
   useEffect(() => () => clearHideTimer(), [clearHideTimer]);
 
   if (!visible || !mode) return null;
 
-  const isOffline = mode === "offline";
-  const Icon = isOffline ? WifiOff : Wifi;
-  const message = isOffline
-    ? language === "hi"
-      ? "आप ऑफलाइन हैं — कनेक्ट होने पर सिंक होगा"
-      : "You're offline — changes will sync when reconnected"
-    : language === "hi"
-      ? "वापस ऑनलाइन — सिंक हो रहा है…"
-      : "Back online — syncing…";
+  const modeConfig = {
+    offline: {
+      Icon: WifiOff,
+      color: colors.warning,
+      message: language === "hi"
+        ? "आप ऑफलाइन हैं — कनेक्ट होने पर सिंक होगा"
+        : "You're offline — changes will sync when reconnected",
+    },
+    online: {
+      Icon: Wifi,
+      color: colors.success,
+      message: language === "hi"
+        ? "वापस ऑनलाइन — सिंक हो रहा है…"
+        : "Back online — syncing…",
+    },
+    synced: {
+      Icon: CheckCircle,
+      color: colors.success,
+      message: language === "hi"
+        ? "सभी बदलाव सेव हो गए"
+        : "All changes saved",
+    },
+    error: {
+      Icon: AlertTriangle,
+      color: colors.error ?? colors.warning,
+      message: language === "hi"
+        ? "कुछ बदलाव सेव नहीं हो सके"
+        : "Some changes couldn't be saved",
+    },
+  }[mode];
 
   return (
     <Animated.View
@@ -118,15 +148,15 @@ export default function OfflineBanner() {
         styles.container,
         {
           top: insets.top,
-          backgroundColor: isOffline ? colors.warning : colors.success,
+          backgroundColor: modeConfig.color,
           transform: [{ translateY }],
         },
       ]}
     >
       <View style={styles.content}>
-        <Icon size={16} color={colors.surface} strokeWidth={2} />
+        <modeConfig.Icon size={16} color={colors.surface} strokeWidth={2} />
         <Text style={[styles.text, { color: colors.surface }]} numberOfLines={1}>
-          {message}
+          {modeConfig.message}
         </Text>
       </View>
     </Animated.View>

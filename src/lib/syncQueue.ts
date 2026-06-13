@@ -34,6 +34,7 @@ export interface QueuedMutation {
   payload: Record<string, any>;         // API request payload
   timestamp: string;                    // ISO 8601 datetime
   retryCount: number;                   // Number of sync attempts (max 3)
+  lastAttemptAt?: string;               // ISO 8601 of last attempt (for backoff)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -198,7 +199,11 @@ export function incrementRetry(mutation: QueuedMutation): boolean {
     return false;
   }
 
-  const updatedMutation = { ...mutation, retryCount: mutation.retryCount + 1 };
+  const updatedMutation = {
+    ...mutation,
+    retryCount: mutation.retryCount + 1,
+    lastAttemptAt: new Date().toISOString(),
+  };
 
   if (updatedMutation.retryCount >= 3) {
     // Max retries exceeded - remove from queue

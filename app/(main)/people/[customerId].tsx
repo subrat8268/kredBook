@@ -180,6 +180,10 @@ export default function CustomerDetailScreen() {
   const [quickPaymentAmount, setQuickPaymentAmount] = useState<string>("");
   const [shareQueued, setShareQueued] = useState(false);
 
+  const handleExpandHistory = useCallback(() => {
+    setVisibleCount((c) => c + 20);
+  }, []);
+
   // WhatsApp reminder
   const handleWhatsAppReminder = useCallback(() => {
     if (customer) {
@@ -614,7 +618,7 @@ export default function CustomerDetailScreen() {
             listItems={listItems}
             visibleCount={visibleCount}
             initialCount={INITIAL_TX_COUNT}
-            onExpandHistory={() => setVisibleCount((c) => c + 20)}
+            onExpandHistory={handleExpandHistory}
             onAddEntry={handleAddEntryNavigation}
             txFilter={txFilter}
             onChangeFilter={(tab) => {

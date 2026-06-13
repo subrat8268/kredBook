@@ -16,10 +16,12 @@
 
 import { createOrder, recordPayment } from "@/src/api/entries";
 import { addPerson } from "@/src/api/people";
+import { emitMutationDropped } from "@/src/lib/offlineEvents";
 import type { QueuedMutation } from "@/src/lib/syncQueue";
 import * as syncQueue from "@/src/lib/syncQueue";
 import { getOrCreateSyncQueueKey } from "@/src/lib/syncQueueStorage";
 import NetInfo, { type NetInfoState } from "@react-native-community/netinfo";
+import { isOnline } from "@/src/hooks/useIsOnline";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
@@ -205,6 +207,22 @@ export function useNetworkSync(): UseNetworkSyncReturn {
 
     // Process mutations sequentially (FIFO)
     for (const mutation of queue) {
+      // Check if this mutation needs backoff delay
+      if (mutation.retryCount > 0 && mutation.lastAttemptAt) {
+        const elapsed = Date.now() - new Date(mutation.lastAttemptAt).getTime();
+        const backoffDelay = Math.min(
+          1000 * Math.pow(2, mutation.retryCount - 1),
+          30000,
+        );
+        if (elapsed < backoffDelay) {
+          console.log(
+            `[NetworkSync] Backoff ${mutation.operation} ${mutation.entity} ` +
+              `(${backoffDelay}ms, ${elapsed}ms elapsed)`,
+          );
+          break; // Stop queue — later mutations might depend on this one
+        }
+      }
+
       const success = await replayMutation(mutation, queryClient);
 
       if (success) {
@@ -215,8 +233,23 @@ export function useNetworkSync(): UseNetworkSyncReturn {
         // Mutation failed → increment retry count
         const shouldRetry = syncQueue.incrementRetry(mutation);
         if (!shouldRetry) {
-          // Max retries exceeded → mutation dropped
+          // Max retries exceeded → mutation permanently dropped
           failureCount++;
+          emitMutationDropped({
+            entity: mutation.entity,
+            operation: mutation.operation,
+          });
+          // Invalidate affected caches so optimistic data is corrected
+          if (mutation.entity === "order") {
+            queryClient.invalidateQueries({ queryKey: ["orders"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+          } else if (mutation.entity === "payment") {
+            queryClient.invalidateQueries({ queryKey: ["orders"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["customers"] });
+          } else if (mutation.entity === "customer") {
+            queryClient.invalidateQueries({ queryKey: ["customers"] });
+          }
         }
       }
 
@@ -262,10 +295,9 @@ export function useNetworkSync(): UseNetworkSyncReturn {
    * Effect: Listen for network state changes.
    * When network returns, auto-trigger sync.
    */
-  useEffect(() => {
+    useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-      const connected =
-        state.isConnected === true && state.isInternetReachable === true;
+      const connected = isOnline(state);
       setIsConnected(connected);
 
       if (connected) {
