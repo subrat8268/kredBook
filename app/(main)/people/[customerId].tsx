@@ -27,6 +27,7 @@ import {
   Trash2,
   Phone,
   MessageCircle,
+  WifiOff,
 } from "lucide-react-native";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
@@ -35,7 +36,9 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 // Hooks & Store
 import { usePersonDetail } from "@/src/hooks/usePeople";
+import { useIsOnline } from "@/src/hooks/useIsOnline";
 import { useAuthStore } from "@/src/store/authStore";
+import { useLanguageStore } from "@/src/store/languageStore";
 import { usePreferencesStore } from "@/src/store/preferencesStore";
 import { useToast } from "@/src/components/feedback/Toast";
 import { useTheme } from "@/src/theme/useTheme";
@@ -136,6 +139,8 @@ export default function CustomerDetailScreen() {
   const t = useTheme();
   const { colors } = t;
   const { i18n } = useTranslation();
+  const isOnline = useIsOnline();
+  const language = useLanguageStore((s) => s.language);
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { customerId, focus } = useLocalSearchParams<{
@@ -604,6 +609,36 @@ export default function CustomerDetailScreen() {
             nearestDueDate={nearestDueDate}
             openEntriesCount={openEntriesCount}
           />
+
+          {!isOnline && customer && (
+            <View
+              style={{
+                paddingVertical: 6,
+                paddingHorizontal: 12,
+                borderRadius: 6,
+                backgroundColor: colors.borderSubtle,
+                gap: 6,
+                flexDirection: "row",
+                alignItems: "center",
+                marginHorizontal: 16,
+                marginBottom: 8,
+                marginTop: 4,
+              }}
+            >
+              <WifiOff size={12} color={colors.faint} />
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.faint,
+                  fontFamily: t.fontFamily.body,
+                }}
+              >
+                {language === "hi"
+                  ? "ऑफलाइन — पिछला डेटा दिखाया जा रहा है"
+                  : "Offline — showing last synced data"}
+              </Text>
+            </View>
+          )}
 
           <CustomerActionStrip
             onCollectPress={() => openPaymentFlow()}

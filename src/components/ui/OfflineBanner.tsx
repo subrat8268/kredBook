@@ -16,7 +16,7 @@ type BannerMode = "offline" | "online" | "synced" | "error";
 
 export default function OfflineBanner() {
   const isOnlineFlag = useIsOnline();
-  const { triggerSync, syncStatus, hasSyncError } = useNetworkSync();
+  const { triggerSync, syncStatus, hasSyncError, syncProgress } = useNetworkSync();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const language = useLanguageStore((s) => s.language);
@@ -121,9 +121,13 @@ export default function OfflineBanner() {
     online: {
       Icon: Wifi,
       color: colors.success,
-      message: language === "hi"
-        ? "वापस ऑनलाइन — सिंक हो रहा है…"
-        : "Back online — syncing…",
+      message: syncProgress.total > 3
+        ? (language === "hi"
+            ? `सिंक हो रहा है… (${syncProgress.current}/${syncProgress.total})`
+            : `Syncing… (${syncProgress.current}/${syncProgress.total})`)
+        : (language === "hi"
+            ? "वापस ऑनलाइन — सिंक हो रहा है…"
+            : "Back online — syncing…"),
     },
     synced: {
       Icon: CheckCircle,

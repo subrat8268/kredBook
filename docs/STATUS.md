@@ -30,13 +30,10 @@
 
 ## ⚡ Next Up (Priority Queue)
 
-> Updated 2026-06-09. Customer List, Customer Detail, Entry List, and Create Entry
-> are fully repolished to the edit-entry token standard. Core loop redesign
-> tasks are complete.
-> Immediate next tasks in order:
-> 1. 4.3.1a — Welcome screen audit + extraction
-> 2. 4.3.1b — Welcome screen premium redesign
-> 3. 4.3.2a — Login audit + extraction
+> Updated 2026-06-13. Welcome screen audit/redesign/polish (4.3.1a–c) complete.
+> Offline-first P0/P1 audit fixes committed.
+> Immediate next task:
+> 1. 4.3.2a — Login audit + extraction
 
 ---
 
@@ -319,9 +316,9 @@ Verification:
 
 | # | Task | Status | Priority | Command | Skills | Screen |
 |---|---|---|---|---|---|---|
-| 4.3.1a | Welcome screen audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `app/index.tsx` |
-| 4.3.1b | Welcome screen premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `app/index.tsx` |
-| 4.3.1c | Welcome screen screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `app/index.tsx` |
+| 4.3.1a | Welcome screen audit + extraction | ✅ Done | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `app/index.tsx` |
+| 4.3.1b | Welcome screen premium redesign | ✅ Done | P1 | `/build` | `ui-ux-pro-max`, `sleek-design-mobile-apps`, `react-native-skills` | `app/index.tsx` |
+| 4.3.1c | Welcome screen screenshot polish + verification | ✅ Done | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `app/index.tsx` |
 | 4.3.2a | Login audit + extraction | ⏳ Not Started | P1 | `/audit` | `code-reviewer`, `refactor-engineer` | `(auth)/login.tsx` |
 | 4.3.2b | Login premium redesign | ⏳ Not Started | P1 | `/build` | `ui-ux-pro-max`, `react-native-skills` | `(auth)/login.tsx` |
 | 4.3.2c | Login screenshot polish + verification | ⏳ Not Started | P1 | `/fix` | `systematic-debugging`, `verification-before-completion` | `(auth)/login.tsx` |

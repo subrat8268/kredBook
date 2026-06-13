@@ -118,6 +118,16 @@ const CustomerTransactionRow = React.memo(function CustomerTransactionRow({
     ? `${modeLabel} · ${formatTime(tx.created_at)}`
     : `${tx.itemCount || 0} item(s) · ${formatTime(tx.created_at)}`;
 
+  const formattedDate = new Date(tx.created_at).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+  const a11yLabel = isPayment
+    ? `Payment of ₹${formatINR(tx.amount)} on ${formattedDate}`
+    : `Entry of ₹${formatINR(tx.amount)} on ${formattedDate}, balance ₹${formatINR(tx.runningBalance)}`;
+
   // Icon configurations
   const iconBg = isPayment
     ? colors.primaryBorderFill
@@ -144,6 +154,8 @@ const CustomerTransactionRow = React.memo(function CustomerTransactionRow({
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={a11yLabel}
       className="flex-row items-center p-4"
       style={({ pressed }) => ({
         backgroundColor: pressed ? colors.borderSubtle : "transparent",

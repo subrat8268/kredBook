@@ -31,6 +31,11 @@ import { useCallback, useEffect, useState } from "react";
 
 export type SyncStatus = "offline" | "syncing" | "synced";
 
+export interface SyncProgress {
+  current: number;
+  total: number;
+}
+
 interface UseNetworkSyncReturn {
   /** Current sync status (offline/syncing/synced) */
   syncStatus: SyncStatus;
@@ -42,6 +47,8 @@ interface UseNetworkSyncReturn {
   hasSyncError: boolean;
   /** Manually trigger sync (for "Retry" button) */
   triggerSync: () => Promise<void>;
+  /** Progress of current sync cycle */
+  syncProgress: SyncProgress;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -157,6 +164,7 @@ export function useNetworkSync(): UseNetworkSyncReturn {
   const [isConnected, setIsConnected] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasSyncError, setHasSyncError] = useState(false);
+  const [syncProgress, setSyncProgress] = useState<SyncProgress>({ current: 0, total: 0 });
 
   useEffect(() => {
     const ensureQueueReady = async () => {
@@ -200,6 +208,7 @@ export function useNetworkSync(): UseNetworkSyncReturn {
 
     setIsSyncing(true);
     setSyncStatus("syncing");
+    setSyncProgress({ current: 0, total: queue.length });
     console.log(`[NetworkSync] Starting sync of ${queue.length} mutations...`);
 
     let successCount = 0;
@@ -219,7 +228,11 @@ export function useNetworkSync(): UseNetworkSyncReturn {
             `[NetworkSync] Backoff ${mutation.operation} ${mutation.entity} ` +
               `(${backoffDelay}ms, ${elapsed}ms elapsed)`,
           );
-          break; // Stop queue — later mutations might depend on this one
+          // Only break for customer CREATE — subsequent orders/payments depend on it
+          if (mutation.entity === "customer" && mutation.operation === "CREATE") {
+            break;
+          }
+          continue;
         }
       }
 
@@ -255,6 +268,7 @@ export function useNetworkSync(): UseNetworkSyncReturn {
 
       // Update queue length UI in real-time
       setQueueLength(syncQueue.size());
+      setSyncProgress((prev) => ({ ...prev, current: prev.current + 1 }));
     }
 
     console.log(
@@ -278,6 +292,9 @@ export function useNetworkSync(): UseNetworkSyncReturn {
     }
 
     setIsSyncing(false);
+    if (syncQueue.isEmpty()) {
+      setSyncProgress({ current: 0, total: 0 });
+    }
   }, [isSyncing, queryClient]);
 
   /**
@@ -295,7 +312,7 @@ export function useNetworkSync(): UseNetworkSyncReturn {
    * Effect: Listen for network state changes.
    * When network returns, auto-trigger sync.
    */
-    useEffect(() => {
+  useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
       const connected = isOnline(state);
       setIsConnected(connected);
@@ -334,5 +351,6 @@ export function useNetworkSync(): UseNetworkSyncReturn {
     isConnected,
     hasSyncError,
     triggerSync,
+    syncProgress,
   };
 }
