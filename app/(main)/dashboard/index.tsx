@@ -122,7 +122,7 @@ export default function DashboardRoute() {
       openRecordPaymentForCustomer={openRecordPaymentForCustomer}
       onPressNotifications={() => router.push({ pathname: "/(main)/people", params: { filter: "Overdue" } } as never)}
       onOpenCustomerDetail={(customerId) => router.push({ pathname: "/(main)/people/[customerId]", params: { customerId } } as never)}
-      onOpenEntryDetail={(orderId) => router.push({ pathname: "/(main)/entries/[orderId]", params: { orderId } } as never)}
+      onOpenEntryDetail={(orderId) => router.push(`/(main)/entries/${orderId}`)}
       onOpenPeople={() => router.push("/(main)/people" as never)}
       onOpenEntries={() => router.push("/(main)/entries" as never)}
     />
