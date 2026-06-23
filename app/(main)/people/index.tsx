@@ -19,7 +19,7 @@ import type { Person } from "@/src/types/customer";
 import { useTheme } from "@/src/utils/ThemeProvider";
 import { formatRelativeActivity } from "@/src/utils/helper";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -72,30 +72,43 @@ export default function CustomersScreen() {
   const createOrderMutation = useCreateOrder(profile?.id ?? "");
   const { show: showToast } = useToast();
 
+  const paramsActionConsumedRef = useRef(false);
+  const paramsFilterConsumedRef = useRef(false);
+
   useEffect(() => {
     let shouldClear = false;
     const nextParams: Record<string, any> = {};
 
     if (params?.action === "add") {
-      setIsModalOpen(true);
-      setRedirectAfterAdd(true);
-      nextParams.action = undefined;
-      shouldClear = true;
+      if (!paramsActionConsumedRef.current) {
+        paramsActionConsumedRef.current = true;
+        setIsModalOpen(true);
+        setRedirectAfterAdd(true);
+        nextParams.action = undefined;
+        shouldClear = true;
+      }
+    } else {
+      paramsActionConsumedRef.current = false;
     }
 
     if (params?.filter) {
-      const pFilter = params.filter;
-      if (pFilter === "All" || pFilter === "Overdue" || pFilter === "Pending" || pFilter === "Paid") {
-        setFilter(pFilter as FilterOption);
+      if (!paramsFilterConsumedRef.current) {
+        paramsFilterConsumedRef.current = true;
+        const pFilter = params.filter;
+        if (pFilter === "All" || pFilter === "Overdue" || pFilter === "Pending" || pFilter === "Paid") {
+          setFilter(pFilter as FilterOption);
+        }
+        nextParams.filter = undefined;
+        shouldClear = true;
       }
-      nextParams.filter = undefined;
-      shouldClear = true;
+    } else {
+      paramsFilterConsumedRef.current = false;
     }
 
     if (shouldClear) {
       router.setParams(nextParams);
     }
-  }, [params, router]);
+  }, [params?.action, params?.filter, router]);
 
   const sortedCustomers = useMemo(() => {
     const list = [...people];

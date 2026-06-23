@@ -88,11 +88,6 @@ export default function DashboardFollowUpCard({
       style={({ pressed }) => ({
         opacity: pressed ? 0.85 : 1,
         width: 200,
-        shadowColor: colors.ink,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 3,
-        elevation: 1,
       })}
     >
       <View className="flex-row items-center justify-between">
