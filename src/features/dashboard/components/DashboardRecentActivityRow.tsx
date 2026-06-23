@@ -1,4 +1,5 @@
 import StatusBadge from "@/src/components/layer2/StatusBadge";
+import * as Haptics from "expo-haptics";
 import { formatINR } from "@/src/utils/format";
 import { Receipt } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
@@ -7,14 +8,20 @@ import type { DashboardActivityItem } from "../types";
 type Props = {
   item: DashboardActivityItem;
   isLast: boolean;
-  onOpenEntries: () => void;
+  onOpenEntryDetail: (orderId: string) => void;
   colors: any;
 };
 
-export default function DashboardRecentActivityRow({ item, isLast, onOpenEntries, colors }: Props) {
+export default function DashboardRecentActivityRow({ item, isLast, onOpenEntryDetail, colors }: Props) {
   return (
     <View>
-      <Pressable className="flex-row items-start" onPress={onOpenEntries}>
+      <Pressable
+        className="flex-row items-start"
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+          onOpenEntryDetail(item.id);
+        }}
+      >
         <View className="mr-3 mt-1 h-8 w-8 items-center justify-center rounded-full bg-surface-alt dark:bg-surface-dark">
           <Receipt size={16} color={colors.muted} strokeWidth={2} />
         </View>

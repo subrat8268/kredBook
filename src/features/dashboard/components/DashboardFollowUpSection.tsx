@@ -13,6 +13,8 @@ type Props = {
   errorMessage?: string;
   followUpPeople: DashboardPerson[];
   onOpenPeople: () => void;
+  onOpenPeopleOverdue: () => void;
+  onOpenCustomerDetail: (customerId: string) => void;
   onCollect: (customerId: string, customerName: string) => Promise<void>;
   onRetry: () => void;
 };
@@ -25,6 +27,8 @@ export default function DashboardFollowUpSection({
   errorMessage,
   followUpPeople,
   onOpenPeople,
+  onOpenPeopleOverdue,
+  onOpenCustomerDetail,
   onCollect,
   onRetry,
 }: Props) {
@@ -38,7 +42,7 @@ export default function DashboardFollowUpSection({
           </View>
         </View>
         <Pressable
-          onPress={onOpenPeople}
+          onPress={onOpenPeopleOverdue}
           accessibilityRole="button"
           accessibilityLabel={`See all ${overdueTotalCount} overdue customers`}
           hitSlop={8}
@@ -101,7 +105,12 @@ export default function DashboardFollowUpSection({
               key={person.id}
               style={{ marginRight: idx === followUpPeople.length - 1 ? 0 : spacing.md }}
             >
-              <DashboardFollowUpCard person={person} onCollect={onCollect} />
+              <DashboardFollowUpCard
+                person={person}
+                onCollect={onCollect}
+                onPressCard={onOpenCustomerDetail}
+                colors={colors}
+              />
             </View>
           ))}
         </ScrollView>

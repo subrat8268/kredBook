@@ -1,17 +1,10 @@
+import Avatar from "@/src/components/ui/Avatar";
 import { Bell } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 function getGreetingOnly() {
   const hour = new Date().getHours();
   return hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-}
-
-function getBusinessInitials(name: string | undefined) {
-  const source = (name ?? "").trim();
-  if (!source) return "KB";
-  const parts = source.split(/\s+/).filter(Boolean);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
 }
 
 type Props = {
@@ -23,12 +16,13 @@ type Props = {
 };
 
 export default function DashboardHeader({ colors, spacing, businessName, overdueTotalCount, onPressNotifications }: Props) {
+  const badgeText = overdueTotalCount > 99 ? "99+" : `${overdueTotalCount}`;
+  const isCapsule = overdueTotalCount > 9;
+
   return (
     <View style={{ paddingHorizontal: spacing.xs, paddingTop: spacing.md, paddingBottom: spacing.sm, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
       <View style={{ flexDirection: "row", alignItems: "center", flex: 1, paddingRight: spacing.md }}>
-        <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.brand, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ color: colors.surface, fontSize: 14, fontWeight: "700" }}>{getBusinessInitials(businessName)}</Text>
-        </View>
+        <Avatar name={businessName} size="sm" color={colors.brand} />
         <View style={{ marginLeft: spacing.md, flex: 1 }}>
           <Text numberOfLines={1} style={{ fontSize: 15, fontWeight: "700", color: colors.ink }}>{businessName}</Text>
           <Text numberOfLines={1} style={{ fontSize: 12, color: colors.textMuted }}>{getGreetingOnly()} 👋</Text>
@@ -43,7 +37,26 @@ export default function DashboardHeader({ colors, spacing, businessName, overdue
         style={{ width: 36, height: 36, alignItems: "center", justifyContent: "center" }}
       >
         <Bell size={22} color={colors.textMuted} strokeWidth={2} />
-        {overdueTotalCount > 0 ? <View style={{ position: "absolute", right: 6, top: 6, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.danger }} /> : null}
+        {overdueTotalCount > 0 ? (
+          <View
+            style={{
+              position: "absolute",
+              right: -2,
+              top: -2,
+              minWidth: 18,
+              height: 18,
+              borderRadius: 9,
+              backgroundColor: colors.danger,
+              alignItems: "center",
+              justifyContent: "center",
+              paddingHorizontal: isCapsule ? 4 : 0,
+            }}
+          >
+            <Text style={{ color: "white", fontSize: 10, fontWeight: "800", textAlign: "center" }}>
+              {badgeText}
+            </Text>
+          </View>
+        ) : null}
       </Pressable>
     </View>
   );

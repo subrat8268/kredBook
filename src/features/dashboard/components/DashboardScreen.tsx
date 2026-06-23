@@ -46,7 +46,9 @@ type Props = {
   search: string;
   setSearch: (value: string) => void;
   openRecordPaymentForCustomer: (customerId: string, customerName: string) => Promise<DashboardPaymentContext | null>;
-  onOpenEntriesOverdue: () => void;
+  onPressNotifications: () => void;
+  onOpenCustomerDetail: (customerId: string) => void;
+  onOpenEntryDetail: (orderId: string) => void;
   onOpenPeople: () => void;
   onOpenEntries: () => void;
 };
@@ -80,7 +82,9 @@ export default function DashboardScreen({
   search,
   setSearch,
   openRecordPaymentForCustomer,
-  onOpenEntriesOverdue,
+  onPressNotifications,
+  onOpenCustomerDetail,
+  onOpenEntryDetail,
   onOpenPeople,
   onOpenEntries,
 }: Props) {
@@ -145,7 +149,7 @@ export default function DashboardScreen({
           spacing={spacing}
           businessName={businessName}
           overdueTotalCount={overdueTotalCount}
-          onPressNotifications={onOpenEntriesOverdue}
+          onPressNotifications={onPressNotifications}
         />
 
         <DashboardHeroCard
@@ -154,6 +158,7 @@ export default function DashboardScreen({
           weekDelta={weekDelta}
           displayOutstanding={displayOutstanding}
           totalOutstanding={totalOutstanding}
+          overdueTotalCount={overdueTotalCount}
           businessName={businessName}
           isCollecting={isCollecting}
           onRecordPayment={handleOpenPicker}
@@ -166,6 +171,7 @@ export default function DashboardScreen({
           overdueTotalCount={overdueTotalCount}
           collectedThisMonth={collectedThisMonth}
           onOpenPeople={onOpenPeople}
+          onOpenPeopleOverdue={onPressNotifications}
           onOpenEntries={onOpenEntries}
         />
 
@@ -178,6 +184,8 @@ export default function DashboardScreen({
           errorMessage={dashboardErrorMessage}
           followUpPeople={followUpPeople}
           onOpenPeople={onOpenPeople}
+          onOpenPeopleOverdue={onPressNotifications}
+          onOpenCustomerDetail={onOpenCustomerDetail}
           onCollect={handleOpenRecordPaymentForCustomer}
           onRetry={refreshDashboard}
         />
@@ -188,6 +196,7 @@ export default function DashboardScreen({
           errorMessage={dashboardErrorMessage}
           recentActivity={recentActivity}
           onOpenEntries={onOpenEntries}
+          onOpenEntryDetail={onOpenEntryDetail}
           onRetry={refreshDashboard}
         />
       </ScrollView>

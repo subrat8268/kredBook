@@ -23,7 +23,8 @@ export type Database = {
           id: string
           is_revoked: boolean | null
           last_accessed_at: string | null
-          token: string
+          token: string | null
+          token_hash: string
           vendor_id: string
         }
         Insert: {
@@ -34,7 +35,8 @@ export type Database = {
           id?: string
           is_revoked?: boolean | null
           last_accessed_at?: string | null
-          token: string
+          token?: string | null
+          token_hash: string
           vendor_id: string
         }
         Update: {
@@ -45,7 +47,8 @@ export type Database = {
           id?: string
           is_revoked?: boolean | null
           last_accessed_at?: string | null
-          token?: string
+          token?: string | null
+          token_hash?: string
           vendor_id?: string
         }
         Relationships: [
@@ -65,17 +68,48 @@ export type Database = {
           },
         ]
       }
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          metadata: Json | null
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
           id: string
           order_id: string
           price: number
-          product_id: string | null
           product_name: string
           quantity: number
           subtotal: number | null
-          variant_id: string | null
           variant_name: string | null
           vendor_id: string
         }
@@ -84,11 +118,9 @@ export type Database = {
           id?: string
           order_id: string
           price: number
-          product_id?: string | null
           product_name: string
           quantity: number
           subtotal?: number | null
-          variant_id?: string | null
           variant_name?: string | null
           vendor_id: string
         }
@@ -97,11 +129,9 @@ export type Database = {
           id?: string
           order_id?: string
           price?: number
-          product_id?: string | null
           product_name?: string
           quantity?: number
           subtotal?: number | null
-          variant_id?: string | null
           variant_name?: string | null
           vendor_id?: string
         }
@@ -198,13 +228,16 @@ export type Database = {
         Row: {
           account_number: string | null
           address: string | null
+          avatar_url: string | null
           bank_name: string | null
           created_at: string
           customer_balance: number
+          email: string | null
           id: string
           ifsc_code: string | null
           is_customer: boolean
           name: string
+          notes: string | null
           phone: string | null
           updated_at: string
           upi_id: string | null
@@ -213,13 +246,16 @@ export type Database = {
         Insert: {
           account_number?: string | null
           address?: string | null
+          avatar_url?: string | null
           bank_name?: string | null
           created_at?: string
           customer_balance?: number
+          email?: string | null
           id?: string
           ifsc_code?: string | null
           is_customer?: boolean
           name: string
+          notes?: string | null
           phone?: string | null
           updated_at?: string
           upi_id?: string | null
@@ -228,13 +264,16 @@ export type Database = {
         Update: {
           account_number?: string | null
           address?: string | null
+          avatar_url?: string | null
           bank_name?: string | null
           created_at?: string
           customer_balance?: number
+          email?: string | null
           id?: string
           ifsc_code?: string | null
           is_customer?: boolean
           name?: string
+          notes?: string | null
           phone?: string | null
           updated_at?: string
           upi_id?: string | null
@@ -394,24 +433,13 @@ export type Database = {
         }[]
       }
       generate_access_token: { Args: never; Returns: string }
+      get_customer_full_detail: {
+        Args: { p_customer_id: string; p_vendor_id: string }
+        Returns: Json
+      }
       get_customer_previous_balance: {
         Args: { customer_uuid: string; vendor_uuid: string }
         Returns: number
-      }
-      get_customer_statement: {
-        Args: { p_customer_id: string }
-        Returns: {
-          amount: number
-          bill_number: string
-          created_at: string
-          id: string
-          item_count: number
-          order_bill_number: string
-          payment_mode: string
-          running_balance: number
-          status: string
-          type: string
-        }[]
       }
       get_dashboard_summary: {
         Args: never
@@ -462,6 +490,7 @@ export type Database = {
         }
         Returns: Json
       }
+      upsert_access_token: { Args: { p_party_id: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never

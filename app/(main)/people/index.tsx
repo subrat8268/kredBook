@@ -45,7 +45,7 @@ export default function CustomersScreen() {
   const { colors, radius, spacing, typography } = useTheme();
   const { profile } = useAuthStore();
   const router = useRouter();
-  const params = useLocalSearchParams<{ action?: string }>();
+  const params = useLocalSearchParams<{ action?: string; filter?: string }>();
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 250);
@@ -73,10 +73,27 @@ export default function CustomersScreen() {
   const { show: showToast } = useToast();
 
   useEffect(() => {
+    let shouldClear = false;
+    const nextParams: Record<string, any> = {};
+
     if (params?.action === "add") {
       setIsModalOpen(true);
       setRedirectAfterAdd(true);
-      router.setParams({ action: undefined });
+      nextParams.action = undefined;
+      shouldClear = true;
+    }
+
+    if (params?.filter) {
+      const pFilter = params.filter;
+      if (pFilter === "All" || pFilter === "Overdue" || pFilter === "Pending" || pFilter === "Paid") {
+        setFilter(pFilter as FilterOption);
+      }
+      nextParams.filter = undefined;
+      shouldClear = true;
+    }
+
+    if (shouldClear) {
+      router.setParams(nextParams);
     }
   }, [params, router]);
 

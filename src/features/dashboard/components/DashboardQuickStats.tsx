@@ -1,4 +1,5 @@
 import { formatINR } from "@/src/utils/format";
+import * as Haptics from "expo-haptics";
 import { Clock3, Users, Wallet } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
@@ -9,6 +10,7 @@ type Props = {
   overdueTotalCount: number;
   collectedThisMonth: number;
   onOpenPeople: () => void;
+  onOpenPeopleOverdue: () => void;
   onOpenEntries: () => void;
 };
 
@@ -19,6 +21,7 @@ export default function DashboardQuickStats({
   overdueTotalCount,
   collectedThisMonth,
   onOpenPeople,
+  onOpenPeopleOverdue,
   onOpenEntries,
 }: Props) {
   const safeCollectedThisMonth = (() => {
@@ -28,7 +31,7 @@ export default function DashboardQuickStats({
 
   const quickStats = [
     { title: "Customers", value: `${totalCustomersCount}`, icon: Users, onPress: onOpenPeople },
-    { title: "Overdue", value: `${overdueTotalCount}`, icon: Clock3, onPress: onOpenPeople },
+    { title: "Overdue", value: `${overdueTotalCount}`, icon: Clock3, onPress: onOpenPeopleOverdue },
     { title: "This Month", value: formatINR(safeCollectedThisMonth), icon: Wallet, onPress: onOpenEntries },
   ] as const;
 
@@ -39,7 +42,10 @@ export default function DashboardQuickStats({
         return (
           <Pressable
             key={stat.title}
-            onPress={stat.onPress}
+            onPress={() => {
+              Haptics.selectionAsync().catch(() => {});
+              stat.onPress();
+            }}
             accessibilityRole="button"
             accessibilityLabel={`${stat.title}: ${stat.value}`}
             hitSlop={6}
@@ -49,7 +55,7 @@ export default function DashboardQuickStats({
                 : "bg-surface dark:bg-surface-dark dark:border dark:border-border-soft-dark"
             }`}
             style={{
-              shadowColor: "#000",
+              shadowColor: colors.ink,
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: isOverdue ? 0.04 : 0.06,
               shadowRadius: isOverdue ? 2 : 4,

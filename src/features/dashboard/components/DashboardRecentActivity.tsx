@@ -11,6 +11,7 @@ type Props = {
   errorMessage?: string;
   recentActivity: DashboardActivityItem[];
   onOpenEntries: () => void;
+  onOpenEntryDetail: (orderId: string) => void;
   onRetry: () => void;
 };
 
@@ -20,6 +21,7 @@ export default function DashboardRecentActivity({
   errorMessage,
   recentActivity,
   onOpenEntries,
+  onOpenEntryDetail,
   onRetry,
 }: Props) {
   const items = recentActivity.slice(0, 5);
@@ -80,7 +82,7 @@ export default function DashboardRecentActivity({
               key={item.id}
               item={item}
               isLast={index === items.length - 1}
-              onOpenEntries={onOpenEntries}
+              onOpenEntryDetail={onOpenEntryDetail}
               colors={colors}
             />
           ))
