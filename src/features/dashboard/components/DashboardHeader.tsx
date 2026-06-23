@@ -22,7 +22,7 @@ export default function DashboardHeader({ colors, spacing, businessName, overdue
   return (
     <View
       style={{
-        paddingHorizontal: 0,
+        paddingHorizontal: spacing.screenPadding,
         paddingTop: spacing.md,
         paddingBottom: spacing.md,
         flexDirection: "row",
@@ -30,6 +30,7 @@ export default function DashboardHeader({ colors, spacing, businessName, overdue
         justifyContent: "space-between",
         borderBottomWidth: 1,
         borderBottomColor: colors.borderSubtle,
+        backgroundColor: colors.surface,
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", flex: 1, paddingRight: spacing.md }}>

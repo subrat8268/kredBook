@@ -135,6 +135,14 @@ export default function DashboardScreen({
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }} edges={["top"]}>
       <StatusBar barStyle={statusBarStyle} backgroundColor={colors.canvas} translucent={false} />
 
+      <DashboardHeader
+        colors={colors}
+        spacing={spacing}
+        businessName={businessName}
+        overdueTotalCount={overdueTotalCount}
+        onPressNotifications={onPressNotifications}
+      />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refreshDashboard} tintColor={colors.brand} />}
@@ -144,14 +152,6 @@ export default function DashboardScreen({
           paddingBottom: spacing.tabBarHeight + spacing.fabSize + spacing.sectionGapMd,
         }}
       >
-        <DashboardHeader
-          colors={colors}
-          spacing={spacing}
-          businessName={businessName}
-          overdueTotalCount={overdueTotalCount}
-          onPressNotifications={onPressNotifications}
-        />
-
         <DashboardHeroCard
           colors={colors}
           gradients={gradients}
