@@ -94,6 +94,7 @@ export default function OfflineBanner() {
   // Track sync completion transitions (syncing → synced/offline)
   useEffect(() => {
     if (prevSyncStatusRef.current === "syncing" && syncStatus === "synced") {
+      clearHideTimer();
       if (hasSyncError) {
         showBanner("error");
       } else {
@@ -102,9 +103,19 @@ export default function OfflineBanner() {
           hideBanner();
         }, CONFIRM_DISMISS_MS);
       }
+    } else if (prevSyncStatusRef.current === "syncing" && syncStatus === "offline") {
+      clearHideTimer();
+      if (hasSyncError) {
+        showBanner("error");
+        hideTimerRef.current = setTimeout(() => {
+          hideBanner();
+        }, CONFIRM_DISMISS_MS);
+      } else {
+        hideBanner();
+      }
     }
     prevSyncStatusRef.current = syncStatus;
-  }, [syncStatus, hasSyncError, showBanner, hideBanner]);
+  }, [syncStatus, hasSyncError, showBanner, hideBanner, clearHideTimer]);
 
   useEffect(() => () => clearHideTimer(), [clearHideTimer]);
 

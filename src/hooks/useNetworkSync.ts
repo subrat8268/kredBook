@@ -23,7 +23,7 @@ import { getOrCreateSyncQueueKey } from "@/src/lib/syncQueueStorage";
 import NetInfo, { type NetInfoState } from "@react-native-community/netinfo";
 import { isOnline } from "@/src/hooks/useIsOnline";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -162,6 +162,7 @@ export function useNetworkSync(): UseNetworkSyncReturn {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("offline");
   const [queueLength, setQueueLength] = useState(syncQueue.size());
   const [isConnected, setIsConnected] = useState(true);
+  const isConnectedRef = useRef(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasSyncError, setHasSyncError] = useState(false);
   const [syncProgress, setSyncProgress] = useState<SyncProgress>({ current: 0, total: 0 });
@@ -196,13 +197,15 @@ export function useNetworkSync(): UseNetworkSyncReturn {
     const queue = syncQueue.list();
     if (queue.length === 0) {
       console.log("[NetworkSync] Queue is empty, nothing to sync");
-      setSyncStatus("synced");
-      // Auto-dismiss "synced" status after 2 seconds
+      setSyncStatus("syncing");
       setTimeout(() => {
-        if (syncQueue.isEmpty()) {
-          setSyncStatus("offline");
-        }
-      }, 2000);
+        setSyncStatus("synced");
+        setTimeout(() => {
+          if (syncQueue.isEmpty()) {
+            setSyncStatus("offline");
+          }
+        }, 2000);
+      }, 50);
       return;
     }
 
@@ -301,12 +304,12 @@ export function useNetworkSync(): UseNetworkSyncReturn {
    * Manual sync trigger (for "Retry" button in UI).
    */
   const triggerSync = useCallback(async () => {
-    if (!isConnected) {
+    if (!isConnectedRef.current) {
       console.warn("[NetworkSync] Cannot sync while offline");
       return;
     }
     await processQueue();
-  }, [isConnected, processQueue]);
+  }, [processQueue]);
 
   /**
    * Effect: Listen for network state changes.
@@ -316,6 +319,7 @@ export function useNetworkSync(): UseNetworkSyncReturn {
     const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
       const connected = isOnline(state);
       setIsConnected(connected);
+      isConnectedRef.current = connected;
 
       if (connected) {
         console.log("[NetworkSync] Network detected, triggering sync...");
