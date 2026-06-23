@@ -180,13 +180,13 @@ export const colors = {
   },
 
   // ─ New canonical aliases (DESIGN.md §2.6 — Edit Entry reference system)
-  canvas: "#F9FAFB",         // = background
-  ink: "#111827",             // = textPrimary
-  body: "#374151",            // = textBody
-  muted: "#6B7280",           // = textSecondary
-  faint: "#9CA3AF",           // new — placeholder/inactive
-  surfaceRaised: "#F4F4F0",   // = surfaceAlt
-  primaryActive: "#15803D",   // = primaryDark
+  canvas: "#F9FAFB", // = background
+  ink: "#111827", // = textPrimary
+  body: "#374151", // = textBody
+  muted: "#6B7280", // = textSecondary
+  faint: "#9CA3AF", // new — placeholder/inactive
+  surfaceRaised: "#F4F4F0", // = surfaceAlt
+  primaryActive: "#15803D", // = primaryDark
   primaryBorderFill: "#DCFCE7", // = primaryLight / successBg
 } as const;
 
@@ -329,13 +329,13 @@ export const darkColors: ColorTokens = {
   },
 
   // ─ New canonical aliases (DESIGN.md §2.6 — Edit Entry reference system)
-  canvas: "#08111F",          // = background dark
-  ink: "#F3F4F6",             // = textPrimary dark
-  body: "#D1D5DB",            // = textBody dark
-  muted: "#B4C0D4",           // = textSecondary dark
-  faint: "#6B7280",           // new
-  surfaceRaised: "#1A2A43",   // = surfaceAlt dark
-  primaryActive: "#16A34A",   // = primaryDark dark
+  canvas: "#08111F", // = background dark
+  ink: "#F3F4F6", // = textPrimary dark
+  body: "#D1D5DB", // = textBody dark
+  muted: "#B4C0D4", // = textSecondary dark
+  faint: "#6B7280", // new
+  surfaceRaised: "#1A2A43", // = surfaceAlt dark
+  primaryActive: "#16A34A", // = primaryDark dark
   primaryBorderFill: "#0F2A1A", // = successBg dark
 };
 

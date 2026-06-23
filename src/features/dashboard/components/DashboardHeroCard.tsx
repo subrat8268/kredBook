@@ -1,8 +1,24 @@
 import { formatINR } from "@/src/utils/format";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import { AlertCircle, ArrowDownRight, ArrowUpRight } from "lucide-react-native";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  CheckCircle2,
+  Clock3,
+} from "lucide-react-native";
 import { Pressable, Share, Text, View } from "react-native";
+import { useTheme } from "@/src/theme/useTheme";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback } from "react";
+import Animated, {
+  cancelAnimation,
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 
 type Props = {
   colors: any;
@@ -27,6 +43,8 @@ export default function DashboardHeroCard({
   isCollecting,
   onRecordPayment,
 }: Props) {
+  const t = useTheme();
+
   const dashboardState = (() => {
     if (totalOutstanding > 0 && overdueTotalCount > 0) return "overdue";
     if (totalOutstanding < 0) return "advance";
@@ -34,8 +52,11 @@ export default function DashboardHeroCard({
     return "pending";
   })();
 
-  const gradient = gradients.customerDetailHero[dashboardState] || gradients.customerDetailHero.pending;
-  const isSendReminderDisabled = dashboardState === "settled" || dashboardState === "advance";
+  const gradient =
+    gradients.customerDetailHero[dashboardState] ||
+    gradients.customerDetailHero.pending;
+  const isSendReminderDisabled =
+    dashboardState === "settled" || dashboardState === "advance";
 
   const getHeroLabel = () => {
     if (dashboardState === "settled") return "ALL SETTLED";
@@ -50,6 +71,39 @@ export default function DashboardHeroCard({
     return "Advance";
   };
 
+  const pulse = useSharedValue(1);
+  useFocusEffect(
+    useCallback(() => {
+      pulse.value = withRepeat(
+        withTiming(0.6, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true,
+      );
+      return () => {
+        cancelAnimation(pulse);
+        pulse.value = 1;
+      };
+    }, [pulse]),
+  );
+
+  const pillStyle = useAnimatedStyle(() => ({ opacity: pulse.value }));
+
+  let badgeIcon = null;
+  if (dashboardState === "settled" || dashboardState === "advance") {
+    badgeIcon = (
+      <CheckCircle2 size={12} color="white" style={{ marginRight: 4 }} />
+    );
+  } else if (dashboardState === "overdue") {
+    badgeIcon = <Clock3 size={12} color="white" style={{ marginRight: 4 }} />;
+  } else {
+    badgeIcon = (
+      <View
+        style={{ backgroundColor: "rgba(255,255,255,0.9)", marginRight: 4 }}
+        className="w-1.5 h-1.5 rounded-full"
+      />
+    );
+  }
+
   return (
     <LinearGradient
       colors={[gradient.end, gradient.start]}
@@ -62,49 +116,68 @@ export default function DashboardHeroCard({
           {getHeroLabel()}
         </Text>
         <View className="px-3 py-1 border rounded-full border-dashboard-hero-chip-border bg-dashboard-hero-chip-bg flex-row items-center">
-          {dashboardState === "overdue" && (
-            <AlertCircle size={12} color="white" style={{ marginRight: 4 }} />
-          )}
+          <Animated.View style={pillStyle} className="flex-row items-center">
+            {badgeIcon}
+          </Animated.View>
           <Text className="text-[11px] font-inter-semibold text-dashboard-hero-text">
             {getPillLabel()}
           </Text>
         </View>
       </View>
-      <Text className="mt-2 text-[34px] font-inter-bold text-dashboard-hero-text">
+
+      <Text
+        style={{
+          fontFamily: t.fontFamily.displayExtraBold,
+          fontSize: 36,
+          lineHeight: 44,
+          color: "#ffffff",
+        }}
+        className="mt-2"
+      >
         {formatINR(displayOutstanding)}
       </Text>
 
       <View className="flex-row items-center mt-2">
-        {weekDelta >= 0 ? (
-          <ArrowUpRight
-            size={16}
-            color={colors.dashboard.arrowUp}
-            strokeWidth={2.4}
-          />
+        {weekDelta === 0 ? (
+          <Text className="text-caption text-dashboard-hero-text-muted">
+            Same as last week
+          </Text>
         ) : (
-          <ArrowDownRight
-            size={16}
-            color={colors.dashboard.arrowDown}
-            strokeWidth={2.4}
-          />
+          <>
+            {weekDelta > 0 ? (
+              <ArrowUpRight
+                size={16}
+                color={colors.dashboard.arrowUp}
+                strokeWidth={2.4}
+              />
+            ) : (
+              <ArrowDownRight
+                size={16}
+                color={colors.dashboard.arrowDown}
+                strokeWidth={2.4}
+              />
+            )}
+            <Text className="ml-1 text-caption text-dashboard-hero-text-muted">
+              {weekDelta > 0 ? "Up" : "Down"} {formatINR(Math.abs(weekDelta))}{" "}
+              vs last week
+            </Text>
+          </>
         )}
-        <Text className="ml-1 text-caption text-dashboard-hero-text-muted">
-          {weekDelta >= 0 ? "Up" : "Down"} {formatINR(Math.abs(weekDelta))} vs
-          last week
-        </Text>
       </View>
 
       <View className="flex-row items-center mt-4" style={{ gap: 10 }}>
         <Pressable
           onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(
+              () => {},
+            );
             onRecordPayment();
           }}
           disabled={isCollecting}
           className="flex-1 px-3 py-3 rounded-full bg-surface"
           style={{
             opacity: isCollecting ? 0.65 : 1,
-            shadowColor: "#000",
+            shadowColor: colors.ink,
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.1,
             shadowRadius: 4,
@@ -121,7 +194,9 @@ export default function DashboardHeroCard({
         </Pressable>
         <Pressable
           onPress={async () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+              () => {},
+            );
             await Share.share({
               message: `Hi, you have an outstanding amount of ${formatINR(totalOutstanding)} with ${businessName}. Please make the payment at your earliest. Thank you!`,
             });
