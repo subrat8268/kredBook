@@ -90,7 +90,7 @@ export default function DashboardFollowUpCard({
         width: 200,
       })}
     >
-      <View className="flex-row items-center justify-between">
+      <View className="flex-row gap-10 items-center justify-between">
         <Avatar name={person.name} size="sm" />
         <Animated.View
           style={[chipAnimStyle, { backgroundColor: chipStyles.bg }]}

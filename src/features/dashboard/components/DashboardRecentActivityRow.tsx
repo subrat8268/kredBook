@@ -21,6 +21,9 @@ export default function DashboardRecentActivityRow({ item, isLast, onOpenEntryDe
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
           onOpenEntryDetail(item.id);
         }}
+        accessibilityRole="button"
+        accessibilityLabel={`${item.name || item.title}, ${item.type === "payment" ? "payment" : "bill"}, ${formatINR(item.amount)}, status ${item.status}`}
+        accessibilityHint="Opens entry details"
       >
         <View className="mr-3 mt-1 h-8 w-8 items-center justify-center rounded-full bg-surface-alt dark:bg-surface-dark">
           <Receipt size={16} color={colors.muted} strokeWidth={2} />
