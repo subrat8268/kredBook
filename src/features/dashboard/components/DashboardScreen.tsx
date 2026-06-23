@@ -208,6 +208,7 @@ export default function DashboardScreen({
         isAddingCustomer={isAddingCustomer}
         addCustomerError={addCustomerError}
         onCustomerAdded={() => {
+          console.log("[DashboardScreen] onCustomerAdded triggered, showing toast and refreshing dashboard...");
           showToast({ message: "Customer added", type: "success" });
           refreshDashboard();
         }}
@@ -225,6 +226,7 @@ export default function DashboardScreen({
         setPaymentContext={setPaymentContext}
         paymentSheetRef={paymentSheetRef}
         onPaymentSuccess={() => {
+          console.log("[DashboardScreen] onPaymentSuccess triggered, showing toast, refreshing dashboard, and clearing payment context...");
           refreshDashboard();
           showToast({ message: "Payment recorded", type: "success" });
           setPaymentContext(null);

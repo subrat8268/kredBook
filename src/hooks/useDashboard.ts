@@ -22,23 +22,43 @@ export function useDashboard(vendorId?: string) {
   const query = useQuery({
     queryKey: ["dashboard", vendorId],
     queryFn: async () => {
-      if (!vendorId) return null;
-      return await getDashboardData(vendorId);
+      if (!vendorId) {
+        console.log("[useDashboard] No vendorId provided, skipping data fetch.");
+        return null;
+      }
+      try {
+        console.log("[useDashboard] Fetching dashboard data for vendorId:", vendorId);
+        const data = await getDashboardData(vendorId);
+        console.log("[useDashboard] Successfully fetched dashboard data:", {
+          toReceiveCount: data?.toReceive,
+          overdueCount: data?.overdueCustomersList?.length,
+          recentActivityCount: data?.recentActivityList?.length,
+        });
+        return data;
+      } catch (error) {
+        console.error("[useDashboard] Error fetching dashboard data:", error);
+        throw error;
+      }
     },
     enabled: !!vendorId,
     staleTime: 30_000,
   });
 
   const refreshDashboard = () => {
-    if (vendorId)
+    if (vendorId) {
+      console.log("[useDashboard] Invalidating dashboard query for vendorId:", vendorId);
       queryClient.invalidateQueries({ queryKey: ["dashboard", vendorId] });
+    } else {
+      console.log("[useDashboard] refreshDashboard called but no vendorId is active.");
+    }
   };
 
   useEffect(() => {
     if (!vendorId) return;
+    const overduePeople = query.data?.overdueCustomersList ?? [];
+    console.log("[useDashboard] Syncing overdue reminders, count:", overduePeople.length, "remindersEnabled:", remindersEnabled);
     pruneReminderSnoozes();
     // Backend contract still returns overdueCustomersList; treat as people list.
-    const overduePeople = query.data?.overdueCustomersList ?? [];
     syncOverdueReminders(
       overduePeople.map((person: any) => ({
         customerId: person.id,

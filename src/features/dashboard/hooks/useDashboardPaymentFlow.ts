@@ -24,6 +24,7 @@ export function useDashboardPaymentFlow({
 
   useEffect(() => {
     if (actionParam === "record-payment") {
+      console.log("[useDashboardPaymentFlow] actionParam 'record-payment' received, opening customer picker.");
       setIsCustomerPickerOpen(true);
       clearActionParam();
     }
@@ -31,16 +32,20 @@ export function useDashboardPaymentFlow({
 
   const handleOpenRecordPaymentForCustomer = useCallback(
     async (customerId: string, customerName: string) => {
+      console.log("[useDashboardPaymentFlow] handleOpenRecordPaymentForCustomer called:", { customerId, customerName });
       setIsCollecting(true);
       try {
         const context = await openRecordPaymentForCustomer(customerId, customerName);
         if (!context) {
+          console.warn("[useDashboardPaymentFlow] No outstanding balance found for customer:", customerId);
           showToast({ message: "No outstanding balance for this customer.", type: "error" });
           return;
         }
 
+        console.log("[useDashboardPaymentFlow] Successfully set payment context:", context);
         setPaymentContext(context);
-      } catch {
+      } catch (error) {
+        console.error("[useDashboardPaymentFlow] Error resolved during record payment setup:", error);
         showToast({ message: "Could not open collection flow.", type: "error" });
       } finally {
         setIsCollecting(false);
@@ -50,6 +55,7 @@ export function useDashboardPaymentFlow({
   );
 
   const handleOpenPicker = useCallback(() => {
+    console.log("[useDashboardPaymentFlow] handleOpenPicker called, opening customer list selector.");
     setIsCustomerPickerOpen(true);
   }, []);
 

@@ -18,7 +18,10 @@ export default function DashboardRecentActivityRow({ item, isLast, onOpenEntryDe
       <Pressable
         className="flex-row items-start"
         onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+          console.log("[DashboardRecentActivityRow] Row pressed, navigating to entry detail:", { orderId: item.id, type: item.type, amount: item.amount });
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+            (err) => console.warn("[DashboardRecentActivityRow] Haptic feedback failed:", err)
+          );
           onOpenEntryDetail(item.id);
         }}
         accessibilityRole="button"

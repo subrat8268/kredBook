@@ -78,7 +78,10 @@ export default function DashboardFollowUpCard({
   return (
     <Pressable
       onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+        console.log("[DashboardFollowUpCard] Card pressed, navigating to customer detail:", { id: person.id, name: person.name });
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+          (err) => console.warn("[DashboardFollowUpCard] Haptic feedback failed:", err)
+        );
         onPressCard(person.id);
       }}
       accessibilityRole="button"
@@ -116,12 +119,15 @@ export default function DashboardFollowUpCard({
       <Pressable
         className="mt-4 rounded-full bg-success px-4 py-2.5"
         onPress={async () => {
+          console.log("[DashboardFollowUpCard] 'Collect' button pressed:", { id: person.id, name: person.name, balance: person.balance });
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(
-            () => {},
+            (err) => console.warn("[DashboardFollowUpCard] Haptic feedback failed:", err)
           );
           try {
             await onCollect(person.id, person.name);
-          } catch {
+            console.log("[DashboardFollowUpCard] Collect callback resolved successfully for customer:", person.id);
+          } catch (error) {
+            console.error("[DashboardFollowUpCard] Collect callback failed for customer:", person.id, error);
             // Error is handled by parent/toast
           }
         }}

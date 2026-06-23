@@ -43,7 +43,10 @@ export default function DashboardQuickStats({
           <Pressable
             key={stat.title}
             onPress={() => {
-              Haptics.selectionAsync().catch(() => {});
+              console.log("[DashboardQuickStats] Stat card pressed:", stat.title, "value:", stat.value);
+              Haptics.selectionAsync().catch(
+                (err) => console.warn("[DashboardQuickStats] Haptic feedback failed:", err)
+              );
               stat.onPress();
             }}
             accessibilityRole="button"

@@ -168,8 +168,9 @@ export default function DashboardHeroCard({
       <View className="flex-row items-center mt-4" style={{ gap: 10 }}>
         <Pressable
           onPress={() => {
+            console.log("[DashboardHeroCard] 'Record Payment' button pressed.");
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(
-              () => {},
+              (err) => console.warn("[DashboardHeroCard] Haptic feedback failed:", err)
             );
             onRecordPayment();
           }}
@@ -194,12 +195,17 @@ export default function DashboardHeroCard({
         </Pressable>
         <Pressable
           onPress={async () => {
+            const message = `Hi, you have an outstanding amount of ${formatINR(totalOutstanding)} with ${businessName}. Please make the payment at your earliest. Thank you!`;
+            console.log("[DashboardHeroCard] 'Send Reminder' button pressed. Sharing message:", message);
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
-              () => {},
+              (err) => console.warn("[DashboardHeroCard] Haptic feedback failed:", err)
             );
-            await Share.share({
-              message: `Hi, you have an outstanding amount of ${formatINR(totalOutstanding)} with ${businessName}. Please make the payment at your earliest. Thank you!`,
-            });
+            try {
+              const res = await Share.share({ message });
+              console.log("[DashboardHeroCard] Share completed successfully:", res);
+            } catch (error) {
+              console.error("[DashboardHeroCard] Share failed:", error);
+            }
           }}
           disabled={isSendReminderDisabled}
           className="flex-1 px-3 py-3 border rounded-full border-dashboard-hero-chip-border bg-dashboard-hero-chip-bg"
