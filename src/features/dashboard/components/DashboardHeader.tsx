@@ -16,11 +16,22 @@ type Props = {
 };
 
 export default function DashboardHeader({ colors, spacing, businessName, overdueTotalCount, onPressNotifications }: Props) {
-  const badgeText = overdueTotalCount > 99 ? "99+" : `${overdueTotalCount}`;
+  const badgeText = overdueTotalCount > 9 ? "9+" : `${overdueTotalCount}`;
   const isCapsule = overdueTotalCount > 9;
 
   return (
-    <View style={{ paddingHorizontal: spacing.xs, paddingTop: spacing.md, paddingBottom: spacing.sm, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+    <View
+      style={{
+        paddingHorizontal: 0,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.md,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderSubtle,
+      }}
+    >
       <View style={{ flexDirection: "row", alignItems: "center", flex: 1, paddingRight: spacing.md }}>
         <Avatar name={businessName} size="sm" color={colors.brand} />
         <View style={{ marginLeft: spacing.md, flex: 1 }}>
@@ -34,15 +45,15 @@ export default function DashboardHeader({ colors, spacing, businessName, overdue
         accessibilityLabel={`Notifications${overdueTotalCount > 0 ? `, ${overdueTotalCount} overdue` : ""}`}
         accessibilityHint="Opens overdue entries"
         hitSlop={10}
-        style={{ width: 36, height: 36, alignItems: "center", justifyContent: "center" }}
+        style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center" }}
       >
         <Bell size={22} color={colors.textMuted} strokeWidth={2} />
         {overdueTotalCount > 0 ? (
           <View
             style={{
               position: "absolute",
-              right: -2,
-              top: -2,
+              right: 4,
+              top: 4,
               minWidth: 18,
               height: 18,
               borderRadius: 9,
