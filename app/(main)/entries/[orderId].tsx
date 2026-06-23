@@ -16,7 +16,7 @@ import PaymentSuccessAnimation from "@/src/components/feedback/PaymentSuccessAni
 import { useEntryDetail } from "@/src/hooks/entries";
 import { useTheme } from "@/src/theme/useTheme";
 import { formatDate } from "@/src/utils/helper";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useGlobalSearchParams, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { ScrollView } from "react-native";
 import {
@@ -41,7 +41,10 @@ const STATUS_DISPLAY_MAP: Record<"pending" | "partial" | "paid" | "overdue", "Pa
 export default function OrderDetailScreen() {
   const t = useTheme();
   const { colors, spacing } = t;
-  const { orderId, justPaid } = useLocalSearchParams<{ orderId: string; justPaid?: string }>();
+  const local = useLocalSearchParams<{ orderId?: string; justPaid?: string }>();
+  const global = useGlobalSearchParams<{ orderId?: string }>();
+  const orderId = local.orderId || global.orderId || "";
+  const justPaid = local.justPaid;
   const router = useRouter();
   const paymentModalRef = useRef<any>(null);
   const { show: showToast } = useToast();
@@ -168,6 +171,7 @@ export default function OrderDetailScreen() {
     showToast,
   ]);
 
+  if (!orderId) return <Loader />;
   if (isLoading) return <Loader />;
   if (isError || !order)
     return (
