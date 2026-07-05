@@ -99,8 +99,7 @@ export default function DashboardPaymentFlow({
           ref={paymentSheetRef}
           autoPresent
           onSuccess={onPaymentSuccess}
-          orderId={paymentContext.orderId}
-          balanceDue={paymentContext.balanceDue}
+          outstandingBalance={paymentContext.balanceDue}
           customerId={paymentContext.customerId}
           customerName={paymentContext.customerName}
           initialAmount={paymentContext.initialAmount}

@@ -34,6 +34,8 @@ type Props = {
   onSubmitEditing?: TextInputProps["onSubmitEditing"];
   editable?: boolean;
   textAlign?: TextInputProps["textAlign"];
+  textContentType?: TextInputProps["textContentType"];
+  autoComplete?: TextInputProps["autoComplete"];
   containerStyle?: StyleProp<ViewStyle>;
   inputStyle?: TextInputProps["style"];
 };
@@ -61,6 +63,8 @@ export default memo(function Input({
   onSubmitEditing,
   editable = true,
   textAlign,
+  textContentType,
+  autoComplete,
   containerStyle,
   inputStyle,
 }: Props) {
@@ -155,6 +159,8 @@ export default memo(function Input({
             onSubmitEditing={onSubmitEditing}
             editable={editable}
             textAlign={textAlign}
+            textContentType={textContentType}
+            autoComplete={autoComplete}
             textAlignVertical={multiline ? "top" : "center"}
             style={[
               styles.input,

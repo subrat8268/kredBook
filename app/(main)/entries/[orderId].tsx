@@ -244,8 +244,7 @@ export default function OrderDetailScreen() {
       <RecordCustomerPaymentModal
         ref={paymentModalRef}
         onSuccess={handlePaymentSuccess}
-        orderId={orderId ?? ""}
-        balanceDue={balanceDue}
+        outstandingBalance={balanceDue}
         customerId={order.customer_id}
         customerName={customerName}
         initialAmount={balanceDue}

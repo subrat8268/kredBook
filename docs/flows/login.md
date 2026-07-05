@@ -32,7 +32,7 @@ The **Login** screen is the entry point for returning users. It's the first scre
 │ [←]                          (back btn)  │
 │                                             │
 │           Welcome Back                        │
-│         Sign in to your kredBook            │
+│     Sign in to continue tracking customers    │
 │                                             │
 │ ┌─────────────────────────────────────────┐ │
 │ │ AUTH CARD                           │ │
@@ -120,7 +120,7 @@ Inputs disabled until response.
 | Element | Spec |
 |---------|------|
 | Title | "Welcome Back", 28px extrabold, textPrimary |
-| Subtitle | "Sign in to your kredBook", 15px, textSecondary |
+| Subtitle | "Sign in to continue tracking customers, entries, and payments", 15px, textSecondary |
 | Margin top | mb-6 |
 
 ### 3. AuthCard (Reusable)

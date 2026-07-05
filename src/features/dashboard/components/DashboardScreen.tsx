@@ -7,6 +7,8 @@ import type {
   DashboardPerson,
   DashboardPickerPerson,
 } from "@/src/features/dashboard/types";
+import type { ColorTokens, GradientTokens } from "@/src/utils/theme";
+import React, { useCallback } from "react";
 import { RefreshControl, ScrollView, StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DashboardFollowUpSection from "./DashboardFollowUpSection";
@@ -18,9 +20,20 @@ import DashboardRecentActivity from "./DashboardRecentActivity";
 import DashboardSkeleton from "./DashboardSkeleton";
 
 type Props = {
-  colors: any;
-  gradients: any;
-  spacing: any;
+  // Fix M11: explicit token types instead of `any`
+  colors: ColorTokens;
+  gradients: GradientTokens;
+  spacing: {
+    screenPadding: number;
+    md: number;
+    sm: number;
+    xs: number;
+    lg: number;
+    tabBarHeight: number;
+    fabSize: number;
+    sectionGapMd: number;
+    screenContentBottom: number;
+  };
   statusBarStyle: "default" | "light-content" | "dark-content";
   profile: any;
   actionParam?: string;
@@ -46,7 +59,9 @@ type Props = {
   search: string;
   setSearch: (value: string) => void;
   openRecordPaymentForCustomer: (customerId: string, customerName: string) => Promise<DashboardPaymentContext | null>;
+  // Fix C3: bell and overdue-tile now have separate, dedicated handlers
   onPressNotifications: () => void;
+  onOpenPeopleOverdue: () => void;
   onOpenCustomerDetail: (customerId: string) => void;
   onOpenEntryDetail: (orderId: string) => void;
   onOpenPeople: () => void;
@@ -83,6 +98,7 @@ export default function DashboardScreen({
   setSearch,
   openRecordPaymentForCustomer,
   onPressNotifications,
+  onOpenPeopleOverdue,
   onOpenCustomerDetail,
   onOpenEntryDetail,
   onOpenPeople,
@@ -122,11 +138,24 @@ export default function DashboardScreen({
     openRecordPaymentForCustomer,
   });
 
+  // Fix m10: stable callbacks — not recreated every render
+  const handleCustomerAdded = useCallback(() => {
+    showToast({ message: "Customer added", type: "success" });
+    refreshDashboard();
+  }, [showToast, refreshDashboard]);
+
+  const handlePaymentSuccess = useCallback(() => {
+    refreshDashboard();
+    showToast({ message: "Payment recorded", type: "success" });
+    setPaymentContext(null);
+  }, [refreshDashboard, showToast, setPaymentContext]);
+
   if (isLoading) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }} edges={["top"]}>
         <StatusBar barStyle={statusBarStyle} backgroundColor={colors.canvas} translucent={false} />
-        <DashboardSkeleton spacing={spacing} />
+        {/* Fix C4 + m9: pass colors and spacing so skeleton uses tokens, not hardcoded values */}
+        <DashboardSkeleton colors={colors} spacing={spacing} />
       </SafeAreaView>
     );
   }
@@ -171,7 +200,8 @@ export default function DashboardScreen({
           overdueTotalCount={overdueTotalCount}
           collectedThisMonth={collectedThisMonth}
           onOpenPeople={onOpenPeople}
-          onOpenPeopleOverdue={onPressNotifications}
+          // Fix C3: Overdue tile now routes to its own dedicated handler, not the bell handler
+          onOpenPeopleOverdue={onOpenPeopleOverdue}
           onOpenEntries={onOpenEntries}
         />
 
@@ -180,11 +210,12 @@ export default function DashboardScreen({
           spacing={spacing}
           overdueTotalCount={overdueTotalCount}
           isLoading={isLoading}
-          isFetching={isFetching}
+          // Fix m3: isFetching removed — DashboardFollowUpSection no longer accepts it
           errorMessage={dashboardErrorMessage}
           followUpPeople={followUpPeople}
           onOpenPeople={onOpenPeople}
-          onOpenPeopleOverdue={onPressNotifications}
+          // Fix C3: overdue link in follow-up section uses dedicated handler
+          onOpenPeopleOverdue={onOpenPeopleOverdue}
           onOpenCustomerDetail={onOpenCustomerDetail}
           onCollect={handleOpenRecordPaymentForCustomer}
           onRetry={refreshDashboard}
@@ -192,7 +223,7 @@ export default function DashboardScreen({
 
         <DashboardRecentActivity
           colors={colors}
-          isLoading={isLoading}
+          // Fix m4: isLoading removed — DashboardRecentActivity no longer accepts it
           errorMessage={dashboardErrorMessage}
           recentActivity={recentActivity}
           onOpenEntries={onOpenEntries}
@@ -207,11 +238,7 @@ export default function DashboardScreen({
         addCustomer={addCustomer}
         isAddingCustomer={isAddingCustomer}
         addCustomerError={addCustomerError}
-        onCustomerAdded={() => {
-          console.log("[DashboardScreen] onCustomerAdded triggered, showing toast and refreshing dashboard...");
-          showToast({ message: "Customer added", type: "success" });
-          refreshDashboard();
-        }}
+        onCustomerAdded={handleCustomerAdded}
         isCustomerPickerOpen={isCustomerPickerOpen}
         setIsCustomerPickerOpen={setIsCustomerPickerOpen}
         pickerPeople={pickerPeople}
@@ -225,12 +252,7 @@ export default function DashboardScreen({
         paymentContext={paymentContext}
         setPaymentContext={setPaymentContext}
         paymentSheetRef={paymentSheetRef}
-        onPaymentSuccess={() => {
-          console.log("[DashboardScreen] onPaymentSuccess triggered, showing toast, refreshing dashboard, and clearing payment context...");
-          refreshDashboard();
-          showToast({ message: "Payment recorded", type: "success" });
-          setPaymentContext(null);
-        }}
+        onPaymentSuccess={handlePaymentSuccess}
       />
     </SafeAreaView>
   );

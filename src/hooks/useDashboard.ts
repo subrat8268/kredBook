@@ -30,9 +30,9 @@ export function useDashboard(vendorId?: string) {
         console.log("[useDashboard] Fetching dashboard data for vendorId:", vendorId);
         const data = await getDashboardData(vendorId);
         console.log("[useDashboard] Successfully fetched dashboard data:", {
-          toReceiveCount: data?.toReceive,
+          customersOweMeCount: data?.customersOweMe,
           overdueCount: data?.overdueCustomersList?.length,
-          recentActivityCount: data?.recentActivityList?.length,
+          recentActivityCount: data?.recentActivity?.length,
         });
         return data;
       } catch (error) {

@@ -83,6 +83,12 @@ EXPO_PUBLIC_SENTRY_DSN=https://sentry-dsn-url
 | `docs/screens/*.md` | Locked v3.0 visual/interaction specs |
 | `docs/audits/*.md` | Point-in-time audit reports |
 
+#### Recent Audits
+
+| Date | Report | Scope |
+|---|---|---|
+| 2026-07-04 | `docs/audits/dashboard-2026-07-04.md` | Dashboard redesign — 31 findings across UI, dark mode, a11y, runtime, performance, code quality |
+
 ### Precedence Order
 
 If files conflict:
@@ -99,7 +105,18 @@ kredBook/
 │   ├── (auth)/           # Login, signup, onboarding
 │   ├── (main)/           # Dashboard, people, entries, profile
 │   └── l/[token].tsx     # Public ledger share link
-├── src/                  # Components, hooks, store, services, utils
+├── src/
+│   ├── api/              # Supabase query functions
+│   ├── components/       # Shared UI components (layer1 primitives, layer2 compositions)
+│   ├── features/         # Feature-scoped components, hooks, types
+│   │   └── dashboard/    # DashboardScreen + sub-components, hooks, types
+│   ├── hooks/            # Cross-feature React Query hooks
+│   ├── lib/              # syncQueue, mmkv
+│   ├── services/         # supabase client
+│   ├── store/            # Zustand stores (authStore)
+│   ├── theme/            # useTheme hook
+│   ├── types/            # Shared TypeScript types
+│   └── utils/            # theme.ts (tokens), format, helper
 ├── docs/                 # Working documentation
 ├── supabase/migrations/  # DB migration history
 ├── .agents/              # Agent commands, pipelines, skills
@@ -110,6 +127,43 @@ kredBook/
 ├── Rules.md              # Engineering rules
 └── AGENTS.md             # Agent config
 ```
+
+## Phase 4 Progress
+
+| Sub-phase | Block | Status |
+|---|---|---|
+| 4.0 | Design System Foundation | ✅ Done |
+| 4.1 | Core Loop Screens (Dashboard, Tab Nav, Create Entry, Record Payment, Customer Detail) | ✅ Done |
+| 4.1.1x | Dashboard code health & UX polish (component extraction, token alignment) | ✅ Done |
+| 4.2 | Detail + List Screens (Entry Detail, Edit Entry, Customer List, Entry List) | ✅ Done |
+| 4.3 | Auth + Onboarding | 🔄 In Progress — Welcome ✅, **Login next (4.3.2a)** |
+| 4.4 | Profile, Export, Public Ledger | ⏳ Not Started |
+
+**Next task:** `4.3.2a` — Login screen audit + extraction (`app/(auth)/login.tsx`)
+
+## Dashboard Audit Fixes (2026-07-04)
+
+All open issues from `docs/audits/dashboard-2026-07-04.md` fixed in this pass. See the audit file for full context.
+
+| Ref | Severity | Component | Fix Applied |
+|---|---|---|---|
+| C5 | ✅ Fixed | `DashboardFollowUpCard` | Nested `Pressable` flattened to siblings — Collect accessible on TalkBack |
+| C4 | ✅ Fixed | `DashboardSkeleton` | Border now uses `colors.borderSubtle` token (dark mode correct) |
+| C2 | ✅ Fixed | `DashboardHeroCard` | Hero amount uses `colors.dashboard.heroText` token |
+| C1 | ✅ Fixed | `DashboardRecentActivity` | Gradient end uses `colors.surface` runtime value |
+| C3 | ✅ Fixed | `DashboardScreen` + route | `onOpenPeopleOverdue` split as dedicated prop from `onPressNotifications` |
+| M1 | ✅ Fixed | All 8 components | All `console.log` removed (guarded or deleted) |
+| m8 | ✅ Fixed | `DashboardSkeleton` | Follow-up skeleton width corrected to `200` |
+| M11 | ✅ Fixed | All 8 components | Props typed as `ColorTokens` / `GradientTokens` — no more `any` |
+| M2 | ✅ Fixed | `DashboardHeroCard` | `dashboardState` wrapped in `useMemo` |
+| M5 | ✅ Fixed | `DashboardQuickStats` | `quickStats` + `safeCollectedThisMonth` wrapped in `useMemo` |
+| m3 | ✅ Fixed | `DashboardFollowUpSection` | `isFetching` prop removed; `keyboardShouldPersistTaps="handled"` added |
+| m4 | ✅ Fixed | `DashboardRecentActivity` | `isLoading` prop removed |
+| M7 | ✅ Fixed | `DashboardFollowUpSection` | Overdue badge shows `"--"` on error state |
+| M6 | ✅ Fixed | `DashboardRecentActivity` | `shadowColor` uses `colors.ink` instead of `"#000"` |
+| m6 | ✅ Fixed | `DashboardFollowUpCard` | `chipStyles` wrapped in `useMemo` |
+| m9 | ✅ Fixed | `DashboardSkeleton` | Padding values use `spacing.screenPadding` / `spacing.md` tokens |
+| m10 | ✅ Fixed | `DashboardScreen` | `onCustomerAdded` / `onPaymentSuccess` stable with `useCallback` |
 
 ## AI Workflow
 
@@ -124,7 +178,8 @@ See `AGENTS.md` and `.agents/commands.md`.
 
 ## Development Rules
 
-- `src/utils/theme.ts` is the design-token source of truth — never hardcode colors.
+- `src/utils/theme.ts` is the design-token source of truth — never hardcode colors, spacing, or shadow colors.
 - Don't guess backend schema — use Supabase MCP.
 - Any behavior/flow change must update related docs in the same task.
+- All props that accept theme values must be typed as `ColorTokens`, `GradientTokens`, or `typeof spacing` — not `any`.
 - Run `.agents/doc-sync-checklist.md` before closing non-trivial work.

@@ -166,6 +166,7 @@ export const colors = {
     heroChipBg: "rgba(255,255,255,0.10)",
     heroChipBorder: "rgba(255,255,255,0.16)",
     heroOrb: "rgba(255,255,255,0.06)",
+    heroIndicatorDot: "rgba(255,255,255,0.9)",
     arrowUp: "#16A34A", // green-600 — positive delta
     arrowDown: "#F59E0B", // amber-500 — negative delta
   },
@@ -317,6 +318,7 @@ export const darkColors: ColorTokens = {
     heroChipBg: "rgba(255,255,255,0.16)",
     heroChipBorder: "rgba(255,255,255,0.28)",
     heroOrb: "rgba(255,255,255,0.10)",
+    heroIndicatorDot: "rgba(255,255,255,0.9)",
     arrowUp: "#22C55E", // green-500 — bright positive delta for dark mode
     arrowDown: "#F59E0B", // amber-500 — stays same for visibility
   },

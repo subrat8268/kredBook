@@ -71,6 +71,9 @@ export default function LoginPage() {
                       error={touched.email ? errors.email : undefined}
                       keyboardType="email-address"
                       variant="white"
+                      textContentType="emailAddress"
+                      autoComplete="email"
+                      returnKeyType="next"
                     />
 
                     <Text style={[typography.caption, { marginBottom: spacing.sm, marginTop: spacing.lg, color: colors.textPrimary, fontWeight: "600" }]}>
@@ -83,6 +86,10 @@ export default function LoginPage() {
                       secureTextEntry={!showPassword}
                       error={touched.password ? errors.password : undefined}
                       variant="white"
+                      textContentType="password"
+                      autoComplete="password"
+                      returnKeyType="go"
+                      onSubmitEditing={() => handleSubmit()}
                       icon={
                         <TouchableOpacity
                           onPress={() => setShowPassword((p) => !p)}
@@ -108,7 +115,7 @@ export default function LoginPage() {
 
                     <TouchableOpacity
                       onPress={() =>
-                        router.push("/(auth)/resetPassword" as any)
+                        router.push("/(auth)/resetPassword")
                       }
                       className="self-end mt-2.5 mb-5"
                     >
@@ -121,6 +128,7 @@ export default function LoginPage() {
                       title="Sign In"
                       onPress={handleSubmit}
                       loading={loginMutation.isPending}
+                      disabled={googleSignIn.isPending}
                     />
 
                     <AuthDivider />
@@ -150,14 +158,14 @@ export default function LoginPage() {
                   strokeWidth={2}
                 />
                 <Text className="text-sm text-dangerStrong">
-                  {(loginMutation.error as any)?.message ??
-                    (googleSignIn.error as any)?.message ??
+                  {loginMutation.error?.message ??
+                    googleSignIn.error?.message ??
                     "Invalid email or password"}
                 </Text>
               </View>
             )}
 
-              <TouchableOpacity onPress={() => router.push("/(auth)/signup" as any)} className="mt-8">
+              <TouchableOpacity onPress={() => router.push("/(auth)/signup")} className="mt-8">
                 <Text style={[typography.body, { textAlign: "center", color: colors.textSecondary }]}> 
                   {"New to KredBook? "}
                   <Text style={{ fontWeight: "600", color: colors.primary }}>Sign Up</Text>

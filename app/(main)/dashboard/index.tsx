@@ -121,6 +121,8 @@ export default function DashboardRoute() {
       setSearch={setCustomerSearch}
       openRecordPaymentForCustomer={openRecordPaymentForCustomer}
       onPressNotifications={() => router.push({ pathname: "/(main)/people", params: { filter: "Overdue" } } as never)}
+      // Fix C3: dedicated prop for Overdue tile / Follow-up "See all" — separate from the bell handler
+      onOpenPeopleOverdue={() => router.push({ pathname: "/(main)/people", params: { filter: "Overdue" } } as never)}
       onOpenCustomerDetail={(customerId) => router.push({ pathname: "/(main)/people/[customerId]", params: { customerId } } as never)}
       onOpenEntryDetail={(orderId) => router.push(`/(main)/entries/${orderId}`)}
       onOpenPeople={() => router.push("/(main)/people" as never)}

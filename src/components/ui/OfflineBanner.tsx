@@ -149,7 +149,7 @@ export default function OfflineBanner() {
     },
     error: {
       Icon: AlertTriangle,
-      color: colors.error ?? colors.warning,
+      color: colors.danger,
       message: language === "hi"
         ? "कुछ बदलाव सेव नहीं हो सके"
         : "Some changes couldn't be saved",

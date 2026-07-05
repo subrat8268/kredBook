@@ -470,9 +470,9 @@ export default function CustomerDetailScreen() {
     return (
       <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1, backgroundColor: colors.canvas }}>
         <View className="flex-row items-center px-4 pt-2 pb-3">
-          <Skeleton width={32} height={32} borderRadius={16} />
+          <Skeleton width={32} height={32} radius={16} />
           <View className="ml-3 flex-row items-center flex-1">
-            <Skeleton width={40} height={40} borderRadius={20} />
+            <Skeleton width={40} height={40} radius={20} />
             <View className="ml-3" style={{ gap: 4 }}>
               <Skeleton width={120} height={14} />
               <Skeleton width={80} height={11} />
@@ -482,8 +482,8 @@ export default function CustomerDetailScreen() {
         <ScrollView className="flex-1 px-4">
           <SkeletonHeroCard />
           <View className="mt-4 flex-row" style={{ gap: 12 }}>
-            <Skeleton height={48} style={{ flex: 1 }} borderRadius={24} />
-            <Skeleton height={48} style={{ flex: 1 }} borderRadius={24} />
+            <Skeleton height={48} style={{ flex: 1 }} radius={24} />
+            <Skeleton height={48} style={{ flex: 1 }} radius={24} />
           </View>
           <View className="mt-6" style={{ gap: 12 }}>
             <SkeletonCard />
